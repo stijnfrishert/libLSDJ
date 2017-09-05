@@ -7,24 +7,6 @@
 const unsigned int BLOCKS_START = 0x8000;
 const unsigned int BLOCKS_SIZE = 0x200;
 
-struct lsdj_error_t
-{
-	const char* message;
-};
-
-const char* lsdj_get_error_c_str(lsdj_error_t* error)
-{
-	if (error == NULL)
-		return NULL;
-	else
-		return error->message;
-}
-
-void lsdj_free_error(lsdj_error_t* error)
-{
-	free(error);
-}
-
 typedef struct
 {
 	char project_names[32 * 8];
@@ -34,22 +16,13 @@ typedef struct
 	int active_project;
 } header_t;
 
-void create_error(lsdj_error_t** error, const char* message)
-{
-	if (error == NULL)
-		return;
-
-	*error = malloc(sizeof(lsdj_error_t));
-	(*error)->message = "could not open file";
-}
-
 lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error)
 {
     // Try to open the sav file at the given path
 	FILE* file = fopen(path, "r");
 	if (!file)
 	{
-		create_error(error, "could not open file");
+		lsdj_create_error(error, "could not open file");
 		return NULL;
 	}
 
@@ -64,7 +37,7 @@ lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error)
 	// probably not dealing with an actual LSDJ sav format file.
 	if (header.init[0] != 'j' || header.init[1] != 'k')
 	{
-		create_error(error, "SRAM initialization check wasn't 'jk'");
+		lsdj_create_error(error, "SRAM initialization check wasn't 'jk'");
 		fclose(file);
 		return NULL;
 	}
@@ -90,8 +63,12 @@ lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error)
     ptr = header.project_names;
     for (int i = 0; i < sav->project_count; ++i)
     {
+        // Store the project name
     	strcpy(sav->projects[i].name, ptr);
     	ptr += strlen(ptr) + 1;
+        
+        // Store the project version
+        sav->projects[i].version = header.versions[i];
     }
 
 	// Store the active project index

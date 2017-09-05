@@ -2,18 +2,11 @@
 #define LSDJ_SAV_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-//! Structure containing specific error details
-typedef struct lsdj_error_t lsdj_error_t;
-
-//! Representation of a project within an LSDJ sav file
-typedef struct
-{
-	char name[8];
-} lsdj_project_t;
+#include "error.h"
+#include "project.h"
 
 //! Representation of an entire LSDJ sav file
 typedef struct
@@ -28,15 +21,6 @@ typedef struct
 	/*! Indices start at 0, a value of -1 means there is no active project */
 	int active_project;
 } lsdj_sav_t;
-
-//! Provide liblsdj with a callback to trigger in case of an error
-// void lsdj_set_error_callback(void(*callback)(const char*));
-
-//! Retrieve a string description of an error
-const char* lsdj_get_error_c_str(lsdj_error_t* error);
-
-//! Free error data returned from an lsdj function call
-void lsdj_free_error(lsdj_error_t* error);
 
 //! Open an LSDJ sav file
 /*! Each successful call to lsdj_open() should be paired with a call to lsdj_close() */

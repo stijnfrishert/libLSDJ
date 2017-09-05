@@ -7,7 +7,7 @@ project(lsdj)
 add_definitions(-Wall -Werror -Wconversion)
 
 # Create the target
-add_library(lsdj STATIC sav.h sav.c)
+add_library(lsdj STATIC error.h error.c project.h project.c sav.h sav.c)
 
 install(TARGETS lsdj DESTINATION lib)
-install(FILES sav.h DESTINATION include/lsdj)
+install(FILES error.h project.h sav.h DESTINATION include/lsdj)
