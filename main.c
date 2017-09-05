@@ -12,8 +12,11 @@ int main(int argc, char* argv[])
 	{
 		lsdj_sav_t* sav = lsdj_open_sav(argv[i], NULL);
         
-        for (int i = 0; i < sav->project_count; ++i)
+        for (int i = 0; i < 32; ++i)
         {
+            if (sav->projects[i].compressed_data.size == 0)
+                continue;
+            
             char v[3];
             sprintf(v, "%02X", sav->projects[i].version);
             v[2] = 0;
@@ -30,7 +33,7 @@ int main(int argc, char* argv[])
         }
 
 		if (sav)
-			lsdj_close_sav(sav);
+			lsdj_free_sav(sav);
 	}
 
 	return 0;

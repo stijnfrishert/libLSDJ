@@ -19,14 +19,19 @@ typedef struct
 } header_t;
 
 // Read compressed project data from memory sav file
-void read_compressed_blocks(lsdj_project_t* projects, unsigned short project_count, FILE* file)
+void read_compressed_blocks(lsdj_project_t* projects, FILE* file)
 {
     unsigned char blocks_table[BLOCKS_TABLE_SIZE];
     fread(blocks_table, sizeof(blocks_table), 1, file);
     
-    for (int i = 0; i < project_count; ++i)
+    for (int i = 0; i < 32; ++i)
     {
-        projects[i].compressed_data.size = 0;
+        if (projects[i].compressed_data.size > 0)
+        {
+            free(projects[i].compressed_data.data);
+            projects[i].compressed_data.size = 0;
+        }
+        
         projects[i].compressed_data.data = NULL;
     }
     
@@ -34,47 +39,42 @@ void read_compressed_blocks(lsdj_project_t* projects, unsigned short project_cou
     for (int i = 0; i < BLOCKS_TABLE_SIZE; ++i)
     {
         unsigned char project = blocks_table[i];
-        if (project >= project_count)
+        if (project == 0xFF)
             continue;
         
         projects[project].compressed_data.size += BLOCK_SIZE;
     }
     
     // Allocate space to store the compressed data
-    void** ptrs = malloc(sizeof(void*) * project_count);
-    for (int i = 0; i < project_count; ++i)
+    void* ptrs[32];
+    for (int i = 0; i < 32; ++i)
     {
-        size_t size = projects[i].compressed_data.size;
         lsdj_project_t* project = projects + i;
+        
+        size_t size = project->compressed_data.size;
         
         if (size > 0)
         {
             project->compressed_data.data = malloc(size);
             memset(project->compressed_data.data, 0, size);
+            ptrs[i] = project->compressed_data.data;
         } else {
             project->compressed_data.data = NULL;
+            ptrs[i] = NULL;
         }
-        
-        ptrs[i] = project->compressed_data.data;
     }
     
     // Store each block
     for (int i = 0; i < BLOCKS_TABLE_SIZE; ++i)
     {
         unsigned char project = blocks_table[i];
-        if (project >= project_count)
+        if (project == 0xFF)
             continue;
         
+        assert(ptrs[project] != NULL);
         fread(ptrs[project], BLOCK_SIZE, 1, file);
         ptrs[project] += BLOCK_SIZE;
     }
-    
-    for (int i = 0; i < project_count; ++i)
-    {
-        assert(ptrs[i] == projects[i].compressed_data.data + projects[i].compressed_data.size);
-    }
-    
-    free(ptrs);
 }
 
 void read_working_project(lsdj_project_decompressed_t* project, FILE* file)
@@ -115,33 +115,11 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
 
 	// Create the sav file structure to return from this function
 	lsdj_sav_t* sav = malloc(sizeof(lsdj_sav_t));
-
-	// Find out how many projects there are
-	sav->project_count = 0;
-	char* ptr = header.project_names;
-	while (1)
-	{
-		size_t length = strnlen(ptr, 8);
-		if (length == 0)
-			break;
-
-		sav->project_count += 1;
-        ptr += length;
-        if (*ptr == '\0')
-            ptr += 1;
-	}
     
     // Allocate data for all the projects and store their names
-    sav->projects = malloc(sizeof(lsdj_project_t) * sav->project_count);
-    ptr = header.project_names;
-    for (int i = 0; i < sav->project_count; ++i)
+    for (int i = 0; i < 32; ++i)
     {
-        // Store the project name
-    	strncpy(sav->projects[i].name, ptr, 8);
-        size_t length = strnlen(ptr, 8);
-        ptr += (length < 8 ? length + 1 : 8);
-        
-        // Store the project version
+        memcpy(sav->projects[i].name, &header.project_names[i * 8], 8);
         sav->projects[i].version = header.versions[i];
     }
 
@@ -149,7 +127,7 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
 	sav->active_project = header.active_project;
     
     // Read the compressed projects
-    read_compressed_blocks(sav->projects, sav->project_count, file);
+    read_compressed_blocks(sav->projects, file);
     
     // Read the working song
     fseek(file, 0, SEEK_SET);
@@ -184,13 +162,10 @@ void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** erro
     unsigned char* table_ptr = block_alloc_table;
     
     // Write project specific data
-    char* names_ptr = header.project_names;
-    for (int i = 0; i < sav->project_count; ++i)
+    for (int i = 0; i < 32; ++i)
     {
         // Write project name
-        unsigned long length = strnlen(sav->projects[i].name, 8);
-        strncpy(names_ptr, sav->projects[i].name, length);
-        names_ptr += length == 8 ? 8 : length + 1;
+        memcpy(&header.project_names[i * 8], sav->projects[i].name, 8);
         
         // Write project version
         header.versions[i] = sav->projects[i].version;
@@ -205,10 +180,8 @@ void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** erro
     fwrite(&block_alloc_table, sizeof(block_alloc_table), 1, file);
     
     // Write the actual blocks
-    size_t size = 0x8000;
-    for (int i = 0; i < sav->project_count; ++i)
+    for (int i = 0; i < 32; ++i)
     {
-        size += sav->projects[i].compressed_data.size;
         fwrite(sav->projects[i].compressed_data.data, sav->projects[i].compressed_data.size, 1, file);
     }
     
@@ -216,14 +189,13 @@ void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** erro
     fclose(file);
 }
 
-void lsdj_close_sav(lsdj_sav_t* sav)
+void lsdj_free_sav(lsdj_sav_t* sav)
 {
-    for (int i = 0; i < sav->project_count; ++i)
+    for (int i = 0; i < 32; ++i)
     {
         if (sav->projects[i].compressed_data.size > 0)
             free(sav->projects[i].compressed_data.data);
     }
     
-    free(sav->projects);
 	free(sav);
 }

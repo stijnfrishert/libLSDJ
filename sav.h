@@ -8,16 +8,16 @@
 extern "C" {
 #endif
     
-//! Representation of an entire LSDJ sav file
+//! Representation of an entire LSDJ save file
 typedef struct
 {
-	//! The number of projects there are in the sav file
-	unsigned short project_count;
+//	//! The number of projects on file
+//	unsigned short project_count;
 
-	//! The projects in the sav file
-	lsdj_project_t* projects;
+	//! The projects
+	lsdj_project_t projects[32];
 
-	//! The project in the SAV that's currently being edited
+	//! Index of the project that is currently being edited
 	/*! Indices start at 0, a value of 0xFF means there is no active project */
 	unsigned char active_project;
     
@@ -25,16 +25,15 @@ typedef struct
     lsdj_project_decompressed_t working_project;
 } lsdj_sav_t;
 
-//! Open an LSDJ sav file
-/*! Each successful call to lsdj_open() should be paired with a call to lsdj_close() */
+//! Reads an LSDJ save file into memory
+/*! Each successful call to lsdj_open() should be paired with a call to lsdj_free() */
 lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error);
     
-//! Write an LSDJ sav file
+//! Write am LSDJ save file to file
 void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
 
-//! Close an LSDJ sav file
-/*! Each successful call to lsdj_open() should be paired with a call to lsdj_close() */
-void lsdj_close_sav(lsdj_sav_t* sav);
+//! Deallocate an LSDJ save file
+void lsdj_free_sav(lsdj_sav_t* sav);
 
 #ifdef __cplusplus
 }

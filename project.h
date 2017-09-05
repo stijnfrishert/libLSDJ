@@ -9,18 +9,18 @@
 extern "C" {
 #endif
     
+//! A decompressed LSDJ project
+typedef struct
+{
+    unsigned char data[0x8000];
+} lsdj_project_decompressed_t;
+    
 //! A compressed LSDJ project
 typedef struct
 {
     size_t size;
     void* data;
 } lsdj_project_compressed_t;
-    
-//! A decompressed LSDJ project
-typedef struct
-{
-    unsigned char data[0x8000];
-} lsdj_project_decompressed_t;
 
 //! Representation of a project within an LSDJ sav file
 typedef struct
