@@ -24,6 +24,12 @@ void read_compressed_blocks(lsdj_project_t* projects, unsigned short project_cou
     unsigned char blocks_table[BLOCKS_TABLE_SIZE];
     fread(blocks_table, sizeof(blocks_table), 1, file);
     
+    for (int i = 0; i < project_count; ++i)
+    {
+        projects[i].compressed_data.size = 0;
+        projects[i].compressed_data.data = NULL;
+    }
+    
     // Gather the size of each project in blocks
     for (int i = 0; i < BLOCKS_TABLE_SIZE; ++i)
     {

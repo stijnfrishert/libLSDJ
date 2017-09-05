@@ -1,6 +1,8 @@
 #ifndef LSDJ_PROJECT_H
 #define LSDJ_PROJECT_H
 
+#include <stddef.h>
+
 #include "error.h"
 
 #ifdef __cplusplus
