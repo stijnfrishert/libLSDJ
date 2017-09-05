@@ -7,23 +7,27 @@
 extern "C" {
 #endif
     
-static const unsigned int BLOCK_SIZE = 0x200;
-    
+//! Structure containing a compressed LSDJ project
 typedef struct
 {
-    unsigned char block_count;
+    size_t size;
     void* data;
 } lsdj_project_compressed_t;
 
 //! Representation of a project within an LSDJ sav file
 typedef struct
 {
+    //! The name of the project
 	char name[8];
+    
+    //! The version of the project
     unsigned char version;
     
+    //! The project compressed in memory
     lsdj_project_compressed_t compressed_data;
 } lsdj_project_t;
     
+//! Write a project to file as an .lsdsng
 void lsdj_write_lsdsng(lsdj_project_t* project, const char* path, lsdj_error_t** error);
 
 #ifdef __cplusplus

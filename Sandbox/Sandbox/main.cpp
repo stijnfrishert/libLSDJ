@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
         }
         
         cout << string(project.name, 8) << " (" << std::to_string((int)project.version) << ")" << endl;
-        cout << (int)project.compressed_data.block_count << endl;
+        cout << (int)project.compressed_data.size << endl;
     }
     
     lsdj_close_sav(sav);

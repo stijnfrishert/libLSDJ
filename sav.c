@@ -6,6 +6,7 @@
 #include "sav.h"
 
 const unsigned int HEADER_START = 0x8000;
+const unsigned int BLOCK_SIZE = 0x200;
 const unsigned int BLOCKS_TABLE_SIZE = 191;
 
 typedef struct
@@ -30,20 +31,20 @@ void read_compressed_blocks(lsdj_project_t* projects, unsigned short project_cou
         if (project >= project_count)
             continue;
         
-        projects[project].compressed_data.block_count++;
+        projects[project].compressed_data.size += BLOCK_SIZE;
     }
     
     // Allocate space to store the compressed data
     void** ptrs = malloc(sizeof(void*) * project_count);
     for (int i = 0; i < project_count; ++i)
     {
-        unsigned char count = projects[i].compressed_data.block_count;
+        size_t size = projects[i].compressed_data.size;
         lsdj_project_t* project = projects + i;
         
-        if (count > 0)
+        if (size > 0)
         {
-            project->compressed_data.data = malloc(BLOCK_SIZE * count);
-            memset(project->compressed_data.data, 0, BLOCK_SIZE * count);
+            project->compressed_data.data = malloc(size);
+            memset(project->compressed_data.data, 0, size);
         } else {
             project->compressed_data.data = NULL;
         }
@@ -64,7 +65,7 @@ void read_compressed_blocks(lsdj_project_t* projects, unsigned short project_cou
     
     for (int i = 0; i < project_count; ++i)
     {
-        assert(ptrs[i] == projects[i].compressed_data.data + projects[i].compressed_data.block_count * BLOCK_SIZE);
+        assert(ptrs[i] == projects[i].compressed_data.data + projects[i].compressed_data.size);
     }
     
     free(ptrs);
@@ -140,6 +141,7 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
     // Clean-up and close the file
 	fclose(file);
 
+    // Return the save structure
 	return sav;
 }
 
@@ -147,7 +149,7 @@ void lsdj_close_sav(lsdj_sav_t* sav)
 {
     for (int i = 0; i < sav->project_count; ++i)
     {
-        if (sav->projects[i].compressed_data.block_count > 0)
+        if (sav->projects[i].compressed_data.size > 0)
             free(sav->projects[i].compressed_data.data);
     }
     
