@@ -13,7 +13,7 @@ void lsdj_create_error(lsdj_error_t** error, const char* message)
         return;
     
     *error = malloc(sizeof(lsdj_error_t));
-    (*error)->message = "could not open file";
+    (*error)->message = message;
 }
 
 void lsdj_free_error(lsdj_error_t* error)

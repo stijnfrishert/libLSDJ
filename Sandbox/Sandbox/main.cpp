@@ -8,7 +8,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = lsdj_open("/Users/stijn/Desktop/LSDj/lsdj.sav", &error);
+    lsdj_sav_t* sav = lsdj_open("/Users/dsperados/Desktop/lsdj.sav", &error);
     if (sav == nullptr)
     {
         std::runtime_error exception(lsdj_get_error_c_str(error));
@@ -17,7 +17,10 @@ int main(int argc, char* argv[])
     }
     
     for (auto i = 0; i < sav->project_count; ++i)
-        cout << sav->projects[i].name << endl;
+    {
+        auto& project = sav->projects[i];
+        cout << string(project.name, 8) << " (" << std::to_string((int)project.version) << ")" << endl;
+    }
     
     lsdj_close(sav);
     
