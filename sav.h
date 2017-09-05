@@ -7,7 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+    
 //! Representation of an entire LSDJ sav file
 typedef struct
 {
@@ -18,13 +18,19 @@ typedef struct
 	lsdj_project_t* projects;
 
 	//! The project in the SAV that's currently being edited
-	/*! Indices start at 0, a value of -1 means there is no active project */
-	int active_project;
+	/*! Indices start at 0, a value of 0xFF means there is no active project */
+	unsigned char active_project;
+    
+    //! The project in active working memory
+    lsdj_project_decompressed_t working_project;
 } lsdj_sav_t;
 
 //! Open an LSDJ sav file
 /*! Each successful call to lsdj_open() should be paired with a call to lsdj_close() */
 lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error);
+    
+//! Write an LSDJ sav file
+void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
 
 //! Close an LSDJ sav file
 /*! Each successful call to lsdj_open() should be paired with a call to lsdj_close() */

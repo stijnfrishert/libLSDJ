@@ -77,6 +77,16 @@ void read_compressed_blocks(lsdj_project_t* projects, unsigned short project_cou
     free(ptrs);
 }
 
+void read_working_project(lsdj_project_decompressed_t* project, FILE* file)
+{
+    fread(project->data, sizeof(project->data), 1, file);
+}
+
+void write_working_project(const lsdj_project_decompressed_t* project, FILE* file)
+{
+    fwrite(project->data, sizeof(project->data), 1, file);
+}
+
 lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
 {
     // Try to open the sav file at the given path
@@ -87,7 +97,7 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
 		return NULL;
 	}
 
-    // Skip memory representing the currently open song
+    // Skip memory representing the working song (we'll get to that)
 	fseek(file, HEADER_START, SEEK_SET);
 
 	// Read the header block, before we start processing each song
@@ -111,10 +121,7 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
 	char* ptr = header.project_names;
 	while (1)
 	{
-		size_t length = strlen(ptr);
-        if (length > 8)
-            length = 8;
-        
+		size_t length = strnlen(ptr, 8);
 		if (length == 0)
 			break;
 
@@ -131,7 +138,7 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
     {
         // Store the project name
     	strncpy(sav->projects[i].name, ptr, 8);
-        size_t length = strlen(ptr);
+        size_t length = strnlen(ptr, 8);
         ptr += (length < 8 ? length + 1 : 8);
         
         // Store the project version
@@ -139,16 +146,74 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
     }
 
 	// Store the active project index
-	sav->active_project = header.active_project == 0xFF ? -1 : header.active_project;
+	sav->active_project = header.active_project;
     
     // Read the compressed projects
     read_compressed_blocks(sav->projects, sav->project_count, file);
+    
+    // Read the working song
+    fseek(file, 0, SEEK_SET);
+    read_working_project(&sav->working_project, file);
 
     // Clean-up and close the file
 	fclose(file);
 
     // Return the save structure
 	return sav;
+}
+
+void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error)
+{
+    FILE* file = fopen(path, "w");
+    if (file == NULL)
+        return lsdj_create_error(error, "could not open file for writing");
+    
+    // Write the working project
+    write_working_project(&sav->working_project, file);
+    
+    // Create the header for writing
+    header_t header;
+    memset(&header, 0, sizeof(header));
+    header.init[0] = 'j';
+    header.init[1] = 'k';
+    header.active_project = sav->active_project;
+    
+    // Create the block allocation table for writing
+    unsigned char block_alloc_table[BLOCKS_TABLE_SIZE];
+    memset(&block_alloc_table, 0xFF, sizeof(block_alloc_table));
+    unsigned char* table_ptr = block_alloc_table;
+    
+    // Write project specific data
+    char* names_ptr = header.project_names;
+    for (int i = 0; i < sav->project_count; ++i)
+    {
+        // Write project name
+        unsigned long length = strnlen(sav->projects[i].name, 8);
+        strncpy(names_ptr, sav->projects[i].name, length);
+        names_ptr += length == 8 ? 8 : length + 1;
+        
+        // Write project version
+        header.versions[i] = sav->projects[i].version;
+        
+        // Write in the block allocation table
+        for (int j = 0; j < sav->projects[i].compressed_data.size / BLOCK_SIZE; ++j)
+            *table_ptr++ = (unsigned char)i;
+    }
+    
+    // Write the header and block allocation table
+    fwrite(&header, sizeof(header), 1, file);
+    fwrite(&block_alloc_table, sizeof(block_alloc_table), 1, file);
+    
+    // Write the actual blocks
+    size_t size = 0x8000;
+    for (int i = 0; i < sav->project_count; ++i)
+    {
+        size += sav->projects[i].compressed_data.size;
+        fwrite(sav->projects[i].compressed_data.data, sav->projects[i].compressed_data.size, 1, file);
+    }
+    
+    // Close the file
+    fclose(file);
 }
 
 void lsdj_close_sav(lsdj_sav_t* sav)
