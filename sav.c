@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -13,7 +14,7 @@ typedef struct
 	unsigned char versions[32 * 1];
 	unsigned char empty[30];
 	char init[2];
-	int active_project;
+	unsigned char active_project;
     unsigned char blocks_table[BLOCKS_TABLE_SIZE];
 } header_t;
 
@@ -96,8 +97,17 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
     for (int i = 0; i < sav->project_count; ++i)
     {
         unsigned char count = sav->projects[i].compressed_data.block_count;
-        sav->projects[i].compressed_data.data = count > 0 ? malloc(BLOCK_SIZE * count) : NULL;
-        ptrs[i] = sav->projects[i].compressed_data.data;
+        lsdj_project_t* project = sav->projects + i;
+        
+        if (count > 0)
+        {
+            project->compressed_data.data = malloc(BLOCK_SIZE * count);
+            memset(project->compressed_data.data, 0, BLOCK_SIZE * count);
+        } else {
+            project->compressed_data.data = NULL;
+        }
+        
+        ptrs[i] = project->compressed_data.data;
     }
     
     // Store each block
@@ -109,6 +119,11 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
         
         fread(ptrs[project], BLOCK_SIZE, 1, file);
         ptrs[project] += BLOCK_SIZE;
+    }
+    
+    for (int i = 0; i < sav->project_count; ++i)
+    {
+        assert(ptrs[i] == sav->projects[i].compressed_data.data + sav->projects[i].compressed_data.block_count * BLOCK_SIZE);
     }
     
     free(ptrs);

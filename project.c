@@ -10,9 +10,9 @@ void lsdj_write_lsdsng(lsdj_project_t* project, const char* path, lsdj_error_t**
         return lsdj_create_error(error, "could not open file for writing");
     }
     
-    fwrite(project->name, sizeof(project->name), 1, file);
-    fwrite(&project->version, sizeof(project->version), 1, file);
-    fwrite(&project->compressed_data.data, sizeof(project->compressed_data.block_count * BLOCK_SIZE), 1, file);
+    fwrite(project->name, 8, 1, file);
+    fwrite(&project->version, 1, 1, file);
+    fwrite(project->compressed_data.data, project->compressed_data.block_count * BLOCK_SIZE, 1, file);
     
     fclose(file);
 }
