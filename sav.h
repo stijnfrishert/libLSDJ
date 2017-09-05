@@ -1,12 +1,12 @@
 #ifndef LSDJ_SAV_H
 #define LSDJ_SAV_H
 
+#include "error.h"
+#include "project.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "error.h"
-#include "project.h"
 
 //! Representation of an entire LSDJ sav file
 typedef struct
@@ -24,11 +24,11 @@ typedef struct
 
 //! Open an LSDJ sav file
 /*! Each successful call to lsdj_open() should be paired with a call to lsdj_close() */
-lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error);
+lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error);
 
 //! Close an LSDJ sav file
 /*! Each successful call to lsdj_open() should be paired with a call to lsdj_close() */
-void lsdj_close(lsdj_sav_t* sav);
+void lsdj_close_sav(lsdj_sav_t* sav);
 
 #ifdef __cplusplus
 }

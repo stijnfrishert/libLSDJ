@@ -1,11 +1,13 @@
 #ifndef LSDJ_PROJECT_H
 #define LSDJ_PROJECT_H
 
+#include "error.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
     
-const unsigned int BLOCK_SIZE = 0x200;
+static const unsigned int BLOCK_SIZE = 0x200;
     
 typedef struct
 {
@@ -21,6 +23,8 @@ typedef struct
     
     lsdj_project_compressed_t compressed_data;
 } lsdj_project_t;
+    
+void lsdj_write_lsdsng(lsdj_project_t* project, const char* path, lsdj_error_t** error);
 
 #ifdef __cplusplus
 }

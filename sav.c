@@ -17,13 +17,13 @@ typedef struct
     unsigned char blocks_table[BLOCKS_TABLE_SIZE];
 } header_t;
 
-lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error)
+lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
 {
     // Try to open the sav file at the given path
 	FILE* file = fopen(path, "r");
-	if (!file)
+	if (file == NULL)
 	{
-		lsdj_create_error(error, "could not open file");
+		lsdj_create_error(error, "could not open file for reading");
 		return NULL;
 	}
 
@@ -119,7 +119,7 @@ lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error)
 	return sav;
 }
 
-void lsdj_close(lsdj_sav_t* sav)
+void lsdj_close_sav(lsdj_sav_t* sav)
 {
     for (int i = 0; i < sav->project_count; ++i)
     {
