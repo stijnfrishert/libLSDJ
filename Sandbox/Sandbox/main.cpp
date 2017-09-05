@@ -20,6 +20,7 @@ int main(int argc, char* argv[])
     {
         auto& project = sav->projects[i];
         cout << string(project.name, 8) << " (" << std::to_string((int)project.version) << ")" << endl;
+        cout << (int)project.compressed_data.block_count << endl;
     }
     
     lsdj_close(sav);

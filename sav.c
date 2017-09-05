@@ -11,10 +11,10 @@ typedef struct
 {
 	char project_names[32 * 8];
 	unsigned char versions[32 * 1];
-	char empty[30];
+	unsigned char empty[30];
 	char init[2];
 	int active_project;
-    char blocks_table[BLOCKS_TABLE_SIZE];
+    unsigned char blocks_table[BLOCKS_TABLE_SIZE];
 } header_t;
 
 lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error)
@@ -84,9 +84,34 @@ lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error)
     // Gather the size of each project in blocks
     for (int i = 0; i < BLOCKS_TABLE_SIZE; ++i)
     {
-        int project = header.blocks_table[i];
+        unsigned char project = header.blocks_table[i];
+        if (project >= sav->project_count)
+            continue;
+        
         sav->projects[project].compressed_data.block_count++;
     }
+    
+    // Allocate space to store the compressed data
+    void** ptrs = malloc(sizeof(void*) * sav->project_count);
+    for (int i = 0; i < sav->project_count; ++i)
+    {
+        unsigned char count = sav->projects[i].compressed_data.block_count;
+        sav->projects[i].compressed_data.data = count > 0 ? malloc(BLOCK_SIZE * count) : NULL;
+        ptrs[i] = sav->projects[i].compressed_data.data;
+    }
+    
+    // Store each block
+    for (int i = 0; i < BLOCKS_TABLE_SIZE; ++i)
+    {
+        unsigned char project = header.blocks_table[i];
+        if (project >= sav->project_count)
+            continue;
+        
+        fread(ptrs[project], BLOCK_SIZE, 1, file);
+        ptrs[project] += BLOCK_SIZE;
+    }
+    
+    free(ptrs);
 
     // Clean-up and close the file
 	fclose(file);
@@ -96,6 +121,12 @@ lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error)
 
 void lsdj_close(lsdj_sav_t* sav)
 {
+    for (int i = 0; i < sav->project_count; ++i)
+    {
+        if (sav->projects[i].compressed_data.block_count > 0)
+            free(sav->projects[i].compressed_data.data);
+    }
+    
     free(sav->projects);
 	free(sav);
 }
