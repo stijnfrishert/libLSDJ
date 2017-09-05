@@ -1,4 +1,5 @@
 {
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "E2F7AAF63C385BDE09FF8106BF8FA35663BAA016",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
 
   },
@@ -8,12 +9,12 @@
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "5D08354D-99EC-4C7B-BEC7-1E637470EEF9",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
-    "E2F7AAF63C385BDE09FF8106BF8FA35663BAA016" : "",
-    "8FDE51B448AD4663C53F2E7796118080CEE5BB0B" : ".."
+    "E2F7AAF63C385BDE09FF8106BF8FA35663BAA016" : "liblsdj\/",
+    "8FDE51B448AD4663C53F2E7796118080CEE5BB0B" : ""
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "Sandbox",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
-  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Sandbox.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Sandbox\/Sandbox.xcodeproj",
   "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
     {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/stijnfrishert\/Zoek.git",

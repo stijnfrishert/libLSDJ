@@ -6,13 +6,16 @@ extern "C"
 {
 #endif
 
+//! Structure containing specific error details
 typedef struct lsdj_error_t lsdj_error_t;
 
+//! Representation of a project within an LSDJ sav file
 typedef struct
 {
-	const char* name;
+	char name[8];
 } lsdj_project_t;
 
+//! Representation of an entire LSDJ sav file
 typedef struct
 {
 	//! The number of projects there are in the sav file

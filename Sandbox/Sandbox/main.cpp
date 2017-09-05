@@ -16,6 +16,9 @@ int main(int argc, char* argv[])
         throw exception;
     }
     
+    for (auto i = 0; i < sav->project_count; ++i)
+        cout << sav->projects[i].name << endl;
+    
     lsdj_close(sav);
     
     return 0;

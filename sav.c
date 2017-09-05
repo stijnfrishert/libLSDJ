@@ -85,8 +85,14 @@ lsdj_sav_t* lsdj_open(const char* path, lsdj_error_t** error)
 		ptr += length + 1;
 	}
     
-    // Allocate data for all the projects
+    // Allocate data for all the projects and store their names
     sav->projects = malloc(sizeof(lsdj_project_t) * sav->project_count);
+    ptr = header.project_names;
+    for (int i = 0; i < sav->project_count; ++i)
+    {
+    	strcpy(sav->projects[i].name, ptr);
+    	ptr += strlen(ptr) + 1;
+    }
 
 	// Store the active project index
 	sav->active_project = header.active_project == 0xFF ? -1 : header.active_project;
