@@ -5,7 +5,8 @@
 
 int main(int argc, char* argv[])
 {
-    lsdj_sav_t* sav = lsdj_open_sav("/Users/stijn/Desktop/lsdj/lsdj.sav", NULL);
+    lsdj_sav_t* sav = lsdj_open_sav("/Users/dsperados/Desktop/lsdj/lsdj.sav", NULL);
+    
     lsdj_write_sav(sav, "lsdj.sav", NULL);
     
 	for (int i = 1; i < argc; ++i)
@@ -14,7 +15,7 @@ int main(int argc, char* argv[])
         
         for (int i = 0; i < 32; ++i)
         {
-            if (sav->projects[i].compressed_data.size == 0)
+            if (sav->projects[i].compressed.size == 0)
                 continue;
             
             char v[3];
