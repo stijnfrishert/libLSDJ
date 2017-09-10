@@ -17,9 +17,9 @@ const unsigned char DEFAULT_INSTRUMENT_BYTE = 0xF1;
 const unsigned char DEFAULT_WAVE[16] = { 0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31 };
 const unsigned char DEFAULT_INSTRUMENT[16] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
 
-void decompress(const unsigned char blocks[BLOCK_COUNT][BLOCK_SIZE], unsigned char start_block, unsigned char* write)
+void decompress(const unsigned char* blocks, unsigned char start_block, unsigned char* write)
 {
-    for (const unsigned char* read = blocks[start_block]; *read != END_OF_FILE_BYTE; )
+    for (const unsigned char* read = blocks + start_block * BLOCK_SIZE; *read != END_OF_FILE_BYTE; )
     {
         switch (*read)
         {
@@ -71,7 +71,7 @@ void decompress(const unsigned char blocks[BLOCK_COUNT][BLOCK_SIZE], unsigned ch
                     case END_OF_FILE_BYTE:
                         break;
                     default:
-                        read = blocks[c - 1];
+                        read = blocks + (c - 1) * BLOCK_SIZE;
                         break;
                 }
                 break;

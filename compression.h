@@ -16,6 +16,6 @@ static const unsigned int BLOCK_SIZE = 0x200;
 static const unsigned int BLOCK_COUNT = 191;
 
 //! Decompress blocks to a song buffer
-void decompress(const unsigned char blocks[BLOCK_COUNT][BLOCK_SIZE], unsigned char start_block, unsigned char* write);
+void decompress(const unsigned char* blocks, unsigned char start_block, unsigned char* write);
 
 #endif /* LSDJ_COMPRESSION_H */

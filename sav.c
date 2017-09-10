@@ -38,7 +38,7 @@ void read_compressed_blocks(lsdj_project_t* projects, FILE* file)
             continue;
         
         unsigned char data[SONG_SIZE];
-        decompress(blocks, i, data);
+        decompress(&blocks[0][0], i, data);
         
         projects[project].song = malloc(sizeof(lsdj_song_t));
         lsdj_read_song_from_memory(data, projects[project].song);
