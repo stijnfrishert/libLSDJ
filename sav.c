@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "compression.h"
 #include "sav.h"
 
-const unsigned int HEADER_START = 0x8000;
-const unsigned int BLOCK_SIZE = 0x200;
-const unsigned int BLOCKS_TABLE_SIZE = 191;
+const unsigned int SONG_SIZE = 0x8000;
+const unsigned int HEADER_START = SONG_SIZE;
 
 typedef struct
 {
@@ -21,74 +21,28 @@ typedef struct
 // Read compressed project data from memory sav file
 void read_compressed_blocks(lsdj_project_t* projects, FILE* file)
 {
-    unsigned char blocks_table[BLOCKS_TABLE_SIZE];
-    fread(blocks_table, sizeof(blocks_table), 1, file);
+    // Read the block allocation table
+    unsigned char blocks_alloc_table[BLOCK_COUNT];
+    fread(blocks_alloc_table, sizeof(blocks_alloc_table), 1, file);
     
-    for (int i = 0; i < SAV_PROJECT_COUNT; ++i)
-    {
-        if (projects[i].compressed.size > 0)
-        {
-            free(projects[i].compressed.data);
-            projects[i].compressed.size = 0;
-        }
-        
-        projects[i].compressed.data = NULL;
-    }
+    // Read the blocks
+    unsigned char blocks[BLOCK_COUNT][BLOCK_SIZE];
+    fread(blocks, BLOCK_SIZE * BLOCK_COUNT, 1, file);
     
-    // Gather the size of each project in blocks
-    for (int i = 0; i < BLOCKS_TABLE_SIZE; ++i)
+    // Pointers for storing decompressed song data
+    // Handle decompression
+    for (unsigned char i = 0; i < BLOCK_COUNT; ++i)
     {
-        unsigned char project = blocks_table[i];
-        if (project == 0xFF)
+        unsigned char project = blocks_alloc_table[i];
+        if (projects[project].song)
             continue;
         
-        projects[project].compressed.size += BLOCK_SIZE;
-    }
-    
-    // Allocate space to store the compressed data
-    void* ptrs[SAV_PROJECT_COUNT];
-    for (int i = 0; i < SAV_PROJECT_COUNT; ++i)
-    {
-        lsdj_project_t* project = projects + i;
+        unsigned char data[SONG_SIZE];
+        decompress(blocks, i, data);
         
-        size_t size = project->compressed.size;
-        
-        if (size > 0)
-        {
-            project->compressed.data = malloc(size);
-            memset(project->compressed.data, 0, size);
-            ptrs[i] = project->compressed.data;
-        } else {
-            project->compressed.data = NULL;
-            ptrs[i] = NULL;
-        }
+        projects[project].song = malloc(sizeof(lsdj_song_t));
+        lsdj_read_song_from_memory(data, projects[project].song);
     }
-    
-    // Store each block
-    for (int i = 0; i < BLOCKS_TABLE_SIZE; ++i)
-    {
-        unsigned char project = blocks_table[i];
-        if (project == 0xFF)
-            continue;
-        
-        assert(ptrs[project] != NULL);
-        fread(ptrs[project], BLOCK_SIZE, 1, file);
-        ptrs[project] += BLOCK_SIZE;
-    }
-    
-    for (int i = 0; i < SAV_PROJECT_COUNT; ++i)
-    {
-        if (projects[i].compressed.size > 0)
-        {
-            projects[i].song = malloc(sizeof(lsdj_song_t));
-            lsdj_decompress_song(projects[i].compressed.data, projects[i].song);
-        }
-    }
-}
-
-void read_song(lsdj_song_t* song, FILE* file)
-{
-    fread(song->data, sizeof(song->data), 1, file);
 }
 
 void write_song(const lsdj_song_t* song, FILE* file)
@@ -140,7 +94,9 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
     
     // Read the working song
     fseek(file, 0, SEEK_SET);
-    read_song(&sav->song, file);
+    unsigned char song_data[SONG_SIZE];
+    fread(song_data, sizeof(song_data), 1, file);
+    lsdj_read_song_from_memory(song_data, &sav->song);
 
     // Clean-up and close the file
 	fclose(file);
@@ -166,7 +122,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** erro
     header.active_project = sav->active_project;
     
     // Create the block allocation table for writing
-    unsigned char block_alloc_table[BLOCKS_TABLE_SIZE];
+    unsigned char block_alloc_table[BLOCK_COUNT];
     memset(&block_alloc_table, 0xFF, sizeof(block_alloc_table));
     unsigned char* table_ptr = block_alloc_table;
     
@@ -210,6 +166,9 @@ void lsdj_free_sav(lsdj_sav_t* sav)
 {
     for (int i = 0; i < SAV_PROJECT_COUNT; ++i)
     {
+        if (sav->projects[i].song)
+            free(sav->projects[i].song);
+        
         if (sav->projects[i].compressed.size > 0)
             free(sav->projects[i].compressed.data);
     }

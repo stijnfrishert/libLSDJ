@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[])
 {
-    lsdj_sav_t* sav = lsdj_open_sav("/Users/dsperados/Desktop/lsdj/lsdj.sav", NULL);
+    lsdj_sav_t* sav = lsdj_open_sav("/Users/stijn/Desktop/lsdj/lsdj.sav", NULL);
     
     lsdj_write_sav(sav, "lsdj.sav", NULL);
     

@@ -11,8 +11,8 @@ typedef struct
     unsigned char data[0x8000];
 } lsdj_song_t;
     
-//! Decompress a song
-void lsdj_decompress_song(const unsigned char* data, lsdj_song_t* song);
+//! Read an LSDJ song from some memory
+void lsdj_read_song_from_memory(const unsigned char* data, lsdj_song_t* song);
 
 #ifdef __cplusplus
 }
