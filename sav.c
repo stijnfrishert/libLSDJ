@@ -25,7 +25,7 @@ typedef struct
 } header_t;
 
 // Read compressed project data from memory sav file
-void read_compressed_blocks(lsdj_project_t* projects, FILE* file)
+void read_compressed_blocks(lsdj_project_t* projects, FILE* file, lsdj_error_t** error)
 {
     // Read the block allocation table
     unsigned char blocks_alloc_table[BLOCK_COUNT];
@@ -46,8 +46,11 @@ void read_compressed_blocks(lsdj_project_t* projects, FILE* file)
         unsigned char data[SONG_DECRYPTED_SIZE];
         decompress(&blocks[0][0], i, BLOCK_SIZE, data);
         
+        // Read the song from memory
         projects[project].song = malloc(sizeof(lsdj_song_t));
-        lsdj_read_song_from_memory(data, projects[project].song);
+        lsdj_read_song_from_memory(data, projects[project].song, error);
+        if (error)
+            return;
     }
 }
 
@@ -91,16 +94,25 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
 	sav->active_project = header.active_project;
     
     // Read the compressed projects
-    read_compressed_blocks(sav->projects, file);
+    read_compressed_blocks(sav->projects, file, error);
+    if (error)
+    {
+        fclose(file);
+        return NULL;
+    }
     
     // Read the working song
     fseek(file, 0, SEEK_SET);
     unsigned char song_data[SONG_DECRYPTED_SIZE];
     fread(song_data, sizeof(song_data), 1, file);
-    lsdj_read_song_from_memory(song_data, &sav->song);
-
-    // Clean-up and close the file
-	fclose(file);
+    lsdj_read_song_from_memory(song_data, &sav->song, error);
+    
+    // Clean-up and close the file anyway
+    fclose(file);
+    
+    // If the last song read threw an error, propagate it upward
+    if (error)
+        return NULL;
 
     // Return the save structure
 	return sav;
