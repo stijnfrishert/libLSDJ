@@ -26,6 +26,7 @@ void lsdj_write_lsdsng(const lsdj_project_t* project, const char* path, lsdj_err
     
     // Compress the song
     unsigned char compressed[SONG_DECOMPRESSED_SIZE];
+    memset(&compressed, 0, SONG_DECOMPRESSED_SIZE);
     unsigned int block_write_count = lsdj_compress(decompressed, compressed, BLOCK_SIZE, 0, BLOCK_COUNT);
     
     fwrite(compressed, BLOCK_SIZE * block_write_count, 1, file);

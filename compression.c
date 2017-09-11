@@ -6,6 +6,9 @@
 //
 //
 
+#include <assert.h>
+#include <string.h>
+
 #include "compression.h"
 
 static const unsigned char RUN_LENGTH_ENCODING_BYTE = 0xC0;
@@ -88,10 +91,9 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, uns
     unsigned int current_block = start_block;
     unsigned char* block = blocks + current_block * block_size;
     unsigned char* write = block;
-
+    
     for (const unsigned char* read = data; read < data + SONG_DECOMPRESSED_SIZE; )
     {
-        long diff = write - block;
         if (write - block >= block_size - 4)
         {
             current_block += 1;
@@ -99,7 +101,6 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, uns
             *write++ = (unsigned char)(current_block + 1);
             
             write = block = blocks + current_block * block_size;
-            diff = 0;
             continue;
         }
         
