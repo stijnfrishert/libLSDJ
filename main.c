@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
         
         for (int i = 0; i < 32; ++i)
         {
-            if (sav->projects[i].compressed.size == 0)
+            if (sav->projects[i].song == NULL)
                 continue;
             
             char v[3];

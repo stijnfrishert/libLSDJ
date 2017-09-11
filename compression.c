@@ -8,16 +8,16 @@
 
 #include "compression.h"
 
-const unsigned char RUN_LENGTH_ENCODING_BYTE = 0xC0;
-const unsigned char SPECIAL_ACTION_BYTE = 0xE0;
-const unsigned char END_OF_FILE_BYTE = 0xFF;
-const unsigned char DEFAULT_WAVE_BYTE = 0xF0;
-const unsigned char DEFAULT_INSTRUMENT_BYTE = 0xF1;
+static const unsigned char RUN_LENGTH_ENCODING_BYTE = 0xC0;
+static const unsigned char SPECIAL_ACTION_BYTE = 0xE0;
+static const unsigned char END_OF_FILE_BYTE = 0xFF;
+static const unsigned char DEFAULT_WAVE_BYTE = 0xF0;
+static const unsigned char DEFAULT_INSTRUMENT_BYTE = 0xF1;
 
-const unsigned char DEFAULT_WAVE[16] = { 0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31 };
-const unsigned char DEFAULT_INSTRUMENT[16] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
+static const unsigned char DEFAULT_WAVE[16] = { 0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31 };
+static const unsigned char DEFAULT_INSTRUMENT[16] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
 
-void decompress(const unsigned char* blocks, unsigned char start_block, unsigned int block_size, unsigned char* write)
+void lsdj_decompress(const unsigned char* blocks, unsigned char start_block, unsigned int block_size, unsigned char* write)
 {
     for (const unsigned char* read = blocks + start_block * block_size; *read != END_OF_FILE_BYTE; )
     {
@@ -83,13 +83,13 @@ void decompress(const unsigned char* blocks, unsigned char start_block, unsigned
     }
 }
 
-unsigned int compress(const unsigned char* data, unsigned char* blocks, unsigned int block_size, unsigned int start_block, unsigned int block_count)
+unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, unsigned int block_size, unsigned int start_block, unsigned int block_count)
 {
     unsigned int current_block = start_block;
     unsigned char* block = blocks + current_block * block_size;
     unsigned char* write = block;
 
-    for (const unsigned char* read = data; read < data + SONG_DECRYPTED_SIZE; )
+    for (const unsigned char* read = data; read < data + SONG_DECOMPRESSED_SIZE; )
     {
         long diff = write - block;
         if (write - block >= block_size - 4)
@@ -122,7 +122,7 @@ unsigned int compress(const unsigned char* data, unsigned char* blocks, unsigned
                 unsigned char c = *read;
                 
                 // See if we can do run-length encoding
-                if ((read + 3 < data + SONG_DECRYPTED_SIZE) &&
+                if ((read + 3 < data + SONG_DECOMPRESSED_SIZE) &&
                     *(read + 1) == c &&
                     *(read + 2) == c &&
                     *(read + 3) == c)
@@ -131,7 +131,7 @@ unsigned int compress(const unsigned char* data, unsigned char* blocks, unsigned
                     *write++ = c;
                     
                     *write = 0;
-                    for ( ; read < data + SONG_DECRYPTED_SIZE; ++read)
+                    for ( ; read < data + SONG_DECOMPRESSED_SIZE; ++read)
                     {
                         if (*read != c || *write == 0xFF)
                             break;

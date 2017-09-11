@@ -12,13 +12,6 @@ extern "C" {
     
 //! The length of project names
 static const unsigned short PROJECT_NAME_LENGTH = 8;
-    
-//! A compressed LSDJ project
-typedef struct
-{
-    size_t size;
-    void* data;
-} lsdj_project_compressed_t;
 
 //! Representation of a project within an LSDJ sav file
 typedef struct
@@ -31,9 +24,6 @@ typedef struct
     
     //! The project decompressed in memory
     lsdj_song_t* song;
-    
-    //! The project compressed in memory
-    lsdj_project_compressed_t compressed;
 } lsdj_project_t;
     
 //! Write a project to an lsdsng file
