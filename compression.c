@@ -82,3 +82,74 @@ void decompress(const unsigned char* blocks, unsigned char start_block, unsigned
         }
     }
 }
+
+unsigned int compress(const unsigned char* data, unsigned char* blocks, unsigned int start_block, unsigned int block_count)
+{
+    unsigned int current_block = start_block;
+    unsigned char* block = blocks + current_block * BLOCK_SIZE;
+    unsigned char* write = block;
+
+    for (const unsigned char* read = data; read < data + 0x8000; )
+    {
+        long diff = write - block;
+        if (write - block >= BLOCK_SIZE - 4)
+        {
+            current_block += 1;
+            *write++ = SPECIAL_ACTION_BYTE;
+            *write++ = (unsigned char)(current_block + 1);
+            
+            write = block = blocks + current_block * BLOCK_SIZE;
+            diff = 0;
+            continue;
+        }
+        
+        switch (*read)
+        {
+            case RUN_LENGTH_ENCODING_BYTE:
+                *write++ = RUN_LENGTH_ENCODING_BYTE;
+                *write++ = RUN_LENGTH_ENCODING_BYTE;
+                read++;
+                break;
+                
+            case SPECIAL_ACTION_BYTE:
+                *write++ = SPECIAL_ACTION_BYTE;
+                *write++ = SPECIAL_ACTION_BYTE;
+                read++;
+                break;
+                
+            default:
+            {
+                unsigned char c = *read;
+                
+                // See if we can do run-length encoding
+                if ((read + 3 < data + 0x8000) &&
+                    *(read + 1) == c &&
+                    *(read + 2) == c &&
+                    *(read + 3) == c)
+                {
+                    *write++ = RUN_LENGTH_ENCODING_BYTE;
+                    *write++ = c;
+                    
+                    *write = 0;
+                    for ( ; read < data + 0x8000; ++read)
+                    {
+                        if (*read != c || *write == 0xFF)
+                            break;
+                        
+                        *write += 1;
+                    }
+                    write++;
+                } else {
+                    *write++ = *read++;
+                }
+                
+                break;
+            }
+        }
+    }
+    
+    *write++ = SPECIAL_ACTION_BYTE;
+    *write++ = END_OF_FILE_BYTE;
+    
+    return current_block - start_block + 1;
+}
