@@ -6,8 +6,14 @@
 #include "compression.h"
 #include "sav.h"
 
-const unsigned int SONG_SIZE = 0x8000;
-const unsigned int HEADER_START = SONG_SIZE;
+//! The memory place of the header
+const unsigned int HEADER_START = SONG_DECRYPTED_SIZE;
+
+//! The amount of blocks in the LSDJ file system
+const unsigned int BLOCK_COUNT = 191;
+
+//! The size of a block in the LSDJ file system
+const unsigned int BLOCK_SIZE = 0x200;
 
 typedef struct
 {
@@ -37,8 +43,8 @@ void read_compressed_blocks(lsdj_project_t* projects, FILE* file)
         if (projects[project].song)
             continue;
         
-        unsigned char data[SONG_SIZE];
-        decompress(&blocks[0][0], i, data);
+        unsigned char data[SONG_DECRYPTED_SIZE];
+        decompress(&blocks[0][0], i, BLOCK_SIZE, data);
         
         projects[project].song = malloc(sizeof(lsdj_song_t));
         lsdj_read_song_from_memory(data, projects[project].song);
@@ -89,7 +95,7 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
     
     // Read the working song
     fseek(file, 0, SEEK_SET);
-    unsigned char song_data[SONG_SIZE];
+    unsigned char song_data[SONG_DECRYPTED_SIZE];
     fread(song_data, sizeof(song_data), 1, file);
     lsdj_read_song_from_memory(song_data, &sav->song);
 
@@ -107,7 +113,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** erro
         return lsdj_create_error(error, "could not open file for writing");
     
     // Write the working project
-    unsigned char song_data[SONG_SIZE];
+    unsigned char song_data[SONG_DECRYPTED_SIZE];
     lsdj_write_song_to_memory(&sav->song, song_data);
     fwrite(song_data, sizeof(song_data), 1, file);
     
@@ -138,9 +144,9 @@ void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** erro
         if (sav->projects[i].song)
         {
             // Compress the song to memory
-            unsigned char song_data[SONG_SIZE];
+            unsigned char song_data[SONG_DECRYPTED_SIZE];
             lsdj_write_song_to_memory(sav->projects[i].song, song_data);
-            unsigned int written_block_count = compress(song_data, &blocks[0][0], current_block, BLOCK_COUNT);
+            unsigned int written_block_count = compress(song_data, &blocks[0][0], BLOCK_SIZE, current_block, BLOCK_COUNT);
             
             current_block += written_block_count;
             for (int j = 0; j < written_block_count; ++j)
