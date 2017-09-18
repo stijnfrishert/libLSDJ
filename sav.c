@@ -116,6 +116,9 @@ lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error)
 
 void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error)
 {
+    if (sav == NULL)
+        return lsdj_create_error(error, "sav is a nullptr");
+    
     FILE* file = fopen(path, "w");
     if (file == NULL)
         return lsdj_create_error(error, "could not open file for writing");
