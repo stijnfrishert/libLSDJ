@@ -17,9 +17,7 @@ static const unsigned int INSTRUMENT_COUNT = 64;
 
 //! An LSDJ song
 typedef struct
-{
-    unsigned char data[0x8000];
-    
+{    
     //! The sequences of chains in the song
     unsigned char sequences[SEQUENCE_LENGTH][SEQUENCE_COUNT];
     
@@ -36,6 +34,11 @@ typedef struct
     
     //! Instruments of the song
     instrument_t instruments[INSTRUMENT_COUNT];
+    
+    unsigned char bank0[0x2000];
+    unsigned char bank1[0x2000];
+    unsigned char bank2[0x2000];
+    unsigned char bank3[0x2000];
     
 } lsdj_song_t;
     

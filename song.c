@@ -11,6 +11,8 @@ void copy_and_increase(const unsigned char** source, unsigned char* destination,
 
 void read_bank0(const unsigned char** read, lsdj_song_t* song)
 {
+    memcpy(song->bank0, read, 0x2000);
+    
     copy_and_increase(read, song->phrases[0], sizeof(song->phrases));
     copy_and_increase(read, song->bookmarks, sizeof(song->bookmarks));
     *read += 96; // empty space
@@ -28,19 +30,39 @@ void read_bank0(const unsigned char** read, lsdj_song_t* song)
     *read += 70; // empty
 }
 
+void write_bank0(const lsdj_song_t* song, unsigned char* write)
+{
+    memcpy(write, song->bank0, 0x2000);
+}
+
 void read_bank1(const unsigned char** read, lsdj_song_t* song)
 {
-    *read += 32; // empty
+    copy_and_increase(read, song->bank1, 0x2000);
+}
+
+void write_bank1(const lsdj_song_t* song, unsigned char* write)
+{
+    memcpy(write, song->bank1, 0x2000);
 }
 
 void read_bank2(const unsigned char** read, lsdj_song_t* song)
 {
-    
+    copy_and_increase(read, song->bank2, 0x2000);
+}
+
+void write_bank2(const lsdj_song_t* song, unsigned char* write)
+{
+    memcpy(write, song->bank2, 0x2000);
 }
 
 void read_bank3(const unsigned char** read, lsdj_song_t* song)
 {
-    
+    copy_and_increase(read, song->bank3, 0x2000);
+}
+
+void write_bank3(const lsdj_song_t* song, unsigned char* write)
+{
+    memcpy(write, song->bank3, 0x2000);
 }
 
 void lsdj_read_song_from_memory(const unsigned char* data, lsdj_song_t* song, lsdj_error_t** error)
@@ -53,8 +75,6 @@ void lsdj_read_song_from_memory(const unsigned char* data, lsdj_song_t* song, ls
     
     const unsigned char* read = data;
     
-    memcpy(song->data, read, 0x8000);
-    
     read_bank0(&read, song);
     read_bank1(&read, song);
     read_bank2(&read, song);
@@ -63,5 +83,8 @@ void lsdj_read_song_from_memory(const unsigned char* data, lsdj_song_t* song, ls
 
 void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data)
 {
-    memcpy(data, song->data, 0x8000);
+    write_bank0(song, data);
+    write_bank0(song, data + 0x2000);
+    write_bank0(song, data + 0x2000);
+    write_bank0(song, data + 0x2000);
 }
