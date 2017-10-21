@@ -114,7 +114,7 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if (song->chains[i])
-            read(song->chains[i]->phraseNumbers, CHAIN_LENGTH, user_data);
+            read(song->chains[i]->phrases, CHAIN_LENGTH, user_data);
         else
             seek(CHAIN_LENGTH, SEEK_CUR, user_data);
     }
@@ -122,7 +122,7 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if (song->chains[i])
-            read(song->chains[i]->transposes, CHAIN_LENGTH, user_data);
+            read(song->chains[i]->transpositions, CHAIN_LENGTH, user_data);
         else
             seek(CHAIN_LENGTH, SEEK_CUR, user_data);
     }
@@ -138,7 +138,7 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
         if (song->tables[i])
-            read(song->tables[i]->transposes, TABLE_LENGTH, user_data);
+            read(song->tables[i]->transpositions, TABLE_LENGTH, user_data);
         else
             seek(TABLE_LENGTH, SEEK_CUR, user_data);
     }
@@ -267,7 +267,7 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if (song->chains[i])
-            write(song->chains[i]->phraseNumbers, CHAIN_LENGTH, user_data);
+            write(song->chains[i]->phrases, CHAIN_LENGTH, user_data);
         else
             write(CHAIN_LENGTH_FF, CHAIN_LENGTH, user_data);
     }
@@ -275,7 +275,7 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if (song->chains[i])
-            write(song->chains[i]->transposes, CHAIN_LENGTH, user_data);
+            write(song->chains[i]->transpositions, CHAIN_LENGTH, user_data);
         else
             write(CHAIN_LENGTH_ZERO, CHAIN_LENGTH, user_data);
     }
@@ -291,7 +291,7 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
         if (song->tables[i])
-            write(song->tables[i]->transposes, TABLE_LENGTH, user_data);
+            write(song->tables[i]->transpositions, TABLE_LENGTH, user_data);
         else
             write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
     }

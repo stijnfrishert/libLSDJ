@@ -21,6 +21,7 @@ static const unsigned char SYNTH_PHASE_NORMAL = 0;
 static const unsigned char SYNTH_PHASE_RESYNC = 1;
 static const unsigned char SYNTH_PHASE_RESYNC2 = 2;
 
+// Structure representing soft synth data
 typedef struct
 {
     unsigned char waveform;
@@ -28,10 +29,12 @@ typedef struct
     unsigned char resonance;
     unsigned char distortion;
     unsigned char phase;
+    
     unsigned char volumeStart;
     unsigned char volumeEnd;
     unsigned char cutOffStart;
     unsigned char cutOffEnd;
+    
     unsigned char phaseStart;
     unsigned char phaseEnd;
     unsigned char vshiftStart;
@@ -42,6 +45,7 @@ typedef struct
     unsigned char overwritten; // 0 if false, 1 if true
 } lsdj_synth_t;
 
+// Clear all soft synth data to factory settings
 void lsdj_clear_synth(lsdj_synth_t* synth);
     
 #ifdef __cplusplus

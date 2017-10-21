@@ -13,7 +13,9 @@
 extern "C" {
 #endif
     
+// The default constant length of an instrument name
 static const unsigned int INSTRUMENT_NAME_LENGTH = 5;
+    
 static const unsigned char DEFAULT_INSTRUMENT[16] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
     
 static const unsigned char INSTR_TYPE_PULSE = 0;
@@ -62,6 +64,7 @@ typedef struct
     };
 } lsdj_instrument_t;
     
+// Clear all instrument data to factory settings
 void lsdj_clear_instrument(lsdj_instrument_t* instrument);
     
 #ifdef __cplusplus

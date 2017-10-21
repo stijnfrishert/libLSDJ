@@ -12,7 +12,7 @@
 void lsdj_clear_table(lsdj_table_t* table)
 {
     memset(table->volumes, 0, TABLE_LENGTH);
-    memset(table->transposes, 0, TABLE_LENGTH);
+    memset(table->transpositions, 0, TABLE_LENGTH);
     
     for (int i = 0; i < TABLE_LENGTH; ++i)
     {

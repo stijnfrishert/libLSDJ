@@ -11,6 +11,6 @@
 
 void lsdj_clear_chain(lsdj_chain_t* chain)
 {
-    memset(chain->phraseNumbers, 0xFF, CHAIN_LENGTH);
-    memset(chain->transposes, 0, CHAIN_LENGTH);
+    memset(chain->phrases, 0xFF, CHAIN_LENGTH);
+    memset(chain->transpositions, 0, CHAIN_LENGTH);
 }

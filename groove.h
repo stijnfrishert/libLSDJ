@@ -5,14 +5,16 @@
 extern "C" {
 #endif
     
+// The default constant length of a groove
 static const unsigned int GROOVE_LENGTH = 16;
-static const unsigned char DEFAULT_GROOVE[GROOVE_LENGTH] = { 0x06, 0x06, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
+// Structure representing a groove
 typedef struct
 {
     unsigned char data[GROOVE_LENGTH];
 } lsdj_groove_t;
 
+    // Clear all groove data to factory settings
 void lsdj_clear_groove(lsdj_groove_t* groove);
     
 #ifdef __cplusplus

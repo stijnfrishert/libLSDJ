@@ -23,7 +23,8 @@ typedef struct
     // The version of the project
     unsigned char version;
     
-    // The project decompressed in memory
+    // The song belonging to this project
+    /*! If this is NULL, the project isn't in use */
     lsdj_song_t* song;
 } lsdj_project_t;
     
@@ -37,7 +38,7 @@ void lsdj_write_lsdsng(const lsdj_project_t* project, lsdj_vio_write_t write, vo
 void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error);
 void lsdj_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t size, lsdj_error_t** error);
     
-// Clear an LSDJ project
+// Clear all project data to factory settings
 void lsdj_clear_project(lsdj_project_t* project);
 
 #ifdef __cplusplus
