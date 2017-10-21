@@ -10,6 +10,7 @@
 #include <string.h>
 
 #include "compression.h"
+#include "song.h"
 
 static const unsigned char RUN_LENGTH_ENCODING_BYTE = 0xC0;
 static const unsigned char SPECIAL_ACTION_BYTE = 0xE0;

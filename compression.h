@@ -9,9 +9,6 @@
 #ifndef LSDJ_COMPRESSION_H
 #define LSDJ_COMPRESSION_H
 
-//! The size of an unencrypted song
-static const unsigned int SONG_DECOMPRESSED_SIZE = 0x8000;
-
 //! Decompress blocks to a song buffer
 void lsdj_decompress(const unsigned char* blocks, unsigned char start_block, unsigned int block_size, unsigned char* destination);
 

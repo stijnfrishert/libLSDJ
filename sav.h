@@ -27,7 +27,7 @@ typedef struct
     lsdj_song_t song;
 } lsdj_sav_t;
     
-void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_sav_t* sav, lsdj_error_t** error);
+void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_sav_t* sav, lsdj_error_t** error);
 void lsdj_read_sav_from_file(const char* path, lsdj_sav_t* sav, lsdj_error_t** error);
 void lsdj_read_sav_from_memory(const unsigned char* data, size_t size, lsdj_sav_t* sav, lsdj_error_t** error);
     

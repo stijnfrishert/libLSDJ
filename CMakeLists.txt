@@ -7,7 +7,7 @@ project(lsdj)
 add_definitions(-Wall -Werror -Wconversion)
 
 # Create the library target
-add_library(liblsdj STATIC compression.h compression.c error.h error.c instrument.h project.h project.c sav.h sav.c song.h song.c vio.h)
+add_library(liblsdj STATIC compression.h compression.c error.h error.c instrument.h project.h project.c sav.h sav.c song.h song.c vio.h vio.c)
 set_target_properties(liblsdj PROPERTIES OUTPUT_NAME lsdj)
 
 # Create the executable target

@@ -3,88 +3,135 @@
 
 #include "song.h"
 
-void copy_and_increase(const unsigned char** source, unsigned char* destination, unsigned int size)
+void read_bank0(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
 {
-    memcpy(destination, *source, size);
-    *source += size;
-}
-
-void read_bank0(const unsigned char** read, lsdj_song_t* song)
-{
-    memcpy(song->bank0, read, 0x2000);
+    const long begin = tell(user_data);
+    read(song->bank0, 0x2000, user_data);
+    seek(begin, SEEK_SET, user_data);
     
-    copy_and_increase(read, song->phrases[0], sizeof(song->phrases));
-    copy_and_increase(read, song->bookmarks, sizeof(song->bookmarks));
-    *read += 96; // empty space
-    copy_and_increase(read, song->grooves, sizeof(song->grooves));
-    copy_and_increase(read, song->sequences[0], sizeof(song->sequences));
-    *read += 512; // tables->envelope
-    *read += 1344; // instrument->speech->words
-    *read += 168; // instrument->speed->wordnames
-    *read += 2; // 'rb'
+    read(song->phrases, sizeof(song->phrases), user_data);
+    read(song->bookmarks, sizeof(song->bookmarks), user_data);
+    seek(96, SEEK_CUR, user_data); // empty space
+    read(song->grooves, sizeof(song->grooves), user_data);
+    read(song->sequences, sizeof(song->sequences), user_data);
+    seek(512, SEEK_CUR, user_data); // tables->envelope
+    seek(1344, SEEK_CUR, user_data); // instrument->speech->words
+    seek(168, SEEK_CUR, user_data); // instrument->speech->wordnames
+    seek(2, SEEK_CUR, user_data); // rb
     
     // Read the instrument names
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
-        copy_and_increase(read, (unsigned char*)song->instruments[i].name, sizeof(song->instruments[i].name));
+        read(song->instruments[i].name, sizeof(song->instruments[i].name), user_data);
+
+    seek(70, SEEK_CUR, user_data);
+}
+
+void write_bank0(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
+{
+    write(song->bank0, 0x2000, user_data);
+}
+
+void read_bank1(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
+{
+    read(song->bank1, 0x2000, user_data);
+}
+
+void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
+{
+    write(song->bank1, 0x2000, user_data);
+}
+
+void read_bank2(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
+{
+    read(song->bank2, 0x2000, user_data);
+}
+
+void write_bank2(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
+{
+    write(song->bank2, 0x2000, user_data);
+}
+
+void read_bank3(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
+{
+    read(song->bank3, 0x2000, user_data);
+}
+
+void write_bank3(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
+{
+    write(song->bank3, 0x2000, user_data);
+}
+
+void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error)
+{
+    // Check for incorrect input
+    if (read == NULL)
+        return lsdj_create_error(error, "read is NULL");
     
-    *read += 70; // empty
-}
-
-void write_bank0(const lsdj_song_t* song, unsigned char* write)
-{
-    memcpy(write, song->bank0, 0x2000);
-}
-
-void read_bank1(const unsigned char** read, lsdj_song_t* song)
-{
-    copy_and_increase(read, song->bank1, 0x2000);
-}
-
-void write_bank1(const lsdj_song_t* song, unsigned char* write)
-{
-    memcpy(write, song->bank1, 0x2000);
-}
-
-void read_bank2(const unsigned char** read, lsdj_song_t* song)
-{
-    copy_and_increase(read, song->bank2, 0x2000);
-}
-
-void write_bank2(const lsdj_song_t* song, unsigned char* write)
-{
-    memcpy(write, song->bank2, 0x2000);
-}
-
-void read_bank3(const unsigned char** read, lsdj_song_t* song)
-{
-    copy_and_increase(read, song->bank3, 0x2000);
-}
-
-void write_bank3(const lsdj_song_t* song, unsigned char* write)
-{
-    memcpy(write, song->bank3, 0x2000);
-}
-
-void lsdj_read_song_from_memory(const unsigned char* data, lsdj_song_t* song, lsdj_error_t** error)
-{
-    if (data[0x1E78] != 'r' || data[0x1E79] != 'b')
-    {
-        lsdj_create_error(error, "memory flag 'rb' not found");
-        return;
-    }
+    if (tell == NULL)
+        return lsdj_create_error(error, "tell is NULL");
     
-    const unsigned char* read = data;
+    if (seek == NULL)
+        return lsdj_create_error(error, "seek is NULL");
     
-    read_bank0(&read, song);
-    read_bank1(&read, song);
-    read_bank2(&read, song);
-    read_bank3(&read, song);
+    if (song == NULL)
+        return lsdj_create_error(error, "song is NULL");
+    
+    const long begin = tell(user_data);
+    seek(0x1E78, SEEK_SET, user_data);
+    
+    char data[2];
+    read(data, 2, user_data);
+    
+    if (data[0] != 'r' || data[1] != 'b')
+        return lsdj_create_error(error, "memory flag 'rb' not found");
+    
+    seek(begin, SEEK_SET, user_data);
+    
+    read_bank0(read, tell, seek, user_data, song);
+    read_bank1(read, tell, seek, user_data, song);
+    read_bank2(read, tell, seek, user_data, song);
+    read_bank3(read, tell, seek, user_data, song);
 }
 
-void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data)
+void lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_song_t* song, lsdj_error_t** error)
 {
-    write_bank0(song, data);
-    write_bank1(song, data + 0x2000);
-    write_bank2(song, data + 0x2000);
-    write_bank3(song, data + 0x2000);
+    if (data == NULL)
+        return lsdj_create_error(error, "data is NULL");
+    
+    if (song == NULL)
+        return lsdj_create_error(error, "song is NULL");
+    
+    lsdj_memory_data_t mem;
+    mem.begin = (unsigned char*)data;
+    mem.cur = mem.begin;
+    mem.size = size;
+    
+    lsdj_read_song(lsdj_mread, lsdj_mtell, lsdj_mseek, &mem, song, error);
+}
+
+void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
+{
+    write_bank0(song, write, user_data);
+    write_bank1(song, write, user_data);
+    write_bank2(song, write, user_data);
+    write_bank3(song, write, user_data);
+}
+
+void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error)
+{
+    if (song == NULL)
+        return lsdj_create_error(error, "song is NULL");
+    
+    if (data == NULL)
+        return lsdj_create_error(error, "data is NULL");
+    
+    if (size < SONG_DECOMPRESSED_SIZE)
+        return lsdj_create_error(error, "memory is not big enough to store song");
+    
+    lsdj_memory_data_t mem;
+    mem.begin = data;
+    mem.cur = mem.begin;
+    mem.size = size;
+    
+    lsdj_write_song(song, lsdj_mwrite, &mem, error);
 }

@@ -3,11 +3,13 @@
 
 #include "error.h"
 #include "instrument.h"
+#include "vio.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
     
+static const unsigned int SONG_DECOMPRESSED_SIZE = 0x8000;
 static const unsigned int SEQUENCE_COUNT = 4;
 static const unsigned int SEQUENCE_LENGTH = 256;
 static const unsigned int PHRASE_COUNT = 0xFF;
@@ -41,12 +43,13 @@ typedef struct
     unsigned char bank3[0x2000];
     
 } lsdj_song_t;
-    
-//! Read an LSDJ song from memory
-void lsdj_read_song_from_memory(const unsigned char* data, lsdj_song_t* song, lsdj_error_t** error);
+
+void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error);
+void lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_song_t* song, lsdj_error_t** error);
     
 //! Write an LSDJ song to memory
-void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data);
+void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error);
+void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error);
 
 #ifdef __cplusplus
 }

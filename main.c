@@ -17,6 +17,7 @@ int main(int argc, char* argv[])
     fread(inData, size, 1, file);
     fclose(file);
     
+    // Read
     lsdj_sav_t sav;
     lsdj_error_t* error = NULL;
     lsdj_read_sav_from_memory(inData, size, &sav, &error);
@@ -28,14 +29,23 @@ int main(int argc, char* argv[])
         return 1;
     }
     
+    // Write
     unsigned char outData[size];
     memset(outData, 0, size);
     lsdj_write_sav_to_memory(&sav, outData, size, &error);
+    
+    if (error)
+    {
+        printf("%s", lsdj_get_error_c_str(error));
+        lsdj_free_error(error);
+        return 1;
+    }
     
     // Compare the original and write
     for (int i = 0; i < size; ++i)
     {
         if (outData[i] != inData[i])
+            printf("diff at %d\n", i);
             return 1;
     }
     

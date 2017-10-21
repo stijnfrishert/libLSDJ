@@ -22,7 +22,7 @@ void lsdj_write_lsdsng(const lsdj_project_t* project, const char* path, lsdj_err
     
     // Write the song to memory
     unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
-    lsdj_write_song_to_memory(project->song, decompressed);
+    lsdj_write_song_to_memory(project->song, decompressed, SONG_DECOMPRESSED_SIZE, error);
     
     // Compress the song
     unsigned char compressed[SONG_DECOMPRESSED_SIZE];
@@ -57,7 +57,7 @@ void lsdj_read_lsdsng(const char* path, lsdj_project_t* project, lsdj_error_t** 
     // Read in the song
     if (project->song == NULL)
         project->song = malloc(sizeof(lsdj_song_t));
-    lsdj_read_song_from_memory(decompressed, project->song, error);
+    lsdj_read_song_from_memory(decompressed, sizeof(lsdj_song_t), project->song, error);
 }
 
 void lsdj_clear_project(lsdj_project_t* project)
