@@ -1,10 +1,6 @@
 #ifndef LSDJ_ROW_H
 #define LSDJ_ROW_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // Structure representing a row in an LSDJ song sequence
 typedef struct
 {
@@ -18,10 +14,5 @@ typedef struct
     
 // Clear all row data to factory settings
 void lsdj_clear_row(lsdj_row_t* row);
-    
-#ifdef __cplusplus
-}
+
 #endif
-
-
-#endif /* LSDJ_ROW_H */

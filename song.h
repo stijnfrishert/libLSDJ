@@ -13,10 +13,6 @@
 #include "wave.h"
 #include "word.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
 static const unsigned int SONG_DECOMPRESSED_SIZE = 0x8000;
 static const unsigned int ROW_COUNT = 256;
 static const unsigned int CHAIN_COUNT = 128;
@@ -116,9 +112,5 @@ void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, siz
     
 // Clear all song data to factory settings
 void lsdj_clear_song(lsdj_song_t* song);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

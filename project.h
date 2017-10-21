@@ -7,10 +7,6 @@
 #include "song.h"
 #include "vio.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
 // The length of project names
 static const unsigned short PROJECT_NAME_LENGTH = 8;
 
@@ -40,9 +36,5 @@ void lsdj_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* d
     
 // Clear all project data to factory settings
 void lsdj_clear_project(lsdj_project_t* project);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

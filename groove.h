@@ -1,10 +1,6 @@
 #ifndef LSDJ_GROOVE_H
 #define LSDJ_GROOVE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
 // The default constant length of a groove
 static const unsigned int GROOVE_LENGTH = 16;
 
@@ -17,8 +13,4 @@ typedef struct
     // Clear all groove data to factory settings
 void lsdj_clear_groove(lsdj_groove_t* groove);
     
-#ifdef __cplusplus
-}
-#endif
-
 #endif

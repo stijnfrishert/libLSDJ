@@ -1,10 +1,6 @@
 #ifndef LSDJ_SYNTH_H
 #define LSDJ_SYNTH_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
 static const unsigned char SYNTH_WAVEFORM_SAWTOOTH = 0;
 static const unsigned char SYNTH_WAVEFORM_SQUARE = 1;
 static const unsigned char SYNTH_WAVEFORM_TRIANGLE = 2;
@@ -48,8 +44,4 @@ typedef struct
 // Clear all soft synth data to factory settings
 void lsdj_clear_synth(lsdj_synth_t* synth);
     
-#ifdef __cplusplus
-}
-#endif
-
 #endif

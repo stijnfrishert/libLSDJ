@@ -3,10 +3,6 @@
 
 #include "command.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
 // The default constant lenght of a phrase
 static const unsigned int PHRASE_LENGTH = 16;
     
@@ -24,9 +20,5 @@ typedef struct
     
 // Clear all phrase data to factory settings
 void lsdj_clear_phrase(lsdj_phrase_t* phrase);
-    
-#ifdef __cplusplus
-}
-#endif
 
 #endif

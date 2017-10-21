@@ -5,10 +5,6 @@
 #include "project.h"
 #include "song.h"
 #include "vio.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
     
 // The amount of projects in a sav
 static const unsigned short PROJECT_COUNT = 32;
@@ -39,9 +35,5 @@ void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t
     
 // Clear all sav data to factory settings
 void lsdj_clear_sav(lsdj_sav_t* sav);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

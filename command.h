@@ -4,10 +4,6 @@
 #include <stddef.h>
 #include <stdio.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
 // Structure representing an effect command with its argument value
 typedef struct
 {
@@ -17,9 +13,5 @@ typedef struct
     
 // Clear the command to factory settings
 void lsdj_clear_command(lsdj_command_t* command);
-    
-#ifdef __cplusplus
-}
-#endif
 
 #endif

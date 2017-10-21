@@ -3,10 +3,6 @@
 
 #include "command.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 // The length of a chain
 static const unsigned int CHAIN_LENGTH = 16;
     
@@ -22,9 +18,5 @@ typedef struct
     
 // Clear chain data to factory settings
 void lsdj_clear_chain(lsdj_chain_t* chain);
-    
-#ifdef __cplusplus
-}
-#endif
 
 #endif

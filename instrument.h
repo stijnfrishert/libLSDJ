@@ -9,10 +9,6 @@
 #ifndef LSDJ_INSTRUMENT_H
 #define LSDJ_INSTRUMENT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
 // The default constant length of an instrument name
 static const unsigned int INSTRUMENT_NAME_LENGTH = 5;
     
@@ -66,10 +62,5 @@ typedef struct
     
 // Clear all instrument data to factory settings
 void lsdj_clear_instrument(lsdj_instrument_t* instrument);
-    
-#ifdef __cplusplus
-}
+
 #endif
-
-
-#endif /* LSDJ_INSTRUMENT_H */

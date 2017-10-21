@@ -3,10 +3,6 @@
 
 #include "command.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    
 // The default constant length of a table
 static const unsigned int TABLE_LENGTH = 16;
     
@@ -27,9 +23,5 @@ typedef struct
     
 // Clear all table data to factory settings
 void lsdj_clear_table(lsdj_table_t* table);
-    
-#ifdef __cplusplus
-}
-#endif
 
 #endif
