@@ -108,7 +108,7 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     read(&song->tempo, 1, user_data);
     read(&song->tuneSetting, 1, user_data);
     read(&song->totalTime, 3, user_data);
-    seek(1, SEEK_CUR, user_data); // time checksum, doesn't appear to be used anymore
+    read(&song->empty3fb9, 1, user_data); // time checksum, doesn't appear to be used anymore
     read(&song->keyDelay, 1, user_data);
     read(&song->keyRepeat, 1, user_data);
     read(&song->font, 1, user_data);
@@ -174,6 +174,7 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     write(&song->tempo, 1, user_data);
     write(&song->tuneSetting, 1, user_data);
     write(&song->totalTime, 3, user_data);
+    write(&song->empty3fb9, 1, user_data); // checksum?
     write(&song->keyDelay, 1, user_data);
     write(&song->keyRepeat, 1, user_data);
     write(&song->font, 1, user_data);
@@ -239,7 +240,7 @@ void read_bank3(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
 void write_bank3(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
 {
     for (int i = 0; i < WAVE_COUNT; ++i)
-        write(song->waves[i], sizeof(WAVE_LENGTH), user_data);
+        write(song->waves[i], WAVE_LENGTH, user_data);
     
     for (int i = 0; i < PHRASE_COUNT; ++i)
         write(&song->phrases[i].instruments, PHRASE_LENGTH, user_data);

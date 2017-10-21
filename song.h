@@ -83,6 +83,8 @@ typedef struct
         unsigned char minutes;
     } totalTime;
     
+    unsigned char empty3fb9;
+    
     unsigned char keyDelay;
     unsigned char keyRepeat;
     unsigned char font;

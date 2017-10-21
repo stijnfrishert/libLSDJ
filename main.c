@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     }
     
     // Compare the original and write
-    for (int i = 0; i < size; ++i)
+    for (int i = 0; i < SONG_DECOMPRESSED_SIZE; ++i)
     {
         if (outData[i] != inData[i])
         {
