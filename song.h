@@ -38,7 +38,7 @@ typedef struct
     lsdj_row_t rows[ROW_COUNT];
     
     //! The chains in the song
-    lsdj_chain_t chains[CHAIN_COUNT];
+    lsdj_chain_t* chains[CHAIN_COUNT];
     
     //! The prases in the song
     lsdj_phrase_t phrases[PHRASE_COUNT];
@@ -60,8 +60,7 @@ typedef struct
     
     unsigned char instrumentSpeechWords[1344];
     unsigned char instrumentSpeechWordNames[168];
-    
-    unsigned char chainAllocTable[16];
+
     unsigned char phraseAllocTable[32];
     unsigned char softSynthParams[16][SYNTH_COUNT];
     
