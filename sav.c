@@ -13,8 +13,8 @@ static const unsigned int BLOCK_SIZE = 0x200;
 
 typedef struct
 {
-	char project_names[SAV_PROJECT_COUNT * 8];
-	unsigned char versions[SAV_PROJECT_COUNT * 1];
+	char project_names[PROJECT_COUNT * 8];
+	unsigned char versions[PROJECT_COUNT * 1];
 	unsigned char empty[30];
 	char init[2];
 	unsigned char active_project;
@@ -78,7 +78,7 @@ void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t s
         return lsdj_create_error(error, "SRAM initialization check wasn't 'jk'");
     
     // Allocate data for all the projects and store their names
-    for (int i = 0; i < SAV_PROJECT_COUNT; ++i)
+    for (int i = 0; i < PROJECT_COUNT; ++i)
     {
         memcpy(sav->projects[i].name, &header.project_names[i * 8], 8);
         sav->projects[i].version = header.versions[i];
@@ -158,7 +158,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_da
     unsigned char blocks[BLOCK_SIZE][BLOCK_COUNT];
     unsigned char current_block = 0;
     memset(blocks, 0, sizeof(blocks));
-    for (int i = 0; i < SAV_PROJECT_COUNT; ++i)
+    for (int i = 0; i < PROJECT_COUNT; ++i)
     {
         // Write project name
         memcpy(&header.project_names[i * 8], sav->projects[i].name, 8);
@@ -220,7 +220,7 @@ void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t
 
 void lsdj_clear_sav(lsdj_sav_t* sav)
 {
-    for (int i = 0; i < SAV_PROJECT_COUNT; ++i)
+    for (int i = 0; i < PROJECT_COUNT; ++i)
         lsdj_clear_project(&sav->projects[i]);
     
     sav->activeProject = 0xFF;

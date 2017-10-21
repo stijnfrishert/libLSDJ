@@ -11,6 +11,7 @@ static unsigned char DEFAULT_SYNTH[SYNTH_LENGTH] = { 0, 0, 0, 0, 0, 0x10, 0xFF, 
 typedef struct
 {
     unsigned char data[SYNTH_LENGTH];
+    unsigned char overwritten; // 0 if false, 1 if true
 } lsdj_synth_t;
 
 void lsdj_clear_synth(lsdj_synth_t* synth);

@@ -11,13 +11,13 @@ extern "C" {
 #endif
     
 //! The amount of projects in a sav
-static const unsigned short SAV_PROJECT_COUNT = 32;
+static const unsigned short PROJECT_COUNT = 32;
     
 //! Representation of an entire LSDJ save file
 typedef struct
 {
 	//! The projects
-	lsdj_project_t projects[SAV_PROJECT_COUNT];
+	lsdj_project_t projects[PROJECT_COUNT];
 
 	//! Index of the project that is currently being edited
 	/*! Indices start at 0, a value of 0xFF means there is no active project */
@@ -27,16 +27,17 @@ typedef struct
     lsdj_song_t song;
 } lsdj_sav_t;
     
+// Deserialize a sav
 void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_sav_t* sav, lsdj_error_t** error);
 void lsdj_read_sav_from_file(const char* path, lsdj_sav_t* sav, lsdj_error_t** error);
 void lsdj_read_sav_from_memory(const unsigned char* data, size_t size, lsdj_sav_t* sav, lsdj_error_t** error);
     
-//! Write am LSDJ save file to file
+// Serialize a sav
 void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error);
 void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
 void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error);
     
-//! Clear the save
+//! Clear all sav data to factory settings
 void lsdj_clear_sav(lsdj_sav_t* sav);
 
 #ifdef __cplusplus

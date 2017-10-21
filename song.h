@@ -90,7 +90,6 @@ typedef struct
     unsigned char fileChangedFlag;
     unsigned char powerSave;
     unsigned char preListen;
-    unsigned char waveSynthOverwriteLocks[2];
     
     unsigned char reserved1030[96];
     unsigned char reserved1fba[70];
@@ -102,13 +101,15 @@ typedef struct
     unsigned char reserved7ff2[13];
 } lsdj_song_t;
 
+// Deserialize a song
 void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error);
 void lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_song_t* song, lsdj_error_t** error);
     
-//! Write an LSDJ song to memory
+// Serialize a song
 void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error);
 void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error);
     
+// Clear all song data to factory settings
 void lsdj_clear_song(lsdj_song_t* song);
 
 #ifdef __cplusplus

@@ -198,7 +198,12 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     read(&song->fileChangedFlag, 1, user_data);
     read(&song->powerSave, 1, user_data);
     read(&song->preListen, 1, user_data);
-    read(song->waveSynthOverwriteLocks, 2, user_data);
+    
+    unsigned char waveSynthOverwriteLocks[2];
+    read(waveSynthOverwriteLocks, 2, user_data);
+    for (int i = 0; i < SYNTH_COUNT; ++i)
+        song->synths[i].overwritten = ((waveSynthOverwriteLocks[1 - (i / 8)] >> (i % 8)) & 1);
+    
     read(&song->reserved3fc6, sizeof(song->reserved3fc6), user_data);
 }
 
@@ -332,7 +337,16 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     write(&song->fileChangedFlag, 1, user_data);
     write(&song->powerSave, 1, user_data);
     write(&song->preListen, 1, user_data);
-    write(song->waveSynthOverwriteLocks, 2, user_data);
+    
+    unsigned char waveSynthOverwriteLocks[2];
+    memset(waveSynthOverwriteLocks, 0, sizeof(waveSynthOverwriteLocks));
+    for (int i = 0; i < SYNTH_COUNT; ++i)
+    {
+        if (song->synths[i].overwritten)
+            waveSynthOverwriteLocks[1 - (i / 8)] |= (1 << (i % 8));
+    }
+    write(waveSynthOverwriteLocks, 2, user_data);
+    
     write(&song->reserved3fc6, sizeof(song->reserved3fc6), user_data);
 }
 
@@ -621,5 +635,4 @@ void lsdj_clear_song(lsdj_song_t* song)
     song->fileChangedFlag = 0;
     song->powerSave = 0;
     song->preListen = 1;
-    song->waveSynthOverwriteLocks[0] = song->waveSynthOverwriteLocks[1] = 0;
 }
