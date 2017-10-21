@@ -17,7 +17,7 @@ void read_bank0(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
         read(song->phrases[i].notes, PHRASE_LENGTH, user_data);
 
     read(song->bookmarks, sizeof(song->bookmarks), user_data);
-    read(song->empty1030, sizeof(song->empty1030), user_data); // empty space
+    read(song->reserved1030, sizeof(song->reserved1030), user_data);
     read(song->grooves, sizeof(song->grooves), user_data);
     read(song->rows, sizeof(song->rows), user_data);
     
@@ -31,7 +31,7 @@ void read_bank0(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
         read(song->instruments[i].name, sizeof(song->instruments[i].name), user_data);
 
-    read(song->empty1fba, sizeof(song->empty1fba), user_data); // empty space
+    read(song->reserved1fba, sizeof(song->reserved1fba), user_data);
 }
 
 void write_bank0(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
@@ -40,7 +40,7 @@ void write_bank0(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
         write(song->phrases[i].notes, PHRASE_LENGTH, user_data);
     
     write(song->bookmarks, sizeof(song->bookmarks), user_data);
-    write(song->empty1030, sizeof(song->empty1030), user_data); // empty space
+    write(song->reserved1030, sizeof(song->reserved1030), user_data);
     write(song->grooves, sizeof(song->grooves), user_data);
     write(song->rows, sizeof(song->rows), user_data);
     
@@ -54,12 +54,12 @@ void write_bank0(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
         write(song->instruments[i].name, sizeof(song->instruments[i].name), user_data);
     
-    write(song->empty1fba, sizeof(song->empty1fba), user_data); // empty space
+    write(song->reserved1fba, sizeof(song->reserved1fba), user_data);
 }
 
 void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error)
 {
-    read(song->empty2000, sizeof(song->empty2000), user_data);
+    read(song->reserved2000, sizeof(song->reserved2000), user_data);
     read(song->tableAllocTable, sizeof(song->tableAllocTable), user_data);
     read(song->instrAllocTable, sizeof(song->instrAllocTable), user_data);
     
@@ -99,7 +99,7 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
             read(&song->tables[i].commands2[j].value, 1, user_data);
     }
     
-    seek(2, SEEK_CUR, user_data); // rb
+    seek(2, SEEK_CUR, user_data); // "rb"
     read(song->phraseAllocTable, sizeof(song->phraseAllocTable), user_data);
     read(song->chainAllocTable, sizeof(song->chainAllocTable), user_data);
     read(song->softSynthParams, sizeof(song->softSynthParams), user_data);
@@ -108,24 +108,24 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     read(&song->tempo, 1, user_data);
     read(&song->tuneSetting, 1, user_data);
     read(&song->totalTime, 3, user_data);
-    read(&song->empty3fb9, 1, user_data); // time checksum, doesn't appear to be used anymore
+    read(&song->reserved3fb9, 1, user_data); // time checksum, doesn't appear to be used anymore
     read(&song->keyDelay, 1, user_data);
     read(&song->keyRepeat, 1, user_data);
     read(&song->font, 1, user_data);
     read(&song->syncSetting, 1, user_data);
     read(&song->colorSet, 1, user_data);
-    read(&song->empty3fbf, 1, user_data);
+    read(&song->reserved3fbf, 1, user_data);
     read(&song->clone, 1, user_data);
     read(&song->fileChangedFlag, 1, user_data);
     read(&song->powerSave, 1, user_data);
     read(&song->preListen, 1, user_data);
     read(song->waveSynthOverwriteLocks, 2, user_data);
-    read(&song->empty3fc6, sizeof(song->empty3fc6), user_data);
+    read(&song->reserved3fc6, sizeof(song->reserved3fc6), user_data);
 }
 
 void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
 {
-    write(song->empty2000, sizeof(song->empty2000), user_data);
+    write(song->reserved2000, sizeof(song->reserved2000), user_data);
     write(song->tableAllocTable, sizeof(song->tableAllocTable), user_data);
     write(song->instrAllocTable, sizeof(song->instrAllocTable), user_data);
     
@@ -174,19 +174,19 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     write(&song->tempo, 1, user_data);
     write(&song->tuneSetting, 1, user_data);
     write(&song->totalTime, 3, user_data);
-    write(&song->empty3fb9, 1, user_data); // checksum?
+    write(&song->reserved3fb9, 1, user_data); // checksum?
     write(&song->keyDelay, 1, user_data);
     write(&song->keyRepeat, 1, user_data);
     write(&song->font, 1, user_data);
     write(&song->syncSetting, 1, user_data);
     write(&song->colorSet, 1, user_data);
-    write(&song->empty3fbf, 1, user_data);
+    write(&song->reserved3fbf, 1, user_data);
     write(&song->clone, 1, user_data);
     write(&song->fileChangedFlag, 1, user_data);
     write(&song->powerSave, 1, user_data);
     write(&song->preListen, 1, user_data);
     write(song->waveSynthOverwriteLocks, 2, user_data);
-    write(&song->empty3fc6, sizeof(song->empty3fc6), user_data);
+    write(&song->reserved3fc6, sizeof(song->reserved3fc6), user_data);
 }
 
 void read_bank2(lsdj_vio_read_t read, void* user_data, lsdj_song_t* song)
@@ -203,7 +203,7 @@ void read_bank2(lsdj_vio_read_t read, void* user_data, lsdj_song_t* song)
             read(&song->phrases[i].commands[j].value, 1, user_data);
     }
     
-    read(song->empty5fe0, sizeof(song->empty5fe0), user_data);
+    read(song->reserved5fe0, sizeof(song->reserved5fe0), user_data);
 }
 
 void write_bank2(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
@@ -220,7 +220,7 @@ void write_bank2(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
             write(&song->phrases[i].commands[j].value, 1, user_data);
     }
     
-    write(song->empty5fe0, sizeof(song->empty5fe0), user_data);
+    write(song->reserved5fe0, sizeof(song->reserved5fe0), user_data);
 }
 
 void read_bank3(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
@@ -231,9 +231,9 @@ void read_bank3(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < PHRASE_COUNT; ++i)
         read(&song->phrases[i].instruments, PHRASE_LENGTH, user_data);
     
-    seek(2, SEEK_CUR, user_data); // rb
+    seek(2, SEEK_CUR, user_data); // "rb"
     
-    read(song->empty7ff2, sizeof(song->empty7ff2), user_data);
+    read(song->reserved7ff2, sizeof(song->reserved7ff2), user_data);
     read(&song->version, 1, user_data);
 }
 
@@ -247,8 +247,18 @@ void write_bank3(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     
     write("rb", 2, user_data);
     
-    write(song->empty7ff2, sizeof(song->empty7ff2), user_data);
+    write(song->reserved7ff2, sizeof(song->reserved7ff2), user_data);
     write(&song->version, 1, user_data);
+}
+
+int check_rb(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, long position)
+{
+    char data[2];
+    
+    seek(position, SEEK_SET, user_data);
+    read(data, 2, user_data);
+    
+    return (data[0] == 'r' && data[1] == 'b') ? 0 : 1;
 }
 
 void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error)
@@ -267,13 +277,11 @@ void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t 
         return lsdj_create_error(error, "song is NULL");
     
     const long begin = tell(user_data);
-    seek(0x1E78, SEEK_SET, user_data);
     
-    char data[2];
-    read(data, 2, user_data);
-    
-    if (data[0] != 'r' || data[1] != 'b')
-        return lsdj_create_error(error, "memory flag 'rb' not found");
+    // Check if the 'rb' flags have been set correctly
+    if (check_rb(read, seek, user_data, 0x1E78) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x1E78");
+    if (check_rb(read, seek, user_data, 0x3E80) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x3E80");
+    if (check_rb(read, seek, user_data, 0x7FF0) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x7FF0");
     
     seek(begin, SEEK_SET, user_data);
     

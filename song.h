@@ -25,6 +25,9 @@ static const unsigned int WAVE_COUNT = 256;
 static const unsigned int WAVE_LENGTH = 16;
 static const unsigned int GROOVE_LENGTH = 16;
 static const unsigned int GROOVE_COUNT = 32;
+    
+static const unsigned char CLONE_DEEP = 0;
+static const unsigned char CLONE_SLIM = 1;
 
 //! An LSDJ song
 typedef struct
@@ -55,12 +58,9 @@ typedef struct
     //! Bookmarks
     unsigned char bookmarks[BOOKMARK_COUNT];
     
-    unsigned char empty1030[96];
     unsigned char instrumentSpeechWords[1344];
     unsigned char instrumentSpeechWordNames[168];
-    unsigned char empty1fba[70];
     
-    unsigned char empty2000[32];
     unsigned char chainAllocTable[16];
     unsigned char phraseAllocTable[32];
     unsigned char instrAllocTable[64];
@@ -83,22 +83,25 @@ typedef struct
         unsigned char minutes;
     } totalTime;
     
-    unsigned char empty3fb9;
-    
     unsigned char keyDelay;
     unsigned char keyRepeat;
     unsigned char font;
     unsigned char syncSetting;
     unsigned char colorSet;
-    unsigned char empty3fbf;
     unsigned char clone;
     unsigned char fileChangedFlag;
     unsigned char powerSave;
     unsigned char preListen;
     unsigned char waveSynthOverwriteLocks[2];
-    unsigned char empty3fc6[58];
-    unsigned char empty5fe0[32];
-    unsigned char empty7ff2[13];
+    
+    unsigned char reserved1030[96];
+    unsigned char reserved1fba[70];
+    unsigned char reserved2000[32];
+    unsigned char reserved3fbf;
+    unsigned char reserved3fb9;
+    unsigned char reserved3fc6[58];
+    unsigned char reserved5fe0[32];
+    unsigned char reserved7ff2[13];
 } lsdj_song_t;
 
 void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error);

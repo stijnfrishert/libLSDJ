@@ -48,9 +48,6 @@ size_t lsdj_mwrite(const void* ptr, size_t size, void* user_data)
     memcpy(mem->cur, ptr, size);
     mem->cur += size;
     
-    const long pos = (mem->cur - mem->begin);
-    printf("%04x\n", (int)pos);
-    
     return size;
 }
 
