@@ -21,4 +21,3 @@ void lsdj_clear_row(lsdj_row_t* row);
 
 
 #endif /* LSDJ_ROW_H */
-

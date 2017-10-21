@@ -8,10 +8,6 @@ static unsigned char DEFAULT_WORD_NAMES[168] =
     'C',' ','2','C','#','2','D',' ','2','D','#','2','E',' ','2','F',' ','2','F','#','2','G',' ','2','G','#','2','A',' ','2','A','#','2','B',' ','2','B','#','2','C',' ','3','C','#','3','D',' ','3','D','#','3','E',' ','3','F',' ','3','F','#','3','G',' ','3','G','#','3','A',' ','3','A','#','3','B',' ','3','B','#','3','C',' ','4','C','#','4','D',' ','4','D','#','4','E',' ','4','F',' ','4','F','#','4','G',' ','4','G','#','4','A',' ','4','A','#','4','B',' ','4','B','#','4','C',' ','5','C','#','5','D',' ','5','D','#','5','E',' ','5','F',' ','5'
 };
 
-static unsigned char DEFAULT_SOFT_SYNTH[16] = { 0, 0, 0, 0, 0, 0x10, 0xFF, 0, 0, 0x10, 0xFF, 0, 0, 0, 0,  };
-static const unsigned char DEFAULT_WAVE[WAVE_LENGTH] = { 0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31 };
-static const unsigned char DEFAULT_INSTRUMENT[16] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
-
 static const int INSTR_ALLOC_TABLE_SIZE = 64;
 static const int TABLE_ALLOC_TABLE_SIZE = 32;
 static const int CHAIN_ALLOC_TABLE_SIZE = 16;
@@ -184,7 +180,9 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     seek(2, SEEK_CUR, user_data); // "rb"
     seek(PHRASE_ALLOC_TABLE_SIZE + CHAIN_ALLOC_TABLE_SIZE, SEEK_CUR, user_data); // Already read at the beginning
     
-    read(song->softSynthParams, sizeof(song->softSynthParams), user_data);
+    for (int i = 0; i < SYNTH_COUNT; ++i)
+        read(song->synths[i].data, SYNTH_LENGTH, user_data);
+    
     read(&song->workTime, 2, user_data);
     read(&song->tempo, 1, user_data);
     read(&song->tuneSetting, 1, user_data);
@@ -315,7 +313,9 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     write("rb", 2, user_data);
     write(phraseAllocTable, PHRASE_ALLOC_TABLE_SIZE, user_data);
     write(chainAllocTable, CHAIN_ALLOC_TABLE_SIZE, user_data);
-    write(song->softSynthParams, sizeof(song->softSynthParams), user_data);
+    
+    for (int i = 0; i < SYNTH_COUNT; ++i)
+        write(song->synths[i].data, SYNTH_LENGTH, user_data);
     
     write(&song->workTime, 2, user_data);
     write(&song->tempo, 1, user_data);
@@ -393,7 +393,7 @@ void write_bank2(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
 void read_bank3(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
 {
     for (int i = 0; i < WAVE_COUNT; ++i)
-        read(song->waves[i], WAVE_LENGTH, user_data);
+        read(song->waves[i].data, WAVE_LENGTH, user_data);
     
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
@@ -412,7 +412,7 @@ void read_bank3(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
 void write_bank3(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
 {
     for (int i = 0; i < WAVE_COUNT; ++i)
-        write(song->waves[i], WAVE_LENGTH, user_data);
+        write(song->waves[i].data, WAVE_LENGTH, user_data);
     
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
@@ -584,7 +584,7 @@ void lsdj_clear_song(lsdj_song_t* song)
     }
     
     for (int i = 0; i < WAVE_COUNT; ++i)
-        memcpy(song->waves[i], DEFAULT_WAVE, WAVE_LENGTH);
+        lsdj_clear_wave(&song->waves[i]);
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
@@ -607,7 +607,7 @@ void lsdj_clear_song(lsdj_song_t* song)
     memcpy(song->instrumentSpeechWordNames, DEFAULT_WORD_NAMES, sizeof(song->instrumentSpeechWordNames));
     
     for (int i = 0; i < SYNTH_COUNT; ++i)
-        memcpy(song->softSynthParams[i], DEFAULT_SOFT_SYNTH, 16);
+        lsdj_clear_synth(&song->synths[i]);
     
     song->workTime.hours = 0;
     song->workTime.minutes = 0;

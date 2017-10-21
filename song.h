@@ -6,8 +6,10 @@
 #include "instrument.h"
 #include "phrase.h"
 #include "row.h"
+#include "synth.h"
 #include "table.h"
 #include "vio.h"
+#include "wave.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,7 +24,6 @@ static const unsigned int INSTRUMENT_COUNT = 64;
 static const unsigned int SYNTH_COUNT = 16;
 static const unsigned int TABLE_COUNT = 32;
 static const unsigned int WAVE_COUNT = 256;
-static const unsigned int WAVE_LENGTH = 16;
 static const unsigned int GROOVE_LENGTH = 16;
 static const unsigned int GROOVE_COUNT = 32;
     
@@ -46,8 +47,11 @@ typedef struct
     //! Instruments of the song
     lsdj_instrument_t* instruments[INSTRUMENT_COUNT];
     
+    //! Soft synths of the song
+    lsdj_synth_t synths[SYNTH_COUNT];
+    
     //! Wave frames of the song
-    unsigned char waves[WAVE_COUNT][WAVE_LENGTH];
+    lsdj_wave_t waves[WAVE_COUNT];
     
     //! The tables in the song
     lsdj_table_t* tables[TABLE_COUNT];
@@ -60,7 +64,6 @@ typedef struct
     
     unsigned char instrumentSpeechWords[1344];
     unsigned char instrumentSpeechWordNames[168];
-    unsigned char softSynthParams[16][SYNTH_COUNT];
     
     struct
     {

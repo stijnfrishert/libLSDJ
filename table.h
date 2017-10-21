@@ -24,4 +24,3 @@ void lsdj_clear_table(lsdj_table_t* table);
 #endif
 
 #endif
-
