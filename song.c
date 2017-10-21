@@ -191,7 +191,22 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     seek(PHRASE_ALLOC_TABLE_SIZE + CHAIN_ALLOC_TABLE_SIZE, SEEK_CUR, user_data); // Already read at the beginning
     
     for (int i = 0; i < SYNTH_COUNT; ++i)
-        read(song->synths[i].data, SYNTH_LENGTH, user_data);
+    {
+        read(&song->synths[i].waveform, 1, user_data);
+        read(&song->synths[i].filter, 1, user_data);
+        read(&song->synths[i].resonance, 1, user_data);
+        read(&song->synths[i].distortion, 1, user_data);
+        read(&song->synths[i].phase, 1, user_data);
+        read(&song->synths[i].volumeStart, 1, user_data);
+        read(&song->synths[i].cutOffStart, 1, user_data);
+        read(&song->synths[i].phaseStart, 1, user_data);
+        read(&song->synths[i].vshiftStart, 1, user_data);
+        read(&song->synths[i].volumeEnd, 1, user_data);
+        read(&song->synths[i].cutOffEnd, 1, user_data);
+        read(&song->synths[i].phaseEnd, 1, user_data);
+        read(&song->synths[i].vshiftEnd, 1, user_data);
+        read(song->synths[i].reserved, 3, user_data);
+    }
     
     read(&song->meta.workTime, 2, user_data);
     read(&song->tempo, 1, user_data);
@@ -330,7 +345,22 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     write(chainAllocTable, CHAIN_ALLOC_TABLE_SIZE, user_data);
     
     for (int i = 0; i < SYNTH_COUNT; ++i)
-        write(song->synths[i].data, SYNTH_LENGTH, user_data);
+    {
+        write(&song->synths[i].waveform, 1, user_data);
+        write(&song->synths[i].filter, 1, user_data);
+        write(&song->synths[i].resonance, 1, user_data);
+        write(&song->synths[i].distortion, 1, user_data);
+        write(&song->synths[i].phase, 1, user_data);
+        write(&song->synths[i].volumeStart, 1, user_data);
+        write(&song->synths[i].cutOffStart, 1, user_data);
+        write(&song->synths[i].phaseStart, 1, user_data);
+        write(&song->synths[i].vshiftStart, 1, user_data);
+        write(&song->synths[i].volumeEnd, 1, user_data);
+        write(&song->synths[i].cutOffEnd, 1, user_data);
+        write(&song->synths[i].phaseEnd, 1, user_data);
+        write(&song->synths[i].vshiftEnd, 1, user_data);
+        write(song->synths[i].reserved, 3, user_data);
+    }
     
     write(&song->meta.workTime, 2, user_data);
     write(&song->tempo, 1, user_data);
