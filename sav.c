@@ -6,7 +6,7 @@
 #include "compression.h"
 #include "sav.h"
 
-//! The memory place of the header
+// The memory place of the header
 static const unsigned int HEADER_START = SONG_DECOMPRESSED_SIZE;
 static const unsigned int BLOCK_COUNT = 191;
 static const unsigned int BLOCK_SIZE = 0x200;

@@ -16,10 +16,10 @@ extern "C" {
 static const unsigned int INSTRUMENT_NAME_LENGTH = 5;
 static const unsigned char DEFAULT_INSTRUMENT[16] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
     
-//! Structure representing one instrument
+// Structure representing one instrument
 typedef struct
 {
-    //! The name of an instrument
+    // The name of an instrument
     char name[INSTRUMENT_NAME_LENGTH];
     unsigned char parameters[16];
 } lsdj_instrument_t;

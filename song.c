@@ -3,9 +3,9 @@
 
 #include "song.h"
 
-static unsigned char DEFAULT_WORD_NAMES[168] =
+static char DEFAULT_WORD_NAMES[WORD_COUNT][WORD_NAME_LENGTH] =
 {
-    'C',' ','2','C','#','2','D',' ','2','D','#','2','E',' ','2','F',' ','2','F','#','2','G',' ','2','G','#','2','A',' ','2','A','#','2','B',' ','2','B','#','2','C',' ','3','C','#','3','D',' ','3','D','#','3','E',' ','3','F',' ','3','F','#','3','G',' ','3','G','#','3','A',' ','3','A','#','3','B',' ','3','B','#','3','C',' ','4','C','#','4','D',' ','4','D','#','4','E',' ','4','F',' ','4','F','#','4','G',' ','4','G','#','4','A',' ','4','A','#','4','B',' ','4','B','#','4','C',' ','5','C','#','5','D',' ','5','D','#','5','E',' ','5','F',' ','5'
+    "C 2 ","C#2 ","D 2 ","D#2 ","E 2 ","F 2 ","F#2 ","G 2 ","G#2 ","A 2 ","A#2 ","B 2 ","C 3 ","C#3 ","D 3 ","D#3 ","E 3 ","F 3 ","F#3 ","G 3 ","G#3 ","A 3 ","A#3 ","B 3 ","C 4 ","C#4 ","D 4 ","D#4 ","E 4 ","F 4 ","F#4 ","G 4 ","G#4 ","A 4 ","A#4 ","B 4 ","C 5 ","C#5 ","D 5 ","D#5 ","E 5 ","F 5 "
 };
 
 static const int INSTR_ALLOC_TABLE_SIZE = 64;
@@ -42,8 +42,13 @@ void read_bank0(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
             seek(TABLE_LENGTH, SEEK_CUR, user_data);
     }
     
-    read(song->instrumentSpeechWords, sizeof(song->instrumentSpeechWords), user_data);
-    read(song->instrumentSpeechWordNames, sizeof(song->instrumentSpeechWordNames), user_data);
+    for (int i = 0; i < WORD_COUNT; ++i)
+    {
+        read(song->words[i].allophones, WORD_LENGTH, user_data);
+        read(song->words[i].lengths, WORD_LENGTH, user_data);
+    }
+    
+    read(song->wordNames, sizeof(song->wordNames), user_data);
     seek(2, SEEK_CUR, user_data); // rb
     
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
@@ -80,8 +85,13 @@ void write_bank0(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
             write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
     }
     
-    write(song->instrumentSpeechWords, sizeof(song->instrumentSpeechWords), user_data);
-    write(song->instrumentSpeechWordNames, sizeof(song->instrumentSpeechWordNames), user_data);
+    for (int i = 0; i < WORD_COUNT; ++i)
+    {
+        write(song->words[i].allophones, WORD_LENGTH, user_data);
+        write(song->words[i].lengths, WORD_LENGTH, user_data);
+    }
+    
+    write(song->wordNames, sizeof(song->wordNames), user_data);
     write("rb", 2, user_data);
     
     static char EMPTY_INSTRUMENT_NAME[5] = { 0, 0, 0, 0, 0 };
@@ -183,21 +193,21 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < SYNTH_COUNT; ++i)
         read(song->synths[i].data, SYNTH_LENGTH, user_data);
     
-    read(&song->workTime, 2, user_data);
+    read(&song->meta.workTime, 2, user_data);
     read(&song->tempo, 1, user_data);
-    read(&song->tuneSetting, 1, user_data);
-    read(&song->totalTime, 3, user_data);
+    read(&song->transposition, 1, user_data);
+    read(&song->meta.totalTime, 3, user_data);
     read(&song->reserved3fb9, 1, user_data); // time checksum, doesn't appear to be used anymore
-    read(&song->keyDelay, 1, user_data);
-    read(&song->keyRepeat, 1, user_data);
-    read(&song->font, 1, user_data);
-    read(&song->syncSetting, 1, user_data);
-    read(&song->colorSet, 1, user_data);
+    read(&song->meta.keyDelay, 1, user_data);
+    read(&song->meta.keyRepeat, 1, user_data);
+    read(&song->meta.font, 1, user_data);
+    read(&song->meta.sync, 1, user_data);
+    read(&song->meta.colorSet, 1, user_data);
     read(&song->reserved3fbf, 1, user_data);
-    read(&song->clone, 1, user_data);
-    read(&song->fileChangedFlag, 1, user_data);
-    read(&song->powerSave, 1, user_data);
-    read(&song->preListen, 1, user_data);
+    read(&song->meta.clone, 1, user_data);
+    read(&song->meta.fileChangedFlag, 1, user_data);
+    read(&song->meta.powerSave, 1, user_data);
+    read(&song->meta.preListen, 1, user_data);
     
     unsigned char waveSynthOverwriteLocks[2];
     read(waveSynthOverwriteLocks, 2, user_data);
@@ -322,21 +332,21 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     for (int i = 0; i < SYNTH_COUNT; ++i)
         write(song->synths[i].data, SYNTH_LENGTH, user_data);
     
-    write(&song->workTime, 2, user_data);
+    write(&song->meta.workTime, 2, user_data);
     write(&song->tempo, 1, user_data);
-    write(&song->tuneSetting, 1, user_data);
-    write(&song->totalTime, 3, user_data);
+    write(&song->transposition, 1, user_data);
+    write(&song->meta.totalTime, 3, user_data);
     write(&song->reserved3fb9, 1, user_data); // checksum?
-    write(&song->keyDelay, 1, user_data);
-    write(&song->keyRepeat, 1, user_data);
-    write(&song->font, 1, user_data);
-    write(&song->syncSetting, 1, user_data);
-    write(&song->colorSet, 1, user_data);
+    write(&song->meta.keyDelay, 1, user_data);
+    write(&song->meta.keyRepeat, 1, user_data);
+    write(&song->meta.font, 1, user_data);
+    write(&song->meta.sync, 1, user_data);
+    write(&song->meta.colorSet, 1, user_data);
     write(&song->reserved3fbf, 1, user_data);
-    write(&song->clone, 1, user_data);
-    write(&song->fileChangedFlag, 1, user_data);
-    write(&song->powerSave, 1, user_data);
-    write(&song->preListen, 1, user_data);
+    write(&song->meta.clone, 1, user_data);
+    write(&song->meta.fileChangedFlag, 1, user_data);
+    write(&song->meta.powerSave, 1, user_data);
+    write(&song->meta.preListen, 1, user_data);
     
     unsigned char waveSynthOverwriteLocks[2];
     memset(waveSynthOverwriteLocks, 0, sizeof(waveSynthOverwriteLocks));
@@ -566,6 +576,8 @@ void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, siz
 void lsdj_clear_song(lsdj_song_t* song)
 {
     song->version = 3;
+    song->tempo = 120;
+    song->transposition = 0;
     
     for (int i = 0; i < ROW_COUNT; ++i)
         lsdj_clear_row(&song->rows[i]);
@@ -615,24 +627,25 @@ void lsdj_clear_song(lsdj_song_t* song)
     for (int i = 0; i < GROOVE_COUNT; ++i)
         lsdj_clear_groove(&song->grooves[i]);
     
-    memset(song->bookmarks, 0xFF, sizeof(BOOKMARK_COUNT));
-    memset(song->instrumentSpeechWords, 0, sizeof(song->instrumentSpeechWords));
-    memcpy(song->instrumentSpeechWordNames, DEFAULT_WORD_NAMES, sizeof(song->instrumentSpeechWordNames));
+    for (int i = 0; i < WORD_COUNT; ++i)
+        lsdj_clear_word(&song->words[i]);
     
-    song->workTime.hours = 0;
-    song->workTime.minutes = 0;
-    song->tempo = 120;
-    song->tuneSetting = 0;
-    song->totalTime.days = 0;
-    song->totalTime.hours = 0;
-    song->totalTime.minutes = 0;
-    song->keyDelay = 7;
-    song->keyRepeat = 2;
-    song->font = 0;
-    song->syncSetting = 0;
-    song->colorSet = 0;
-    song->clone = 0;
-    song->fileChangedFlag = 0;
-    song->powerSave = 0;
-    song->preListen = 1;
+    memset(song->bookmarks, 0xFF, sizeof(BOOKMARK_COUNT));
+    memcpy(song->wordNames, DEFAULT_WORD_NAMES, sizeof(song->wordNames));
+    
+    song->meta.keyDelay = 7;
+    song->meta.keyRepeat = 2;
+    song->meta.font = 0;
+    song->meta.sync = 0;
+    song->meta.colorSet = 0;
+    song->meta.clone = 0;
+    song->meta.fileChangedFlag = 0;
+    song->meta.powerSave = 0;
+    song->meta.preListen = 1;
+    
+    song->meta.totalTime.days = 0;
+    song->meta.totalTime.hours = 0;
+    song->meta.totalTime.minutes = 0;
+    song->meta.workTime.hours = 0;
+    song->meta.workTime.minutes = 0;
 }

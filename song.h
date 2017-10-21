@@ -11,6 +11,7 @@
 #include "table.h"
 #include "vio.h"
 #include "wave.h"
+#include "word.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,70 +27,74 @@ static const unsigned int SYNTH_COUNT = 16;
 static const unsigned int TABLE_COUNT = 32;
 static const unsigned int WAVE_COUNT = 256;
 static const unsigned int GROOVE_COUNT = 32;
+static const unsigned int WORD_COUNT = 42;
     
 static const unsigned char CLONE_DEEP = 0;
 static const unsigned char CLONE_SLIM = 1;
 
-//! An LSDJ song
+// An LSDJ song
 typedef struct
 {
     unsigned char version;
+    unsigned char tempo;
+    unsigned char transposition;
     
-    //! The sequences of chains in the song
+    // The sequences of chains in the song
     lsdj_row_t rows[ROW_COUNT];
     
-    //! The chains in the song
+    // The chains in the song
     lsdj_chain_t* chains[CHAIN_COUNT];
     
-    //! The prases in the song
+    // The prases in the song
     lsdj_phrase_t* phrases[PHRASE_COUNT];
     
-    //! Instruments of the song
+    // Instruments of the song
     lsdj_instrument_t* instruments[INSTRUMENT_COUNT];
     
-    //! Soft synths of the song
+    // Soft synths of the song
     lsdj_synth_t synths[SYNTH_COUNT];
     
-    //! Wave frames of the song
+    // Wave frames of the song
     lsdj_wave_t waves[WAVE_COUNT];
     
-    //! The tables in the song
+    // The tables in the song
     lsdj_table_t* tables[TABLE_COUNT];
     
-    //! The grooves in the song
+    // The grooves in the song
     lsdj_groove_t grooves[GROOVE_COUNT];
     
-    //! Bookmarks
+    // The speech synth words in the song
+    lsdj_word_t words[WORD_COUNT];
+    char wordNames[WORD_COUNT][WORD_NAME_LENGTH];
+    
+    // Bookmarks
     unsigned char bookmarks[BOOKMARK_COUNT];
     
-    unsigned char instrumentSpeechWords[1344];
-    unsigned char instrumentSpeechWordNames[168];
-    
     struct
     {
-        unsigned char hours;
-        unsigned char minutes;
-    } workTime;
-    
-    unsigned char tempo;
-    unsigned char tuneSetting;
-    
-    struct
-    {
-        unsigned char days;
-        unsigned char hours;
-        unsigned char minutes;
-    } totalTime;
-    
-    unsigned char keyDelay;
-    unsigned char keyRepeat;
-    unsigned char font;
-    unsigned char syncSetting;
-    unsigned char colorSet;
-    unsigned char clone;
-    unsigned char fileChangedFlag;
-    unsigned char powerSave;
-    unsigned char preListen;
+        unsigned char keyDelay;
+        unsigned char keyRepeat;
+        unsigned char font;
+        unsigned char sync;
+        unsigned char colorSet;
+        unsigned char clone;
+        unsigned char fileChangedFlag;
+        unsigned char powerSave;
+        unsigned char preListen;
+        
+        struct
+        {
+            unsigned char days;
+            unsigned char hours;
+            unsigned char minutes;
+        } totalTime;
+        
+        struct
+        {
+            unsigned char hours;
+            unsigned char minutes;
+        } workTime;
+    } meta;
     
     unsigned char reserved1030[96];
     unsigned char reserved1fba[70];
