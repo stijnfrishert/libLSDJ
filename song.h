@@ -37,10 +37,15 @@ typedef struct
     //! Instruments of the song
     instrument_t instruments[INSTRUMENT_COUNT];
     
-    unsigned char bank0[0x2000];
     unsigned char bank1[0x2000];
     unsigned char bank2[0x2000];
     unsigned char bank3[0x2000];
+    
+    unsigned char empty1030[96];
+    unsigned char tablesEnvelope[512];
+    unsigned char instrumentSpeechWords[1344];
+    unsigned char instrumentSpeechWordNames[168];
+    unsigned char empty1fba[70];
     
 } lsdj_song_t;
 

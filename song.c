@@ -3,32 +3,40 @@
 
 #include "song.h"
 
-void read_bank0(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
+void read_bank0(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
 {
-    const long begin = tell(user_data);
-    read(song->bank0, 0x2000, user_data);
-    seek(begin, SEEK_SET, user_data);
-    
     read(song->phrases, sizeof(song->phrases), user_data);
     read(song->bookmarks, sizeof(song->bookmarks), user_data);
-    seek(96, SEEK_CUR, user_data); // empty space
+    read(song->empty1030, sizeof(song->empty1030), user_data); // empty space
     read(song->grooves, sizeof(song->grooves), user_data);
     read(song->sequences, sizeof(song->sequences), user_data);
-    seek(512, SEEK_CUR, user_data); // tables->envelope
-    seek(1344, SEEK_CUR, user_data); // instrument->speech->words
-    seek(168, SEEK_CUR, user_data); // instrument->speech->wordnames
+    read(song->tablesEnvelope, sizeof(song->tablesEnvelope), user_data);
+    read(song->instrumentSpeechWords, sizeof(song->instrumentSpeechWords), user_data);
+    read(song->instrumentSpeechWordNames, sizeof(song->instrumentSpeechWordNames), user_data);
     seek(2, SEEK_CUR, user_data); // rb
     
-    // Read the instrument names
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
         read(song->instruments[i].name, sizeof(song->instruments[i].name), user_data);
 
-    seek(70, SEEK_CUR, user_data);
+    read(song->empty1fba, sizeof(song->empty1fba), user_data); // empty space
 }
 
 void write_bank0(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
-{
-    write(song->bank0, 0x2000, user_data);
+{    
+    write(song->phrases, sizeof(song->phrases), user_data);
+    write(song->bookmarks, sizeof(song->bookmarks), user_data);
+    write(song->empty1030, sizeof(song->empty1030), user_data); // empty space
+    write(song->grooves, sizeof(song->grooves), user_data);
+    write(song->sequences, sizeof(song->sequences), user_data);
+    write(song->tablesEnvelope, sizeof(song->tablesEnvelope), user_data);
+    write(song->instrumentSpeechWords, sizeof(song->instrumentSpeechWords), user_data);
+    write(song->instrumentSpeechWordNames, sizeof(song->instrumentSpeechWordNames), user_data);
+    write("rb", 2, user_data);
+    
+    for (int i = 0; i < INSTRUMENT_COUNT; ++i)
+        write(song->instruments[i].name, sizeof(song->instruments[i].name), user_data);
+    
+    write(song->empty1fba, sizeof(song->empty1fba), user_data); // empty space
 }
 
 void read_bank1(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
@@ -87,7 +95,7 @@ void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t 
     
     seek(begin, SEEK_SET, user_data);
     
-    read_bank0(read, tell, seek, user_data, song);
+    read_bank0(read, seek, user_data, song);
     read_bank1(read, tell, seek, user_data, song);
     read_bank2(read, tell, seek, user_data, song);
     read_bank3(read, tell, seek, user_data, song);
