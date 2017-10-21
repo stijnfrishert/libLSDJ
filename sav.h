@@ -21,7 +21,7 @@ typedef struct
 
 	//! Index of the project that is currently being edited
 	/*! Indices start at 0, a value of 0xFF means there is no active project */
-	unsigned char active_project;
+	unsigned char activeProject;
     
     //! The song in active working memory
     lsdj_song_t song;

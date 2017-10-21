@@ -20,7 +20,10 @@ typedef struct
 {
     //! The name of an instrument
     char name[INSTRUMENT_NAME_LENGTH];
-} instrument_t;
+    unsigned char parameters[16];
+} lsdj_instrument_t;
+    
+void lsdj_clear_instrument(lsdj_instrument_t* instrument);
     
 #ifdef __cplusplus
 }

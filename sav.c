@@ -36,7 +36,7 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* us
     for (unsigned char i = 0; i < BLOCK_COUNT; ++i)
     {
         unsigned char project = blocks_alloc_table[i];
-        if (projects[project].song)
+        if (project == 0xFF || projects[project].song)
             continue;
         
         unsigned char data[SONG_DECOMPRESSED_SIZE];
@@ -62,7 +62,7 @@ void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t s
     if (sav == NULL)
         return lsdj_create_error(error, "sav is NULL");
     
-    memset(sav, 0, sizeof(*sav));
+    lsdj_clear_sav(sav);
     
     // Skip memory representing the working song (we'll get to that)
     const long begin = tell(user_data);
@@ -85,7 +85,7 @@ void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t s
     }
     
     // Store the active project index
-    sav->active_project = header.active_project;
+    sav->activeProject = header.active_project;
     
     // Read the compressed projects
     read_compressed_blocks(read, seek, user_data, sav->projects, error);
@@ -147,7 +147,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_da
     memset(&header, 0, sizeof(header));
     header.init[0] = 'j';
     header.init[1] = 'k';
-    header.active_project = sav->active_project;
+    header.active_project = sav->activeProject;
 
     // Create the block allocation table for writing
     unsigned char block_alloc_table[BLOCK_COUNT];
@@ -223,5 +223,7 @@ void lsdj_clear_sav(lsdj_sav_t* sav)
     for (int i = 0; i < SAV_PROJECT_COUNT; ++i)
         lsdj_clear_project(&sav->projects[i]);
     
-    sav->active_project = 0;
+    sav->activeProject = 0xFF;
+    
+    lsdj_clear_song(&sav->song);
 }

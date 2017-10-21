@@ -5,6 +5,7 @@
 //  Created by Stijn on 21/10/2017.
 //
 
+#include <assert.h>
 #include <string.h>
 
 #include "vio.h"
@@ -35,6 +36,10 @@ size_t lsdj_mread(void* ptr, size_t size, void* user_data)
     
     memcpy(ptr, mem->cur, size);
     mem->cur += size;
+    assert((mem->cur - mem->begin) <= mem->size);
+    
+    const long pos = (mem->cur - mem->begin);
+    printf("%04x\n", (int)pos);
     
     return size;
 }

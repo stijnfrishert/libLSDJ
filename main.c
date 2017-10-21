@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 //    lsdj_error_t* error = NULL;
 //    lsdj_read_sav_from_file("/Users/stijnfrishert/Desktop/LSDj/4ntler/Chipwrecked Set.sav", &sav, &error);
     
-    FILE* file = fopen("/Users/stijnfrishert/Desktop/LSDj/4ntler/Chipwrecked Set.sav", "r");
+    FILE* file = fopen("/Users/stijnfrishert/Desktop/LSDj/LSDj/lsdj_5.3.7.sav", "r");
     fseek(file, 0, SEEK_END);
     const size_t size = (size_t)ftell(file);
     unsigned char inData[size];
@@ -19,12 +19,13 @@ int main(int argc, char* argv[])
     
     // Read
     lsdj_sav_t sav;
+    memset(&sav, 0, sizeof(sav));
     lsdj_error_t* error = NULL;
     lsdj_read_sav_from_memory(inData, size, &sav, &error);
     
     if (error)
     {
-        printf("%s", lsdj_get_error_c_str(error));
+        printf("%s\n", lsdj_get_error_c_str(error));
         lsdj_free_error(error);
         return 1;
     }
@@ -45,8 +46,10 @@ int main(int argc, char* argv[])
     for (int i = 0; i < size; ++i)
     {
         if (outData[i] != inData[i])
+        {
             printf("diff at %d\n", i);
             return 1;
+        }
     }
     
     
