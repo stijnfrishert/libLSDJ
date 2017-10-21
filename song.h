@@ -3,6 +3,7 @@
 
 #include "chain.h"
 #include "error.h"
+#include "groove.h"
 #include "instrument.h"
 #include "phrase.h"
 #include "row.h"
@@ -24,7 +25,6 @@ static const unsigned int INSTRUMENT_COUNT = 64;
 static const unsigned int SYNTH_COUNT = 16;
 static const unsigned int TABLE_COUNT = 32;
 static const unsigned int WAVE_COUNT = 256;
-static const unsigned int GROOVE_LENGTH = 16;
 static const unsigned int GROOVE_COUNT = 32;
     
 static const unsigned char CLONE_DEEP = 0;
@@ -57,7 +57,7 @@ typedef struct
     lsdj_table_t* tables[TABLE_COUNT];
     
     //! The grooves in the song
-    unsigned char grooves[GROOVE_COUNT][GROOVE_LENGTH];
+    lsdj_groove_t grooves[GROOVE_COUNT];
     
     //! Bookmarks
     unsigned char bookmarks[BOOKMARK_COUNT];

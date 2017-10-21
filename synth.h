@@ -1,8 +1,6 @@
 #ifndef LSDJ_SYNTH_H
 #define LSDJ_SYNTH_H
 
-#include "command.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

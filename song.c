@@ -583,6 +583,9 @@ void lsdj_clear_song(lsdj_song_t* song)
         }
     }
     
+    for (int i = 0; i < SYNTH_COUNT; ++i)
+        lsdj_clear_synth(&song->synths[i]);
+    
     for (int i = 0; i < WAVE_COUNT; ++i)
         lsdj_clear_wave(&song->waves[i]);
     
@@ -596,18 +599,11 @@ void lsdj_clear_song(lsdj_song_t* song)
     }
     
     for (int i = 0; i < GROOVE_COUNT; ++i)
-    {
-        song->grooves[i][0] = 0x06;
-        song->grooves[i][1] = 0x06;
-        memset(&song->grooves[2], 0, GROOVE_LENGTH - 2);
-    }
+        lsdj_clear_groove(&song->grooves[i]);
     
     memset(song->bookmarks, 0xFF, sizeof(BOOKMARK_COUNT));
     memset(song->instrumentSpeechWords, 0, sizeof(song->instrumentSpeechWords));
     memcpy(song->instrumentSpeechWordNames, DEFAULT_WORD_NAMES, sizeof(song->instrumentSpeechWordNames));
-    
-    for (int i = 0; i < SYNTH_COUNT; ++i)
-        lsdj_clear_synth(&song->synths[i]);
     
     song->workTime.hours = 0;
     song->workTime.minutes = 0;
