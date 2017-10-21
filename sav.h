@@ -4,6 +4,7 @@
 #include "error.h"
 #include "project.h"
 #include "song.h"
+#include "vio.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,19 +26,16 @@ typedef struct
     //! The song in active working memory
     lsdj_song_t song;
 } lsdj_sav_t;
-
-//! Reads an LSDJ save file into memory
-/*! Each successful call to lsdj_open() should be paired with a call to lsdj_free() */
-lsdj_sav_t* lsdj_open_sav(const char* path, lsdj_error_t** error);
+    
+void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_sav_t* sav, lsdj_error_t** error);
+void lsdj_read_sav_from_file(const char* path, lsdj_sav_t* sav, lsdj_error_t** error);
+void lsdj_read_sav_from_memory(const unsigned char* data, size_t size, lsdj_sav_t* sav, lsdj_error_t** error);
     
 //! Write am LSDJ save file to file
 void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
     
 //! Clear the save
 void lsdj_clear_sav(lsdj_sav_t* sav);
-
-//! Deallocate an LSDJ save file
-void lsdj_free_sav(lsdj_sav_t* sav);
 
 #ifdef __cplusplus
 }
