@@ -44,7 +44,7 @@ typedef struct
     lsdj_phrase_t phrases[PHRASE_COUNT];
     
     //! Instruments of the song
-    lsdj_instrument_t instruments[INSTRUMENT_COUNT];
+    lsdj_instrument_t* instruments[INSTRUMENT_COUNT];
     
     //! Wave frames of the song
     unsigned char waves[WAVE_COUNT][WAVE_LENGTH];
@@ -63,7 +63,6 @@ typedef struct
     
     unsigned char chainAllocTable[16];
     unsigned char phraseAllocTable[32];
-    unsigned char instrAllocTable[64];
     unsigned char tableAllocTable[32];
     unsigned char softSynthParams[16][SYNTH_COUNT];
     
