@@ -16,12 +16,50 @@ extern "C" {
 static const unsigned int INSTRUMENT_NAME_LENGTH = 5;
 static const unsigned char DEFAULT_INSTRUMENT[16] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
     
+static const unsigned char INSTR_TYPE_PULSE = 0;
+static const unsigned char INSTR_TYPE_WAVE = 1;
+static const unsigned char INSTR_TYPE_KIT = 2;
+static const unsigned char INSTR_TYPE_NOISE = 3;
+    
 // Structure representing one instrument
 typedef struct
 {
-    // The name of an instrument
     char name[INSTRUMENT_NAME_LENGTH];
-    unsigned char parameters[16];
+    
+    union
+    {
+        unsigned char data[16];
+        
+        struct
+        {
+            unsigned char type;
+            
+            union { unsigned char envelope; unsigned char volume; };
+            
+            union
+            {
+                struct
+                {
+                    
+                } pulse;
+                
+                struct
+                {
+                    
+                } wave;
+                
+                struct
+                {
+                    
+                } kit;
+                
+                struct
+                {
+                    
+                } noise;
+            };
+        };
+    };
 } lsdj_instrument_t;
     
 void lsdj_clear_instrument(lsdj_instrument_t* instrument);

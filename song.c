@@ -130,7 +130,7 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-            read(song->instruments[i]->parameters, 16, user_data);
+            read(song->instruments[i]->data, 16, user_data);
         else
             seek(16, SEEK_CUR, user_data);
     }
@@ -283,7 +283,7 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-            write(song->instruments[i]->parameters, 16, user_data);
+            write(song->instruments[i]->data, 16, user_data);
         else
             write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), user_data);
     }

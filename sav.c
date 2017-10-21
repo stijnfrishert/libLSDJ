@@ -110,7 +110,7 @@ void lsdj_read_sav_from_file(const char* path, lsdj_sav_t* sav, lsdj_error_t** e
     if (sav == NULL)
         return lsdj_create_error(error, "sav is NULL");
         
-    FILE* file = fopen("/Users/stijnfrishert/Desktop/LSDj/4ntler/Chipwrecked Set.sav", "r");
+    FILE* file = fopen(path, "r");
     if (file == NULL)
         return lsdj_create_error(error, "could not open file for reading");
 

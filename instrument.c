@@ -12,5 +12,5 @@
 void lsdj_clear_instrument(lsdj_instrument_t* instrument)
 {
     memset(instrument->name, 0, INSTRUMENT_NAME_LENGTH);
-    memcpy(instrument->parameters, DEFAULT_INSTRUMENT, 16);
+    memcpy(instrument->data, DEFAULT_INSTRUMENT, 16);
 }
