@@ -13,6 +13,9 @@ static const unsigned char DEFAULT_WAVE[WAVE_LENGTH] = { 0x8E, 0xCD, 0xCC, 0xBB,
 static const unsigned char DEFAULT_INSTRUMENT[16] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
 
 static const int INSTR_ALLOC_TABLE_SIZE = 64;
+static const int TABLE_ALLOC_TABLE_SIZE = 32;
+
+static unsigned char TABLE_LENGTH_ZERO[TABLE_LENGTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 void read_bank0(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
 {
@@ -25,7 +28,12 @@ void read_bank0(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     read(song->rows, sizeof(song->rows), user_data);
     
     for (int i = 0; i < TABLE_COUNT; ++i)
-        read(song->tables[i].volumes, TABLE_LENGTH, user_data);
+    {
+        if (song->tables[i])
+            read(song->tables[i]->volumes, TABLE_LENGTH, user_data);
+        else
+            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+    }
     
     read(song->instrumentSpeechWords, sizeof(song->instrumentSpeechWords), user_data);
     read(song->instrumentSpeechWordNames, sizeof(song->instrumentSpeechWordNames), user_data);
@@ -53,7 +61,12 @@ void write_bank0(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     write(song->rows, sizeof(song->rows), user_data);
     
     for (int i = 0; i < TABLE_COUNT; ++i)
-        write(song->tables[i].volumes, TABLE_LENGTH, user_data);
+    {
+        if (song->tables[i])
+            write(song->tables[i]->volumes, TABLE_LENGTH, user_data);
+        else
+            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+    }
     
     write(song->instrumentSpeechWords, sizeof(song->instrumentSpeechWords), user_data);
     write(song->instrumentSpeechWordNames, sizeof(song->instrumentSpeechWordNames), user_data);
@@ -74,7 +87,7 @@ void write_bank0(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
 void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error)
 {
     read(song->reserved2000, sizeof(song->reserved2000), user_data);
-    seek(sizeof(song->tableAllocTable) + INSTR_ALLOC_TABLE_SIZE, SEEK_CUR, user_data); // table and instr alloc tables already read at beginning
+    seek(TABLE_ALLOC_TABLE_SIZE + INSTR_ALLOC_TABLE_SIZE, SEEK_CUR, user_data); // table and instr alloc tables already read at beginning
     
     for (int i = 0; i < CHAIN_COUNT; ++i)
         read(song->chains[i].phraseNumbers, CHAIN_LENGTH, user_data);
@@ -91,30 +104,55 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
-        read(song->tables[i].transposes, TABLE_LENGTH, user_data);
-    
-    for (int i = 0; i < TABLE_COUNT; ++i)
     {
-        for (int j = 0; j < TABLE_LENGTH; ++j)
-            read(&song->tables[i].commands1[j].command, 1, user_data);
+        if (song->tables[i])
+            read(song->tables[i]->transposes, TABLE_LENGTH, user_data);
+        else
+            seek(TABLE_LENGTH, SEEK_CUR, user_data);
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
-        for (int j = 0; j < TABLE_LENGTH; ++j)
-            read(&song->tables[i].commands1[j].value, 1, user_data);
+        if (song->tables[i])
+        {
+            for (int j = 0; j < TABLE_LENGTH; ++j)
+                read(&song->tables[i]->commands1[j].command, 1, user_data);
+        } else {
+            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+        }
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
-        for (int j = 0; j < TABLE_LENGTH; ++j)
-            read(&song->tables[i].commands2[j].command, 1, user_data);
+        if (song->tables[i])
+        {
+            for (int j = 0; j < TABLE_LENGTH; ++j)
+                read(&song->tables[i]->commands1[j].value, 1, user_data);
+        } else {
+            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+        }
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
-        for (int j = 0; j < TABLE_LENGTH; ++j)
-            read(&song->tables[i].commands2[j].value, 1, user_data);
+        if (song->tables[i])
+        {
+            for (int j = 0; j < TABLE_LENGTH; ++j)
+                read(&song->tables[i]->commands2[j].command, 1, user_data);
+        } else {
+            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+        }
+    }
+    
+    for (int i = 0; i < TABLE_COUNT; ++i)
+    {
+        if (song->tables[i])
+        {
+            for (int j = 0; j < TABLE_LENGTH; ++j)
+                read(&song->tables[i]->commands2[j].value, 1, user_data);
+        } else {
+            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+        }
     }
     
     seek(2, SEEK_CUR, user_data); // "rb"
@@ -146,8 +184,12 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
         instrAllocTable[i] = (song->instruments[i] == NULL) ? 0 : 1;
     
+    unsigned char tableAllocTable[TABLE_ALLOC_TABLE_SIZE];
+    for (int i = 0; i < TABLE_COUNT; ++i)
+        tableAllocTable[i] = (song->tables[i] == NULL) ? 0 : 1;
+    
     write(song->reserved2000, sizeof(song->reserved2000), user_data);
-    write(song->tableAllocTable, sizeof(song->tableAllocTable), user_data);
+    write(tableAllocTable, TABLE_ALLOC_TABLE_SIZE, user_data);
     write(instrAllocTable, INSTR_ALLOC_TABLE_SIZE, user_data);
     
     for (int i = 0; i < CHAIN_COUNT; ++i)
@@ -165,30 +207,55 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
-        write(song->tables[i].transposes, TABLE_LENGTH, user_data);
-    
-    for (int i = 0; i < TABLE_COUNT; ++i)
     {
-        for (int j = 0; j < TABLE_LENGTH; ++j)
-            write(&song->tables[i].commands1[j].command, 1, user_data);
+        if (song->tables[i])
+            write(song->tables[i]->transposes, TABLE_LENGTH, user_data);
+        else
+            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
-        for (int j = 0; j < TABLE_LENGTH; ++j)
-            write(&song->tables[i].commands1[j].value, 1, user_data);
+        if (song->tables[i])
+        {
+            for (int j = 0; j < TABLE_LENGTH; ++j)
+                write(&song->tables[i]->commands1[j].command, 1, user_data);
+        } else {
+            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+        }
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
-        for (int j = 0; j < TABLE_LENGTH; ++j)
-            write(&song->tables[i].commands2[j].command, 1, user_data);
+        if (song->tables[i])
+        {
+            for (int j = 0; j < TABLE_LENGTH; ++j)
+                write(&song->tables[i]->commands1[j].value, 1, user_data);
+        } else {
+            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+        }
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
-        for (int j = 0; j < TABLE_LENGTH; ++j)
-            write(&song->tables[i].commands2[j].value, 1, user_data);
+        if (song->tables[i])
+        {
+            for (int j = 0; j < TABLE_LENGTH; ++j)
+                write(&song->tables[i]->commands2[j].command, 1, user_data);
+        } else {
+            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+        }
+    }
+    
+    for (int i = 0; i < TABLE_COUNT; ++i)
+    {
+        if (song->tables[i])
+        {
+            for (int j = 0; j < TABLE_LENGTH; ++j)
+                write(&song->tables[i]->commands2[j].value, 1, user_data);
+        } else {
+            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+        }
     }
     
     write("rb", 2, user_data);
@@ -311,14 +378,21 @@ void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t 
     
     // Read the allocation tables
     unsigned char instrAllocTable[INSTR_ALLOC_TABLE_SIZE];
+    unsigned char tableAllocTable[TABLE_ALLOC_TABLE_SIZE];
     
     seek(begin + 0x2020, SEEK_SET, user_data);
-    read(song->tableAllocTable, sizeof(song->tableAllocTable), user_data);
-    read(instrAllocTable, sizeof(instrAllocTable), user_data);
+    read(tableAllocTable, TABLE_ALLOC_TABLE_SIZE, user_data);
+    read(instrAllocTable, INSTR_ALLOC_TABLE_SIZE, user_data);
     
     seek(begin + 0x3E82, SEEK_SET, user_data);
     read(song->phraseAllocTable, sizeof(song->phraseAllocTable), user_data);
     read(song->chainAllocTable, sizeof(song->chainAllocTable), user_data);
+    
+    for (int i = 0; i < TABLE_ALLOC_TABLE_SIZE; ++i)
+    {
+        if (tableAllocTable[i])
+            song->tables[i] = malloc(sizeof(lsdj_table_t));
+    }
     
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
@@ -403,7 +477,13 @@ void lsdj_clear_song(lsdj_song_t* song)
         memcpy(song->waves[i], DEFAULT_WAVE, WAVE_LENGTH);
     
     for (int i = 0; i < TABLE_COUNT; ++i)
-        lsdj_clear_table(&song->tables[i]);
+    {
+        if (song->tables[i])
+        {
+            free(song->tables[i]);
+            song->tables[i] = NULL;
+        }
+    }
     
     for (int i = 0; i < GROOVE_COUNT; ++i)
     {
@@ -417,7 +497,6 @@ void lsdj_clear_song(lsdj_song_t* song)
     memcpy(song->instrumentSpeechWordNames, DEFAULT_WORD_NAMES, sizeof(song->instrumentSpeechWordNames));
     memset(song->chainAllocTable, 0, sizeof(song->chainAllocTable));
     memset(song->phraseAllocTable, 0, sizeof(song->phraseAllocTable));
-    memset(song->tableAllocTable, 0, sizeof(song->tableAllocTable));
     
     for (int i = 0; i < SYNTH_COUNT; ++i)
         memcpy(song->softSynthParams[i], DEFAULT_SOFT_SYNTH, 16);

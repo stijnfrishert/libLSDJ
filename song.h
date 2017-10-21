@@ -50,7 +50,7 @@ typedef struct
     unsigned char waves[WAVE_COUNT][WAVE_LENGTH];
     
     //! The tables in the song
-    lsdj_table_t tables[TABLE_COUNT];
+    lsdj_table_t* tables[TABLE_COUNT];
     
     //! The grooves in the song
     unsigned char grooves[GROOVE_COUNT][GROOVE_LENGTH];
@@ -63,7 +63,6 @@ typedef struct
     
     unsigned char chainAllocTable[16];
     unsigned char phraseAllocTable[32];
-    unsigned char tableAllocTable[32];
     unsigned char softSynthParams[16][SYNTH_COUNT];
     
     struct
