@@ -45,7 +45,7 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* us
         // Read the song from memory
         projects[project].song = malloc(sizeof(lsdj_song_t));
         lsdj_read_song_from_memory(data, projects[project].song, error);
-        if (error)
+        if (*error)
             return;
     }
 }
@@ -61,6 +61,8 @@ void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, 
     
     if (sav == NULL)
         return lsdj_create_error(error, "sav is NULL");
+    
+    memset(sav, 0, sizeof(*sav));
     
     // Skip memory representing the working song (we'll get to that)
     seek(HEADER_START, SEEK_SET, user_data);
@@ -86,7 +88,7 @@ void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, 
     
     // Read the compressed projects
     read_compressed_blocks(read, seek, user_data, sav->projects, error);
-    if (error)
+    if (*error)
         return;
     
     // Read the working song
@@ -96,9 +98,9 @@ void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, 
     lsdj_read_song_from_memory(song_data, &sav->song, error);
 }
 
-static size_t lsdj_fread(void* ptr, size_t count, void* user_data)
+static size_t lsdj_fread(void* ptr, size_t size, void* user_data)
 {
-    return fread(ptr, count, 1, (FILE*)user_data);
+    return fread(ptr, size, 1, (FILE*)user_data);
 }
 
 static int lsdj_fseek(long offset, int whence, void* user_data)
@@ -108,9 +110,15 @@ static int lsdj_fseek(long offset, int whence, void* user_data)
 
 void lsdj_read_sav_from_file(const char* path, lsdj_sav_t* sav, lsdj_error_t** error)
 {
+    if (path == NULL)
+        return lsdj_create_error(error, "path is NULL");
+    
+    if (sav == NULL)
+        return lsdj_create_error(error, "sav is NULL");
+        
     FILE* file = fopen("/Users/stijnfrishert/Desktop/LSDj/4ntler/Chipwrecked Set.sav", "r");
     if (file == NULL)
-        return lsdj_create_error(error, "could not open file");
+        return lsdj_create_error(error, "could not open file for reading");
 
     lsdj_read_sav(lsdj_fread, lsdj_fseek, file, sav, error);
     
@@ -119,19 +127,19 @@ void lsdj_read_sav_from_file(const char* path, lsdj_sav_t* sav, lsdj_error_t** e
 
 typedef struct
 {
-    const unsigned char* begin;
-    const unsigned char* cur;
+    unsigned char* begin;
+    unsigned char* cur;
     size_t size;
 } lsdj_memory_data_t;
 
-static size_t lsdj_mread(void* ptr, size_t count, void* user_data)
+static size_t lsdj_mread(void* ptr, size_t size, void* user_data)
 {
     lsdj_memory_data_t* mem = (lsdj_memory_data_t*)user_data;
     
-    memcpy(ptr, mem->cur, count);
-    mem->cur += count;
+    memcpy(ptr, mem->cur, size);
+    mem->cur += size;
     
-    return count;
+    return size;
 }
 
 static int lsdj_mseek(long offset, int whence, void* user_data)
@@ -152,41 +160,37 @@ void lsdj_read_sav_from_memory(const unsigned char* data, size_t size, lsdj_sav_
 {
     if (data == NULL)
         return lsdj_create_error(error, "data is NULL");
+    
+    if (sav == NULL)
+        return lsdj_create_error(error, "sav is NULL");
 
     lsdj_memory_data_t mem;
-    mem.begin = data;
+    mem.begin = (unsigned char*)data;
     mem.cur = mem.begin;
     mem.size = size;
     
     lsdj_read_sav(lsdj_mread, lsdj_mseek, &mem, sav, error);
 }
 
-void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error)
+void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
 {
-    if (sav == NULL)
-        return lsdj_create_error(error, "sav is NULL");
-    
-    FILE* file = fopen(path, "w");
-    if (file == NULL)
-        return lsdj_create_error(error, "could not open file for writing");
-    
     // Write the working project
     unsigned char song_data[SONG_DECOMPRESSED_SIZE];
     lsdj_write_song_to_memory(&sav->song, song_data);
-    fwrite(song_data, sizeof(song_data), 1, file);
-    
+    write(song_data, sizeof(song_data), user_data);
+
     // Create the header for writing
     header_t header;
     memset(&header, 0, sizeof(header));
     header.init[0] = 'j';
     header.init[1] = 'k';
     header.active_project = sav->active_project;
-    
+
     // Create the block allocation table for writing
     unsigned char block_alloc_table[BLOCK_COUNT];
     memset(&block_alloc_table, 0xFF, sizeof(block_alloc_table));
     unsigned char* table_ptr = block_alloc_table;
-    
+
     // Write project specific data
     unsigned char blocks[BLOCK_SIZE][BLOCK_COUNT];
     unsigned char current_block = 0;
@@ -195,30 +199,75 @@ void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** erro
     {
         // Write project name
         memcpy(&header.project_names[i * 8], sav->projects[i].name, 8);
-        
+
         // Write project version
         header.versions[i] = sav->projects[i].version;
-        
+
         if (sav->projects[i].song)
         {
             // Compress the song to memory
             unsigned char song_data[SONG_DECOMPRESSED_SIZE];
             lsdj_write_song_to_memory(sav->projects[i].song, song_data);
             unsigned int written_block_count = lsdj_compress(song_data, &blocks[0][0], BLOCK_SIZE, current_block, BLOCK_COUNT);
-            
+
             current_block += written_block_count;
             for (int j = 0; j < written_block_count; ++j)
                 *table_ptr++ = (unsigned char)i;
         }
     }
-    
+
     // Write the header and blocks
-    fwrite(&header, sizeof(header), 1, file);
-    fwrite(&block_alloc_table, sizeof(block_alloc_table), 1, file);
-    fwrite(blocks, sizeof(blocks), 1, file);
+    write(&header, sizeof(header), user_data);
+    write(&block_alloc_table, sizeof(block_alloc_table), user_data);
+    write(blocks, sizeof(blocks), user_data);
+}
+
+static size_t lsdj_fwrite(const void* ptr, size_t size, void* user_data)
+{
+    return fwrite(ptr, size, 1, (FILE*)user_data);
+}
+
+void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error)
+{
+    if (path == NULL)
+        return lsdj_create_error(error, "path is NULL");
     
-    // Close the file
+    if (sav == NULL)
+        return lsdj_create_error(error, "sav is NULL");
+    
+    FILE* file = fopen(path, "w");
+    if (file == NULL)
+        return lsdj_create_error(error, "could not open file for writing");
+    
+    lsdj_write_sav(sav, lsdj_fwrite, file, error);
+    
     fclose(file);
+}
+
+static size_t lsdj_mwrite(const void* ptr, size_t size, void* user_data)
+{
+    lsdj_memory_data_t* mem = (lsdj_memory_data_t*)user_data;
+    
+    memcpy(mem->cur, ptr, size);
+    mem->cur += size;
+    
+    return size;
+}
+
+void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error)
+{
+    if (sav == NULL)
+        return lsdj_create_error(error, "sav is NULL");
+    
+    if (data == NULL)
+        return lsdj_create_error(error, "data is NULL");
+    
+    lsdj_memory_data_t mem;
+    mem.begin = data;
+    mem.cur = mem.begin;
+    mem.size = size;
+    
+    lsdj_write_sav(sav, lsdj_mwrite, &mem, error);
 }
 
 void lsdj_clear_sav(lsdj_sav_t* sav)

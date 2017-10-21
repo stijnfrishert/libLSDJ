@@ -32,7 +32,9 @@ void lsdj_read_sav_from_file(const char* path, lsdj_sav_t* sav, lsdj_error_t** e
 void lsdj_read_sav_from_memory(const unsigned char* data, size_t size, lsdj_sav_t* sav, lsdj_error_t** error);
     
 //! Write am LSDJ save file to file
-void lsdj_write_sav(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
+void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error);
+void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
+void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error);
     
 //! Clear the save
 void lsdj_clear_sav(lsdj_sav_t* sav);

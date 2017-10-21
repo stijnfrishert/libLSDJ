@@ -12,20 +12,31 @@ int main(int argc, char* argv[])
     FILE* file = fopen("/Users/stijnfrishert/Desktop/LSDj/4ntler/Chipwrecked Set.sav", "r");
     fseek(file, 0, SEEK_END);
     const size_t size = (size_t)ftell(file);
-    unsigned char data[size];
+    unsigned char inData[size];
     fseek(file, 0, SEEK_SET);
-    fread(data, size, 1, file);
+    fread(inData, size, 1, file);
     fclose(file);
     
     lsdj_sav_t sav;
     lsdj_error_t* error = NULL;
-    lsdj_read_sav_from_memory(data, size, &sav, &error);
+    lsdj_read_sav_from_memory(inData, size, &sav, &error);
     
     if (error)
     {
         printf("%s", lsdj_get_error_c_str(error));
         lsdj_free_error(error);
         return 1;
+    }
+    
+    unsigned char outData[size];
+    memset(outData, 0, size);
+    lsdj_write_sav_to_memory(&sav, outData, size, &error);
+    
+    // Compare the original and write
+    for (int i = 0; i < size; ++i)
+    {
+        if (outData[i] != inData[i])
+            return 1;
     }
     
     

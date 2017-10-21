@@ -84,7 +84,7 @@ void lsdj_read_song_from_memory(const unsigned char* data, lsdj_song_t* song, ls
 void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data)
 {
     write_bank0(song, data);
-    write_bank0(song, data + 0x2000);
-    write_bank0(song, data + 0x2000);
-    write_bank0(song, data + 0x2000);
+    write_bank1(song, data + 0x2000);
+    write_bank2(song, data + 0x2000);
+    write_bank3(song, data + 0x2000);
 }
