@@ -102,6 +102,8 @@ typedef struct
     unsigned char reserved7ff2[13];
 } lsdj_song_t;
 
+void lsdj_init_song(lsdj_song_t* song);
+
 // Deserialize a song
 void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error);
 void lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_song_t* song, lsdj_error_t** error);

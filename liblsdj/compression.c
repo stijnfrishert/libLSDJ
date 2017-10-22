@@ -22,7 +22,8 @@ void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t
 {    
     unsigned char byte = 0;
     
-    while (byte != END_OF_FILE_BYTE)
+    int reading = 1;
+    while (reading == 1)
     {
         read(&byte, 1, user_data);
         switch (byte)
@@ -75,6 +76,7 @@ void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t
                         break;
                     }
                     case END_OF_FILE_BYTE:
+                        reading = 0;
                         break;
                     default:
                         seek(begin + ((long)byte - 1) * (long)blockSize, SEEK_SET, user_data);

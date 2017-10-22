@@ -8,6 +8,13 @@
 static const unsigned int BLOCK_SIZE = 0x200;
 static const unsigned int BLOCK_COUNT = 191;
 
+void lsdj_init_project(lsdj_project_t* project)
+{
+    memset(project->name, 0, sizeof(project->name));
+    project->version = 0;
+    project->song = NULL;
+}
+
 void lsdj_read_lsdsng(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_project_t* project, lsdj_error_t** error)
 {
     read(project->name, PROJECT_NAME_LENGTH, user_data);

@@ -19,6 +19,51 @@ static unsigned char CHAIN_LENGTH_FF[TABLE_LENGTH] = { 0xFF, 0xFF, 0xFF, 0xFF, 0
 static unsigned char PHRASE_LENGTH_ZERO[PHRASE_LENGTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 static unsigned char PHRASE_LENGTH_FF[PHRASE_LENGTH] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
+void lsdj_init_song(lsdj_song_t* song)
+{
+    song->version = 3;
+    song->tempo = 128;
+    song->transposition = 0;
+    
+    for (int i = 0; i < ROW_COUNT; ++i)
+        lsdj_clear_row(&song->rows[i]);
+    
+    memset(song->chains, 0, sizeof(song->chains));
+    memset(song->phrases, 0, sizeof(song->phrases));
+    memset(song->instruments, 0, sizeof(song->instruments));
+    memset(song->synths, 0, sizeof(song->synths));
+    
+    for (int i = 0; i < WAVE_COUNT; ++i)
+        lsdj_clear_wave(&song->waves[i]);
+    
+    memset(song->tables, 0, sizeof(song->tables));
+    
+    for (int i = 0; i < GROOVE_COUNT; ++i)
+        lsdj_clear_groove(&song->grooves[i]);
+    
+    for (int i = 0; i < WORD_COUNT; ++i)
+        lsdj_clear_word(&song->words[i]);
+    
+    memcpy(song->wordNames, DEFAULT_WORD_NAMES, sizeof(song->wordNames));
+    memset(song->bookmarks, 0xFF, sizeof(song->bookmarks));
+    
+    song->meta.keyDelay = 7;
+    song->meta.keyRepeat = 2;
+    song->meta.font = 0;
+    song->meta.sync = 0;
+    song->meta.colorSet = 0;
+    song->meta.clone = 0;
+    song->meta.fileChangedFlag = 0;
+    song->meta.powerSave = 0;
+    song->meta.preListen = 1;
+    
+    song->meta.totalTime.days = 0;
+    song->meta.totalTime.hours = 0;
+    song->meta.totalTime.minutes = 0;
+    song->meta.workTime.hours = 0;
+    song->meta.workTime.minutes = 0;
+}
+
 void read_bank0(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
 {
     for (int i = 0; i < PHRASE_COUNT; ++i)
@@ -583,8 +628,7 @@ void lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_son
         return lsdj_create_error(error, "song is NULL");
     
     lsdj_memory_data_t mem;
-    mem.begin = (unsigned char*)data;
-    mem.cur = mem.begin;
+    mem.cur = mem.begin = (unsigned char*)data;
     mem.size = size;
     
     lsdj_read_song(lsdj_mread, lsdj_mtell, lsdj_mseek, &mem, song, error);
@@ -619,77 +663,29 @@ void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, siz
 
 void lsdj_clear_song(lsdj_song_t* song)
 {
-    song->version = 3;
-    song->tempo = 120;
-    song->transposition = 0;
-    
-    for (int i = 0; i < ROW_COUNT; ++i)
-        lsdj_clear_row(&song->rows[i]);
-    
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
-        if (song->instruments[i])
-        {
+        if (song->chains[i])
             free(song->chains[i]);
-            song->chains[i] = NULL;
-        }
     }
     
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
-        if (song->instruments[i])
-        {
+        if (song->phrases[i])
             free(song->phrases[i]);
-            song->phrases[i] = NULL;
-        }
     }
     
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-        {
             free(song->instruments[i]);
-            song->instruments[i] = NULL;
-        }
     }
-    
-    for (int i = 0; i < SYNTH_COUNT; ++i)
-        lsdj_clear_synth(&song->synths[i]);
-    
-    for (int i = 0; i < WAVE_COUNT; ++i)
-        lsdj_clear_wave(&song->waves[i]);
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
         if (song->tables[i])
-        {
             free(song->tables[i]);
-            song->tables[i] = NULL;
-        }
     }
     
-    for (int i = 0; i < GROOVE_COUNT; ++i)
-        lsdj_clear_groove(&song->grooves[i]);
-    
-    for (int i = 0; i < WORD_COUNT; ++i)
-        lsdj_clear_word(&song->words[i]);
-    
-    memset(song->bookmarks, 0xFF, sizeof(BOOKMARK_COUNT));
-    memcpy(song->wordNames, DEFAULT_WORD_NAMES, sizeof(song->wordNames));
-    
-    song->meta.keyDelay = 7;
-    song->meta.keyRepeat = 2;
-    song->meta.font = 0;
-    song->meta.sync = 0;
-    song->meta.colorSet = 0;
-    song->meta.clone = 0;
-    song->meta.fileChangedFlag = 0;
-    song->meta.powerSave = 0;
-    song->meta.preListen = 1;
-    
-    song->meta.totalTime.days = 0;
-    song->meta.totalTime.hours = 0;
-    song->meta.totalTime.minutes = 0;
-    song->meta.workTime.hours = 0;
-    song->meta.workTime.minutes = 0;
+    lsdj_init_song(song);
 }

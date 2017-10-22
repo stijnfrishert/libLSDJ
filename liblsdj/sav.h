@@ -23,8 +23,8 @@ typedef struct
     lsdj_song_t song;
 } lsdj_sav_t;
 
-// Create an empty sav
-lsdj_sav_t* lsdj_create_sav();
+// Create/free saves
+void lsdj_init_sav(lsdj_sav_t* sav);
     
 // Deserialize a sav
 void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_sav_t* sav, lsdj_error_t** error);

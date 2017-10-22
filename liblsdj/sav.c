@@ -6,16 +6,6 @@
 #include "compression.h"
 #include "sav.h"
 
-lsdj_sav_t* lsdj_create_sav()
-{
-    lsdj_sav_t* sav = (lsdj_sav_t*)malloc(sizeof(lsdj_sav_t));
-    
-    memset(sav, 0, sizeof(*sav));
-    lsdj_clear_sav(sav);
-    
-    return sav;
-}
-
 // The memory place of the header
 static const unsigned int HEADER_START = SONG_DECOMPRESSED_SIZE;
 static const unsigned int BLOCK_COUNT = 191;
@@ -30,6 +20,15 @@ typedef struct
 	unsigned char active_project;
 } header_t;
 
+void lsdj_init_sav(lsdj_sav_t* sav)
+{
+    for (unsigned char i = 0; i < PROJECT_COUNT; ++i)
+        lsdj_init_project(&sav->projects[i]);
+    
+    sav->activeProject = 0xFF;
+    lsdj_init_song(&sav->song);
+}
+
 // Read compressed project data from memory sav file
 void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_project_t* projects, lsdj_error_t** error)
 {
@@ -43,15 +42,15 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* us
     
     // Pointers for storing decompressed song data
     // Handle decompression
-    for (unsigned char i = 0; i < BLOCK_COUNT; ++i)
+    for (int i = 0; i < BLOCK_COUNT; ++i)
     {
-        unsigned char project = blocks_alloc_table[i];
-        if (project == 0xFF || projects[project].song)
+        unsigned char p = blocks_alloc_table[i];
+        lsdj_project_t* project = &projects[p];
+        if (p == 0xFF || project->song != NULL)
             continue;
         
         unsigned char data[SONG_DECOMPRESSED_SIZE];
         memset(data, 0x34, sizeof(data));
-//        lsdj_decompress((const unsigned char*)blocks, i, BLOCK_SIZE, data);
         
         lsdj_memory_data_t mem;
         mem.cur = mem.begin = (unsigned char*)blocks;
@@ -59,8 +58,9 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* us
         lsdj_decompress(lsdj_mread, lsdj_mseek, lsdj_mtell, &mem, 0, BLOCK_SIZE, data);
         
         // Read the song from memory
-        projects[project].song = (lsdj_song_t*)malloc(sizeof(lsdj_song_t));
-        lsdj_read_song_from_memory(data, sizeof(data), projects[project].song, error);
+        project->song = (lsdj_song_t*)malloc(sizeof(lsdj_song_t));
+        lsdj_init_song(project->song);
+        lsdj_read_song_from_memory(data, sizeof(data), project->song, error);
         if (*error)
             return;
     }

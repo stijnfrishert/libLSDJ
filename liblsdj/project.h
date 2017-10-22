@@ -23,6 +23,8 @@ typedef struct
     /*! If this is NULL, the project isn't in use */
     lsdj_song_t* song;
 } lsdj_project_t;
+
+void lsdj_init_project(lsdj_project_t* project);
     
 // Deserialize a project from LSDSNG
 void lsdj_read_lsdsng(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_project_t* project, lsdj_error_t** error);

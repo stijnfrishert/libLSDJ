@@ -17,9 +17,10 @@ int main(int argc, char* argv[])
     if (argc < 2)
         return 1;
     
-    lsdj_sav_t* sav = lsdj_create_sav();
+    lsdj_sav_t sav;
+    lsdj_init_sav(&sav);
     lsdj_error_t* error = NULL;
-    lsdj_read_sav_from_file(argv[1], sav, &error);
+    lsdj_read_sav_from_file(boost::filesystem::canonical(argv[1]).c_str(), &sav, &error);
     
     if (error)
         return handle_error(error);
@@ -28,12 +29,12 @@ int main(int argc, char* argv[])
     
     for (int i = 0; i < PROJECT_COUNT; ++i)
     {
-        lsdj_project_t& project = sav->projects[i];
+        lsdj_project_t& project = sav.projects[i];
         if (!project.song)
             continue;
         
         std::stringstream stream;
-        stream << project.name;
+        stream << std::string(project.name, strnlen(project.name, 8));
         stream << ".lsdsng";
         
         lsdj_write_lsdsng_to_file(&project, (cwd / stream.str()).c_str(), &error);
