@@ -9,6 +9,7 @@
 #ifndef LSDJ_INSTRUMENT_H
 #define LSDJ_INSTRUMENT_H
 
+#include "error.h"
 #include "vio.h"
 
 // The default constant length of an instrument name
@@ -56,11 +57,25 @@ typedef enum
 
 typedef enum
 {
+    TUNE_12_TONE,
+    TUNE_FIXED,
+    TUNE_DRUM
+} tuning_mode;
+
+typedef enum
+{
     PLAY_ONCE,
     PLAY_LOOP,
     PLAY_PING_PONG,
     PLAY_MANUAL
 } playback_mode;
+
+typedef enum
+{
+    KIT_LOOP_OFF,
+    KIT_LOOP_ON,
+    KIT_LOOP_ATTACK
+} kit_loop_mode;
 
 typedef enum
 {
@@ -73,7 +88,8 @@ typedef enum
 typedef enum
 {
     KIT_PSPEED_FAST,
-    KIT_PSPEED_SLOW
+    KIT_PSPEED_SLOW,
+    KIT_PSPEED_STEP
 } kit_pspeed;
 
 typedef enum
@@ -89,7 +105,7 @@ typedef struct
     unsigned char sweep;
     plvib_type plvib;
     vibrato_direction vibratoDirection;
-    unsigned char transpose;
+    tuning_mode tuning;
     unsigned char pulse2tune;
     unsigned char fineTune;
 } lsdj_instrument_pulse_t;
@@ -98,7 +114,7 @@ typedef struct
 {
     plvib_type plvib;
     vibrato_direction vibratoDirection;
-    unsigned char transpose;
+    tuning_mode tuning;
     unsigned char synth;
     playback_mode playback;
     unsigned char length;
@@ -111,12 +127,12 @@ typedef struct
     unsigned char kit1;
     unsigned char offset1;
     unsigned char length1;
-    unsigned char loop1;
+    kit_loop_mode loop1;
     
     unsigned char kit2;
     unsigned char offset2;
     unsigned char length2;
-    unsigned char loop2;
+    kit_loop_mode loop2;
     
     unsigned char pitch;
     unsigned char halfSpeed;
@@ -163,7 +179,8 @@ void lsdj_clear_instrument_as_wave(lsdj_instrument_t* instrument);
 void lsdj_clear_instrument_as_kit(lsdj_instrument_t* instrument);
 void lsdj_clear_instrument_as_noise(lsdj_instrument_t* instrument);
 
-// Instrument reading
-void read_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_instrument_t* instrument);
+// Instrument I/O
+void lsdj_read_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error);
+void lsdj_write_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error);
 
 #endif

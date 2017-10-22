@@ -9,7 +9,7 @@ int main(int argc, char* argv[])
 //    lsdj_error_t* error = NULL;
 //    lsdj_read_sav_from_file("/Users/stijnfrishert/Desktop/LSDj/4ntler/Chipwrecked Set.sav", &sav, &error);
     
-    FILE* file = fopen("/Users/stijnfrishert/Desktop/LSDj/LSDj/lsdj_5.3.7.sav", "r");
+    FILE* file = fopen("/Users/stijnfrishert/Desktop/LSDj/LSDj/lsdj_5.6.4.sav", "r");
     fseek(file, 0, SEEK_END);
     const size_t size = (size_t)ftell(file);
     unsigned char inData[size];

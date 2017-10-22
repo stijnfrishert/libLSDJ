@@ -148,9 +148,12 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-            read_instrument(read, seek, user_data, song->instruments[i]);
+            lsdj_read_instrument(read, seek, user_data, song->instruments[i], error);
         else
             seek(16, SEEK_CUR, user_data);
+        
+        if (*error)
+            return;
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
@@ -253,7 +256,7 @@ void write_soft_synth_parameters(const lsdj_synth_t* synth, lsdj_vio_write_t wri
     write(synth->reserved, 3, user_data);
 }
 
-void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
+void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
 {
     unsigned char instrAllocTable[INSTR_ALLOC_TABLE_SIZE];
     memset(instrAllocTable, 0, INSTR_ALLOC_TABLE_SIZE);
@@ -305,11 +308,13 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     {
         if (song->instruments[i])
         {
-            // TODO
-//            write(song->instruments[i]->data, 16, user_data);
+            lsdj_write_instrument(write, user_data, song->instruments[i], error);
         } else {
             write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), user_data);
         }
+        
+        if (*error)
+            return;
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
@@ -588,7 +593,7 @@ void lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_son
 void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
 {
     write_bank0(song, write, user_data);
-    write_bank1(song, write, user_data);
+    write_bank1(song, write, user_data, error);
     write_bank2(song, write, user_data);
     write_bank3(song, write, user_data);
 }
