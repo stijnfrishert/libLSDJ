@@ -12,7 +12,7 @@ void lsdj_create_error(lsdj_error_t** error, const char* message)
     if (error == NULL)
         return;
     
-    *error = malloc(sizeof(lsdj_error_t));
+    *error = (lsdj_error_t*)malloc(sizeof(lsdj_error_t));
     (*error)->message = message;
 }
 

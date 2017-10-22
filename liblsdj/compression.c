@@ -18,71 +18,143 @@ static const unsigned char END_OF_FILE_BYTE = 0xFF;
 static const unsigned char DEFAULT_WAVE_BYTE = 0xF0;
 static const unsigned char DEFAULT_INSTRUMENT_BYTE = 0xF1;
 
-void lsdj_decompress(const unsigned char* blocks, unsigned char start_block, unsigned int block_size, unsigned char* write)
-{
-    for (const unsigned char* read = blocks + start_block * block_size; *read != END_OF_FILE_BYTE; )
+void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t tell, void* user_data, long begin, size_t blockSize, unsigned char* write)
+{    
+    unsigned char byte = 0;
+    
+    while (byte != END_OF_FILE_BYTE)
     {
-        switch (*read)
+        read(&byte, 1, user_data);
+        switch (byte)
         {
             case RUN_LENGTH_ENCODING_BYTE:
             {
-                unsigned char c = *++read;
-                if (c == RUN_LENGTH_ENCODING_BYTE)
+                read(&byte, 1, user_data);
+                if (byte == RUN_LENGTH_ENCODING_BYTE)
                 {
-                    *write++ = RUN_LENGTH_ENCODING_BYTE;
-                } else {
-                    unsigned char count = *++read;
-                    for (int i = 0; i < count; ++i)
-                        *write++ = c;
+                    *write ++ = RUN_LENGTH_ENCODING_BYTE;
                 }
-                read++;
+                else
+                {
+                    unsigned char count = 0;
+                    read(&count, 1, user_data);
+                    for (int i = 0; i < count; ++i)
+                        *write++ = byte;
+                }
                 break;
             }
+                
             case SPECIAL_ACTION_BYTE:
             {
-                unsigned char c = *++read;
-                switch (c)
+                read(&byte, 1, user_data);
+                switch (byte)
                 {
                     case SPECIAL_ACTION_BYTE:
                         *write++ = SPECIAL_ACTION_BYTE;
-                        read++;
                         break;
                     case DEFAULT_WAVE_BYTE:
                     {
-                        unsigned char count = *++read;
+                        unsigned char count = 0;
+                        read(&count, 1, user_data);
                         for (int i = 0; i < count; ++i)
                         {
                             for (int j = 0; j < 16; ++j)
                                 *write++ = DEFAULT_WAVE[j];
                         }
-                        read++;
                         break;
                     }
                     case DEFAULT_INSTRUMENT_BYTE:
                     {
-                        unsigned char count = *++read;
+                        unsigned char count = 0;
+                        read(&count, 1, user_data);
                         for (int i = 0; i < count; ++i)
                         {
                             for (int j = 0; j < 16; ++j)
                                 *write++ = DEFAULT_INSTRUMENT[j];
                         }
-                        read++;
                         break;
                     }
                     case END_OF_FILE_BYTE:
                         break;
                     default:
-                        read = blocks + (c - 1) * block_size;
+                        seek(begin + ((long)byte - 1) * (long)blockSize, SEEK_SET, user_data);
                         break;
                 }
                 break;
             }
+                
             default:
-                *write++ = *read++;
+                *write++ = byte;
                 break;
         }
     }
 }
+
+//void lsdj_decompress(const unsigned char* blocks, unsigned char start_block, unsigned int block_size, unsigned char* write)
+//{
+//    for (const unsigned char* read = blocks + start_block * block_size; *read != END_OF_FILE_BYTE; )
+//    {
+//        switch (*read)
+//        {
+//            case RUN_LENGTH_ENCODING_BYTE:
+//            {
+//                unsigned char c = *++read;
+//                if (c == RUN_LENGTH_ENCODING_BYTE)
+//                {
+//                    *write++ = RUN_LENGTH_ENCODING_BYTE;
+//                } else {
+//                    unsigned char count = *++read;
+//                    for (int i = 0; i < count; ++i)
+//                        *write++ = c;
+//                }
+//                read++;
+//                break;
+//            }
+//            case SPECIAL_ACTION_BYTE:
+//            {
+//                unsigned char c = *++read;
+//                switch (c)
+//                {
+//                    case SPECIAL_ACTION_BYTE:
+//                        *write++ = SPECIAL_ACTION_BYTE;
+//                        read++;
+//                        break;
+//                    case DEFAULT_WAVE_BYTE:
+//                    {
+//                        unsigned char count = *++read;
+//                        for (int i = 0; i < count; ++i)
+//                        {
+//                            for (int j = 0; j < 16; ++j)
+//                                *write++ = DEFAULT_WAVE[j];
+//                        }
+//                        read++;
+//                        break;
+//                    }
+//                    case DEFAULT_INSTRUMENT_BYTE:
+//                    {
+//                        unsigned char count = *++read;
+//                        for (int i = 0; i < count; ++i)
+//                        {
+//                            for (int j = 0; j < 16; ++j)
+//                                *write++ = DEFAULT_INSTRUMENT[j];
+//                        }
+//                        read++;
+//                        break;
+//                    }
+//                    case END_OF_FILE_BYTE:
+//                        break;
+//                    default:
+//                        read = blocks + (c - 1) * block_size;
+//                        break;
+//                }
+//                break;
+//            }
+//            default:
+//                *write++ = *read++;
+//                break;
+//        }
+//    }
+//}
 
 unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, unsigned int block_size, unsigned int start_block, unsigned int block_count)
 {

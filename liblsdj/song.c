@@ -5,7 +5,7 @@
 
 static char DEFAULT_WORD_NAMES[WORD_COUNT][WORD_NAME_LENGTH] =
 {
-    "C 2 ","C#2 ","D 2 ","D#2 ","E 2 ","F 2 ","F#2 ","G 2 ","G#2 ","A 2 ","A#2 ","B 2 ","C 3 ","C#3 ","D 3 ","D#3 ","E 3 ","F 3 ","F#3 ","G 3 ","G#3 ","A 3 ","A#3 ","B 3 ","C 4 ","C#4 ","D 4 ","D#4 ","E 4 ","F 4 ","F#4 ","G 4 ","G#4 ","A 4 ","A#4 ","B 4 ","C 5 ","C#5 ","D 5 ","D#5 ","E 5 ","F 5 "
+    {'C',' ','2',' '},{'C',' ','2',' '},{'D',' ','2',' '},{'D',' ','2',' '},{'E',' ','2',' '},{'F',' ','2',' '},{'F',' ','2',' '},{'G',' ','2',' '},{'G',' ','2',' '},{'A',' ','2',' '},{'A',' ','2',' '},{'B',' ','2',' '},{'C',' ','3',' '},{'C',' ','3',' '},{'D',' ','3',' '},{'D',' ','3',' '},{'E',' ','3',' '},{'F',' ','3',' '},{'F',' ','3',' '},{'G',' ','3',' '},{'G',' ','3',' '},{'A',' ','3',' '},{'A',' ','3',' '},{'B',' ','3',' '},{'C',' ','4',' '},{'C',' ','4',' '},{'D',' ','4',' '},{'D',' ','4',' '},{'E',' ','4',' '},{'F',' ','4',' '},{'F',' ','4',' '},{'G',' ','4',' '},{'G',' ','4',' '},{'A',' ','4',' '},{'A',' ','4',' '},{'B',' ','4',' '},{'C',' ','5',' '},{'C',' ','5',' '},{'D',' ','5',' '},{'D',' ','5',' '},{'E',' ','5',' '},{'F',' ','5',' '}
 };
 
 static const int INSTR_ALLOC_TABLE_SIZE = 64;
@@ -524,9 +524,9 @@ void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t 
     const long begin = tell(user_data);
     
     // Check if the 'rb' flags have been set correctly
-    if (check_rb(read, seek, user_data, 0x1E78) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x1E78");
-    if (check_rb(read, seek, user_data, 0x3E80) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x3E80");
-    if (check_rb(read, seek, user_data, 0x7FF0) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x7FF0");
+    if (check_rb(read, seek, user_data, begin + 0x1E78) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x1E78");
+    if (check_rb(read, seek, user_data, begin + 0x3E80) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x3E80");
+    if (check_rb(read, seek, user_data, begin + 0x7FF0) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x7FF0");
     
     // Read the allocation tables
     unsigned char instrAllocTable[INSTR_ALLOC_TABLE_SIZE];
@@ -545,25 +545,25 @@ void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t 
     for (int i = 0; i < TABLE_ALLOC_TABLE_SIZE; ++i)
     {
         if (tableAllocTable[i])
-            song->tables[i] = malloc(sizeof(lsdj_table_t));
+            song->tables[i] = (lsdj_table_t*)malloc(sizeof(lsdj_table_t));
     }
     
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (instrAllocTable[i])
-            song->instruments[i] = malloc(sizeof(lsdj_instrument_t));
+            song->instruments[i] = (lsdj_instrument_t*)malloc(sizeof(lsdj_instrument_t));
     }
     
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if ((chainAllocTable[i / 8] >> (i % 8)) & 1)
-            song->chains[i] = malloc(sizeof(lsdj_chain_t));
+            song->chains[i] = (lsdj_chain_t*)malloc(sizeof(lsdj_chain_t));
     }
     
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
         if ((phraseAllocTable[i / 8] >> (i % 8)) & 1)
-            song->phrases[i] = malloc(sizeof(lsdj_phrase_t));
+            song->phrases[i] = (lsdj_phrase_t*)malloc(sizeof(lsdj_phrase_t));
     }
     
     // Read the banks

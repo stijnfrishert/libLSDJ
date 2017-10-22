@@ -239,9 +239,9 @@ void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* use
     instrument->pulse.fineTune = ((byte >> 2) & 0xF);
     instrument->panning = parsePanning(byte);
     
-    unsigned char data[8];
-    read(data, 8, user_data);
-//    seek(8, SEEK_CUR, user_data); // Bytes 8-15 are empty
+//    unsigned char data[8];
+//    read(data, 8, user_data);
+    seek(8, SEEK_CUR, user_data); // Bytes 8-15 are empty
 }
 
 void read_wave_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error)

@@ -43,14 +43,16 @@ int main(int argc, char* argv[])
     }
     
     // Compare the original and write
-    for (int i = 0; i < SONG_DECOMPRESSED_SIZE; ++i)
-    {
-        if (outData[i] != inData[i])
-        {
-            printf("diff at %d\n", i);
-            return 1;
-        }
-    }
+//    for (int i = 0; i < SONG_DECOMPRESSED_SIZE; ++i)
+//    {
+//        if (outData[i] != inData[i])
+//        {
+//            printf("diff at %d\n", i);
+//            return 1;
+//        }
+//    }
+    
+    lsdj_write_sav_to_file(&sav, "/Users/stijnfrishert/Desktop/LSDj/LSDj/out_lsdj_5.6.4.sav", &error);
     
     
     

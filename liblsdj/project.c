@@ -16,17 +16,22 @@ void lsdj_read_lsdsng(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_
     // Read the compressed data
     seek(0, SEEK_END, user_data);
     const size_t size = (size_t)(tell(user_data) - 9);
-    unsigned char* compressed = malloc(size);
+    unsigned char* compressed = (unsigned char*)malloc(size);
     seek(0, SEEK_SET, user_data);
     read(compressed, size, user_data);
 
     // Decompressed the data
     unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
-    lsdj_decompress(compressed, 0, BLOCK_SIZE, decompressed);
+    lsdj_memory_data_t mem;
+    mem.cur = mem.begin = compressed;
+    mem.size = size;
+    lsdj_decompress(lsdj_mread, lsdj_mseek, lsdj_mtell, &mem, 0, BLOCK_SIZE, decompressed);
+    
+//    lsdj_decompress(compressed, 0, BLOCK_SIZE, decompressed);
 
     // Read in the song
     if (project->song == NULL)
-        project->song = malloc(sizeof(lsdj_song_t));
+        project->song = (lsdj_song_t*)malloc(sizeof(lsdj_song_t));
     lsdj_read_song_from_memory(decompressed, sizeof(lsdj_song_t), project->song, error);
 }
 
