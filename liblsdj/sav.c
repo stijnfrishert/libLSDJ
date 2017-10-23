@@ -142,8 +142,7 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* us
         lsdj_decompress(lsdj_mread, lsdj_mseek, lsdj_mtell, &mem, 0, BLOCK_SIZE, data);
         
         // Read the song from memory
-        song = lsdj_new_song(error);
-        lsdj_read_song_from_memory(data, sizeof(data), song, error);
+        song = lsdj_read_song_from_memory(data, sizeof(data), error);
         if (*error)
         {
             free(song);
@@ -225,7 +224,7 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_s
         return NULL;
     }
     
-    lsdj_read_song_from_memory(song_data, sizeof(song_data), sav->song, error);
+    sav->song = lsdj_read_song_from_memory(song_data, sizeof(song_data), error);
     
     seek(end, SEEK_SET, user_data);
     

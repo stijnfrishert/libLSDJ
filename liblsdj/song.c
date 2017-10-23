@@ -601,27 +601,33 @@ int check_rb(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, long p
     return (data[0] == 'r' && data[1] == 'b') ? 0 : 1;
 }
 
-void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error)
+lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_error_t** error)
 {
     // Check for incorrect input
     if (read == NULL)
-        return lsdj_create_error(error, "read is NULL");
+    {
+        lsdj_create_error(error, "read is NULL");
+        return NULL;
+    }
     
     if (tell == NULL)
-        return lsdj_create_error(error, "tell is NULL");
+    {
+        lsdj_create_error(error, "tell is NULL");
+        return NULL;
+    }
     
     if (seek == NULL)
-        return lsdj_create_error(error, "seek is NULL");
-    
-    if (song == NULL)
-        return lsdj_create_error(error, "song is NULL");
+    {
+        lsdj_create_error(error, "seek is NULL");
+        return NULL;
+    }
     
     const long begin = tell(user_data);
     
     // Check if the 'rb' flags have been set correctly
-    if (check_rb(read, seek, user_data, begin + 0x1E78) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x1E78");
-    if (check_rb(read, seek, user_data, begin + 0x3E80) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x3E80");
-    if (check_rb(read, seek, user_data, begin + 0x7FF0) != 0) return lsdj_create_error(error, "memory flag 'rb' not found at 0x7FF0");
+    if (check_rb(read, seek, user_data, begin + 0x1E78) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x1E78"); return NULL; }
+    if (check_rb(read, seek, user_data, begin + 0x3E80) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x3E80"); return NULL; }
+    if (check_rb(read, seek, user_data, begin + 0x7FF0) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x7FF0"); return NULL; }
     
     // Read the allocation tables
     unsigned char instrAllocTable[INSTR_ALLOC_TABLE_SIZE];
@@ -637,6 +643,10 @@ void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t 
     read(phraseAllocTable, PHRASE_ALLOC_TABLE_SIZE, user_data);
     read(chainAllocTable, CHAIN_ALLOC_TABLE_SIZE, user_data);
     
+    lsdj_song_t* song = alloc_song(error);
+    if (*error)
+        return NULL;
+
     for (int i = 0; i < TABLE_ALLOC_TABLE_SIZE; ++i)
     {
         if (tableAllocTable[i])
@@ -665,23 +675,31 @@ void lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t 
     seek(begin, SEEK_SET, user_data);
     read_bank0(read, seek, user_data, song);
     read_bank1(read, seek, user_data, song, error);
+    if (*error)
+    {
+        lsdj_free_song(song);
+        return NULL;
+    }
+    
     read_bank2(read, seek, user_data, song);
     read_bank3(read, seek, user_data, song);
+    
+    return song;
 }
 
-void lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_song_t* song, lsdj_error_t** error)
+lsdj_song_t* lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
 {
     if (data == NULL)
-        return lsdj_create_error(error, "data is NULL");
-    
-    if (song == NULL)
-        return lsdj_create_error(error, "song is NULL");
+    {
+        lsdj_create_error(error, "data is NULL");
+        return NULL;
+    }
     
     lsdj_memory_data_t mem;
     mem.cur = mem.begin = (unsigned char*)data;
     mem.size = size;
     
-    lsdj_read_song(lsdj_mread, lsdj_mtell, lsdj_mseek, &mem, song, error);
+    return lsdj_read_song(lsdj_mread, lsdj_mtell, lsdj_mseek, &mem, error);
 }
 
 void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
