@@ -39,4 +39,8 @@ void lsdj_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* d
 // Clear all project data to factory settings
 void lsdj_clear_project(lsdj_project_t* project);
 
+void lsdj_project_get_name(lsdj_project_t* project, char* data, size_t size);
+unsigned int lsdj_project_get_version(lsdj_project_t* project);
+lsdj_song_t* lsdj_project_get_song(lsdj_project_t* project);
+
 #endif

@@ -139,3 +139,21 @@ void lsdj_clear_project(lsdj_project_t* project)
         project->song = NULL;
     }
 }
+
+void lsdj_project_get_name(lsdj_project_t* project, char* data, size_t size)
+{
+    const size_t len = strnlen(project->name, PROJECT_NAME_LENGTH);
+    strncpy(data, project->name, len);
+    if (len < size)
+        data[len] = '\0';
+}
+
+unsigned int lsdj_project_get_version(lsdj_project_t* project)
+{
+    return project->version;
+}
+
+lsdj_song_t* lsdj_project_get_song(lsdj_project_t* project)
+{
+    return project->song;
+}
