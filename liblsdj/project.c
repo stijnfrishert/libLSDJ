@@ -8,6 +8,49 @@
 static const unsigned int BLOCK_SIZE = 0x200;
 static const unsigned int BLOCK_COUNT = 191;
 
+struct lsdj_project_t
+{
+    // The name of the project
+    char name[PROJECT_NAME_LENGTH];
+    
+    // The version of the project
+    unsigned char version;
+    
+    // The song belonging to this project
+    /*! If this is NULL, the project isn't in use */
+    lsdj_song_t* song;
+};
+
+lsdj_project_t* alloc_project(lsdj_error_t** error)
+{
+    lsdj_project_t* project = (lsdj_project_t*)calloc(sizeof(lsdj_project_t), 1);
+    if (project == NULL)
+    {
+        lsdj_create_error(error, "could not allocate project");
+        return NULL;
+    }
+    
+    return project;
+}
+
+lsdj_project_t* lsdj_new_project(lsdj_error_t** error)
+{
+    lsdj_project_t* project = alloc_project(error);
+    if (project == NULL)
+        return NULL;
+    
+    memset(project->name, '\0', sizeof(project->name));
+    project->version = 0;
+    project->song = NULL;
+    
+    return project;
+}
+
+void lsdj_free_project(lsdj_project_t* project)
+{
+    free(project);
+}
+
 void lsdj_init_project(lsdj_project_t* project)
 {
     memset(project->name, 0, sizeof(project->name));
@@ -140,6 +183,11 @@ void lsdj_clear_project(lsdj_project_t* project)
     }
 }
 
+void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size)
+{
+    strncpy(project->name, data, size < PROJECT_NAME_LENGTH ? size : PROJECT_NAME_LENGTH);
+}
+
 void lsdj_project_get_name(lsdj_project_t* project, char* data, size_t size)
 {
     const size_t len = strnlen(project->name, PROJECT_NAME_LENGTH);
@@ -148,9 +196,22 @@ void lsdj_project_get_name(lsdj_project_t* project, char* data, size_t size)
         data[len] = '\0';
 }
 
-unsigned int lsdj_project_get_version(lsdj_project_t* project)
+void lsdj_project_set_version(lsdj_project_t* project, unsigned char version)
+{
+    project->version = version;
+}
+
+unsigned char lsdj_project_get_version(lsdj_project_t* project)
 {
     return project->version;
+}
+
+void lsdj_project_set_song(lsdj_project_t* project, lsdj_song_t* song)
+{
+    if (project->song)
+        free(project->song);
+    
+    project->song = song;
 }
 
 lsdj_song_t* lsdj_project_get_song(lsdj_project_t* project)

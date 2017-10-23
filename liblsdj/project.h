@@ -11,20 +11,12 @@
 static const unsigned short PROJECT_NAME_LENGTH = 8;
 
 // Representation of a project within an LSDJ sav file
-typedef struct
-{
-    // The name of the project
-	char name[PROJECT_NAME_LENGTH];
-    
-    // The version of the project
-    unsigned char version;
-    
-    // The song belonging to this project
-    /*! If this is NULL, the project isn't in use */
-    lsdj_song_t* song;
-} lsdj_project_t;
+struct lsdj_project_t;
+typedef struct lsdj_project_t lsdj_project_t;
 
-void lsdj_init_project(lsdj_project_t* project);
+// Create/free projects
+lsdj_project_t* lsdj_new_project(lsdj_error_t** error);
+void lsdj_free_project(lsdj_project_t* project);
     
 // Deserialize a project from LSDSNG
 void lsdj_read_lsdsng(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_project_t* project, lsdj_error_t** error);
@@ -35,12 +27,13 @@ void lsdj_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_p
 void lsdj_write_lsdsng(const lsdj_project_t* project, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error);
 void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error);
 void lsdj_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t size, lsdj_error_t** error);
-    
-// Clear all project data to factory settings
-void lsdj_clear_project(lsdj_project_t* project);
 
+// Change data in a project
+void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size);
 void lsdj_project_get_name(lsdj_project_t* project, char* data, size_t size);
-unsigned int lsdj_project_get_version(lsdj_project_t* project);
+void lsdj_project_set_version(lsdj_project_t* project, unsigned char version);
+unsigned char lsdj_project_get_version(lsdj_project_t* project);
+void lsdj_project_set_song(lsdj_project_t* project, lsdj_song_t* song);
 lsdj_song_t* lsdj_project_get_song(lsdj_project_t* project);
 
 #endif

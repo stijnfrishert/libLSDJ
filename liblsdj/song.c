@@ -19,8 +19,24 @@ static unsigned char CHAIN_LENGTH_FF[TABLE_LENGTH] = { 0xFF, 0xFF, 0xFF, 0xFF, 0
 static unsigned char PHRASE_LENGTH_ZERO[PHRASE_LENGTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 static unsigned char PHRASE_LENGTH_FF[PHRASE_LENGTH] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-void lsdj_init_song(lsdj_song_t* song)
+lsdj_song_t* alloc_song(lsdj_error_t** error)
 {
+    lsdj_song_t* song = (lsdj_song_t*)calloc(sizeof(lsdj_song_t), 1);
+    if (song == NULL)
+    {
+        lsdj_create_error(error, "could not allocate song");
+        return NULL;
+    }
+    
+    return song;
+}
+
+lsdj_song_t* lsdj_new_song(lsdj_error_t** error)
+{
+    lsdj_song_t* song = alloc_song(error);
+    if (song == NULL)
+        return NULL;
+    
     song->version = 3;
     song->tempo = 128;
     song->transposition = 0;
@@ -62,6 +78,40 @@ void lsdj_init_song(lsdj_song_t* song)
     song->meta.totalTime.minutes = 0;
     song->meta.workTime.hours = 0;
     song->meta.workTime.minutes = 0;
+    
+    return song;
+}
+
+void lsdj_free_song(lsdj_song_t* song)
+{
+    if (song == NULL)
+        return;
+    
+    for (int i = 0; i < CHAIN_COUNT; ++i)
+    {
+        if (song->chains[i])
+            free(song->chains[i]);
+    }
+    
+    for (int i = 0; i < PHRASE_COUNT; ++i)
+    {
+        if (song->phrases[i])
+            free(song->phrases[i]);
+    }
+    
+    for (int i = 0; i < INSTRUMENT_COUNT; ++i)
+    {
+        if (song->instruments[i])
+            free(song->instruments[i]);
+    }
+    
+    for (int i = 0; i < TABLE_COUNT; ++i)
+    {
+        if (song->tables[i])
+            free(song->tables[i]);
+    }
+    
+    free(song);
 }
 
 void read_bank0(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
@@ -663,29 +713,5 @@ void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, siz
 
 void lsdj_clear_song(lsdj_song_t* song)
 {
-    for (int i = 0; i < CHAIN_COUNT; ++i)
-    {
-        if (song->chains[i])
-            free(song->chains[i]);
-    }
     
-    for (int i = 0; i < PHRASE_COUNT; ++i)
-    {
-        if (song->phrases[i])
-            free(song->phrases[i]);
-    }
-    
-    for (int i = 0; i < INSTRUMENT_COUNT; ++i)
-    {
-        if (song->instruments[i])
-            free(song->instruments[i]);
-    }
-    
-    for (int i = 0; i < TABLE_COUNT; ++i)
-    {
-        if (song->tables[i])
-            free(song->tables[i]);
-    }
-    
-    lsdj_init_song(song);
 }
