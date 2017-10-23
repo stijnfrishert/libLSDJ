@@ -19,7 +19,8 @@ static const unsigned char DEFAULT_WAVE_BYTE = 0xF0;
 static const unsigned char DEFAULT_INSTRUMENT_BYTE = 0xF1;
 
 void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t tell, void* user_data, long begin, size_t blockSize, unsigned char* write)
-{    
+{
+    unsigned char* start = write;
     unsigned char byte = 0;
     
     int reading = 1;
@@ -90,6 +91,8 @@ void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t
                 break;
         }
     }
+    
+    assert((write - start) == SONG_DECOMPRESSED_SIZE);
 }
 
 //void lsdj_decompress(const unsigned char* blocks, unsigned char start_block, unsigned int block_size, unsigned char* write)

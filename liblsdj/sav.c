@@ -110,7 +110,7 @@ lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, unsigned char project)
 }
 
 // Read compressed project data from memory sav file
-void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_project_t** projects, lsdj_error_t** error)
+void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t tell, void* user_data, lsdj_project_t** projects, lsdj_error_t** error)
 {
     // Read the block allocation table
     unsigned char blocks_alloc_table[BLOCK_COUNT];
@@ -129,12 +129,11 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* us
             continue;
         
         lsdj_project_t* project = projects[p];
-        lsdj_song_t* song = lsdj_project_get_song(project);
-        if (song != NULL)
+        if (lsdj_project_get_song(project) != NULL)
             continue;
         
         unsigned char data[SONG_DECOMPRESSED_SIZE];
-        memset(data, 0x34, sizeof(data));
+        memset(data, 0x00, sizeof(data));
         
         lsdj_memory_data_t mem;
         mem.cur = mem.begin = (unsigned char*)blocks;
@@ -142,7 +141,7 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* us
         lsdj_decompress(lsdj_mread, lsdj_mseek, lsdj_mtell, &mem, 0, BLOCK_SIZE, data);
         
         // Read the song from memory
-        song = lsdj_read_song_from_memory(data, sizeof(data), error);
+        lsdj_song_t* song = lsdj_read_song_from_memory(data, sizeof(data), error);
         if (*error)
         {
             free(song);
@@ -208,7 +207,7 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_s
     sav->activeProject = header.active_project;
     
     // Read the compressed projects
-    read_compressed_blocks(read, seek, user_data, sav->projects, error);
+    read_compressed_blocks(read, seek, tell, user_data, sav->projects, error);
     if (*error)
         return NULL;
     

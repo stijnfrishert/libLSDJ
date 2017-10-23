@@ -618,6 +618,7 @@ void write_noise_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instru
 {
     unsigned char byte = 3;
     write(&byte, 1, user_data);
+    
     write(&instrument->envelope, 1, user_data);
     
     byte = createScommandByte(instrument->noise.sCommand);
@@ -627,6 +628,9 @@ void write_noise_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instru
     write(&byte, 1, user_data);
     
     write(&instrument->noise.shape, 1, user_data);
+    
+    byte = createAutomateByte(instrument->automate);
+    write(&byte, 1, user_data);
     
     byte = createTableByte(instrument->table);
     write(&byte, 1, user_data);

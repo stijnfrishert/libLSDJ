@@ -81,7 +81,7 @@ lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsd
     
     // Read in the song
     if (project->song == NULL)
-        project->song = lsdj_read_song_from_memory(decompressed, sizeof(lsdj_song_t), error);
+        project->song = lsdj_read_song_from_memory(decompressed, sizeof(decompressed), error);
     
     return project;
 }

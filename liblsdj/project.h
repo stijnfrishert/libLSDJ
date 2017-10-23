@@ -11,7 +11,6 @@
 static const unsigned short PROJECT_NAME_LENGTH = 8;
 
 // Representation of a project within an LSDJ sav file
-struct lsdj_project_t;
 typedef struct lsdj_project_t lsdj_project_t;
 
 // Create/free projects

@@ -12,4 +12,4 @@ set_target_properties(liblsdj PROPERTIES OUTPUT_NAME lsdj)
 source_group(\\ FILES ${HEADERS} ${SOURCES})
 
 install(TARGETS liblsdj DESTINATION lib)
-install(FILES ${HEADERS} DESTINATION include/lsdj)
+install(FILES error.h sav.h project.h song.h DESTINATION include/lsdj)

@@ -10,7 +10,6 @@ extern "C" {
 #include "song.h"
 #include "vio.h"
     
-struct lsdj_sav_t;
 typedef struct lsdj_sav_t lsdj_sav_t;
 
 // Create/free saves

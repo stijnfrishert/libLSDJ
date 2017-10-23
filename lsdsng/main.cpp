@@ -21,9 +21,6 @@ int main(int argc, char* argv[])
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(argv[1]).c_str(), &error);
     if (sav == nullptr)
-        return 1;
-    
-    if (error)
     {
         lsdj_free_sav(sav);
         return handle_error(error);
