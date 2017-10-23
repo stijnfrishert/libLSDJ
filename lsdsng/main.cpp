@@ -1,4 +1,5 @@
 #include <boost/filesystem.hpp>
+#include <boost/filesystem.hpp>
 
 #include <iostream>
 #include <sstream>
@@ -16,20 +17,24 @@ int main(int argc, char* argv[])
 {
     if (argc < 2)
         return 1;
-    
-    lsdj_sav_t sav;
-    lsdj_init_sav(&sav);
-    lsdj_error_t* error = NULL;
-    lsdj_read_sav_from_file(boost::filesystem::canonical(argv[1]).c_str(), &sav, &error);
+
+    lsdj_error_t* error = nullptr;
+    lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(argv[1]).c_str(), &error);
+    if (sav == nullptr)
+        return 1;
     
     if (error)
+    {
+        lsdj_free_sav(sav);
         return handle_error(error);
+    }
     
     const auto& cwd = boost::filesystem::current_path();
     
-    for (int i = 0; i < PROJECT_COUNT; ++i)
+    const auto count = lsdj_sav_get_project_count(sav);
+    for (int i = 0; i < count; ++i)
     {
-        lsdj_project_t& project = sav.projects[i];
+        lsdj_project_t& project = *lsdj_sav_get_project(sav, i);
         if (!project.song)
             continue;
         
@@ -41,6 +46,8 @@ int main(int argc, char* argv[])
         if (error)
             return handle_error(error);
     }
+    
+    lsdj_free_sav(sav);
 
 	return 0;
 }

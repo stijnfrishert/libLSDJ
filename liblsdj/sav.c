@@ -6,27 +6,92 @@
 #include "compression.h"
 #include "sav.h"
 
-// The memory place of the header
+static const unsigned int LSDJ_SAV_PROJECT_COUNT = 32;
 static const unsigned int HEADER_START = SONG_DECOMPRESSED_SIZE;
 static const unsigned int BLOCK_COUNT = 191;
 static const unsigned int BLOCK_SIZE = 0x200;
 
+// Representation of an entire LSDJ save file
+struct lsdj_sav_t
+{
+    // The projects
+    lsdj_project_t projects[LSDJ_SAV_PROJECT_COUNT];
+    
+    // Index of the project that is currently being edited
+    /*! Indices start at 0, a value of 0xFF means there is no active project */
+    unsigned char activeProject;
+    
+    // The song in active working memory
+    lsdj_song_t song;
+};
+
+
+
 typedef struct
 {
-	char project_names[PROJECT_COUNT * 8];
-	unsigned char versions[PROJECT_COUNT * 1];
+	char project_names[LSDJ_SAV_PROJECT_COUNT * 8];
+	unsigned char versions[LSDJ_SAV_PROJECT_COUNT * 1];
 	unsigned char empty[30];
 	char init[2];
 	unsigned char active_project;
 } header_t;
 
-void lsdj_init_sav(lsdj_sav_t* sav)
+void construct_sav(lsdj_sav_t* sav)
 {
-    for (unsigned char i = 0; i < PROJECT_COUNT; ++i)
+    for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
         lsdj_init_project(&sav->projects[i]);
     
-    sav->activeProject = 0xFF;
     lsdj_init_song(&sav->song);
+}
+
+lsdj_sav_t* alloc_sav(lsdj_error_t** error)
+{
+    lsdj_sav_t* sav = (lsdj_sav_t*)malloc(sizeof(lsdj_sav_t));
+    if (sav == NULL)
+    {
+        lsdj_create_error(error, "could not allocate sav");
+        return NULL;
+    }
+    
+    construct_sav(sav);
+    
+    return sav;
+}
+
+lsdj_sav_t* lsdj_new_sav(lsdj_error_t** error)
+{
+    lsdj_sav_t* sav = alloc_sav(error);
+    if (sav == NULL)
+        return NULL;
+    
+    sav->activeProject = 0xFF;
+    
+    return sav;
+}
+
+void lsdj_free_sav(lsdj_sav_t* sav)
+{
+    free(sav);
+}
+
+lsdj_song_t* lsdj_sav_get_song(lsdj_sav_t* sav)
+{
+    return &sav->song;
+}
+
+int lsdj_sav_get_active_project(lsdj_sav_t* sav)
+{
+    return sav->activeProject == 0xFF ? -1 : sav->activeProject;
+}
+
+unsigned int lsdj_sav_get_project_count(lsdj_sav_t* sav)
+{
+    return LSDJ_SAV_PROJECT_COUNT;
+}
+
+lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, unsigned char project)
+{
+    return &sav->projects[project];
 }
 
 // Read compressed project data from memory sav file
@@ -66,19 +131,24 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* us
     }
 }
 
-void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_sav_t* sav, lsdj_error_t** error)
+lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_error_t** error)
 {
     // Check for incorrect input
     if (read == NULL)
-        return lsdj_create_error(error, "read is NULL");
+    {
+        lsdj_create_error(error, "read is NULL");
+        return NULL;
+    }
     
     if (seek == NULL)
-        return lsdj_create_error(error, "seek is NULL");
+    {
+        lsdj_create_error(error, "seek is NULL");
+        return NULL;
+    }
     
+    lsdj_sav_t* sav = alloc_sav(error);
     if (sav == NULL)
-        return lsdj_create_error(error, "sav is NULL");
-    
-    lsdj_clear_sav(sav);
+        return NULL;
     
     // Skip memory representing the working song (we'll get to that)
     const long begin = tell(user_data);
@@ -91,10 +161,13 @@ void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t s
     // Check the initialization characters. If they're not 'jk', we're
     // probably not dealing with an actual LSDJ sav format file.
     if (header.init[0] != 'j' || header.init[1] != 'k')
-        return lsdj_create_error(error, "SRAM initialization check wasn't 'jk'");
+    {
+        lsdj_create_error(error, "SRAM initialization check wasn't 'jk'");
+        return NULL;
+    }
     
     // Allocate data for all the projects and store their names
-    for (int i = 0; i < PROJECT_COUNT; ++i)
+    for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
     {
         memcpy(sav->projects[i].name, &header.project_names[i * 8], 8);
         sav->projects[i].version = header.versions[i];
@@ -106,7 +179,7 @@ void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t s
     // Read the compressed projects
     read_compressed_blocks(read, seek, user_data, sav->projects, error);
     if (*error)
-        return;
+        return NULL;
     
     // Read the working song
     const long end = tell(user_data);
@@ -116,39 +189,45 @@ void lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t s
     lsdj_read_song_from_memory(song_data, sizeof(song_data), &sav->song, error);
     
     seek(end, SEEK_SET, user_data);
+    
+    return sav;
 }
 
-void lsdj_read_sav_from_file(const char* path, lsdj_sav_t* sav, lsdj_error_t** error)
+lsdj_sav_t* lsdj_read_sav_from_file(const char* path, lsdj_error_t** error)
 {
     if (path == NULL)
-        return lsdj_create_error(error, "path is NULL");
-    
-    if (sav == NULL)
-        return lsdj_create_error(error, "sav is NULL");
+    {
+        lsdj_create_error(error, "path is NULL");
+        return NULL;
+    }
         
     FILE* file = fopen(path, "r");
     if (file == NULL)
-        return lsdj_create_error(error, "could not open file for reading");
+    {
+        lsdj_create_error(error, "could not open file for reading");
+        return NULL;
+    }
 
-    lsdj_read_sav(lsdj_fread, lsdj_ftell, lsdj_fseek, file, sav, error);
+    lsdj_sav_t* sav = lsdj_read_sav(lsdj_fread, lsdj_ftell, lsdj_fseek, file, error);
     
     fclose(file);
+    return sav;
 }
 
-void lsdj_read_sav_from_memory(const unsigned char* data, size_t size, lsdj_sav_t* sav, lsdj_error_t** error)
+lsdj_sav_t* lsdj_read_sav_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
 {
     if (data == NULL)
-        return lsdj_create_error(error, "data is NULL");
-    
-    if (sav == NULL)
-        return lsdj_create_error(error, "sav is NULL");
+    {
+        lsdj_create_error(error, "data is NULL");
+        return NULL;
+    }
 
     lsdj_memory_data_t mem;
     mem.begin = (unsigned char*)data;
     mem.cur = mem.begin;
     mem.size = size;
     
-    lsdj_read_sav(lsdj_mread, lsdj_mtell, lsdj_mseek, &mem, sav, error);
+    return lsdj_read_sav(lsdj_mread, lsdj_mtell, lsdj_mseek, &mem, error);
 }
 
 void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
@@ -174,7 +253,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_da
     unsigned char blocks[BLOCK_SIZE][BLOCK_COUNT];
     unsigned char current_block = 0;
     memset(blocks, 0, sizeof(blocks));
-    for (int i = 0; i < PROJECT_COUNT; ++i)
+    for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
     {
         // Write project name
         memcpy(&header.project_names[i * 8], sav->projects[i].name, 8);
@@ -236,7 +315,7 @@ void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t
 
 void lsdj_clear_sav(lsdj_sav_t* sav)
 {
-    for (int i = 0; i < PROJECT_COUNT; ++i)
+    for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
         lsdj_clear_project(&sav->projects[i]);
     
     sav->activeProject = 0xFF;
