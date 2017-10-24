@@ -51,13 +51,6 @@ void lsdj_free_project(lsdj_project_t* project)
     free(project);
 }
 
-void lsdj_init_project(lsdj_project_t* project)
-{
-    memset(project->name, 0, sizeof(project->name));
-    project->version = 0;
-    project->song = NULL;
-}
-
 lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_error_t** error)
 {
     lsdj_project_t* project = alloc_project(error);

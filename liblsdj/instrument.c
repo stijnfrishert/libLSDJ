@@ -213,7 +213,7 @@ scommand_type parseScommand(unsigned char byte)
     }
 }
 
-void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error)
+void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
     instrument->type = INSTR_PULSE;
     read(&instrument->envelope, 1, user_data);
@@ -226,7 +226,7 @@ void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* use
     read(&instrument->pulse.sweep, 1, user_data);
     
     read(&byte, 1, user_data);
-    instrument->pulse.tuning = parseTuning(byte);
+    instrument->pulse.tuning = (version >= 0x03) ? parseTuning(byte) : TUNE_12_TONE;
     instrument->automate = parseAutomate(byte);
     instrument->pulse.plvib = parsePlvib(byte);
     instrument->pulse.vibratoDirection = parseVibrationDirection(byte);
@@ -244,7 +244,7 @@ void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* use
     seek(8, SEEK_CUR, user_data); // Bytes 8-15 are empty
 }
 
-void read_wave_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error)
+void read_wave_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
     instrument->type = INSTR_WAVE;
     read(&instrument->volume, 1, user_data);
@@ -256,7 +256,7 @@ void read_wave_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user
     seek(2, SEEK_CUR, user_data); // Bytes 3 and 4 are empty
     
     read(&byte, 1, user_data);
-    instrument->wave.tuning = parseTuning(byte);
+    instrument->wave.tuning = (version >= 0x03) ? parseTuning(byte) : TUNE_12_TONE;
     instrument->automate = parseAutomate(byte);
     instrument->pulse.plvib = parsePlvib(byte);
     instrument->pulse.vibratoDirection = parseVibrationDirection(byte);
@@ -358,7 +358,7 @@ void read_noise_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* use
     seek(8, SEEK_CUR, user_data); // Bytes 8-15 are empty
 }
 
-void lsdj_read_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error)
+void lsdj_read_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
     if (read == NULL)
         return lsdj_create_error(error, "read is NULL");
@@ -374,8 +374,8 @@ void lsdj_read_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user
     
     switch (type)
     {
-        case 0: read_pulse_instrument(read, seek, user_data, instrument, error); break;
-        case 1: read_wave_instrument(read, seek, user_data, instrument, error); break;
+        case 0: read_pulse_instrument(read, seek, user_data, version, instrument, error); break;
+        case 1: read_wave_instrument(read, seek, user_data, version, instrument, error); break;
         case 2: read_kit_instrument(read, seek, user_data, instrument, error); break;
         case 3: read_noise_instrument(read, seek, user_data, instrument, error); break;
         default: return lsdj_create_error(error, "unknown instrument type");
@@ -501,7 +501,7 @@ unsigned char createScommandByte(scommand_type type)
     }
 }
 
-void write_pulse_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrument_t* instrument)
+void write_pulse_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_write_t write, void* user_data)
 {
     unsigned char byte = 0;
     write(&byte, 1, user_data);
@@ -512,7 +512,8 @@ void write_pulse_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instru
     write(&byte, 1, user_data);
     write(&instrument->pulse.sweep, 1, user_data);
     
-    byte = createTuningByte(instrument->pulse.tuning) | createAutomateByte(instrument->automate) | createPlvibByte(instrument->pulse.plvib) | createVibrationDirectionByte(instrument->pulse.vibratoDirection);
+    byte = (version >= 0x03) ? createTuningByte(instrument->pulse.tuning) : 0;
+    byte |= createAutomateByte(instrument->automate) | createPlvibByte(instrument->pulse.plvib) | createVibrationDirectionByte(instrument->pulse.vibratoDirection);
     write(&byte, 1, user_data);
     
     byte = createTableByte(instrument->table);
@@ -525,7 +526,7 @@ void write_pulse_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instru
     write(empty, sizeof(empty), user_data); // Bytes 8-15 are empty
 }
 
-void write_wave_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrument_t* instrument)
+void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_write_t write, void* user_data)
 {
     unsigned char byte = 1;
     write(&byte, 1, user_data);
@@ -540,7 +541,8 @@ void write_wave_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrum
     write(&byte, 1, user_data); // Byte 3 is empty
     write(&byte, 1, user_data); // Byte 4 is empty
     
-    byte = createTuningByte(instrument->wave.tuning) | createAutomateByte(instrument->automate) | createPlvibByte(instrument->wave.plvib) | createVibrationDirectionByte(instrument->wave.vibratoDirection);
+    byte = (version >= 0x03) ? createTuningByte(instrument->pulse.tuning) : 0;
+    byte |= createAutomateByte(instrument->automate) | createPlvibByte(instrument->wave.plvib) | createVibrationDirectionByte(instrument->wave.vibratoDirection);
     write(&byte, 1, user_data);
     
     byte = createTableByte(instrument->table);
@@ -568,7 +570,7 @@ void write_wave_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrum
     write(&byte, 1, user_data); // Byte 15 is empty
 }
 
-void write_kit_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrument_t* instrument)
+void write_kit_instrument(const lsdj_instrument_t* instrument, lsdj_vio_write_t write, void* user_data)
 {
     unsigned char byte = 2;
     write(&byte, 1, user_data);
@@ -614,7 +616,7 @@ void write_kit_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrume
     write(&byte, 1, user_data); // Byte 15 is empty
 }
 
-void write_noise_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrument_t* instrument)
+void write_noise_instrument(const lsdj_instrument_t* instrument, lsdj_vio_write_t write, void* user_data)
 {
     unsigned char byte = 3;
     write(&byte, 1, user_data);
@@ -642,7 +644,7 @@ void write_noise_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instru
     write(empty, sizeof(empty), user_data); // Bytes 8-15 are empty
 }
 
-void lsdj_write_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error)
+void lsdj_write_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
 {
     if (write == NULL)
         return lsdj_create_error(error, "write is NULL");
@@ -652,9 +654,9 @@ void lsdj_write_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrum
     
     switch (instrument->type)
     {
-        case INSTR_PULSE: write_pulse_instrument(write, user_data, instrument); break;
-        case INSTR_WAVE: write_wave_instrument(write, user_data, instrument); break;
-        case INSTR_KIT: write_kit_instrument(write, user_data, instrument); break;
-        case INSTR_NOISE: write_noise_instrument(write, user_data, instrument); break;
+        case INSTR_PULSE: write_pulse_instrument(instrument, version, write, user_data); break;
+        case INSTR_WAVE: write_wave_instrument(instrument, version, write, user_data); break;
+        case INSTR_KIT: write_kit_instrument(instrument, write, user_data); break;
+        case INSTR_NOISE: write_noise_instrument(instrument, write, user_data); break;
     }
 }

@@ -316,7 +316,7 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-            lsdj_read_instrument(read, seek, user_data, song->instruments[i], error);
+            lsdj_read_instrument(read, seek, user_data, song->version, song->instruments[i], error);
         else
             seek(16, SEEK_CUR, user_data);
         
@@ -476,7 +476,7 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     {
         if (song->instruments[i])
         {
-            lsdj_write_instrument(write, user_data, song->instruments[i], error);
+            lsdj_write_instrument(song->instruments[i], song->version, write, user_data, error);
         } else {
             write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), user_data);
         }
@@ -642,7 +642,8 @@ void read_bank3(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     seek(2, SEEK_CUR, user_data); // "rb"
     
     read(song->reserved7ff2, sizeof(song->reserved7ff2), user_data);
-    read(&song->version, 1, user_data);
+    
+    seek(1, SEEK_CUR, user_data); // Already read the version number
 }
 
 void write_bank3(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
@@ -702,6 +703,15 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio
     if (check_rb(read, seek, user_data, begin + 0x3E80) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x3E80"); return NULL; }
     if (check_rb(read, seek, user_data, begin + 0x7FF0) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x7FF0"); return NULL; }
     
+    // We passed the 'rb' check, and can create a song now for reading
+    lsdj_song_t* song = alloc_song(error);
+    if (*error)
+        return NULL;
+    
+    // Read the version number
+    seek(begin + 0x7FFF, SEEK_SET, user_data);
+    read(&song->version, 1, user_data);
+    
     // Read the allocation tables
     unsigned char instrAllocTable[INSTR_ALLOC_TABLE_SIZE];
     unsigned char tableAllocTable[TABLE_ALLOC_TABLE_SIZE];
@@ -715,10 +725,6 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio
     seek(begin + 0x3E82, SEEK_SET, user_data);
     read(phraseAllocTable, PHRASE_ALLOC_TABLE_SIZE, user_data);
     read(chainAllocTable, CHAIN_ALLOC_TABLE_SIZE, user_data);
-    
-    lsdj_song_t* song = alloc_song(error);
-    if (*error)
-        return NULL;
 
     for (int i = 0; i < TABLE_ALLOC_TABLE_SIZE; ++i)
     {

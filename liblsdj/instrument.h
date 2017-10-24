@@ -180,7 +180,7 @@ void lsdj_clear_instrument_as_kit(lsdj_instrument_t* instrument);
 void lsdj_clear_instrument_as_noise(lsdj_instrument_t* instrument);
 
 // Instrument I/O
-void lsdj_read_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error);
-void lsdj_write_instrument(lsdj_vio_write_t write, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error);
+void lsdj_read_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error);
+void lsdj_write_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error);
 
 #endif
