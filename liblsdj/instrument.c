@@ -175,12 +175,16 @@ void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* use
                 instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
                 break;
             case 1:
+                instrument->pulse.plvibSpeed = LSDJ_PLVIB_TICK;
                 instrument->pulse.vibShape = LSDJ_VIB_SAWTOOTH;
+                break;
             case 2:
+                instrument->pulse.plvibSpeed = LSDJ_PLVIB_TICK;
                 instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
+                break;
             case 3:
+                instrument->pulse.plvibSpeed = LSDJ_PLVIB_TICK;
                 instrument->pulse.vibShape = LSDJ_VIB_SQUARE;
-                instrument->pulse.plvibSpeed = LSDJ_PLVIB_FAST;
                 break;
         }
     } else {
@@ -233,16 +237,20 @@ void read_wave_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user
         switch ((byte >> 1) & 3)
         {
             case 0:
-                instrument->wave.plvibSpeed = LSDJ_PLVIB_FAST;
-                instrument->wave.vibShape = LSDJ_VIB_TRIANGLE;
+                instrument->pulse.plvibSpeed = LSDJ_PLVIB_FAST;
+                instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
                 break;
             case 1:
-                instrument->wave.vibShape = LSDJ_VIB_SAWTOOTH;
+                instrument->pulse.plvibSpeed = LSDJ_PLVIB_TICK;
+                instrument->pulse.vibShape = LSDJ_VIB_SAWTOOTH;
+                break;
             case 2:
-                instrument->wave.vibShape = LSDJ_VIB_TRIANGLE;
+                instrument->pulse.plvibSpeed = LSDJ_PLVIB_TICK;
+                instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
+                break;
             case 3:
-                instrument->wave.vibShape = LSDJ_VIB_SQUARE;
-                instrument->wave.plvibSpeed = LSDJ_PLVIB_FAST;
+                instrument->pulse.plvibSpeed = LSDJ_PLVIB_TICK;
+                instrument->pulse.vibShape = LSDJ_VIB_SQUARE;
                 break;
         }
     } else {
@@ -318,12 +326,12 @@ void read_kit_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_
                 instrument->kit.vibShape = LSDJ_VIB_TRIANGLE;
                 break;
             case 1:
-                instrument->kit.vibShape = LSDJ_VIB_SAWTOOTH;
-            case 2:
+                instrument->kit.plvibSpeed = LSDJ_PLVIB_TICK;
                 instrument->kit.vibShape = LSDJ_VIB_TRIANGLE;
-            case 3:
-                instrument->kit.vibShape = LSDJ_VIB_SQUARE;
-                instrument->kit.plvibSpeed = LSDJ_PLVIB_FAST;
+                break;
+            case 2:
+                instrument->kit.plvibSpeed = LSDJ_PLVIB_STEP;
+                instrument->kit.vibShape = LSDJ_VIB_TRIANGLE;
                 break;
         }
     } else {
