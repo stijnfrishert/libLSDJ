@@ -26,9 +26,10 @@ void lsdj_clear_instrument_as_pulse(lsdj_instrument_t* instrument)
     instrument->pulse.pulseWidth = LSDJ_PULSE_WAVE_PW_125;
     instrument->pulse.length = UNLIMITED_LENGTH;
     instrument->pulse.sweep = 0xFF;
-    instrument->pulse.plvib = LSDJ_PLVIB_HIGH_FREQUENCY;
+    instrument->pulse.plvibSpeed = LSDJ_PLVIB_FAST;
+    instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
     instrument->pulse.vibratoDirection = LSDJ_VIB_UP;
-    instrument->pulse.tuning = TUNE_12_TONE;
+    instrument->pulse.tuning = LSDJ_TUNE_12_TONE;
     instrument->pulse.pulse2tune = 0;
     instrument->pulse.fineTune = 0;
 }
@@ -41,9 +42,10 @@ void lsdj_clear_instrument_as_wave(lsdj_instrument_t* instrument)
     instrument->table = NO_TABLE;
     instrument->automate = 0;
     
-    instrument->wave.plvib = LSDJ_PLVIB_HIGH_FREQUENCY;
+    instrument->wave.plvibSpeed = LSDJ_PLVIB_FAST;
+    instrument->wave.vibShape = LSDJ_VIB_TRIANGLE;
     instrument->wave.vibratoDirection = LSDJ_VIB_UP;
-    instrument->wave.tuning = TUNE_12_TONE;
+    instrument->wave.tuning = LSDJ_TUNE_12_TONE;
     instrument->wave.synth = 0;
     instrument->wave.playback = LSDJ_PLAY_ONCE;
     instrument->wave.length = 0x0F;
@@ -72,7 +74,8 @@ void lsdj_clear_instrument_as_kit(lsdj_instrument_t* instrument)
     instrument->kit.pitch = 0;
     instrument->kit.halfSpeed = 0;
     instrument->kit.distortion = LSDJ_KIT_DIST_CLIP;
-    instrument->kit.pSpeed = LSDJ_KIT_PSPEED_FAST;
+    instrument->kit.plvibSpeed = LSDJ_PLVIB_FAST;
+    instrument->kit.vibShape = LSDJ_VIB_TRIANGLE;
 }
 
 void lsdj_clear_instrument_as_noise(lsdj_instrument_t* instrument)
@@ -111,30 +114,14 @@ lsdj_panning parsePanning(unsigned char byte)
     return byte & 3;
 }
 
-tuning_mode parseTuning(unsigned char byte)
+lsdj_tuning_mode parseTuning(unsigned char byte)
 {
-    switch ((byte >> 5) & 0x3)
-    {
-        case 0: return TUNE_12_TONE;
-        case 1: return TUNE_FIXED;
-        case 2: return TUNE_DRUM;
-        default: return TUNE_12_TONE;
-    }
+    return (byte >> 5) & 0x3;
 }
 
 unsigned char parseAutomate(unsigned char byte)
 {
     return (byte >> 3) & 3;
-}
-
-lsdj_plvib_type parsePlvib(unsigned char byte)
-{
-    return (byte >> 1) & 0x3;
-}
-
-lsdj_vibrato_direction parseVibrationDirection(unsigned char byte)
-{
-    return byte & 0x1;
 }
 
 lsdj_pulse_wave parsePulseWidth(unsigned char byte)
@@ -145,11 +132,6 @@ lsdj_pulse_wave parsePulseWidth(unsigned char byte)
 lsdj_playback_mode parsePlaybackMode(unsigned char byte)
 {
     return byte & 0x3;
-}
-
-lsdj_kit_pspeed parsePspeed(unsigned char byte, lsdj_error_t** error)
-{
-    return (byte >> 1) & 3;
 }
 
 lsdj_kit_distortion parseKitDistortion(unsigned char byte)
@@ -180,10 +162,42 @@ void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* use
     
     // 5
     read(&byte, 1, user_data);
-    instrument->pulse.tuning = (version >= 0x03) ? parseTuning(byte) : TUNE_12_TONE;
+    instrument->pulse.tuning = (version >= 0x03) ? parseTuning(byte) : LSDJ_TUNE_12_TONE;
     instrument->automate = parseAutomate(byte);
-    instrument->pulse.plvib = parsePlvib(byte);
-    instrument->pulse.vibratoDirection = parseVibrationDirection(byte);
+    instrument->pulse.vibratoDirection = byte & 1;
+    
+    if (version < 5)
+    {
+        switch ((byte >> 1) & 3)
+        {
+            case 0:
+                instrument->pulse.plvibSpeed = LSDJ_PLVIB_FAST;
+                instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
+                break;
+            case 1:
+                instrument->pulse.vibShape = LSDJ_VIB_SAWTOOTH;
+            case 2:
+                instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
+            case 3:
+                instrument->pulse.vibShape = LSDJ_VIB_SQUARE;
+                instrument->pulse.plvibSpeed = LSDJ_PLVIB_FAST;
+                break;
+        }
+    } else {
+        if (byte & 0x80)
+            instrument->pulse.plvibSpeed = LSDJ_PLVIB_STEP;
+        else if (byte & 0x10)
+            instrument->pulse.plvibSpeed = LSDJ_PLVIB_TICK;
+        else
+            instrument->pulse.plvibSpeed = LSDJ_PLVIB_FAST;
+        
+        switch ((byte >> 1) & 3)
+        {
+            case 0: instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
+            case 1: instrument->pulse.vibShape = LSDJ_VIB_SAWTOOTH;
+            case 2: instrument->pulse.vibShape = LSDJ_VIB_SQUARE;
+        }
+    }
     
     read(&byte, 1, user_data);
     instrument->table = parseTable(byte);
@@ -210,10 +224,44 @@ void read_wave_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user
     seek(2, SEEK_CUR, user_data); // Bytes 3 and 4 are empty
     
     read(&byte, 1, user_data);
-    instrument->wave.tuning = (version >= 0x03) ? parseTuning(byte) : TUNE_12_TONE;
+    instrument->wave.tuning = (version >= 0x03) ? parseTuning(byte) : LSDJ_TUNE_12_TONE;
     instrument->automate = parseAutomate(byte);
-    instrument->pulse.plvib = parsePlvib(byte);
-    instrument->pulse.vibratoDirection = parseVibrationDirection(byte);
+    instrument->pulse.vibratoDirection = byte & 1;
+    
+    if (version < 5)
+    {
+        switch ((byte >> 1) & 3)
+        {
+            case 0:
+                instrument->wave.plvibSpeed = LSDJ_PLVIB_FAST;
+                instrument->wave.vibShape = LSDJ_VIB_TRIANGLE;
+                break;
+            case 1:
+                instrument->wave.vibShape = LSDJ_VIB_SAWTOOTH;
+            case 2:
+                instrument->wave.vibShape = LSDJ_VIB_TRIANGLE;
+            case 3:
+                instrument->wave.vibShape = LSDJ_VIB_SQUARE;
+                instrument->wave.plvibSpeed = LSDJ_PLVIB_FAST;
+                break;
+        }
+    } else {
+        if (byte & 0x80)
+            instrument->wave.plvibSpeed = LSDJ_PLVIB_STEP;
+        else if (byte & 0x10)
+            instrument->wave.plvibSpeed = LSDJ_PLVIB_TICK;
+        else
+            instrument->wave.plvibSpeed = LSDJ_PLVIB_FAST;
+        
+        switch ((byte >> 1) & 3)
+        {
+            case 0: instrument->wave.vibShape = LSDJ_VIB_TRIANGLE;
+            case 1: instrument->wave.vibShape = LSDJ_VIB_SAWTOOTH;
+            case 2: instrument->wave.vibShape = LSDJ_VIB_SQUARE;
+        }
+        
+        instrument->kit.vibratoDirection = (byte & 1) == 1 ? LSDJ_VIB_UP : LSDJ_VIB_DOWN;
+    }
     
     read(&byte, 1, user_data);
     instrument->table = parseTable(byte);
@@ -235,7 +283,7 @@ void read_wave_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user
     seek(1, SEEK_CUR, user_data); // Byte 15 is empty
 }
 
-void read_kit_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_instrument_t* instrument, lsdj_error_t** error)
+void read_kit_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
     instrument->type = INSTR_KIT;
     read(&instrument->volume, 1, user_data);
@@ -258,9 +306,41 @@ void read_kit_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_
         instrument->kit.loop1 = ((byte >> 6) & 1) ? LSDJ_KIT_LOOP_ON : LSDJ_KIT_LOOP_OFF;
     instrument->kit.loop2 = ((byte >> 6) & 1) ? LSDJ_KIT_LOOP_ON : LSDJ_KIT_LOOP_OFF;
     instrument->automate = parseAutomate(byte);
-    instrument->kit.pSpeed = parsePspeed(byte, error);
-    if (*error)
-        return;
+    
+    instrument->kit.vibratoDirection = byte & 1;
+    
+    if (version < 5)
+    {
+        switch ((byte >> 1) & 3)
+        {
+            case 0:
+                instrument->kit.plvibSpeed = LSDJ_PLVIB_FAST;
+                instrument->kit.vibShape = LSDJ_VIB_TRIANGLE;
+                break;
+            case 1:
+                instrument->kit.vibShape = LSDJ_VIB_SAWTOOTH;
+            case 2:
+                instrument->kit.vibShape = LSDJ_VIB_TRIANGLE;
+            case 3:
+                instrument->kit.vibShape = LSDJ_VIB_SQUARE;
+                instrument->kit.plvibSpeed = LSDJ_PLVIB_FAST;
+                break;
+        }
+    } else {
+        if (byte & 0x80)
+            instrument->kit.plvibSpeed = LSDJ_PLVIB_STEP;
+        else if (byte & 0x10)
+            instrument->kit.plvibSpeed = LSDJ_PLVIB_TICK;
+        else
+            instrument->kit.plvibSpeed = LSDJ_PLVIB_FAST;
+        
+        switch ((byte >> 1) & 3)
+        {
+            case 0: instrument->kit.vibShape = LSDJ_VIB_TRIANGLE;
+            case 1: instrument->kit.vibShape = LSDJ_VIB_SAWTOOTH;
+            case 2: instrument->kit.vibShape = LSDJ_VIB_SQUARE;
+        }
+    }
     
     read(&byte, 1, user_data);
     instrument->table = parseTable(byte);
@@ -329,7 +409,7 @@ void lsdj_read_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user
     {
         case 0: read_pulse_instrument(read, seek, user_data, version, instrument, error); break;
         case 1: read_wave_instrument(read, seek, user_data, version, instrument, error); break;
-        case 2: read_kit_instrument(read, seek, user_data, instrument, error); break;
+        case 2: read_kit_instrument(read, seek, user_data, version, instrument, error); break;
         case 3: read_noise_instrument(read, seek, user_data, instrument, error); break;
         default: return lsdj_create_error(error, "unknown instrument type");
     }
@@ -366,22 +446,12 @@ unsigned char createAutomateByte(unsigned char automate)
     return (automate == 0) ? 0x0 : 0x8;
 }
 
-unsigned char createTuningByte(tuning_mode tuning)
+unsigned char createTuningByte(lsdj_tuning_mode tuning)
 {
-    switch (tuning)
-    {
-        case TUNE_12_TONE: return 0x0;
-        case TUNE_FIXED: return 0x20;
-        case TUNE_DRUM: return 0x40;
-    }
+    return (unsigned char)((tuning & 3) << 5);
 }
 
-unsigned char createPlvibByte(lsdj_plvib_type plvib)
-{
-    return (unsigned char)((plvib & 3) << 1);
-}
-
-unsigned char createVibrationDirectionByte(lsdj_vibrato_direction dir)
+unsigned char createVibrationDirectionByte(lsdj_vib_direction dir)
 {
     return dir & 1;
 }
@@ -394,11 +464,6 @@ unsigned char createPulseWidthByte(lsdj_pulse_wave pw)
 unsigned char createPlaybackModeByte(lsdj_playback_mode play)
 {
     return play & 3;
-}
-
-unsigned char createPspeedByte(lsdj_kit_pspeed pspeed)
-{
-    return (unsigned char)((pspeed & 3) << 1);
 }
 
 unsigned char createKitDistortionByte(lsdj_kit_distortion dist)
@@ -423,7 +488,27 @@ void write_pulse_instrument(const lsdj_instrument_t* instrument, unsigned char v
     write(&instrument->pulse.sweep, 1, user_data);
     
     byte = (version >= 0x03) ? createTuningByte(instrument->pulse.tuning) : 0;
-    byte |= createAutomateByte(instrument->automate) | createPlvibByte(instrument->pulse.plvib) | createVibrationDirectionByte(instrument->pulse.vibratoDirection);
+    byte |= createAutomateByte(instrument->automate) | createVibrationDirectionByte(instrument->pulse.vibratoDirection);
+    
+    if (version < 5)
+    {
+        switch (instrument->pulse.vibShape)
+        {
+            case LSDJ_VIB_SAWTOOTH: byte |= 2; break;
+            case LSDJ_VIB_SQUARE: byte |= 6; break;
+            case LSDJ_VIB_TRIANGLE:
+                if (instrument->pulse.plvibSpeed != LSDJ_PLVIB_FAST)
+                    byte |= 2;
+                break;
+        }
+    } else {
+        byte |= (instrument->pulse.vibShape & 3) << 1;
+        if (instrument->pulse.plvibSpeed == LSDJ_PLVIB_TICK)
+            byte |= 0x10;
+        else if (instrument->pulse.plvibSpeed == LSDJ_PLVIB_STEP)
+            byte |= 0x80;
+    }
+    
     write(&byte, 1, user_data);
     
     byte = createTableByte(instrument->table);
@@ -452,7 +537,25 @@ void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char ve
     write(&byte, 1, user_data); // Byte 4 is empty
     
     byte = (version >= 0x03) ? createTuningByte(instrument->pulse.tuning) : 0;
-    byte |= createAutomateByte(instrument->automate) | createPlvibByte(instrument->wave.plvib) | createVibrationDirectionByte(instrument->wave.vibratoDirection);
+    byte |= createAutomateByte(instrument->automate) | createVibrationDirectionByte(instrument->wave.vibratoDirection);
+    if (version < 5)
+    {
+        switch (instrument->pulse.vibShape)
+        {
+            case LSDJ_VIB_SAWTOOTH: byte |= 2; break;
+            case LSDJ_VIB_SQUARE: byte |= 6; break;
+            case LSDJ_VIB_TRIANGLE:
+                if (instrument->pulse.plvibSpeed != LSDJ_PLVIB_FAST)
+                    byte |= 2;
+                break;
+        }
+    } else {
+        byte |= (instrument->pulse.vibShape & 3) << 1;
+        if (instrument->pulse.plvibSpeed == LSDJ_PLVIB_TICK)
+            byte |= 0x10;
+        else if (instrument->pulse.plvibSpeed == LSDJ_PLVIB_STEP)
+            byte |= 0x80;
+    }
     write(&byte, 1, user_data);
     
     byte = createTableByte(instrument->table);
@@ -480,7 +583,7 @@ void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char ve
     write(&byte, 1, user_data); // Byte 15 is empty
 }
 
-void write_kit_instrument(const lsdj_instrument_t* instrument, lsdj_vio_write_t write, void* user_data)
+void write_kit_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_write_t write, void* user_data)
 {
     unsigned char byte = 2;
     write(&byte, 1, user_data);
@@ -498,8 +601,18 @@ void write_kit_instrument(const lsdj_instrument_t* instrument, lsdj_vio_write_t 
     
     byte = ((instrument->kit.loop1 == LSDJ_KIT_LOOP_ON) ? 0x80 : 0x0) |
            ((instrument->kit.loop2 == LSDJ_KIT_LOOP_ON) ? 0x40 : 0x0) |
-           createAutomateByte(instrument->automate) |
-           createPspeedByte(instrument->kit.pSpeed);
+           createAutomateByte(instrument->automate);
+    
+    if (version < 5)
+    {
+        byte |= (instrument->kit.plvibSpeed & 3) << 1;
+    } else {
+        byte |= (instrument->pulse.vibShape & 3) << 1;
+        if (instrument->pulse.plvibSpeed == LSDJ_PLVIB_TICK)
+            byte |= 0x10;
+        else if (instrument->pulse.plvibSpeed == LSDJ_PLVIB_STEP)
+            byte |= 0x80;
+    }
     write(&byte, 1, user_data);
     
     byte = createTableByte(instrument->table);
@@ -565,7 +678,7 @@ void lsdj_write_instrument(const lsdj_instrument_t* instrument, unsigned char ve
     {
         case INSTR_PULSE: write_pulse_instrument(instrument, version, write, user_data); break;
         case INSTR_WAVE: write_wave_instrument(instrument, version, write, user_data); break;
-        case INSTR_KIT: write_kit_instrument(instrument, write, user_data); break;
+        case INSTR_KIT: write_kit_instrument(instrument, version, write, user_data); break;
         case INSTR_NOISE: write_noise_instrument(instrument, write, user_data); break;
     }
 }

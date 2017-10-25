@@ -8,6 +8,8 @@
 #ifndef LSDJ_INSTRUMENT_KIT_H
 #define LSDJ_INSTRUMENT_KIT_H
 
+#include "instrument_constants.h"
+
 typedef unsigned char lsdj_kit_loop_mode;
 static const lsdj_kit_loop_mode LSDJ_KIT_LOOP_OFF = 0;
 static const lsdj_kit_loop_mode LSDJ_KIT_LOOP_ON = 1;
@@ -39,7 +41,9 @@ typedef struct
     unsigned char pitch;
     unsigned char halfSpeed;
     lsdj_kit_distortion distortion;
-    lsdj_kit_pspeed pSpeed;
+    lsdj_plvib_speed plvibSpeed;
+    lsdj_vib_shape vibShape;
+    lsdj_vib_direction vibratoDirection;
 } lsdj_instrument_kit_t;
 
 #endif

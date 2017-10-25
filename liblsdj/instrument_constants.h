@@ -8,21 +8,23 @@
 #ifndef LSDJ_INSTRUMENT_CONSTANTS_H
 #define LSDJ_INSTRUMENT_CONSTANTS_H
 
-typedef unsigned char lsdj_plvib_type;
-static const lsdj_plvib_type LSDJ_PLVIB_HIGH_FREQUENCY = 0;
-static const lsdj_plvib_type LSDJ_PLVIB_SAWTOOTH = 1;
-static const lsdj_plvib_type LSDJ_PLVIB_TRIANGLE = 2;
-static const lsdj_plvib_type LSDJ_PLVIB_SQUARE = 3;
+typedef unsigned char lsdj_plvib_speed;
+static const lsdj_plvib_speed LSDJ_PLVIB_FAST = 0;
+static const lsdj_plvib_speed LSDJ_PLVIB_TICK = 1;
+static const lsdj_plvib_speed LSDJ_PLVIB_STEP = 2;
 
-typedef unsigned char lsdj_vibrato_direction;
-static const lsdj_vibrato_direction LSDJ_VIB_UP = 0;
-static const lsdj_vibrato_direction LSDJ_VIB_DOWN = 1;
+typedef unsigned char lsdj_vib_shape;
+static const lsdj_vib_shape LSDJ_VIB_TRIANGLE = 0;
+static const lsdj_vib_shape LSDJ_VIB_SAWTOOTH = 1;
+static const lsdj_vib_shape LSDJ_VIB_SQUARE = 2;
 
-typedef enum
-{
-    TUNE_12_TONE,
-    TUNE_FIXED,
-    TUNE_DRUM
-} tuning_mode;
+typedef unsigned char lsdj_vib_direction;
+static const lsdj_vib_direction LSDJ_VIB_UP = 0;
+static const lsdj_vib_direction LSDJ_VIB_DOWN = 1;
+
+typedef unsigned char lsdj_tuning_mode;
+static const lsdj_tuning_mode LSDJ_TUNE_12_TONE = 0;
+static const lsdj_tuning_mode LSDJ_TUNE_FIXED = 1;
+static const lsdj_tuning_mode LSDJ_TUNE_DRUM = 2;
 
 #endif

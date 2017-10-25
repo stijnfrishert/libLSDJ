@@ -18,9 +18,10 @@ static const lsdj_playback_mode LSDJ_PLAY_MANUAL = 3;
 
 typedef struct
 {
-    lsdj_plvib_type plvib;
-    lsdj_vibrato_direction vibratoDirection;
-    tuning_mode tuning;
+    lsdj_plvib_speed plvibSpeed;
+    lsdj_vib_shape vibShape;
+    lsdj_vib_direction vibratoDirection;
+    lsdj_tuning_mode tuning;
     unsigned char synth;
     lsdj_playback_mode playback;
     unsigned char length;

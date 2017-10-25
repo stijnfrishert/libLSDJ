@@ -21,9 +21,10 @@ typedef struct
     lsdj_pulse_wave pulseWidth;
     unsigned char length; // 0x40 and above = unlimited
     unsigned char sweep;
-    lsdj_plvib_type plvib;
-    lsdj_vibrato_direction vibratoDirection;
-    tuning_mode tuning;
+    lsdj_plvib_speed plvibSpeed;
+    lsdj_vib_shape vibShape;
+    lsdj_vib_direction vibratoDirection;
+    lsdj_tuning_mode tuning;
     unsigned char pulse2tune;
     unsigned char fineTune;
 } lsdj_instrument_pulse_t;
