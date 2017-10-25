@@ -506,7 +506,7 @@ void write_pulse_instrument(const lsdj_instrument_t* instrument, unsigned char v
             case LSDJ_VIB_SQUARE: byte |= 6; break;
             case LSDJ_VIB_TRIANGLE:
                 if (instrument->pulse.plvibSpeed != LSDJ_PLVIB_FAST)
-                    byte |= 2;
+                    byte |= 4;
                 break;
         }
     } else {
@@ -554,7 +554,7 @@ void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char ve
             case LSDJ_VIB_SQUARE: byte |= 6; break;
             case LSDJ_VIB_TRIANGLE:
                 if (instrument->pulse.plvibSpeed != LSDJ_PLVIB_FAST)
-                    byte |= 2;
+                    byte |= 4;
                 break;
         }
     } else {

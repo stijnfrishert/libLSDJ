@@ -57,7 +57,7 @@ lsdj_sav_t* lsdj_new_sav(lsdj_error_t** error)
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
     {
         sav->projects[i] = lsdj_new_project(error);
-        if (*error)
+        if (error && *error)
         {
             lsdj_free_sav(sav);
             return NULL;
@@ -67,7 +67,7 @@ lsdj_sav_t* lsdj_new_sav(lsdj_error_t** error)
     sav->activeProject = 0xFF;
     
     sav->song = lsdj_new_song(error);
-    if (*error)
+    if (error && *error)
     {
         lsdj_free_sav(sav);
         return NULL;
@@ -142,7 +142,7 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio
         
         // Read the song from memory
         lsdj_song_t* song = lsdj_read_song_from_memory(data, sizeof(data), error);
-        if (*error)
+        if (error && *error)
         {
             free(song);
             return;
@@ -191,7 +191,7 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_s
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
     {
         lsdj_project_t* project = lsdj_new_project(error);
-        if (*error)
+        if (error && *error)
         {
             lsdj_free_sav(sav);
             return NULL;
@@ -208,7 +208,7 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_s
     
     // Read the compressed projects
     read_compressed_blocks(read, seek, tell, user_data, sav->projects, error);
-    if (*error)
+    if (error && *error)
         return NULL;
     
     // Read the working song
@@ -217,7 +217,7 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_s
     unsigned char song_data[SONG_DECOMPRESSED_SIZE];
     read(song_data, sizeof(song_data), user_data);
     sav->song = lsdj_new_song(error);
-    if (*error)
+    if (error && *error)
     {
         lsdj_free_sav(sav);
         return NULL;

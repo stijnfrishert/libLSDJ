@@ -320,7 +320,7 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
         else
             seek(16, SEEK_CUR, user_data);
         
-        if (*error)
+        if (error && *error)
             return;
     }
     
@@ -481,7 +481,7 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
             write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), user_data);
         }
         
-        if (*error)
+        if (error && *error)
             return;
     }
     
@@ -705,7 +705,7 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio
     
     // We passed the 'rb' check, and can create a song now for reading
     lsdj_song_t* song = alloc_song(error);
-    if (*error)
+    if (error && *error)
         return NULL;
     
     // Read the version number
@@ -754,7 +754,7 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio
     seek(begin, SEEK_SET, user_data);
     read_bank0(read, seek, user_data, song);
     read_bank1(read, seek, user_data, song, error);
-    if (*error)
+    if (error && *error)
     {
         lsdj_free_song(song);
         return NULL;

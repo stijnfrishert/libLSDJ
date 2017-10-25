@@ -26,6 +26,8 @@ int main(int argc, char* argv[])
         return handle_error(error);
     }
     
+    lsdj_write_sav_to_file(sav, "/Users/stijn/Desktop/test.sav", nullptr);
+    
     const auto& cwd = boost::filesystem::current_path();
     
     const auto count = lsdj_sav_get_project_count(sav);
