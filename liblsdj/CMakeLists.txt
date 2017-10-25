@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 3.0.0)
 # Add global definitions and include directories
 add_definitions(-Wall -Werror -Wconversion)
 
-set(HEADERS chain.h command.h compression.h error.h groove.h instrument.h phrase.h project.h row.h sav.h song.h synth.h table.h vio.h wave.h word.h)
-set(SOURCES chain.c command.c compression.c error.c groove.c instrument.c phrase.c project.c row.c sav.c song.c synth.c table.c vio.c wave.c word.c)
+set(HEADERS chain.h command.h compression.h error.h groove.h instrument.h instrument_constants.h instrument_kit.h instrument_noise.h instrument_pulse.h instrument_wave.h phrase.h project.h row.h sav.h song.h synth.h table.h vio.h wave.h word.h)
+set(SOURCES chain.c command.c compression.c error.c groove.c instrument.c instrument_kit.c instrument_noise.c instrument_pulse.c instrument_wave.c phrase.c project.c row.c sav.c song.c synth.c table.c vio.c wave.c word.c)
 
 # Create the library target
 add_library(liblsdj STATIC ${HEADERS} ${SOURCES})

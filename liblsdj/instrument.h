@@ -10,6 +10,10 @@
 #define LSDJ_INSTRUMENT_H
 
 #include "error.h"
+#include "instrument_kit.h"
+#include "instrument_noise.h"
+#include "instrument_pulse.h"
+#include "instrument_wave.h"
 #include "vio.h"
 
 // The default constant length of an instrument name
@@ -25,127 +29,11 @@ typedef enum
     INSTR_NOISE
 } instrument_type;
 
-typedef enum
-{
-    PAN_LEFT_RIGHT,
-    PAN_LEFT,
-    PAN_RIGHT,
-    PAN_NONE
-} panning;
-
-typedef enum
-{
-    PULSE_WIDTH_125,
-    PULSE_WIDTH_25,
-    PULSE_WIDTH_50,
-    PULSE_WIDTH_75
-} pulse_width;
-
-typedef enum
-{
-    PLVIB_HIGH_FREQUENCY,
-    PLVIB_SAWTOOTH,
-    PLVIB_TRIANGLE,
-    PLVIB_SQUARE
-} plvib_type;
-
-typedef enum
-{
-    VIB_UP,
-    VIB_DOWN
-} vibrato_direction;
-
-typedef enum
-{
-    TUNE_12_TONE,
-    TUNE_FIXED,
-    TUNE_DRUM
-} tuning_mode;
-
-typedef enum
-{
-    PLAY_ONCE,
-    PLAY_LOOP,
-    PLAY_PING_PONG,
-    PLAY_MANUAL
-} playback_mode;
-
-typedef enum
-{
-    KIT_LOOP_OFF,
-    KIT_LOOP_ON,
-    KIT_LOOP_ATTACK
-} kit_loop_mode;
-
-typedef enum
-{
-    KIT_DIST_CLIP,
-    KIT_DIST_SHAPE,
-    KIT_DIST_SHAPE2,
-    KIT_DIST_WRAP,
-} kit_distortion;
-
-typedef enum
-{
-    KIT_PSPEED_FAST,
-    KIT_PSPEED_SLOW,
-    KIT_PSPEED_STEP
-} kit_pspeed;
-
-typedef enum
-{
-    SCOMMAND_FREE,
-    SCOMMAND_STABLE
-} scommand_type;
-
-typedef struct
-{
-    pulse_width pulseWidth;
-    unsigned char length; // 0x40 and above = unlimited
-    unsigned char sweep;
-    plvib_type plvib;
-    vibrato_direction vibratoDirection;
-    tuning_mode tuning;
-    unsigned char pulse2tune;
-    unsigned char fineTune;
-} lsdj_instrument_pulse_t;
-
-typedef struct
-{
-    plvib_type plvib;
-    vibrato_direction vibratoDirection;
-    tuning_mode tuning;
-    unsigned char synth;
-    playback_mode playback;
-    unsigned char length;
-    unsigned char repeat;
-    unsigned char speed;
-} lsdj_instrument_wave_t;
-
-typedef struct
-{
-    unsigned char kit1;
-    unsigned char offset1;
-    unsigned char length1;
-    kit_loop_mode loop1;
-    
-    unsigned char kit2;
-    unsigned char offset2;
-    unsigned char length2;
-    kit_loop_mode loop2;
-    
-    unsigned char pitch;
-    unsigned char halfSpeed;
-    kit_distortion distortion;
-    kit_pspeed pSpeed;
-} lsdj_instrument_kit_t;
-
-typedef struct
-{
-    unsigned char length; // 0x40 and above = unlimited
-    unsigned char shape;
-    scommand_type sCommand;
-} lsdj_instrument_noise_t;
+typedef unsigned char lsdj_panning;
+static const lsdj_panning LSDJ_PAN_NONE = 0;
+static const lsdj_panning LSDJ_PAN_RIGHT = 1;
+static const lsdj_panning LSDJ_PAN_LEFT = 2;
+static const lsdj_panning LSDJ_PAN_LEFT_RIGHT = 3;
 
 static const unsigned char NO_TABLE = 0x20;
 static const unsigned char UNLIMITED_LENGTH = 0x40;
@@ -159,7 +47,7 @@ typedef struct
     instrument_type type;
     
     union { unsigned char envelope; unsigned char volume; };
-    panning panning;
+    lsdj_panning panning;
     unsigned char table; // 0x20 or higher = NO_TABLE
     unsigned char automate;
     

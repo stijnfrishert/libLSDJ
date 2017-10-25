@@ -4,6 +4,7 @@ find_package(Boost REQUIRED COMPONENTS filesystem program_options)
 
 # Create the executable target
 add_executable(lsdsng main.cpp)
+source_group(\\ FILES main.cpp)
 
 target_compile_features(lsdsng PUBLIC cxx_std_14)
 target_include_directories(lsdsng PUBLIC ${Boost_INCLUDE_DIRS})

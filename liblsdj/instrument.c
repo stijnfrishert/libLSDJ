@@ -19,15 +19,15 @@ void lsdj_clear_instrument_as_pulse(lsdj_instrument_t* instrument)
 {
     instrument->type = INSTR_PULSE;
     instrument->envelope = 0xA8;
-    instrument->panning = PAN_LEFT_RIGHT;
+    instrument->panning = LSDJ_PAN_LEFT_RIGHT;
     instrument->table = NO_TABLE;
     instrument->automate = 0;
     
-    instrument->pulse.pulseWidth = PULSE_WIDTH_125;
+    instrument->pulse.pulseWidth = LSDJ_PULSE_WAVE_PW_125;
     instrument->pulse.length = UNLIMITED_LENGTH;
     instrument->pulse.sweep = 0xFF;
-    instrument->pulse.plvib = PLVIB_HIGH_FREQUENCY;
-    instrument->pulse.vibratoDirection = VIB_UP;
+    instrument->pulse.plvib = LSDJ_PLVIB_HIGH_FREQUENCY;
+    instrument->pulse.vibratoDirection = LSDJ_VIB_UP;
     instrument->pulse.tuning = TUNE_12_TONE;
     instrument->pulse.pulse2tune = 0;
     instrument->pulse.fineTune = 0;
@@ -37,15 +37,15 @@ void lsdj_clear_instrument_as_wave(lsdj_instrument_t* instrument)
 {
     instrument->type = INSTR_WAVE;
     instrument->volume = 3;
-    instrument->panning = PAN_LEFT_RIGHT;
+    instrument->panning = LSDJ_PAN_LEFT_RIGHT;
     instrument->table = NO_TABLE;
     instrument->automate = 0;
     
-    instrument->wave.plvib = PLVIB_HIGH_FREQUENCY;
-    instrument->wave.vibratoDirection = VIB_UP;
+    instrument->wave.plvib = LSDJ_PLVIB_HIGH_FREQUENCY;
+    instrument->wave.vibratoDirection = LSDJ_VIB_UP;
     instrument->wave.tuning = TUNE_12_TONE;
     instrument->wave.synth = 0;
-    instrument->wave.playback = PLAY_ONCE;
+    instrument->wave.playback = LSDJ_PLAY_ONCE;
     instrument->wave.length = 0x0F;
     instrument->wave.repeat = 0;
     instrument->wave.speed = 4;
@@ -55,37 +55,37 @@ void lsdj_clear_instrument_as_kit(lsdj_instrument_t* instrument)
 {
     instrument->type = INSTR_KIT;
     instrument->volume = 3;
-    instrument->panning = PAN_LEFT_RIGHT;
+    instrument->panning = LSDJ_PAN_LEFT_RIGHT;
     instrument->table = NO_TABLE;
     instrument->automate = 0;
     
     instrument->kit.kit1 = 0;
     instrument->kit.offset1 = 0;
     instrument->kit.length1 = KIT_LENGTH_AUTO;
-    instrument->kit.loop1 = KIT_LOOP_OFF;
+    instrument->kit.loop1 = LSDJ_KIT_LOOP_OFF;
     
     instrument->kit.kit2 = 0;
     instrument->kit.offset2 = 0;
     instrument->kit.length2 = KIT_LENGTH_AUTO;
-    instrument->kit.loop2 = KIT_LOOP_OFF;
+    instrument->kit.loop2 = LSDJ_KIT_LOOP_OFF;
     
     instrument->kit.pitch = 0;
     instrument->kit.halfSpeed = 0;
-    instrument->kit.distortion = KIT_DIST_CLIP;
-    instrument->kit.pSpeed = KIT_PSPEED_FAST;
+    instrument->kit.distortion = LSDJ_KIT_DIST_CLIP;
+    instrument->kit.pSpeed = LSDJ_KIT_PSPEED_FAST;
 }
 
 void lsdj_clear_instrument_as_noise(lsdj_instrument_t* instrument)
 {
     instrument->type = INSTR_NOISE;
     instrument->envelope = 0xA8;
-    instrument->panning = PAN_LEFT_RIGHT;
+    instrument->panning = LSDJ_PAN_LEFT_RIGHT;
     instrument->table = NO_TABLE;
     instrument->automate = 0;
     
     instrument->noise.length = UNLIMITED_LENGTH;
     instrument->noise.shape = 0xFF;
-    instrument->noise.sCommand = SCOMMAND_FREE;
+    instrument->noise.sCommand = LSDJ_SCOMMAND_FREE;
 }
 
 // --- Reading --- //
@@ -106,16 +106,9 @@ unsigned char parseTable(unsigned char byte)
         return NO_TABLE;
 }
 
-panning parsePanning(unsigned char byte)
+lsdj_panning parsePanning(unsigned char byte)
 {
-    switch (byte & 0x3)
-    {
-        case 0: return PAN_NONE;
-        case 1: return PAN_RIGHT;
-        case 2: return PAN_LEFT;
-        case 3: return PAN_LEFT_RIGHT;
-        default: return PAN_LEFT_RIGHT;
-    }
+    return byte & 3;
 }
 
 tuning_mode parseTuning(unsigned char byte)
@@ -134,97 +127,58 @@ unsigned char parseAutomate(unsigned char byte)
     return (byte >> 3) & 3;
 }
 
-plvib_type parsePlvib(unsigned char byte)
+lsdj_plvib_type parsePlvib(unsigned char byte)
 {
-    switch ((byte >> 1) & 0x3)
-    {
-        case 0: return PLVIB_HIGH_FREQUENCY;
-        case 1: return PLVIB_SAWTOOTH;
-        case 2: return PLVIB_TRIANGLE;
-        case 3: return PLVIB_SQUARE;
-        default: return PLVIB_HIGH_FREQUENCY;
-    }
+    return (byte >> 1) & 0x3;
 }
 
-vibrato_direction parseVibrationDirection(unsigned char byte)
+lsdj_vibrato_direction parseVibrationDirection(unsigned char byte)
 {
-    switch (byte & 0x1)
-    {
-        case 0: return VIB_UP;
-        case 1: return VIB_DOWN;
-        default: return VIB_UP;
-    }
+    return byte & 0x1;
 }
 
-pulse_width parsePulseWidth(unsigned char byte)
+lsdj_pulse_wave parsePulseWidth(unsigned char byte)
 {
-    switch ((byte >> 6) & 0x3)
-    {
-        case 0: return PULSE_WIDTH_125;
-        case 1: return PULSE_WIDTH_25;
-        case 2: return PULSE_WIDTH_50;
-        case 3: return PULSE_WIDTH_75;
-        default: return PULSE_WIDTH_125;
-    }
+    return (byte >> 6) & 3;
 }
 
-playback_mode parsePlaybackMode(unsigned char byte)
+lsdj_playback_mode parsePlaybackMode(unsigned char byte)
 {
-    switch (byte & 0x3)
-    {
-        case 0: return PLAY_ONCE;
-        case 1: return PLAY_LOOP;
-        case 2: return PLAY_PING_PONG;
-        case 3: return PLAY_MANUAL;
-        default: return PLAY_ONCE;
-    }
+    return byte & 0x3;
 }
 
-kit_pspeed parsePspeed(unsigned char byte, lsdj_error_t** error)
+lsdj_kit_pspeed parsePspeed(unsigned char byte, lsdj_error_t** error)
 {
-    switch ((byte >> 1) & 0x3)
-    {
-        case 0: return KIT_PSPEED_FAST;
-        case 1: return KIT_PSPEED_SLOW;
-        case 2: return KIT_PSPEED_STEP;
-        default: lsdj_create_error(error, "unknown kit pspeed bit pattern"); return KIT_PSPEED_FAST;
-    }
+    return (byte >> 1) & 3;
 }
 
-kit_distortion parseKitDistortion(unsigned char byte)
+lsdj_kit_distortion parseKitDistortion(unsigned char byte)
 {
-    switch (byte & 0x3)
-    {
-        case 0: return KIT_DIST_CLIP;
-        case 1: return KIT_DIST_SHAPE;
-        case 2: return KIT_DIST_SHAPE2;
-        case 3: return KIT_DIST_WRAP;
-        default: return KIT_DIST_CLIP;
-    }
+    return byte & 3;
 }
 
-scommand_type parseScommand(unsigned char byte)
+lsdj_scommand_type parseScommand(unsigned char byte)
 {
-    switch (byte & 0x1)
-    {
-        case 0: return SCOMMAND_FREE;
-        case 1: return SCOMMAND_STABLE;
-        default: return SCOMMAND_FREE;
-    }
+    return byte & 1;
 }
 
 void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
-    instrument->type = INSTR_PULSE;
-    read(&instrument->envelope, 1, user_data);
-    read(&instrument->pulse.pulse2tune, 1, user_data);
+    instrument->type = INSTR_PULSE; // 0
     
+    read(&instrument->envelope, 1, user_data); // 1
+    
+    read(&instrument->pulse.pulse2tune, 1, user_data); // 2
+    
+    // 3
     unsigned char byte;
     read(&byte, 1, user_data);
     instrument->pulse.length = parseLength(byte);
     
+    // 4
     read(&instrument->pulse.sweep, 1, user_data);
     
+    // 5
     read(&byte, 1, user_data);
     instrument->pulse.tuning = (version >= 0x03) ? parseTuning(byte) : TUNE_12_TONE;
     instrument->automate = parseAutomate(byte);
@@ -286,13 +240,13 @@ void read_kit_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_
     instrument->type = INSTR_KIT;
     read(&instrument->volume, 1, user_data);
     
-    instrument->kit.loop1 = KIT_LOOP_OFF;
-    instrument->kit.loop2 = KIT_LOOP_OFF;
+    instrument->kit.loop1 = LSDJ_KIT_LOOP_OFF;
+    instrument->kit.loop2 = LSDJ_KIT_LOOP_OFF;
     
     unsigned char byte;
     read(&byte, 1, user_data);
     if ((byte >> 7) & 1)
-        instrument->kit.loop1 = KIT_LOOP_ATTACK;
+        instrument->kit.loop1 = LSDJ_KIT_LOOP_ATTACK;
     instrument->kit.halfSpeed = (byte >> 6) & 1;
     instrument->kit.kit1 = byte & 0x3F;
     read(&instrument->kit.length1, 1, user_data);
@@ -300,14 +254,13 @@ void read_kit_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_
     seek(1, SEEK_CUR, user_data); // Byte 4 is empty
     
     read(&byte, 1, user_data);
-    if (instrument->kit.loop1 != KIT_LOOP_ATTACK)
-        instrument->kit.loop1 = ((byte >> 6) & 1) ? KIT_LOOP_ON : KIT_LOOP_OFF;
-    instrument->kit.loop2 = ((byte >> 6) & 1) ? KIT_LOOP_ON : KIT_LOOP_OFF;
+    if (instrument->kit.loop1 != LSDJ_KIT_LOOP_ATTACK)
+        instrument->kit.loop1 = ((byte >> 6) & 1) ? LSDJ_KIT_LOOP_ON : LSDJ_KIT_LOOP_OFF;
+    instrument->kit.loop2 = ((byte >> 6) & 1) ? LSDJ_KIT_LOOP_ON : LSDJ_KIT_LOOP_OFF;
     instrument->automate = parseAutomate(byte);
     instrument->kit.pSpeed = parsePspeed(byte, error);
     if (*error)
         return;
-//    instrument->kit.upDown = byte & 1; // up/down?
     
     read(&byte, 1, user_data);
     instrument->table = parseTable(byte);
@@ -319,7 +272,7 @@ void read_kit_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_
     
     read(&byte, 1, user_data);
     if ((byte >> 7) & 1)
-        instrument->kit.loop2 = KIT_LOOP_ATTACK;
+        instrument->kit.loop2 = LSDJ_KIT_LOOP_ATTACK;
     instrument->kit.kit2 = byte & 0x3F;
     
     read(&byte, 1, user_data);
@@ -387,15 +340,9 @@ unsigned char createWaveVolumeByte(unsigned char volume)
     return (volume > 0x3) ? 0x3 : volume;
 }
 
-unsigned char createPanningByte(panning pan)
+unsigned char createPanningByte(lsdj_panning pan)
 {
-    switch (pan)
-    {
-        case PAN_LEFT_RIGHT: return 0x3;
-        case PAN_LEFT: return 0x2;
-        case PAN_RIGHT: return 0x1;
-        case PAN_NONE: return 0x0;
-    }
+    return pan & 3;
 }
 
 unsigned char createLengthByte(unsigned char length)
@@ -429,76 +376,39 @@ unsigned char createTuningByte(tuning_mode tuning)
     }
 }
 
-unsigned char createPlvibByte(plvib_type plvib)
+unsigned char createPlvibByte(lsdj_plvib_type plvib)
 {
-    switch (plvib)
-    {
-        case PLVIB_HIGH_FREQUENCY: return 0x0;
-        case PLVIB_SAWTOOTH: return 0x2;
-        case PLVIB_TRIANGLE: return 0x4;
-        case PLVIB_SQUARE: return 0x6;
-    }
+    return (unsigned char)((plvib & 3) << 1);
 }
 
-unsigned char createVibrationDirectionByte(vibrato_direction dir)
+unsigned char createVibrationDirectionByte(lsdj_vibrato_direction dir)
 {
-    switch (dir)
-    {
-        case VIB_UP: return 0x0;
-        case VIB_DOWN: return 0x1;
-    }
+    return dir & 1;
 }
 
-unsigned char createPulseWidthByte(pulse_width pw)
+unsigned char createPulseWidthByte(lsdj_pulse_wave pw)
 {
-    switch (pw)
-    {
-        case PULSE_WIDTH_125: return 0x0;
-        case PULSE_WIDTH_25: return 0x40;
-        case PULSE_WIDTH_50: return 0x80;
-        case PULSE_WIDTH_75: return 0xC0;
-    }
+    return (unsigned char)((pw & 3) << 6);
 }
 
-unsigned char createPlaybackModeByte(playback_mode play)
+unsigned char createPlaybackModeByte(lsdj_playback_mode play)
 {
-    switch (play)
-    {
-        case PLAY_ONCE: return 0x0;
-        case PLAY_LOOP: return 0x1;
-        case PLAY_PING_PONG: return 0x2;
-        case PLAY_MANUAL: return 0x3;
-    }
+    return play & 3;
 }
 
-unsigned char createPspeedByte(kit_pspeed pspeed)
+unsigned char createPspeedByte(lsdj_kit_pspeed pspeed)
 {
-    switch (pspeed)
-    {
-        case KIT_PSPEED_FAST: return 0x0;
-        case KIT_PSPEED_SLOW: return 0x2;
-        case KIT_PSPEED_STEP: return 0x4;
-    }
+    return (unsigned char)((pspeed & 3) << 1);
 }
 
-unsigned char createKitDistortionByte(kit_distortion dist)
+unsigned char createKitDistortionByte(lsdj_kit_distortion dist)
 {
-    switch (dist)
-    {
-        case KIT_DIST_CLIP: return 0x0;
-        case KIT_DIST_SHAPE: return 0x1;
-        case KIT_DIST_SHAPE2: return 0x2;
-        case KIT_DIST_WRAP: return 0x3;
-    }
+    return dist;
 }
 
-unsigned char createScommandByte(scommand_type type)
+unsigned char createScommandByte(lsdj_scommand_type type)
 {
-    switch (type)
-    {
-        case SCOMMAND_FREE: return 0x0;
-        case SCOMMAND_STABLE: return 0x1;
-    }
+    return type & 1;
 }
 
 void write_pulse_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_write_t write, void* user_data)
@@ -578,7 +488,7 @@ void write_kit_instrument(const lsdj_instrument_t* instrument, lsdj_vio_write_t 
     byte = createWaveVolumeByte(instrument->volume);
     write(&byte, 1, user_data);
     
-    byte = ((instrument->kit.loop1 == KIT_LOOP_ATTACK) ? 0x80 : 0x0) | (instrument->kit.halfSpeed ? 0x40 : 0x0) | (instrument->kit.kit1 & 0x3F); // Keep attack 1?
+    byte = ((instrument->kit.loop1 == LSDJ_KIT_LOOP_ATTACK) ? 0x80 : 0x0) | (instrument->kit.halfSpeed ? 0x40 : 0x0) | (instrument->kit.kit1 & 0x3F); // Keep attack 1?
     write(&byte, 1, user_data);
     
     write(&instrument->kit.length1, 1, user_data);
@@ -586,11 +496,10 @@ void write_kit_instrument(const lsdj_instrument_t* instrument, lsdj_vio_write_t 
     byte = 0;
     write(&byte, 1, user_data); // Byte 4 is empty
     
-    byte = ((instrument->kit.loop1 == KIT_LOOP_ON) ? 0x80 : 0x0) |
-           ((instrument->kit.loop2 == KIT_LOOP_ON) ? 0x40 : 0x0) |
+    byte = ((instrument->kit.loop1 == LSDJ_KIT_LOOP_ON) ? 0x80 : 0x0) |
+           ((instrument->kit.loop2 == LSDJ_KIT_LOOP_ON) ? 0x40 : 0x0) |
            createAutomateByte(instrument->automate) |
-           createPspeedByte(instrument->kit.pSpeed) |
-           0x0; // up/down?
+           createPspeedByte(instrument->kit.pSpeed);
     write(&byte, 1, user_data);
     
     byte = createTableByte(instrument->table);
@@ -601,7 +510,7 @@ void write_kit_instrument(const lsdj_instrument_t* instrument, lsdj_vio_write_t 
     
     write(&instrument->kit.pitch, 1, user_data);
     
-    byte = ((instrument->kit.loop2 == KIT_LOOP_ATTACK) ? 0x80 : 0x0) | (instrument->kit.kit2 & 0x3F);
+    byte = ((instrument->kit.loop2 == LSDJ_KIT_LOOP_ATTACK) ? 0x80 : 0x0) | (instrument->kit.kit2 & 0x3F);
     write(&byte, 1, user_data);
     
     byte = createKitDistortionByte(instrument->kit.distortion);
