@@ -187,7 +187,7 @@ void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t siz
     strncpy(project->name, data, size < PROJECT_NAME_LENGTH ? size : PROJECT_NAME_LENGTH);
 }
 
-void lsdj_project_get_name(lsdj_project_t* project, char* data, size_t size)
+void lsdj_project_get_name(const lsdj_project_t* project, char* data, size_t size)
 {
     const size_t len = strnlen(project->name, PROJECT_NAME_LENGTH);
     strncpy(data, project->name, len);
@@ -200,7 +200,7 @@ void lsdj_project_set_version(lsdj_project_t* project, unsigned char version)
     project->version = version;
 }
 
-unsigned char lsdj_project_get_version(lsdj_project_t* project)
+unsigned char lsdj_project_get_version(const lsdj_project_t* project)
 {
     return project->version;
 }
@@ -213,7 +213,7 @@ void lsdj_project_set_song(lsdj_project_t* project, lsdj_song_t* song)
     project->song = song;
 }
 
-lsdj_song_t* lsdj_project_get_song(lsdj_project_t* project)
+lsdj_song_t* lsdj_project_get_song(const lsdj_project_t* project)
 {
     return project->song;
 }

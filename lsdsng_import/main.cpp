@@ -15,20 +15,6 @@ int handle_error(lsdj_error_t* error)
     return 1;
 }
 
-void exportProject(const lsdj_project_t* project, const boost::filesystem::path& folder, bool addVersionNumber, lsdj_error_t** error)
-{
-    char name[9];
-    lsdj_project_get_name(project, name, sizeof(name));
-    
-    std::stringstream stream;
-    stream << name;
-    if (addVersionNumber)
-        stream << "." << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project);
-    stream << ".lsdsng";
-    
-    lsdj_write_lsdsng_to_file(project, (folder / stream.str()).c_str(), error);
-}
-
 int exportSongs(const std::string& file, bool addVersionNumber)
 {
     lsdj_error_t* error = nullptr;
@@ -49,7 +35,16 @@ int exportSongs(const std::string& file, bool addVersionNumber)
         if (!song)
             continue;
         
-        exportProject(project, cwd, addVersionNumber, &error);
+        char name[9];
+        lsdj_project_get_name(project, name, sizeof(name));
+        
+        std::stringstream stream;
+        stream << name;
+        if (addVersionNumber)
+            stream << "." << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (int)lsdj_project_get_version(project);
+        stream << ".lsdsng";
+        
+        lsdj_write_lsdsng_to_file(project, (cwd / stream.str()).c_str(), &error);
         if (error)
             return handle_error(error);
     }

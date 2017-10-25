@@ -29,10 +29,10 @@ void lsdj_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* d
 
 // Change data in a project
 void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size);
-void lsdj_project_get_name(lsdj_project_t* project, char* data, size_t size);
+void lsdj_project_get_name(const lsdj_project_t* project, char* data, size_t size);
 void lsdj_project_set_version(lsdj_project_t* project, unsigned char version);
-unsigned char lsdj_project_get_version(lsdj_project_t* project);
+unsigned char lsdj_project_get_version(const lsdj_project_t* project);
 void lsdj_project_set_song(lsdj_project_t* project, lsdj_song_t* song);
-lsdj_song_t* lsdj_project_get_song(lsdj_project_t* project);
+lsdj_song_t* lsdj_project_get_song(const lsdj_project_t* project);
 
 #endif
