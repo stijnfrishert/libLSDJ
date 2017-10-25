@@ -166,7 +166,7 @@ void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* use
     instrument->automate = parseAutomate(byte);
     instrument->pulse.vibratoDirection = byte & 1;
     
-    if (version < 5)
+    if (version < 4)
     {
         switch ((byte >> 1) & 3)
         {
@@ -197,9 +197,9 @@ void read_pulse_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* use
         
         switch ((byte >> 1) & 3)
         {
-            case 0: instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
-            case 1: instrument->pulse.vibShape = LSDJ_VIB_SAWTOOTH;
-            case 2: instrument->pulse.vibShape = LSDJ_VIB_SQUARE;
+            case 0: instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE; break;
+            case 1: instrument->pulse.vibShape = LSDJ_VIB_SAWTOOTH; break;
+            case 2: instrument->pulse.vibShape = LSDJ_VIB_SQUARE; break;
         }
     }
     
@@ -232,7 +232,7 @@ void read_wave_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user
     instrument->automate = parseAutomate(byte);
     instrument->pulse.vibratoDirection = byte & 1;
     
-    if (version < 5)
+    if (version < 4)
     {
         switch ((byte >> 1) & 3)
         {
@@ -263,9 +263,9 @@ void read_wave_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user
         
         switch ((byte >> 1) & 3)
         {
-            case 0: instrument->wave.vibShape = LSDJ_VIB_TRIANGLE;
-            case 1: instrument->wave.vibShape = LSDJ_VIB_SAWTOOTH;
-            case 2: instrument->wave.vibShape = LSDJ_VIB_SQUARE;
+            case 0: instrument->wave.vibShape = LSDJ_VIB_TRIANGLE; break;
+            case 1: instrument->wave.vibShape = LSDJ_VIB_SAWTOOTH; break;
+            case 2: instrument->wave.vibShape = LSDJ_VIB_SQUARE; break;
         }
         
         instrument->kit.vibratoDirection = (byte & 1) == 1 ? LSDJ_VIB_UP : LSDJ_VIB_DOWN;
@@ -317,7 +317,7 @@ void read_kit_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_
     
     instrument->kit.vibratoDirection = byte & 1;
     
-    if (version < 5)
+    if (version < 4)
     {
         switch ((byte >> 1) & 3)
         {
@@ -344,9 +344,9 @@ void read_kit_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_
         
         switch ((byte >> 1) & 3)
         {
-            case 0: instrument->kit.vibShape = LSDJ_VIB_TRIANGLE;
-            case 1: instrument->kit.vibShape = LSDJ_VIB_SAWTOOTH;
-            case 2: instrument->kit.vibShape = LSDJ_VIB_SQUARE;
+            case 0: instrument->kit.vibShape = LSDJ_VIB_TRIANGLE; break;
+            case 1: instrument->kit.vibShape = LSDJ_VIB_SAWTOOTH; break;
+            case 2: instrument->kit.vibShape = LSDJ_VIB_SQUARE; break;
         }
     }
     
@@ -498,7 +498,7 @@ void write_pulse_instrument(const lsdj_instrument_t* instrument, unsigned char v
     byte = (version >= 0x03) ? createTuningByte(instrument->pulse.tuning) : 0;
     byte |= createAutomateByte(instrument->automate) | createVibrationDirectionByte(instrument->pulse.vibratoDirection);
     
-    if (version < 5)
+    if (version < 4)
     {
         switch (instrument->pulse.vibShape)
         {
@@ -546,7 +546,7 @@ void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char ve
     
     byte = (version >= 0x03) ? createTuningByte(instrument->pulse.tuning) : 0;
     byte |= createAutomateByte(instrument->automate) | createVibrationDirectionByte(instrument->wave.vibratoDirection);
-    if (version < 5)
+    if (version < 4)
     {
         switch (instrument->pulse.vibShape)
         {
@@ -611,7 +611,7 @@ void write_kit_instrument(const lsdj_instrument_t* instrument, unsigned char ver
            ((instrument->kit.loop2 == LSDJ_KIT_LOOP_ON) ? 0x40 : 0x0) |
            createAutomateByte(instrument->automate);
     
-    if (version < 5)
+    if (version < 4)
     {
         byte |= (instrument->kit.plvibSpeed & 3) << 1;
     } else {
