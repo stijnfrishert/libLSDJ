@@ -15,7 +15,14 @@ int handle_error(lsdj_error_t* error)
     return 1;
 }
 
-void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, bool addVersionNumber, bool putInFolder, lsdj_error_t** error)
+enum class VersionStyle
+{
+    NONE,
+    HEX,
+    DECIMAL
+};
+
+void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, VersionStyle versionStyle, bool putInFolder, lsdj_error_t** error)
 {
     char name[9];
     lsdj_project_get_name(project, name, sizeof(name));
@@ -26,15 +33,23 @@ void exportProject(const lsdj_project_t* project, boost::filesystem::path folder
     
     std::stringstream stream;
     stream << name;
-    if (addVersionNumber)
-        stream << "." << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project);
+    switch (versionStyle)
+    {
+        case VersionStyle::NONE: break;
+        case VersionStyle::HEX:
+            stream << "." << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project);
+            break;
+        case VersionStyle::DECIMAL:
+            stream << "." << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project);
+            break;
+    }
     stream << ".lsdsng";
     folder /= stream.str();
     
     lsdj_write_lsdsng_to_file(project, folder.c_str(), error);
 }
 
-int exportSongs(const std::string& file, bool addVersionNumber, bool putInFolder)
+int exportSongs(const std::string& file, VersionStyle versionStyle, bool putInFolder)
 {
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).c_str(), &error);
@@ -54,7 +69,7 @@ int exportSongs(const std::string& file, bool addVersionNumber, bool putInFolder
         if (!song)
             continue;
         
-        exportProject(project, cwd, addVersionNumber, putInFolder, &error);
+        exportProject(project, cwd, versionStyle, putInFolder, &error);
         if (error)
             return handle_error(error);
     }
@@ -64,7 +79,7 @@ int exportSongs(const std::string& file, bool addVersionNumber, bool putInFolder
     return 0;
 }
 
-int print(const std::string& file)
+int print(const std::string& file, VersionStyle versionStyle)
 {
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).c_str(), &error);
@@ -77,7 +92,7 @@ int print(const std::string& file)
     const auto active = lsdj_sav_get_active_project(sav);
 
     std::cout << "WM. ";
-    if (active != 0xFF)
+    if (active != -1)
     {
         lsdj_project_t* project = lsdj_sav_get_project(sav, active);
         
@@ -108,9 +123,23 @@ int print(const std::string& file)
         
         char name[9];
         lsdj_project_get_name(project, name, sizeof(name));
-        std::cout << name << '\t';
+        std::cout << name;
         
-        std::cout << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project) << std::endl;
+        for (auto i = 0; i < 8 - strnlen(name, 8); ++i)
+            std::cout << ' ';
+        
+        switch (versionStyle)
+        {
+            case VersionStyle::NONE: break;
+            case VersionStyle::HEX:
+                std::cout << '\t'<< std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project);
+                break;
+            case VersionStyle::DECIMAL:
+                std::cout << '\t' << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project);
+                break;
+        }
+        
+        std::cout << std::endl;
     }
     
     return 0;
@@ -124,7 +153,9 @@ int main(int argc, char* argv[])
         ("file", boost::program_options::value<std::string>(), "input save file, can be a nameless option")
         ("noversion,n", "Don't add version numbers to the filename")
         ("folder,f", "Put every lsdsng in its own folder")
-        ("print,p", "Print a list of all songs in the sav");
+        ("print,p", "Print a list of all songs in the sav")
+        ("decimal,d", "Use decimal notation for the version number, instead of hex")
+        ("underscore,u", "Use an underscore for the special lightning bolt character, instead of x");
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", 1);
@@ -143,10 +174,12 @@ int main(int argc, char* argv[])
             std::cout << desc << std::endl;
             return 0;
         } else if (vm.count("file")) {
+            VersionStyle version = vm.count("noversion") ? VersionStyle::NONE : vm.count("decimal") ? VersionStyle::DECIMAL : VersionStyle::HEX;
+            
             if (vm.count("print"))
-                return print(vm["file"].as<std::string>());
+                return print(vm["file"].as<std::string>(), version);
             else
-                return exportSongs(vm["file"].as<std::string>(), !vm.count("noversion"), vm.count("folder"));
+                return exportSongs(vm["file"].as<std::string>(), version, vm.count("folder"));
         } else {
             std::cout << desc << std::endl;
             return 0;
