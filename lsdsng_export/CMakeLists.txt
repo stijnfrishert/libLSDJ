@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0)
 
+set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED COMPONENTS filesystem program_options)
 
 # Create the executable target
