@@ -2,7 +2,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#include <array>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -25,13 +24,13 @@ enum class VersionStyle
 
 std::string constructName(const lsdj_project_t* project, bool underscore)
 {
-    std::array<char, 9> name = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    lsdj_project_get_name(project, name.data(), sizeof(name));
+    char name[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    lsdj_project_get_name(project, name, sizeof(name));
     
     if (underscore)
-        std::replace(std::begin(name), std::end(name), 'x', '_');
+        std::replace(name, name + 9, 'x', '_');
     
-    return {name.data(), 8};
+    return name;
 }
 
 void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, VersionStyle versionStyle, bool underscore, bool putInFolder, lsdj_error_t** error)
@@ -107,14 +106,17 @@ int print(const std::string& file, VersionStyle versionStyle, bool underscore)
     {
         lsdj_project_t* project = lsdj_sav_get_project(sav, active);
         
-        std::cout << constructName(project, underscore) << '\t';
+        const auto name = constructName(project, underscore);
+        std::cout << name;
+        for (auto i = 0; i < (8 - name.length()); ++i)
+            std::cout << ' ';
     } else {
-        std::cout << "        \t";
+        std::cout << "        ";
     }
     
     const lsdj_song_t* song = lsdj_sav_get_song(sav);
     if (lsdj_song_get_file_changed_flag(song))
-        std::cout << '*';
+        std::cout << "\t*";
     
     std::cout << std::endl;
     
@@ -133,7 +135,7 @@ int print(const std::string& file, VersionStyle versionStyle, bool underscore)
         const auto name = constructName(project, underscore);
         std::cout << name;
         
-        for (auto i = 0; i < (8 - name.size()); ++i)
+        for (auto i = 0; i < (8 - name.length()); ++i)
             std::cout << ' ';
         
         switch (versionStyle)
@@ -158,7 +160,7 @@ int main(int argc, char* argv[])
     boost::program_options::options_description desc{"Options"};
     desc.add_options()
         ("help,h", "Help screen")
-        ("file", boost::program_options::value<std::string>(), "input save file, can be a nameless option")
+        ("file", boost::program_options::value<std::string>(), "Input save file, can be a nameless option")
         ("noversion,n", "Don't add version numbers to the filename")
         ("folder,f", "Put every lsdsng in its own folder")
         ("print,p", "Print a list of all songs in the sav")
