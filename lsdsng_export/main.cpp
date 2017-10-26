@@ -2,6 +2,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
+#include <array>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -22,10 +23,20 @@ enum class VersionStyle
     DECIMAL
 };
 
-void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, VersionStyle versionStyle, bool putInFolder, lsdj_error_t** error)
+std::string constructName(const lsdj_project_t* project, bool underscore)
 {
-    char name[9];
-    lsdj_project_get_name(project, name, sizeof(name));
+    std::array<char, 9> name = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    lsdj_project_get_name(project, name.data(), sizeof(name));
+    
+    if (underscore)
+        std::replace(std::begin(name), std::end(name), 'x', '_');
+    
+    return {name.data(), 8};
+}
+
+void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, VersionStyle versionStyle, bool underscore, bool putInFolder, lsdj_error_t** error)
+{
+    const auto name = constructName(project, underscore);
     
     if (putInFolder)
         folder /= name;
@@ -49,7 +60,7 @@ void exportProject(const lsdj_project_t* project, boost::filesystem::path folder
     lsdj_write_lsdsng_to_file(project, folder.c_str(), error);
 }
 
-int exportSongs(const std::string& file, VersionStyle versionStyle, bool putInFolder)
+int exportSongs(const std::string& file, VersionStyle versionStyle, bool underscore, bool putInFolder)
 {
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).c_str(), &error);
@@ -69,7 +80,7 @@ int exportSongs(const std::string& file, VersionStyle versionStyle, bool putInFo
         if (!song)
             continue;
         
-        exportProject(project, cwd, versionStyle, putInFolder, &error);
+        exportProject(project, cwd, versionStyle, underscore, putInFolder, &error);
         if (error)
             return handle_error(error);
     }
@@ -79,7 +90,7 @@ int exportSongs(const std::string& file, VersionStyle versionStyle, bool putInFo
     return 0;
 }
 
-int print(const std::string& file, VersionStyle versionStyle)
+int print(const std::string& file, VersionStyle versionStyle, bool underscore)
 {
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).c_str(), &error);
@@ -96,9 +107,7 @@ int print(const std::string& file, VersionStyle versionStyle)
     {
         lsdj_project_t* project = lsdj_sav_get_project(sav, active);
         
-        char name[9];
-        lsdj_project_get_name(project, name, sizeof(name));
-        std::cout << name << '\t';
+        std::cout << constructName(project, underscore) << '\t';
     } else {
         std::cout << "        \t";
     }
@@ -121,11 +130,10 @@ int print(const std::string& file, VersionStyle versionStyle)
         if (i < 9)
             std::cout << ' ';
         
-        char name[9];
-        lsdj_project_get_name(project, name, sizeof(name));
+        const auto name = constructName(project, underscore);
         std::cout << name;
         
-        for (auto i = 0; i < 8 - strnlen(name, 8); ++i)
+        for (auto i = 0; i < (8 - name.size()); ++i)
             std::cout << ' ';
         
         switch (versionStyle)
@@ -177,9 +185,9 @@ int main(int argc, char* argv[])
             VersionStyle version = vm.count("noversion") ? VersionStyle::NONE : vm.count("decimal") ? VersionStyle::DECIMAL : VersionStyle::HEX;
             
             if (vm.count("print"))
-                return print(vm["file"].as<std::string>(), version);
+                return print(vm["file"].as<std::string>(), version, vm.count("underscore"));
             else
-                return exportSongs(vm["file"].as<std::string>(), version, vm.count("folder"));
+                return exportSongs(vm["file"].as<std::string>(), version, vm.count("underscore"), vm.count("folder"));
         } else {
             std::cout << desc << std::endl;
             return 0;
