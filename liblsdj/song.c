@@ -21,7 +21,7 @@ static unsigned char PHRASE_LENGTH_FF[PHRASE_LENGTH] = { 0xFF, 0xFF, 0xFF, 0xFF,
 
 struct lsdj_song_t
 {
-    unsigned char version;
+    unsigned char formatVersion;
     unsigned char tempo;
     unsigned char transposition;
     
@@ -110,7 +110,7 @@ lsdj_song_t* lsdj_new_song(lsdj_error_t** error)
     if (song == NULL)
         return NULL;
     
-    song->version = 3;
+    song->formatVersion = 4;
     song->tempo = 128;
     song->transposition = 0;
     
@@ -316,7 +316,7 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-            lsdj_read_instrument(read, seek, user_data, song->version, song->instruments[i], error);
+            lsdj_read_instrument(read, seek, user_data, song->formatVersion, song->instruments[i], error);
         else
             seek(16, SEEK_CUR, user_data);
         
@@ -476,7 +476,7 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     {
         if (song->instruments[i])
         {
-            lsdj_write_instrument(song->instruments[i], song->version, write, user_data, error);
+            lsdj_write_instrument(song->instruments[i], song->formatVersion, write, user_data, error);
         } else {
             write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), user_data);
         }
@@ -662,7 +662,7 @@ void write_bank3(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     write("rb", 2, user_data);
     
     write(song->reserved7ff2, sizeof(song->reserved7ff2), user_data);
-    write(&song->version, 1, user_data);
+    write(&song->formatVersion, 1, user_data);
 }
 
 int check_rb(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, long position)
@@ -710,7 +710,7 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio
     
     // Read the version number
     seek(begin + 0x7FFF, SEEK_SET, user_data);
-    read(&song->version, 1, user_data);
+    read(&song->formatVersion, 1, user_data);
     
     // Read the allocation tables
     unsigned char instrAllocTable[INSTR_ALLOC_TABLE_SIZE];
@@ -808,14 +808,14 @@ void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, siz
     lsdj_write_song(song, lsdj_mwrite, &mem, error);
 }
 
-unsigned char lsdj_song_get_version(lsdj_song_t* song)
+void lsdj_song_set_format_version(lsdj_song_t* song, unsigned char version)
 {
-    return song->version;
+    song->formatVersion = version;
 }
 
-void lsdj_song_set_version(lsdj_song_t* song, unsigned char version)
+unsigned char lsdj_song_get_format_version(lsdj_song_t* song)
 {
-    song->version = version;
+    return song->formatVersion;
 }
 
 unsigned char lsdj_song_get_tempo(lsdj_song_t* song)
