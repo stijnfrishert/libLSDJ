@@ -186,6 +186,12 @@ int main(int argc, char* argv[])
         } else if (vm.count("file")) {
             VersionStyle version = vm.count("noversion") ? VersionStyle::NONE : vm.count("decimal") ? VersionStyle::DECIMAL : VersionStyle::HEX;
             
+			if (!boost::filesystem::exists(vm["file"].as<std::string>()))
+			{
+				std::cerr << "file does not exist" << std::endl;
+				return 1;
+			}
+
             if (vm.count("print"))
                 return print(vm["file"].as<std::string>(), version, vm.count("underscore"));
             else

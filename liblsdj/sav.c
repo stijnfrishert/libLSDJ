@@ -173,11 +173,11 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_s
     
     // Skip memory representing the working song (we'll get to that)
     const long begin = tell(user_data);
-    seek(HEADER_START, SEEK_SET, user_data);
+    seek(begin + HEADER_START, SEEK_SET, user_data);
     
     // Read the header block, before we start processing each song
-    header_t header;
-    read(&header, sizeof(header), user_data);
+	header_t header;
+	read(&header, sizeof(header), user_data);
     
     // Check the initialization characters. If they're not 'jk', we're
     // probably not dealing with an actual LSDJ sav format file.
@@ -238,7 +238,7 @@ lsdj_sav_t* lsdj_read_sav_from_file(const char* path, lsdj_error_t** error)
         return NULL;
     }
         
-    FILE* file = fopen(path, "r");
+    FILE* file = fopen(path, "rb");
     if (file == NULL)
     {
         lsdj_create_error(error, "could not open file for reading");
@@ -289,7 +289,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_da
     // Write project specific data
     unsigned char blocks[BLOCK_SIZE][BLOCK_COUNT];
     unsigned char current_block = 0;
-    memset(blocks, 0, sizeof(blocks));
+	memset(blocks, 0, sizeof(blocks));
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
     {
         lsdj_project_t* project = sav->projects[i];
@@ -330,7 +330,7 @@ void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_
     if (sav == NULL)
         return lsdj_create_error(error, "sav is NULL");
     
-    FILE* file = fopen(path, "w");
+    FILE* file = fopen(path, "wb");
     if (file == NULL)
         return lsdj_create_error(error, "could not open file for writing");
     

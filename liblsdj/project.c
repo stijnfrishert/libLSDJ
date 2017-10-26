@@ -87,7 +87,7 @@ lsdj_project_t* lsdj_read_lsdsng_from_file(const char* path, lsdj_error_t** erro
         return NULL;
     }
     
-    FILE* file = fopen(path, "r");
+    FILE* file = fopen(path, "rb");
     if (file == NULL)
     {
         lsdj_create_error(error, "could not open file for reading");
@@ -145,7 +145,7 @@ void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, 
     if (project == NULL)
         return lsdj_create_error(error, "project is NULL");
     
-    FILE* file = fopen(path, "w");
+    FILE* file = fopen(path, "wb");
     if (file == NULL)
         return lsdj_create_error(error, "could not open file for writing");
     
