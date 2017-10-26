@@ -13,17 +13,17 @@
 #include "wave.h"
 #include "word.h"
 
-static const unsigned int SONG_DECOMPRESSED_SIZE = 0x8000;
-static const unsigned int ROW_COUNT = 256;
-static const unsigned int CHAIN_COUNT = 128;
-static const unsigned int PHRASE_COUNT = 0xFF;
-static const unsigned int BOOKMARK_COUNT = 64;
-static const unsigned int INSTRUMENT_COUNT = 64;
-static const unsigned int SYNTH_COUNT = 16;
-static const unsigned int TABLE_COUNT = 32;
-static const unsigned int WAVE_COUNT = 256;
-static const unsigned int GROOVE_COUNT = 32;
-static const unsigned int WORD_COUNT = 42;
+#define SONG_DECOMPRESSED_SIZE 0x8000
+#define ROW_COUNT 256
+#define CHAIN_COUNT 128
+#define PHRASE_COUNT 0xFF
+#define BOOKMARK_COUNT 64
+#define INSTRUMENT_COUNT 64
+#define SYNTH_COUNT 16
+#define TABLE_COUNT 32
+#define WAVE_COUNT 256
+#define GROOVE_COUNT 32
+#define WORD_COUNT 42
     
 static const unsigned char CLONE_DEEP = 0;
 static const unsigned char CLONE_SLIM = 1;

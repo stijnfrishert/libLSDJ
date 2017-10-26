@@ -7,9 +7,9 @@
 #include "sav.h"
 
 #define LSDJ_SAV_PROJECT_COUNT 32
-static const unsigned int HEADER_START = SONG_DECOMPRESSED_SIZE;
-static const unsigned int BLOCK_COUNT = 191;
-static const unsigned int BLOCK_SIZE = 0x200;
+#define HEADER_START SONG_DECOMPRESSED_SIZE
+#define BLOCK_COUNT 191
+#define BLOCK_SIZE 0x200
 
 // Representation of an entire LSDJ save file
 struct lsdj_sav_t
