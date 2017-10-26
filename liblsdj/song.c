@@ -813,14 +813,9 @@ void lsdj_song_set_format_version(lsdj_song_t* song, unsigned char version)
     song->formatVersion = version;
 }
 
-unsigned char lsdj_song_get_format_version(lsdj_song_t* song)
+unsigned char lsdj_song_get_format_version(const lsdj_song_t* song)
 {
     return song->formatVersion;
-}
-
-unsigned char lsdj_song_get_tempo(lsdj_song_t* song)
-{
-    return song->tempo;
 }
 
 void lsdj_song_set_tempo(lsdj_song_t* song, unsigned char tempo)
@@ -828,12 +823,23 @@ void lsdj_song_set_tempo(lsdj_song_t* song, unsigned char tempo)
     song->tempo = tempo;
 }
 
-unsigned char lsdj_song_get_transposition(lsdj_song_t* song)
+unsigned char lsdj_song_get_tempo(const lsdj_song_t* song)
 {
-    return song->transposition;
+    return song->tempo;
 }
 
 void lsdj_song_set_transposition(lsdj_song_t* song, unsigned char transposition)
 {
     song->transposition = transposition;
 }
+
+unsigned char lsdj_song_get_transposition(const lsdj_song_t* song)
+{
+    return song->transposition;
+}
+
+unsigned char lsdj_song_get_file_changed_flag(const lsdj_song_t* song)
+{
+    return song->meta.fileChangedFlag;
+}
+

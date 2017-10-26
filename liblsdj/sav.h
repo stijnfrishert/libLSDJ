@@ -27,10 +27,10 @@ void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_
 void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error);
     
 // Change data in a sav
-lsdj_song_t* lsdj_sav_get_song(lsdj_sav_t* sav);
-int lsdj_sav_get_active_project(lsdj_sav_t* sav);
-unsigned int lsdj_sav_get_project_count(lsdj_sav_t* sav);
-lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, unsigned char project);
+lsdj_song_t* lsdj_sav_get_song(const lsdj_sav_t* sav);
+int lsdj_sav_get_active_project(const lsdj_sav_t* sav);
+unsigned int lsdj_sav_get_project_count(const lsdj_sav_t* sav);
+lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char project);
 
 #ifdef __cplusplus
 }

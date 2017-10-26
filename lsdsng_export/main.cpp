@@ -74,11 +74,31 @@ int print(const std::string& file)
         return handle_error(error);
     }
     
+    const auto active = lsdj_sav_get_active_project(sav);
+
+    std::cout << "WM. ";
+    if (active != 0xFF)
+    {
+        lsdj_project_t* project = lsdj_sav_get_project(sav, active);
+        
+        char name[9];
+        lsdj_project_get_name(project, name, sizeof(name));
+        std::cout << name << '\t';
+    } else {
+        std::cout << "        \t";
+    }
+    
+    const lsdj_song_t* song = lsdj_sav_get_song(sav);
+    if (lsdj_song_get_file_changed_flag(song))
+        std::cout << '*';
+    
+    std::cout << std::endl;
+    
     const auto count = lsdj_sav_get_project_count(sav);
     for (int i = 0; i < count; ++i)
     {
-        lsdj_project_t* project = lsdj_sav_get_project(sav, i);
-        lsdj_song_t* song = lsdj_project_get_song(project);
+        const lsdj_project_t* project = lsdj_sav_get_project(sav, i);
+        const lsdj_song_t* song = lsdj_project_get_song(project);
         if (!song)
             continue;
         

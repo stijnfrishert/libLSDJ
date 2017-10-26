@@ -89,22 +89,22 @@ void lsdj_free_sav(lsdj_sav_t* sav)
     }
 }
 
-lsdj_song_t* lsdj_sav_get_song(lsdj_sav_t* sav)
+lsdj_song_t* lsdj_sav_get_song(const lsdj_sav_t* sav)
 {
     return sav->song;
 }
 
-int lsdj_sav_get_active_project(lsdj_sav_t* sav)
+int lsdj_sav_get_active_project(const lsdj_sav_t* sav)
 {
     return sav->activeProject == 0xFF ? -1 : sav->activeProject;
 }
 
-unsigned int lsdj_sav_get_project_count(lsdj_sav_t* sav)
+unsigned int lsdj_sav_get_project_count(const lsdj_sav_t* sav)
 {
     return LSDJ_SAV_PROJECT_COUNT;
 }
 
-lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, unsigned char project)
+lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char project)
 {
     return sav->projects[project];
 }

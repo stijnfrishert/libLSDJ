@@ -45,10 +45,11 @@ void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, siz
 
 // Change data in a song
 void lsdj_song_set_format_version(lsdj_song_t* song, unsigned char version);
-unsigned char lsdj_song_get_format_version(lsdj_song_t* song);
-unsigned char lsdj_song_get_tempo(lsdj_song_t* song);
+unsigned char lsdj_song_get_format_version(const lsdj_song_t* song);
 void lsdj_song_set_tempo(lsdj_song_t* song, unsigned char tempo);
-unsigned char lsdj_song_get_transposition(lsdj_song_t* song);
+unsigned char lsdj_song_get_tempo(const lsdj_song_t* song);
 void lsdj_song_set_transposition(lsdj_song_t* song, unsigned char transposition);
+unsigned char lsdj_song_get_transposition(const lsdj_song_t* song);
+unsigned char lsdj_song_get_file_changed_flag(const lsdj_song_t* song);
 
 #endif
