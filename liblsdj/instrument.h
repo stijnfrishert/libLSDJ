@@ -17,7 +17,7 @@
 #include "vio.h"
 
 // The default constant length of an instrument name
-static const unsigned int INSTRUMENT_NAME_LENGTH = 5;
+#define INSTRUMENT_NAME_LENGTH 5
     
 static const unsigned char DEFAULT_INSTRUMENT[16] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
 

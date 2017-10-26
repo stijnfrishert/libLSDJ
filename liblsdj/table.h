@@ -4,7 +4,7 @@
 #include "command.h"
 
 // The default constant length of a table
-static const unsigned int TABLE_LENGTH = 16;
+#define TABLE_LENGTH 16
     
 typedef struct
 {

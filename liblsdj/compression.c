@@ -12,11 +12,11 @@
 #include "compression.h"
 #include "song.h"
 
-static const unsigned char RUN_LENGTH_ENCODING_BYTE = 0xC0;
-static const unsigned char SPECIAL_ACTION_BYTE = 0xE0;
-static const unsigned char END_OF_FILE_BYTE = 0xFF;
-static const unsigned char DEFAULT_WAVE_BYTE = 0xF0;
-static const unsigned char DEFAULT_INSTRUMENT_BYTE = 0xF1;
+#define RUN_LENGTH_ENCODING_BYTE 0xC0
+#define SPECIAL_ACTION_BYTE 0xE0
+#define END_OF_FILE_BYTE 0xFF
+#define DEFAULT_WAVE_BYTE 0xF0
+#define DEFAULT_INSTRUMENT_BYTE 0xF1
 
 void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t tell, void* user_data, long begin, size_t blockSize, unsigned char* write)
 {

@@ -4,8 +4,8 @@
 #include "command.h"
 
 // The default constant lenght of a phrase
-static const unsigned int PHRASE_LENGTH = 16;
-    
+#define PHRASE_LENGTH 16
+
 typedef struct
 {
     // The notes in the phrase

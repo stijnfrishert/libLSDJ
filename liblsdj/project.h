@@ -8,7 +8,7 @@
 #include "vio.h"
 
 // The length of project names
-static const unsigned short PROJECT_NAME_LENGTH = 8;
+#define PROJECT_NAME_LENGTH 8
 
 // Representation of a project within an LSDJ sav file
 typedef struct lsdj_project_t lsdj_project_t;

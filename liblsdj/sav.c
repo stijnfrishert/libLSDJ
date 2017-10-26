@@ -6,7 +6,7 @@
 #include "compression.h"
 #include "sav.h"
 
-static const unsigned int LSDJ_SAV_PROJECT_COUNT = 32;
+#define LSDJ_SAV_PROJECT_COUNT 32
 static const unsigned int HEADER_START = SONG_DECOMPRESSED_SIZE;
 static const unsigned int BLOCK_COUNT = 191;
 static const unsigned int BLOCK_SIZE = 0x200;

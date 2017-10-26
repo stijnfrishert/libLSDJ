@@ -2,7 +2,7 @@
 #define LSDJ_GROOVE_H
 
 // The default constant length of a groove
-static const unsigned int GROOVE_LENGTH = 16;
+#define GROOVE_LENGTH 16
 
 // Structure representing a groove
 typedef struct

@@ -4,7 +4,7 @@
 #include "command.h"
 
 // The length of a chain
-static const unsigned int CHAIN_LENGTH = 16;
+#define CHAIN_LENGTH 16
     
 // Structure representing a chain
 typedef struct

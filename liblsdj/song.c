@@ -8,10 +8,10 @@ static char DEFAULT_WORD_NAMES[WORD_COUNT][WORD_NAME_LENGTH] =
     {'C',' ','2',' '},{'C',' ','2',' '},{'D',' ','2',' '},{'D',' ','2',' '},{'E',' ','2',' '},{'F',' ','2',' '},{'F',' ','2',' '},{'G',' ','2',' '},{'G',' ','2',' '},{'A',' ','2',' '},{'A',' ','2',' '},{'B',' ','2',' '},{'C',' ','3',' '},{'C',' ','3',' '},{'D',' ','3',' '},{'D',' ','3',' '},{'E',' ','3',' '},{'F',' ','3',' '},{'F',' ','3',' '},{'G',' ','3',' '},{'G',' ','3',' '},{'A',' ','3',' '},{'A',' ','3',' '},{'B',' ','3',' '},{'C',' ','4',' '},{'C',' ','4',' '},{'D',' ','4',' '},{'D',' ','4',' '},{'E',' ','4',' '},{'F',' ','4',' '},{'F',' ','4',' '},{'G',' ','4',' '},{'G',' ','4',' '},{'A',' ','4',' '},{'A',' ','4',' '},{'B',' ','4',' '},{'C',' ','5',' '},{'C',' ','5',' '},{'D',' ','5',' '},{'D',' ','5',' '},{'E',' ','5',' '},{'F',' ','5',' '}
 };
 
-static const int INSTR_ALLOC_TABLE_SIZE = 64;
-static const int TABLE_ALLOC_TABLE_SIZE = 32;
-static const int CHAIN_ALLOC_TABLE_SIZE = 16;
-static const int PHRASE_ALLOC_TABLE_SIZE = 32;
+#define INSTR_ALLOC_TABLE_SIZE 64
+#define TABLE_ALLOC_TABLE_SIZE 32
+#define CHAIN_ALLOC_TABLE_SIZE 16
+#define PHRASE_ALLOC_TABLE_SIZE 32
 
 static unsigned char TABLE_LENGTH_ZERO[TABLE_LENGTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 static unsigned char CHAIN_LENGTH_ZERO[TABLE_LENGTH] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };

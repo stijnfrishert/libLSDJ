@@ -2,10 +2,10 @@
 #define LSDJ_WORD_H
 
 // The default constant length of a word
-static const unsigned int WORD_LENGTH = 16;
-    
+#define WORD_LENGTH 16
+
 // The constant length of all word names
-static const unsigned int WORD_NAME_LENGTH = 4;
+#define WORD_NAME_LENGTH 4
 
 // Structure representing word data for the speech synthesizer
 typedef struct

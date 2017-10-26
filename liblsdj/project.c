@@ -5,8 +5,8 @@
 #include "compression.h"
 #include "project.h"
 
-static const unsigned int BLOCK_SIZE = 0x200;
-static const unsigned int BLOCK_COUNT = 191;
+#define BLOCK_SIZE 0x200
+#define BLOCK_COUNT 191
 
 struct lsdj_project_t
 {
