@@ -14,9 +14,9 @@ static const lsdj_plvib_speed LSDJ_PLVIB_TICK = 1;
 static const lsdj_plvib_speed LSDJ_PLVIB_STEP = 2;
 
 typedef unsigned char lsdj_vib_shape;
-static const lsdj_vib_shape LSDJ_VIB_TRIANGLE = 0;
-static const lsdj_vib_shape LSDJ_VIB_SAWTOOTH = 1;
-static const lsdj_vib_shape LSDJ_VIB_SQUARE = 2;
+#define LSDJ_VIB_TRIANGLE 0
+#define LSDJ_VIB_SAWTOOTH 1
+#define LSDJ_VIB_SQUARE 2
 
 typedef unsigned char lsdj_vib_direction;
 static const lsdj_vib_direction LSDJ_VIB_UP = 0;

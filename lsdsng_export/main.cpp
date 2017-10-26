@@ -56,13 +56,13 @@ void exportProject(const lsdj_project_t* project, boost::filesystem::path folder
     stream << ".lsdsng";
     folder /= stream.str();
     
-    lsdj_write_lsdsng_to_file(project, folder.c_str(), error);
+    lsdj_write_lsdsng_to_file(project, folder.string().c_str(), error);
 }
 
 int exportSongs(const std::string& file, VersionStyle versionStyle, bool underscore, bool putInFolder)
 {
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).c_str(), &error);
+    lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).string().c_str(), &error);
     if (sav == nullptr)
     {
         lsdj_free_sav(sav);
@@ -92,7 +92,7 @@ int exportSongs(const std::string& file, VersionStyle versionStyle, bool undersc
 int print(const std::string& file, VersionStyle versionStyle, bool underscore)
 {
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).c_str(), &error);
+    lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).string().c_str(), &error);
     if (sav == nullptr)
     {
         lsdj_free_sav(sav);
