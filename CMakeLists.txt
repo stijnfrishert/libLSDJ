@@ -5,3 +5,4 @@ project(lsdj)
 
 add_subdirectory(liblsdj)
 add_subdirectory(lsdsng_export)
+add_subdirectory(lsdsng_import)

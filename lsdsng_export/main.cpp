@@ -15,21 +15,26 @@ int handle_error(lsdj_error_t* error)
     return 1;
 }
 
-void exportProject(const lsdj_project_t* project, const boost::filesystem::path& folder, bool addVersionNumber, lsdj_error_t** error)
+void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, bool addVersionNumber, bool putInFolder, lsdj_error_t** error)
 {
     char name[9];
     lsdj_project_get_name(project, name, sizeof(name));
+    
+    if (putInFolder)
+        folder /= name;
+    boost::filesystem::create_directories(folder);
     
     std::stringstream stream;
     stream << name;
     if (addVersionNumber)
         stream << "." << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project);
     stream << ".lsdsng";
+    folder /= stream.str();
     
-    lsdj_write_lsdsng_to_file(project, (folder / stream.str()).c_str(), error);
+    lsdj_write_lsdsng_to_file(project, folder.c_str(), error);
 }
 
-int exportSongs(const std::string& file, bool addVersionNumber)
+int exportSongs(const std::string& file, bool addVersionNumber, bool putInFolder)
 {
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).c_str(), &error);
@@ -49,7 +54,7 @@ int exportSongs(const std::string& file, bool addVersionNumber)
         if (!song)
             continue;
         
-        exportProject(project, cwd, addVersionNumber, &error);
+        exportProject(project, cwd, addVersionNumber, putInFolder, &error);
         if (error)
             return handle_error(error);
     }
@@ -64,8 +69,9 @@ int main(int argc, char* argv[])
     boost::program_options::options_description desc{"Options"};
     desc.add_options()
         ("help,h", "Help screen")
-        ("file,f", boost::program_options::value<std::string>()->required(), ".sav file")
-        ("add-version,a", "Add version numbers to the filename");
+        ("file", boost::program_options::value<std::string>(), ".sav file, can be a nameless option")
+        ("noversion,n", "Don't add version numbers to the filename")
+        ("folder,f", "Put every lsdsng in its own folder");
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", 1);
@@ -73,7 +79,10 @@ int main(int argc, char* argv[])
     try
     {
         boost::program_options::variables_map vm;
-        boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(desc).positional(positionalOptions).run(), vm);
+        boost::program_options::command_line_parser parser(argc, argv);
+        parser = parser.options(desc);
+        parser = parser.positional(positionalOptions);
+        boost::program_options::store(parser.run(), vm);
         boost::program_options::notify(vm);
     
         if (vm.count("help"))
@@ -81,7 +90,7 @@ int main(int argc, char* argv[])
             std::cout << desc << std::endl;
             return 0;
         } else if (vm.count("file")) {
-            return exportSongs(vm["file"].as<std::string>(), vm.count("add-version"));
+            return exportSongs(vm["file"].as<std::string>(), !vm.count("noversion"), vm.count("folder"));
         } else {
             std::cout << desc << std::endl;
             return 0;
