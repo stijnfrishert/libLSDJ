@@ -64,14 +64,47 @@ int exportSongs(const std::string& file, bool addVersionNumber, bool putInFolder
     return 0;
 }
 
+int print(const std::string& file)
+{
+    lsdj_error_t* error = nullptr;
+    lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).c_str(), &error);
+    if (sav == nullptr)
+    {
+        lsdj_free_sav(sav);
+        return handle_error(error);
+    }
+    
+    const auto count = lsdj_sav_get_project_count(sav);
+    for (int i = 0; i < count; ++i)
+    {
+        lsdj_project_t* project = lsdj_sav_get_project(sav, i);
+        lsdj_song_t* song = lsdj_project_get_song(project);
+        if (!song)
+            continue;
+        
+        std::cout << std::to_string(i + 1) << ". ";
+        if (i < 9)
+            std::cout << ' ';
+        
+        char name[9];
+        lsdj_project_get_name(project, name, sizeof(name));
+        std::cout << name << '\t';
+        
+        std::cout << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project) << std::endl;
+    }
+    
+    return 0;
+}
+
 int main(int argc, char* argv[])
 {
     boost::program_options::options_description desc{"Options"};
     desc.add_options()
         ("help,h", "Help screen")
-        ("file", boost::program_options::value<std::string>(), ".sav file, can be a nameless option")
+        ("file", boost::program_options::value<std::string>(), "input save file, can be a nameless option")
         ("noversion,n", "Don't add version numbers to the filename")
-        ("folder,f", "Put every lsdsng in its own folder");
+        ("folder,f", "Put every lsdsng in its own folder")
+        ("print,p", "Print a list of all songs in the sav");
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", 1);
@@ -90,7 +123,10 @@ int main(int argc, char* argv[])
             std::cout << desc << std::endl;
             return 0;
         } else if (vm.count("file")) {
-            return exportSongs(vm["file"].as<std::string>(), !vm.count("noversion"), vm.count("folder"));
+            if (vm.count("print"))
+                return print(vm["file"].as<std::string>());
+            else
+                return exportSongs(vm["file"].as<std::string>(), !vm.count("noversion"), vm.count("folder"));
         } else {
             std::cout << desc << std::endl;
             return 0;
