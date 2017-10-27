@@ -166,7 +166,6 @@ int main(int argc, char* argv[])
         ("print,p", "Print a list of all songs in the sav")
         ("decimal,d", "Use decimal notation for the version number, instead of hex")
         ("underscore,u", "Use an underscore for the special lightning bolt character, instead of x")
-        ("verbose,v", "Verbose output")
         ("output,o", boost::program_options::value<std::string>()->default_value(""), "Output folder for the lsdsng's");
     
     boost::program_options::positional_options_description positionalOptions;
@@ -181,8 +180,6 @@ int main(int argc, char* argv[])
         boost::program_options::store(parser.run(), vm);
         boost::program_options::notify(vm);
         
-        bool verbose = vm.count("verbose");
-    
         if (vm.count("help"))
         {
             std::cout << desc << std::endl;
@@ -190,8 +187,6 @@ int main(int argc, char* argv[])
         } else if (vm.count("file")) {
             VersionStyle version = vm.count("noversion") ? VersionStyle::NONE : vm.count("decimal") ? VersionStyle::DECIMAL : VersionStyle::HEX;
             const auto path = boost::filesystem::absolute(vm["file"].as<std::string>());
-            if (verbose)
-                std::cout << "path to save is '" + path.string() << "'" << std::endl;
             
 			if (!boost::filesystem::exists(path))
 			{
