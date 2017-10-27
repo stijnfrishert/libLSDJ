@@ -59,17 +59,17 @@ void exportProject(const lsdj_project_t* project, boost::filesystem::path folder
     lsdj_write_lsdsng_to_file(project, folder.string().c_str(), error);
 }
 
-int exportSongs(const std::string& file, VersionStyle versionStyle, bool underscore, bool putInFolder)
+int exportSongs(const boost::filesystem::path& path, const std::string& output, VersionStyle versionStyle, bool underscore, bool putInFolder)
 {
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).string().c_str(), &error);
+    lsdj_sav_t* sav = lsdj_read_sav_from_file(path.string().c_str(), &error);
     if (sav == nullptr)
     {
         lsdj_free_sav(sav);
         return handle_error(error);
     }
     
-    const auto& cwd = boost::filesystem::current_path();
+    const auto outputFolder = boost::filesystem::absolute(output);
     
     const auto count = lsdj_sav_get_project_count(sav);
     for (int i = 0; i < count; ++i)
@@ -79,7 +79,7 @@ int exportSongs(const std::string& file, VersionStyle versionStyle, bool undersc
         if (!song)
             continue;
         
-        exportProject(project, cwd, versionStyle, underscore, putInFolder, &error);
+        exportProject(project, outputFolder, versionStyle, underscore, putInFolder, &error);
         if (error)
             return handle_error(error);
     }
@@ -89,10 +89,10 @@ int exportSongs(const std::string& file, VersionStyle versionStyle, bool undersc
     return 0;
 }
 
-int print(const std::string& file, VersionStyle versionStyle, bool underscore)
+int print(const boost::filesystem::path& path, VersionStyle versionStyle, bool underscore)
 {
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = lsdj_read_sav_from_file(boost::filesystem::canonical(file).string().c_str(), &error);
+    lsdj_sav_t* sav = lsdj_read_sav_from_file(path.string().c_str(), &error);
     if (sav == nullptr)
     {
         lsdj_free_sav(sav);
@@ -165,7 +165,9 @@ int main(int argc, char* argv[])
         ("folder,f", "Put every lsdsng in its own folder")
         ("print,p", "Print a list of all songs in the sav")
         ("decimal,d", "Use decimal notation for the version number, instead of hex")
-        ("underscore,u", "Use an underscore for the special lightning bolt character, instead of x");
+        ("underscore,u", "Use an underscore for the special lightning bolt character, instead of x")
+        ("verbose,v", "Verbose output")
+        ("output,o", boost::program_options::value<std::string>()->default_value(""), "Output folder for the lsdsng's");
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", 1);
@@ -178,6 +180,8 @@ int main(int argc, char* argv[])
         parser = parser.positional(positionalOptions);
         boost::program_options::store(parser.run(), vm);
         boost::program_options::notify(vm);
+        
+        bool verbose = vm.count("verbose");
     
         if (vm.count("help"))
         {
@@ -185,17 +189,20 @@ int main(int argc, char* argv[])
             return 0;
         } else if (vm.count("file")) {
             VersionStyle version = vm.count("noversion") ? VersionStyle::NONE : vm.count("decimal") ? VersionStyle::DECIMAL : VersionStyle::HEX;
+            const auto path = boost::filesystem::absolute(vm["file"].as<std::string>());
+            if (verbose)
+                std::cout << "path to save is '" + path.string() << "'" << std::endl;
             
-			if (!boost::filesystem::exists(vm["file"].as<std::string>()))
+			if (!boost::filesystem::exists(path))
 			{
-				std::cerr << "file does not exist" << std::endl;
+				std::cerr << "File '" << path.string() << "' does not exist" << std::endl;
 				return 1;
 			}
 
             if (vm.count("print"))
-                return print(vm["file"].as<std::string>(), version, vm.count("underscore"));
+                return print(path, version, vm.count("underscore"));
             else
-                return exportSongs(vm["file"].as<std::string>(), version, vm.count("underscore"), vm.count("folder"));
+                return exportSongs(path, vm["output"].as<std::string>(), version, vm.count("underscore"), vm.count("folder"));
         } else {
             std::cout << desc << std::endl;
             return 0;
@@ -203,6 +210,10 @@ int main(int argc, char* argv[])
     } catch (const boost::program_options::error& e) {
         std::cerr << e.what() << std::endl;
         return 1;
+    } catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+    } catch (...) {
+        std::cerr << "unknown error" << std::endl;
     }
 
 	return 0;
