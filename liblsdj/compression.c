@@ -18,6 +18,8 @@
 #define DEFAULT_WAVE_BYTE 0xF0
 #define DEFAULT_INSTRUMENT_BYTE 0xF1
 
+static const unsigned char DEFAULT_INSTRUMENT_COMPRESSION[DEFAULT_INSTRUMENT_LENGTH] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
+
 void decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio)
 {
     unsigned char byte;
@@ -49,7 +51,7 @@ void decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio)
     rvio->read(&count, 1, rvio->user_data);
     
     for (int i = 0; i < count; ++i)
-        wvio->write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), wvio->user_data);
+        wvio->write(DEFAULT_INSTRUMENT_COMPRESSION, sizeof(DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data);
 }
 
 void decompress_sa_byte(lsdj_vio_t* rvio, long firstBlockOffset, size_t blockSize, lsdj_vio_t* wvio, int* reading)
@@ -85,9 +87,9 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, 
     int reading = 1;
     while (reading == 1)
     {
-        int rcur = (int)(rvio->tell(rvio->user_data));
-        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
-        printf("%#06x\t%#04x\n", rcur, wcur);
+//        int rcur = (int)(rvio->tell(rvio->user_data));
+//        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
+//        printf("%#06x\t%#04x\n", rcur, wcur);
         
         rvio->read(&byte, 1, rvio->user_data);
         
@@ -120,9 +122,14 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
     
     unsigned char byte = 0;
     
+    long wstart = wvio->tell(wvio->user_data);
+    
     const unsigned char* end = data + SONG_DECOMPRESSED_SIZE;
     for (const unsigned char* read = data; read < end; )
     {
+        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
+        printf("%#06x\t%#04x\n", (int)(read - data), wcur);
+        
         // Are we reading a default wave? If so, we can compress these!
         unsigned char defaultWaveLengthCount = 0;
         while (read + WAVE_LENGTH < end && memcmp(read, DEFAULT_WAVE, WAVE_LENGTH) == 0)
@@ -144,7 +151,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         
         // Are we reading a default instrument? If so, we can compress these!
         unsigned char defaultInstrumentLengthCount = 0;
-        while (read + DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, DEFAULT_INSTRUMENT, DEFAULT_INSTRUMENT_LENGTH) == 0)
+        while (read + DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, DEFAULT_INSTRUMENT_COMPRESSION, DEFAULT_INSTRUMENT_LENGTH) == 0)
         {
             read += DEFAULT_INSTRUMENT_LENGTH;
             ++defaultInstrumentLengthCount;
