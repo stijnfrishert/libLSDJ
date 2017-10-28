@@ -414,6 +414,8 @@ void lsdj_read_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrumen
     unsigned char type;
     vio->read(&type, 1, vio->user_data);
     
+    const long pos = vio->tell(vio->user_data);
+    
     switch (type)
     {
         case 0: read_pulse_instrument(vio, version, instrument, error); break;
@@ -422,6 +424,8 @@ void lsdj_read_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrumen
         case 3: read_noise_instrument(vio, instrument, error); break;
         default: return lsdj_create_error(error, "unknown instrument type");
     }
+    
+    assert(vio->tell(vio->user_data) - pos == 15);
 }
 
 unsigned char createWaveVolumeByte(unsigned char volume)

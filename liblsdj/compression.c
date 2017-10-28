@@ -78,15 +78,16 @@ void decompress_sa_byte(lsdj_vio_t* rvio, long firstBlockOffset, size_t blockSiz
 
 void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, size_t blockSize)
 {
-    long start = wvio->tell(wvio->user_data);
+    long wstart = wvio->tell(wvio->user_data);
     
     unsigned char byte = 0;
     
     int reading = 1;
     while (reading == 1)
     {
-//        int cur = (int)(wvio->tell(wvio->user_data) - start);
-//        printf("%#04x\n", cur);
+        int rcur = (int)(rvio->tell(rvio->user_data));
+        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
+        printf("%#06x\t%#04x\n", rcur, wcur);
         
         rvio->read(&byte, 1, rvio->user_data);
         
@@ -106,7 +107,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, 
         }
     }
 
-    assert((wvio->tell(wvio->user_data) - start) == SONG_DECOMPRESSED_SIZE);
+    assert((wvio->tell(wvio->user_data) - wstart) == SONG_DECOMPRESSED_SIZE);
 }
 
 unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_t* wvio)
