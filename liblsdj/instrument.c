@@ -425,7 +425,7 @@ void lsdj_read_instrument(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user
 
 unsigned char createWaveVolumeByte(unsigned char volume)
 {
-    return (volume > 0x3) ? 0x3 : volume;
+    return volume;
 }
 
 unsigned char createPanningByte(lsdj_panning pan)
@@ -525,24 +525,31 @@ void write_pulse_instrument(const lsdj_instrument_t* instrument, unsigned char v
     byte = (unsigned char)(createPulseWidthByte(instrument->pulse.pulseWidth) | ((instrument->pulse.fineTune & 0xF) << 2) | createPanningByte(instrument->panning));
     write(&byte, 1, user_data);
     
-    static unsigned char empty[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    static unsigned char empty[8] = { 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
     write(empty, sizeof(empty), user_data); // Bytes 8-15 are empty
 }
 
 void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_write_t write, void* user_data)
 {
+    // Byte 0
     unsigned char byte = 1;
     write(&byte, 1, user_data);
     
+    // Byte 1
     byte = createWaveVolumeByte(instrument->volume);
     write(&byte, 1, user_data);
     
+    // Byte 2
     byte = (unsigned char)((instrument->wave.synth & 0xF) << 4) | (instrument->wave.repeat & 0xF);
     write(&byte, 1, user_data);
     
+    // Byte 3 (is empty)
     byte = 0;
-    write(&byte, 1, user_data); // Byte 3 is empty
-    write(&byte, 1, user_data); // Byte 4 is empty
+    write(&byte, 1, user_data);
+    
+    // Byte 4 (is empty)
+    byte = 0xFF;
+    write(&byte, 1, user_data);
     
     byte = (version >= 0x03) ? createTuningByte(instrument->pulse.tuning) : 0;
     byte |= createAutomateByte(instrument->automate) | createVibrationDirectionByte(instrument->wave.vibratoDirection);
@@ -578,8 +585,10 @@ void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char ve
     byte = createPlaybackModeByte(instrument->wave.playback);
     write(&byte, 1, user_data);
     
-    byte = 0;
+    byte = 0xD0;
     write(&byte, 1, user_data); // Byte 10 is empty
+    
+    byte = 0;
     write(&byte, 1, user_data); // Byte 11 is empty
     write(&byte, 1, user_data); // Byte 12 is empty
     write(&byte, 1, user_data); // Byte 13 is empty
@@ -604,7 +613,7 @@ void write_kit_instrument(const lsdj_instrument_t* instrument, unsigned char ver
     
     write(&instrument->kit.length1, 1, user_data);
     
-    byte = 0;
+    byte = 0xFF;
     write(&byte, 1, user_data); // Byte 4 is empty
     
     byte = ((instrument->kit.loop1 == LSDJ_KIT_LOOP_ON) ? 0x80 : 0x0) |
@@ -641,8 +650,10 @@ void write_kit_instrument(const lsdj_instrument_t* instrument, unsigned char ver
     write(&instrument->kit.offset1, 1, user_data);
     write(&instrument->kit.offset2, 1, user_data);
     
-    byte = 0;
+    byte = 0xF3;
     write(&byte, 1, user_data); // Byte 14 is empty
+    
+    byte = 0;
     write(&byte, 1, user_data); // Byte 15 is empty
 }
 
@@ -670,7 +681,7 @@ void write_noise_instrument(const lsdj_instrument_t* instrument, lsdj_vio_write_
     byte = createPanningByte(instrument->panning);
     write(&byte, 1, user_data);
     
-    static unsigned char empty[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+    static unsigned char empty[8] = { 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
     write(empty, sizeof(empty), user_data); // Bytes 8-15 are empty
 }
 

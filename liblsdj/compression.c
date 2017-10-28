@@ -105,11 +105,42 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, uns
     unsigned char nextEvent[3] = { 0, 0, 0 };
     unsigned short eventSize = 0;
     
-    for (const unsigned char* read = data; read < data + SONG_DECOMPRESSED_SIZE; )
+    const unsigned char* end = data + SONG_DECOMPRESSED_SIZE;
+    for (const unsigned char* read = data; read < end; )
     {
-        const long diff = read - data;
-        (void)diff;
+        // Are we reading a default wave? If so, we can compress these!
+        unsigned char defaultWaveLengthCount = 0;
+        while (read + WAVE_LENGTH < end && memcmp(read, DEFAULT_WAVE, WAVE_LENGTH) == 0)
+        {
+            read += WAVE_LENGTH;
+            ++defaultWaveLengthCount;
+        }
         
+        if (defaultWaveLengthCount > 0)
+        {
+            *write++ = SPECIAL_ACTION_BYTE;
+            *write++ = DEFAULT_WAVE_BYTE;
+            *write++ = defaultWaveLengthCount;
+            continue;
+        }
+        
+        // Are we reading a default instrument? If so, we can compress these!
+        unsigned char defaultInstrumentLengthCount = 0;
+        while (read + DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, DEFAULT_INSTRUMENT, DEFAULT_INSTRUMENT_LENGTH) == 0)
+        {
+            read += DEFAULT_INSTRUMENT_LENGTH;
+            ++defaultInstrumentLengthCount;
+        }
+        
+        if (defaultInstrumentLengthCount > 0)
+        {
+            *write++ = SPECIAL_ACTION_BYTE;
+            *write++ = DEFAULT_INSTRUMENT_BYTE;
+            *write++ = defaultInstrumentLengthCount;
+            continue;
+        }
+        
+        // Not a default wave, time to do "normal" compression
         switch (*read)
         {
             case RUN_LENGTH_ENCODING_BYTE:
@@ -133,14 +164,14 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, uns
                 unsigned char c = *read;
                 
                 // See if we can do run-length encoding
-                if ((read + 3 < data + SONG_DECOMPRESSED_SIZE) &&
+                if ((read + 3 < end) &&
                     *(read + 1) == c &&
                     *(read + 2) == c &&
                     *(read + 3) == c)
                 {
                     unsigned char count = 0;
                     
-                    while (read < data + SONG_DECOMPRESSED_SIZE && *read == c && count != 0xFF)
+                    while (read < end && *read == c && count != 0xFF)
                     {
                         ++count;
                         ++read;
