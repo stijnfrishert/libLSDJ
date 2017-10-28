@@ -116,9 +116,7 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio
     unsigned char blocks_alloc_table[BLOCK_COUNT];
     read(blocks_alloc_table, sizeof(blocks_alloc_table), user_data);
     
-    // Read the blocks
-    unsigned char blocks[BLOCK_COUNT][BLOCK_SIZE];
-    read(blocks, sizeof(blocks), user_data);
+    const long firstBlockOffset = tell(user_data);
     
     // Pointers for storing decompressed song data
     // Handle decompression
@@ -135,10 +133,12 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio
         unsigned char data[SONG_DECOMPRESSED_SIZE];
         memset(data, 0x00, sizeof(data));
         
-        lsdj_memory_data_t mem;
-        mem.cur = mem.begin = (unsigned char*)blocks;
-        mem.size = BLOCK_COUNT * BLOCK_SIZE;
-        lsdj_decompress(lsdj_mread, lsdj_mseek, lsdj_mtell, &mem, 0, BLOCK_SIZE, data);
+        seek(firstBlockOffset + i * BLOCK_SIZE, SEEK_SET, user_data);
+        lsdj_decompress(read, seek, tell, user_data, firstBlockOffset, BLOCK_SIZE, data);
+        
+//        FILE* file = fopen("/Users/stijnfrishert/Desktop/uncompr.hex", "wb");
+//        fwrite(data, SONG_DECOMPRESSED_SIZE, 1, file);
+//        fclose(file);
         
         // Read the song from memory
         lsdj_song_t* song = lsdj_read_song_from_memory(data, sizeof(data), error);
