@@ -18,101 +18,97 @@
 #define DEFAULT_WAVE_BYTE 0xF0
 #define DEFAULT_INSTRUMENT_BYTE 0xF1
 
-void decompress_rle_byte(lsdj_vio_read_t read, void* read_data, unsigned char** write)
+void decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio)
 {
     unsigned char byte;
-    read(&byte, 1, read_data);
+    rvio->read(&byte, 1, rvio->user_data);
     if (byte == RUN_LENGTH_ENCODING_BYTE)
     {
-        *(*write)++ = RUN_LENGTH_ENCODING_BYTE;
+        wvio->write(&byte, 1, wvio->user_data);
     }
     else
     {
         unsigned char count = 0;
-        read(&count, 1, read_data);
+        rvio->read(&count, 1, rvio->user_data);
         for (int i = 0; i < count; ++i)
-            *(*write)++ = byte;
+            wvio->write(&byte, 1, wvio->user_data);
     }
 }
 
-void decompress_default_wave_byte(lsdj_vio_read_t read, void* read_data, unsigned char** write)
+void decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio)
 {
     unsigned char count = 0;
-    read(&count, 1, read_data);
+    rvio->read(&count, 1, rvio->user_data);
     for (int i = 0; i < count; ++i)
-    {
-        for (int j = 0; j < 16; ++j)
-            *(*write)++ = DEFAULT_WAVE[j];
-    }
+        wvio->write(DEFAULT_WAVE, sizeof(DEFAULT_WAVE), wvio->user_data);
 }
 
-void decompress_default_instrument_byte(lsdj_vio_read_t read, void* read_data, unsigned char** write)
+void decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio)
 {
     unsigned char count = 0;
-    read(&count, 1, read_data);
+    rvio->read(&count, 1, rvio->user_data);
+    
     for (int i = 0; i < count; ++i)
-    {
-        for (int j = 0; j < 16; ++j)
-            *(*write)++ = DEFAULT_INSTRUMENT[j];
-    }
+        wvio->write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), wvio->user_data);
 }
 
-void decompress_sa_byte(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* read_data, long firstBlockOffset, size_t blockSize, unsigned char** write, int* reading)
+void decompress_sa_byte(lsdj_vio_t* rvio, long firstBlockOffset, size_t blockSize, lsdj_vio_t* wvio, int* reading)
 {
     unsigned char byte = 0;
-    read(&byte, 1, read_data);
+    rvio->read(&byte, 1, rvio->user_data);
     switch (byte)
     {
         case SPECIAL_ACTION_BYTE:
-            *(*write)++ = SPECIAL_ACTION_BYTE;
+            wvio->write(&byte, 1, wvio->user_data);
             break;
         case DEFAULT_WAVE_BYTE:
-            decompress_default_wave_byte(read, read_data, write);
+            decompress_default_wave_byte(rvio, wvio);
             break;
         case DEFAULT_INSTRUMENT_BYTE:
-            decompress_default_instrument_byte(read, read_data, write);
+            decompress_default_instrument_byte(rvio, wvio);
             break;
         case END_OF_FILE_BYTE:
             *reading = 0;
             break;
         default:
-            seek(firstBlockOffset + (long)(byte * blockSize), SEEK_SET, read_data);
+            rvio->seek(firstBlockOffset + (long)(byte * blockSize), SEEK_SET, rvio->user_data);
             break;
     }
 }
 
-void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t tell, void* read_data, long firstBlockOffset, size_t blockSize, unsigned char* write)
+void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, size_t blockSize)
 {
-    unsigned char* start = write;
+    long start = wvio->tell(wvio->user_data);
+    
     unsigned char byte = 0;
     
     int reading = 1;
     while (reading == 1)
     {
-        int cur = (int)(write - start);
+        int cur = (int)(wvio->tell(wvio->user_data) - start);
         printf("%#04x\n", cur);
-        read(&byte, 1, read_data);
+        rvio->read(&byte, 1, rvio->user_data);
         
         switch (byte)
         {
             case RUN_LENGTH_ENCODING_BYTE:
-                decompress_rle_byte(read, read_data, &write);
+                decompress_rle_byte(rvio, wvio);
                 break;
                 
             case SPECIAL_ACTION_BYTE:
-                decompress_sa_byte(read, seek, read_data, firstBlockOffset, blockSize, &write, &reading);
+                decompress_sa_byte(rvio, firstBlockOffset, blockSize, wvio, &reading);
                 break;
                 
             default:
-                *write++ = byte;
+                wvio->write(&byte, 1, wvio->user_data);
                 break;
         }
     }
 
-    assert((write - start) == SONG_DECOMPRESSED_SIZE);
+    assert((wvio->tell(wvio->user_data) - start) == SONG_DECOMPRESSED_SIZE);
 }
 
-unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_write_t write, void* user_data)
+unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_t* wvio)
 {
     unsigned char nextEvent[3] = { 0, 0, 0 };
     unsigned short eventSize = 0;
@@ -136,10 +132,10 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         if (defaultWaveLengthCount > 0)
         {
             byte = SPECIAL_ACTION_BYTE;
-            write(&byte, 1, user_data);
+            wvio->write(&byte, 1, wvio->user_data);
             byte = DEFAULT_WAVE_BYTE;
-            write(&byte, 1, user_data);
-            write(&defaultWaveLengthCount, 1, user_data);
+            wvio->write(&byte, 1, wvio->user_data);
+            wvio->write(&defaultWaveLengthCount, 1, wvio->user_data);
             currentBlockSize += 3;
             continue;
         }
@@ -155,10 +151,10 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         if (defaultInstrumentLengthCount > 0)
         {
             byte = SPECIAL_ACTION_BYTE;
-            write(&byte, 1, user_data);
+            wvio->write(&byte, 1, wvio->user_data);
             byte = DEFAULT_INSTRUMENT_BYTE;
-            write(&byte, 1, user_data);
-            write(&defaultInstrumentLengthCount, 1, user_data);
+            wvio->write(&byte, 1, wvio->user_data);
+            wvio->write(&defaultInstrumentLengthCount, 1, wvio->user_data);
             currentBlockSize += 3;
             continue;
         }
@@ -219,35 +215,35 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         if (currentBlockSize >= blockSize - eventSize - 1)
         {
             byte = SPECIAL_ACTION_BYTE;
-            write(&byte, 1, user_data);
+            wvio->write(&byte, 1, wvio->user_data);
             byte = currentBlock + 1;
-            write(&byte, 1, user_data);
+            wvio->write(&byte, 1, wvio->user_data);
             
             byte = 0;
             for (currentBlockSize += 2; currentBlockSize < blockSize; currentBlockSize++)
-                write(&byte, 1, user_data);
+                wvio->write(&byte, 1, wvio->user_data);
             
             currentBlock += 1;
             currentBlockSize = 0;
             continue;
         }
         
-        write(nextEvent, eventSize, user_data);
+        wvio->write(nextEvent, eventSize, wvio->user_data);
         currentBlockSize += eventSize;
         nextEvent[0] = nextEvent[1] = nextEvent[2] = 0;
         eventSize = 0;
     }
     
     byte = SPECIAL_ACTION_BYTE;
-    write(&byte, 1, user_data);
+    wvio->write(&byte, 1, wvio->user_data);
     byte = END_OF_FILE_BYTE;
-    write(&byte, 1, user_data);
+    wvio->write(&byte, 1, wvio->user_data);
     
     if (currentBlockSize > 0)
     {
         byte = 0;
         for (currentBlockSize += 2; currentBlockSize < blockSize; currentBlockSize++)
-            write(&byte, 1, user_data);
+            wvio->write(&byte, 1, wvio->user_data);
     }
     
     return currentBlock - startBlock;

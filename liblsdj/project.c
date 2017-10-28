@@ -51,18 +51,29 @@ void lsdj_free_project(lsdj_project_t* project)
     free(project);
 }
 
-lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_error_t** error)
+lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
 {
     lsdj_project_t* project = alloc_project(error);
     
-    read(project->name, PROJECT_NAME_LENGTH, user_data);
-    read(&project->version, 1, user_data);
+    vio->read(project->name, PROJECT_NAME_LENGTH, vio->user_data);
+    vio->read(&project->version, 1, vio->user_data);
 
     // Decompress the data
-    const long firstBlockOffset = tell(user_data);
+    const long firstBlockOffset = vio->tell(vio->user_data);
     unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
     memset(decompressed, 0, sizeof(decompressed));
-    lsdj_decompress(read, seek, tell, user_data, firstBlockOffset, BLOCK_SIZE, decompressed);
+    
+    lsdj_memory_data_t mem;
+    mem.begin = mem.cur = decompressed;
+    mem.size = sizeof(decompressed);
+    
+    lsdj_vio_t wvio;
+    wvio.write = lsdj_fwrite;
+    wvio.tell = lsdj_ftell;
+    wvio.seek = lsdj_fseek;
+    wvio.user_data = &mem;
+    
+    lsdj_decompress(vio, &wvio, firstBlockOffset, BLOCK_SIZE);
     
     // Read in the song
     if (project->song == NULL)
@@ -86,7 +97,13 @@ lsdj_project_t* lsdj_read_lsdsng_from_file(const char* path, lsdj_error_t** erro
         return NULL;
     }
     
-    lsdj_project_t* project = lsdj_read_lsdsng(lsdj_fread, lsdj_ftell, lsdj_fseek, file, error);
+    lsdj_vio_t vio;
+    vio.read = lsdj_fread;
+    vio.tell = lsdj_ftell;
+    vio.seek = lsdj_fseek;
+    vio.user_data = file;
+    
+    lsdj_project_t* project = lsdj_read_lsdsng(&vio, error);
     
     fclose(file);
     
@@ -106,23 +123,29 @@ lsdj_project_t* lsdj_read_lsdsng_from_memory(const unsigned char* data, size_t s
     mem.cur = mem.begin;
     mem.size = size;
     
-    return lsdj_read_lsdsng(lsdj_mread, lsdj_mtell, lsdj_mseek, &mem, error);
+    lsdj_vio_t vio;
+    vio.read = lsdj_mread;
+    vio.tell = lsdj_mtell;
+    vio.seek = lsdj_mseek;
+    vio.user_data = &mem;
+    
+    return lsdj_read_lsdsng(&vio, error);
 }
 
-void lsdj_write_lsdsng(const lsdj_project_t* project, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
+void lsdj_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     if (project->song == NULL)
         return lsdj_create_error(error, "project does not contain a song");
     
-    write(project->name, PROJECT_NAME_LENGTH, user_data);
-    write(&project->version, 1, user_data);
+    vio->write(project->name, PROJECT_NAME_LENGTH, vio->user_data);
+    vio->write(&project->version, 1, vio->user_data);
     
     // Write the song to memory
     unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
     lsdj_write_song_to_memory(project->song, decompressed, SONG_DECOMPRESSED_SIZE, error);
     
     // Compress the song
-    lsdj_compress(decompressed, BLOCK_SIZE, 0, BLOCK_COUNT, write, user_data);
+    lsdj_compress(decompressed, BLOCK_SIZE, 0, BLOCK_COUNT, vio);
 }
 
 void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error)
@@ -137,7 +160,13 @@ void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, 
     if (file == NULL)
         return lsdj_create_error(error, "could not open file for writing");
     
-    lsdj_write_lsdsng(project, lsdj_fwrite, file, error);
+    lsdj_vio_t vio;
+    vio.write = lsdj_fwrite;
+    vio.tell = lsdj_ftell;
+    vio.seek = lsdj_fseek;
+    vio.user_data = file;
+    
+    lsdj_write_lsdsng(project, &vio, error);
     
     fclose(file);
 }
@@ -155,7 +184,13 @@ void lsdj_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* d
     mem.cur = mem.begin;
     mem.size = size;
     
-    lsdj_write_lsdsng(project, lsdj_mwrite, &mem, error);
+    lsdj_vio_t vio;
+    vio.write = lsdj_mwrite;
+    vio.tell = lsdj_mtell;
+    vio.seek = lsdj_mseek;
+    vio.user_data = &mem;
+    
+    lsdj_write_lsdsng(project, &vio, error);
 }
 
 void lsdj_clear_project(lsdj_project_t* project)

@@ -119,11 +119,11 @@ lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char projec
 }
 
 // Read compressed project data from memory sav file
-void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t tell, void* user_data, lsdj_project_t** projects, lsdj_error_t** error)
+void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_error_t** error)
 {
     // Read the block allocation table
     unsigned char blocks_alloc_table[BLOCK_COUNT];
-    read(blocks_alloc_table, sizeof(blocks_alloc_table), user_data);
+    vio->read(blocks_alloc_table, sizeof(blocks_alloc_table), vio->user_data);
     
     // Pointers for storing decompressed song data
     // Handle decompression
@@ -140,8 +140,22 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio
         unsigned char data[SONG_DECOMPRESSED_SIZE];
         memset(data, 0x00, sizeof(data));
         
-        seek(HEADER_START + (i + 1) * BLOCK_SIZE, SEEK_SET, user_data);
-        lsdj_decompress(read, seek, tell, user_data, HEADER_START, BLOCK_SIZE, data);
+        vio->seek(HEADER_START + (i + 1) * BLOCK_SIZE, SEEK_SET, vio->user_data);
+                
+        lsdj_memory_data_t mem;
+        mem.cur = mem.begin = data;
+        mem.size = sizeof(data);
+        
+        lsdj_vio_t wvio;
+        wvio.write = lsdj_mwrite;
+        wvio.tell = lsdj_mtell;
+        wvio.seek = lsdj_mseek;
+        wvio.user_data = &mem;
+        lsdj_decompress(vio, &wvio, HEADER_START, BLOCK_SIZE);
+        
+        FILE* file = fopen("/Users/stijnfrishert/Desktop/uncompressedc.hex", "wb");
+        fwrite(data, SONG_DECOMPRESSED_SIZE, 1, file);
+        fclose(file);
         
         // Read the song from memory
         lsdj_song_t* song = lsdj_read_song_from_memory(data, sizeof(data), error);
@@ -155,16 +169,16 @@ void read_compressed_blocks(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio
     }
 }
 
-lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_error_t** error)
+lsdj_sav_t* lsdj_read_sav(lsdj_vio_t* vio, lsdj_error_t** error)
 {
     // Check for incorrect input
-    if (read == NULL)
+    if (vio->read == NULL)
     {
         lsdj_create_error(error, "read is NULL");
         return NULL;
     }
     
-    if (seek == NULL)
+    if (vio->seek == NULL)
     {
         lsdj_create_error(error, "seek is NULL");
         return NULL;
@@ -175,12 +189,12 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_s
         return NULL;
     
     // Skip memory representing the working song (we'll get to that)
-    const long begin = tell(user_data);
-    seek(begin + HEADER_START, SEEK_SET, user_data);
+    const long begin = vio->tell(vio->user_data);
+    vio->seek(begin + HEADER_START, SEEK_SET, vio->user_data);
     
     // Read the header block, before we start processing each song
 	header_t header;
-	read(&header, sizeof(header), user_data);
+	vio->read(&header, sizeof(header), vio->user_data);
     
     // Check the initialization characters. If they're not 'jk', we're
     // probably not dealing with an actual LSDJ sav format file.
@@ -210,15 +224,15 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_s
     sav->activeProject = header.active_project;
     
     // Read the compressed projects
-    read_compressed_blocks(read, seek, tell, user_data, sav->projects, error);
+    read_compressed_blocks(vio, sav->projects, error);
     if (error && *error)
         return NULL;
     
     // Read the working song
-    const long end = tell(user_data);
-    seek(begin, SEEK_SET, user_data);
+    const long end = vio->tell(vio->user_data);
+    vio->seek(begin, SEEK_SET, vio->user_data);
     unsigned char song_data[SONG_DECOMPRESSED_SIZE];
-    read(song_data, sizeof(song_data), user_data);
+    vio->read(song_data, sizeof(song_data), vio->user_data);
     sav->song = lsdj_new_song(error);
     if (error && *error)
     {
@@ -228,7 +242,7 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_s
     
     sav->song = lsdj_read_song_from_memory(song_data, sizeof(song_data), error);
     
-    seek(end, SEEK_SET, user_data);
+    vio->seek(end, SEEK_SET, vio->user_data);
     
     return sav;
 }
@@ -247,8 +261,14 @@ lsdj_sav_t* lsdj_read_sav_from_file(const char* path, lsdj_error_t** error)
         lsdj_create_error(error, "could not open file for reading");
         return NULL;
     }
+    
+    lsdj_vio_t vio;
+    vio.read = lsdj_fread;
+    vio.tell = lsdj_ftell;
+    vio.seek = lsdj_fseek;
+    vio.user_data = file;
 
-    lsdj_sav_t* sav = lsdj_read_sav(lsdj_fread, lsdj_ftell, lsdj_fseek, file, error);
+    lsdj_sav_t* sav = lsdj_read_sav(&vio, error);
     
     fclose(file);
     return sav;
@@ -267,15 +287,21 @@ lsdj_sav_t* lsdj_read_sav_from_memory(const unsigned char* data, size_t size, ls
     mem.cur = mem.begin;
     mem.size = size;
     
-    return lsdj_read_sav(lsdj_mread, lsdj_mtell, lsdj_mseek, &mem, error);
+    lsdj_vio_t vio;
+    vio.read = lsdj_mread;
+    vio.tell = lsdj_mtell;
+    vio.seek = lsdj_mseek;
+    vio.user_data = &mem;
+    
+    return lsdj_read_sav(&vio, error);
 }
 
-void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
+void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     // Write the working project
     unsigned char song_data[SONG_DECOMPRESSED_SIZE];
     lsdj_write_song_to_memory(sav->song, song_data, SONG_DECOMPRESSED_SIZE, error);
-    write(song_data, sizeof(song_data), user_data);
+    vio->write(song_data, sizeof(song_data), vio->user_data);
 
     // Create the header for writing
     header_t header;
@@ -307,8 +333,8 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_da
     }
     
     // Write the header and block alloc table
-    write(&header, sizeof(header), user_data);
-    write(&block_alloc_table, sizeof(block_alloc_table), user_data);
+    vio->write(&header, sizeof(header), vio->user_data);
+    vio->write(&block_alloc_table, sizeof(block_alloc_table), vio->user_data);
 
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
     {
@@ -321,7 +347,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_da
         // Compress the song to memory
         unsigned char song_data[SONG_DECOMPRESSED_SIZE];
         lsdj_write_song_to_memory(song, song_data, SONG_DECOMPRESSED_SIZE, error);
-        unsigned int written_block_count = lsdj_compress(song_data, BLOCK_SIZE, current_block, BLOCK_COUNT, write, user_data);
+        unsigned int written_block_count = lsdj_compress(song_data, BLOCK_SIZE, current_block, BLOCK_COUNT, vio);
 
         current_block += written_block_count;
         for (int j = 0; j < written_block_count; ++j)
@@ -329,9 +355,9 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_write_t write, void* user_da
     }
 
     // Write the header and blocks
-    write(&header, sizeof(header), user_data);
-    write(&block_alloc_table, sizeof(block_alloc_table), user_data);
-    write(blocks, sizeof(blocks), user_data);
+    vio->write(&header, sizeof(header), vio->user_data);
+    vio->write(&block_alloc_table, sizeof(block_alloc_table), vio->user_data);
+    vio->write(blocks, sizeof(blocks), vio->user_data);
 }
 
 void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error)
@@ -346,7 +372,13 @@ void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_
     if (file == NULL)
         return lsdj_create_error(error, "could not open file for writing");
     
-    lsdj_write_sav(sav, lsdj_fwrite, file, error);
+    lsdj_vio_t vio;
+    vio.write = lsdj_fwrite;
+    vio.tell = lsdj_ftell;
+    vio.seek = lsdj_fseek;
+    vio.user_data = file;
+    
+    lsdj_write_sav(sav, &vio, error);
     
     fclose(file);
 }
@@ -364,5 +396,11 @@ void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t
     mem.cur = mem.begin;
     mem.size = size;
     
-    lsdj_write_sav(sav, lsdj_mwrite, &mem, error);
+    lsdj_vio_t vio;
+    vio.write = lsdj_mwrite;
+    vio.tell = lsdj_mtell;
+    vio.seek = lsdj_mseek;
+    vio.user_data = &mem;
+    
+    lsdj_write_sav(sav, &vio, error);
 }

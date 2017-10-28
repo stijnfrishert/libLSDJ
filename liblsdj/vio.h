@@ -9,6 +9,15 @@ typedef size_t (*lsdj_vio_read_t)(void* ptr, size_t size, void* user_data);
 typedef size_t (*lsdj_vio_write_t)(const void* ptr, size_t size, void* user_data);
 typedef long (*lsdj_vio_tell_t)(void* user_data);
 typedef long (*lsdj_vio_seek_t)(long offset, int whence, void* user_data);
+
+typedef struct
+{
+    lsdj_vio_read_t read;
+    lsdj_vio_write_t write;
+    lsdj_vio_tell_t tell;
+    lsdj_vio_seek_t seek;
+    void* user_data;
+} lsdj_vio_t;
     
 // Structure used for virtual I/O into memory
 /* You probably won't ever have to use this yourself, *read/write_from_memory() functions
