@@ -18,7 +18,70 @@
 #define DEFAULT_WAVE_BYTE 0xF0
 #define DEFAULT_INSTRUMENT_BYTE 0xF1
 
-void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t tell, void* user_data, long begin, size_t blockSize, unsigned char* write)
+void decompress_rle_byte(lsdj_vio_read_t read, void* read_data, unsigned char** write)
+{
+    unsigned char byte;
+    read(&byte, 1, read_data);
+    if (byte == RUN_LENGTH_ENCODING_BYTE)
+    {
+        *(*write)++ = RUN_LENGTH_ENCODING_BYTE;
+    }
+    else
+    {
+        unsigned char count = 0;
+        read(&count, 1, read_data);
+        for (int i = 0; i < count; ++i)
+            *(*write)++ = byte;
+    }
+}
+
+void decompress_default_wave_byte(lsdj_vio_read_t read, void* read_data, unsigned char** write)
+{
+    unsigned char count = 0;
+    read(&count, 1, read_data);
+    for (int i = 0; i < count; ++i)
+    {
+        for (int j = 0; j < 16; ++j)
+            *(*write)++ = DEFAULT_WAVE[j];
+    }
+}
+
+void decompress_default_instrument_byte(lsdj_vio_read_t read, void* read_data, unsigned char** write)
+{
+    unsigned char count = 0;
+    read(&count, 1, read_data);
+    for (int i = 0; i < count; ++i)
+    {
+        for (int j = 0; j < 16; ++j)
+            *(*write)++ = DEFAULT_INSTRUMENT[j];
+    }
+}
+
+void decompress_sa_byte(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* read_data, long firstBlockOffset, size_t blockSize, unsigned char** write, int* reading)
+{
+    unsigned char byte = 0;
+    read(&byte, 1, read_data);
+    switch (byte)
+    {
+        case SPECIAL_ACTION_BYTE:
+            *(*write)++ = SPECIAL_ACTION_BYTE;
+            break;
+        case DEFAULT_WAVE_BYTE:
+            decompress_default_wave_byte(read, read_data, write);
+            break;
+        case DEFAULT_INSTRUMENT_BYTE:
+            decompress_default_instrument_byte(read, read_data, write);
+            break;
+        case END_OF_FILE_BYTE:
+            *reading = 0;
+            break;
+        default:
+            seek(firstBlockOffset + (long)(byte * blockSize), SEEK_SET, read_data);
+            break;
+    }
+}
+
+void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t tell, void* read_data, long firstBlockOffset, size_t blockSize, unsigned char* write)
 {
     unsigned char* start = write;
     unsigned char byte = 0;
@@ -26,84 +89,38 @@ void lsdj_decompress(lsdj_vio_read_t read, lsdj_vio_seek_t seek, lsdj_vio_tell_t
     int reading = 1;
     while (reading == 1)
     {
-        read(&byte, 1, user_data);
+        int cur = (int)(write - start);
+        printf("%#04x\n", cur);
+        read(&byte, 1, read_data);
+        
         switch (byte)
         {
             case RUN_LENGTH_ENCODING_BYTE:
-            {
-                read(&byte, 1, user_data);
-                if (byte == RUN_LENGTH_ENCODING_BYTE)
-                {
-                    *write ++ = RUN_LENGTH_ENCODING_BYTE;
-                }
-                else
-                {
-                    unsigned char count = 0;
-                    read(&count, 1, user_data);
-                    for (int i = 0; i < count; ++i)
-                        *write++ = byte;
-                }
+                decompress_rle_byte(read, read_data, &write);
                 break;
-            }
                 
             case SPECIAL_ACTION_BYTE:
-            {
-                read(&byte, 1, user_data);
-                switch (byte)
-                {
-                    case SPECIAL_ACTION_BYTE:
-                        *write++ = SPECIAL_ACTION_BYTE;
-                        break;
-                    case DEFAULT_WAVE_BYTE:
-                    {
-                        unsigned char count = 0;
-                        read(&count, 1, user_data);
-                        for (int i = 0; i < count; ++i)
-                        {
-                            for (int j = 0; j < 16; ++j)
-                                *write++ = DEFAULT_WAVE[j];
-                        }
-                        break;
-                    }
-                    case DEFAULT_INSTRUMENT_BYTE:
-                    {
-                        unsigned char count = 0;
-                        read(&count, 1, user_data);
-                        for (int i = 0; i < count; ++i)
-                        {
-                            for (int j = 0; j < 16; ++j)
-                                *write++ = DEFAULT_INSTRUMENT[j];
-                        }
-                        break;
-                    }
-                    case END_OF_FILE_BYTE:
-                        reading = 0;
-                        break;
-                    default:
-                        seek(begin + ((long)byte - 1) * (long)blockSize, SEEK_SET, user_data);
-                        break;
-                }
+                decompress_sa_byte(read, seek, read_data, firstBlockOffset, blockSize, &write, &reading);
                 break;
-            }
                 
             default:
                 *write++ = byte;
                 break;
         }
     }
-    
+
     assert((write - start) == SONG_DECOMPRESSED_SIZE);
 }
 
-unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, unsigned int block_size, unsigned int start_block, unsigned int block_count)
+unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_write_t write, void* user_data)
 {
-    unsigned int current_block = start_block;
-    unsigned char* block = blocks + current_block * block_size;
-    unsigned char* write = block;
-    
-    
     unsigned char nextEvent[3] = { 0, 0, 0 };
     unsigned short eventSize = 0;
+    
+    unsigned char currentBlock = startBlock;
+    unsigned int currentBlockSize = 0;
+    
+    unsigned char byte = 0;
     
     const unsigned char* end = data + SONG_DECOMPRESSED_SIZE;
     for (const unsigned char* read = data; read < end; )
@@ -118,9 +135,12 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, uns
         
         if (defaultWaveLengthCount > 0)
         {
-            *write++ = SPECIAL_ACTION_BYTE;
-            *write++ = DEFAULT_WAVE_BYTE;
-            *write++ = defaultWaveLengthCount;
+            byte = SPECIAL_ACTION_BYTE;
+            write(&byte, 1, user_data);
+            byte = DEFAULT_WAVE_BYTE;
+            write(&byte, 1, user_data);
+            write(&defaultWaveLengthCount, 1, user_data);
+            currentBlockSize += 3;
             continue;
         }
         
@@ -134,9 +154,12 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, uns
         
         if (defaultInstrumentLengthCount > 0)
         {
-            *write++ = SPECIAL_ACTION_BYTE;
-            *write++ = DEFAULT_INSTRUMENT_BYTE;
-            *write++ = defaultInstrumentLengthCount;
+            byte = SPECIAL_ACTION_BYTE;
+            write(&byte, 1, user_data);
+            byte = DEFAULT_INSTRUMENT_BYTE;
+            write(&byte, 1, user_data);
+            write(&defaultInstrumentLengthCount, 1, user_data);
+            currentBlockSize += 3;
             continue;
         }
         
@@ -193,24 +216,39 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned char* blocks, uns
             }
         }
         
-        if (write - block >= block_size - eventSize - 1)
+        if (currentBlockSize >= blockSize - eventSize - 1)
         {
-            *write++ = SPECIAL_ACTION_BYTE;
-            *write++ = (unsigned char)(current_block + 1);
+            byte = SPECIAL_ACTION_BYTE;
+            write(&byte, 1, user_data);
+            byte = currentBlock + 1;
+            write(&byte, 1, user_data);
             
-            current_block += 1;
-            write = block = blocks + current_block * block_size;
+            byte = 0;
+            for (currentBlockSize += 2; currentBlockSize < blockSize; currentBlockSize++)
+                write(&byte, 1, user_data);
+            
+            currentBlock += 1;
+            currentBlockSize = 0;
+            continue;
         }
         
-        for (int i = 0; i < eventSize; ++i)
-            *write++ = nextEvent[i];
-        
+        write(nextEvent, eventSize, user_data);
+        currentBlockSize += eventSize;
         nextEvent[0] = nextEvent[1] = nextEvent[2] = 0;
         eventSize = 0;
     }
     
-    *write++ = SPECIAL_ACTION_BYTE;
-    *write++ = END_OF_FILE_BYTE;
+    byte = SPECIAL_ACTION_BYTE;
+    write(&byte, 1, user_data);
+    byte = END_OF_FILE_BYTE;
+    write(&byte, 1, user_data);
     
-    return current_block - start_block + 1;
+    if (currentBlockSize > 0)
+    {
+        byte = 0;
+        for (currentBlockSize += 2; currentBlockSize < blockSize; currentBlockSize++)
+            write(&byte, 1, user_data);
+    }
+    
+    return currentBlock - startBlock;
 }

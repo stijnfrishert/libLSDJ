@@ -58,19 +58,11 @@ lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsd
     read(project->name, PROJECT_NAME_LENGTH, user_data);
     read(&project->version, 1, user_data);
 
-    // Read the compressed data
-    seek(0, SEEK_END, user_data);
-    const size_t size = (size_t)(tell(user_data) - 9);
-    unsigned char* compressed = (unsigned char*)malloc(size);
-    seek(0, SEEK_SET, user_data);
-    read(compressed, size, user_data);
-
-    // Decompressed the data
+    // Decompress the data
+    const long firstBlockOffset = tell(user_data);
     unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
-    lsdj_memory_data_t mem;
-    mem.cur = mem.begin = compressed;
-    mem.size = size;
-    lsdj_decompress(lsdj_mread, lsdj_mseek, lsdj_mtell, &mem, 0, BLOCK_SIZE, decompressed);
+    memset(decompressed, 0, sizeof(decompressed));
+    lsdj_decompress(read, seek, tell, user_data, firstBlockOffset, BLOCK_SIZE, decompressed);
     
     // Read in the song
     if (project->song == NULL)
@@ -130,11 +122,7 @@ void lsdj_write_lsdsng(const lsdj_project_t* project, lsdj_vio_write_t write, vo
     lsdj_write_song_to_memory(project->song, decompressed, SONG_DECOMPRESSED_SIZE, error);
     
     // Compress the song
-    unsigned char compressed[SONG_DECOMPRESSED_SIZE];
-    memset(&compressed, 0, SONG_DECOMPRESSED_SIZE);
-    unsigned int block_write_count = lsdj_compress(decompressed, compressed, BLOCK_SIZE, 0, BLOCK_COUNT);
-    
-    write(compressed, BLOCK_SIZE * block_write_count, user_data);
+    lsdj_compress(decompressed, BLOCK_SIZE, 0, BLOCK_COUNT, write, user_data);
 }
 
 void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error)

@@ -30,6 +30,7 @@ void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t
 lsdj_song_t* lsdj_sav_get_song(const lsdj_sav_t* sav);
 int lsdj_sav_get_active_project(const lsdj_sav_t* sav);
 unsigned int lsdj_sav_get_project_count(const lsdj_sav_t* sav);
+void lsdj_sav_set_project(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project, lsdj_error_t** error);
 lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char project);
 
 #ifdef __cplusplus
