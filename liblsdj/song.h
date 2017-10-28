@@ -36,11 +36,11 @@ lsdj_song_t* lsdj_new_song(lsdj_error_t** error);
 void lsdj_free_song(lsdj_song_t* song);
 
 // Deserialize a song
-lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_error_t** error);
+lsdj_song_t* lsdj_read_song(lsdj_vio_t* vio, lsdj_error_t** error);
 lsdj_song_t* lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
 // Serialize a song
-void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error);
+void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error);
 void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error);
 
 // Change data in a song

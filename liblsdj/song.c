@@ -187,138 +187,138 @@ void lsdj_free_song(lsdj_song_t* song)
     free(song);
 }
 
-void read_bank0(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
+void read_bank0(lsdj_vio_t* vio, lsdj_song_t* song)
 {
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
         if (song->phrases[i])
-            read(song->phrases[i]->notes, PHRASE_LENGTH, user_data);
+            vio->read(song->phrases[i]->notes, PHRASE_LENGTH, vio->user_data);
         else
-            seek(PHRASE_LENGTH, SEEK_CUR, user_data);
+            vio->seek(PHRASE_LENGTH, SEEK_CUR, vio->user_data);
     }
 
-    read(song->bookmarks, sizeof(song->bookmarks), user_data);
-    read(song->reserved1030, sizeof(song->reserved1030), user_data);
-    read(song->grooves, sizeof(song->grooves), user_data);
-    read(song->rows, sizeof(song->rows), user_data);
+    vio->read(song->bookmarks, sizeof(song->bookmarks), vio->user_data);
+    vio->read(song->reserved1030, sizeof(song->reserved1030), vio->user_data);
+    vio->read(song->grooves, sizeof(song->grooves), vio->user_data);
+    vio->read(song->rows, sizeof(song->rows), vio->user_data);
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
         if (song->tables[i])
-            read(song->tables[i]->volumes, TABLE_LENGTH, user_data);
+            vio->read(song->tables[i]->volumes, TABLE_LENGTH, vio->user_data);
         else
-            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+            vio->seek(TABLE_LENGTH, SEEK_CUR, vio->user_data);
     }
     
     for (int i = 0; i < WORD_COUNT; ++i)
     {
-        read(song->words[i].allophones, WORD_LENGTH, user_data);
-        read(song->words[i].lengths, WORD_LENGTH, user_data);
+        vio->read(song->words[i].allophones, WORD_LENGTH, vio->user_data);
+        vio->read(song->words[i].lengths, WORD_LENGTH, vio->user_data);
     }
     
-    read(song->wordNames, sizeof(song->wordNames), user_data);
-    seek(2, SEEK_CUR, user_data); // rb
+    vio->read(song->wordNames, sizeof(song->wordNames), vio->user_data);
+    vio->seek(2, SEEK_CUR, vio->user_data); // rb
     
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-            read(song->instruments[i]->name, INSTRUMENT_NAME_LENGTH, user_data);
+            vio->read(song->instruments[i]->name, INSTRUMENT_NAME_LENGTH, vio->user_data);
         else
-            seek(INSTRUMENT_NAME_LENGTH, SEEK_CUR, user_data);
+            vio->seek(INSTRUMENT_NAME_LENGTH, SEEK_CUR, vio->user_data);
     }
 
-    read(song->reserved1fba, sizeof(song->reserved1fba), user_data);
+    vio->read(song->reserved1fba, sizeof(song->reserved1fba), vio->user_data);
 }
 
-void write_bank0(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
+void write_bank0(const lsdj_song_t* song, lsdj_vio_t* vio)
 {    
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
         if (song->phrases[i])
-            write(song->phrases[i]->notes, PHRASE_LENGTH, user_data);
+            vio->write(song->phrases[i]->notes, PHRASE_LENGTH, vio->user_data);
         else
-            write(PHRASE_LENGTH_ZERO, PHRASE_LENGTH, user_data);
+            vio->write(PHRASE_LENGTH_ZERO, PHRASE_LENGTH, vio->user_data);
     }
     
-    write(song->bookmarks, sizeof(song->bookmarks), user_data);
-    write(song->reserved1030, sizeof(song->reserved1030), user_data);
-    write(song->grooves, sizeof(song->grooves), user_data);
-    write(song->rows, sizeof(song->rows), user_data);
+    vio->write(song->bookmarks, sizeof(song->bookmarks), vio->user_data);
+    vio->write(song->reserved1030, sizeof(song->reserved1030), vio->user_data);
+    vio->write(song->grooves, sizeof(song->grooves), vio->user_data);
+    vio->write(song->rows, sizeof(song->rows), vio->user_data);
     
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
         if (song->tables[i])
-            write(song->tables[i]->volumes, TABLE_LENGTH, user_data);
+            vio->write(song->tables[i]->volumes, TABLE_LENGTH, vio->user_data);
         else
-            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+            vio->write(TABLE_LENGTH_ZERO, TABLE_LENGTH, vio->user_data);
     }
     
     for (int i = 0; i < WORD_COUNT; ++i)
     {
-        write(song->words[i].allophones, WORD_LENGTH, user_data);
-        write(song->words[i].lengths, WORD_LENGTH, user_data);
+        vio->write(song->words[i].allophones, WORD_LENGTH, vio->user_data);
+        vio->write(song->words[i].lengths, WORD_LENGTH, vio->user_data);
     }
     
-    write(song->wordNames, sizeof(song->wordNames), user_data);
-    write("rb", 2, user_data);
+    vio->write(song->wordNames, sizeof(song->wordNames), vio->user_data);
+    vio->write("rb", 2, vio->user_data);
     
     static char EMPTY_INSTRUMENT_NAME[5] = { 0, 0, 0, 0, 0 };
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-            write(song->instruments[i]->name, INSTRUMENT_NAME_LENGTH, user_data);
+            vio->write(song->instruments[i]->name, INSTRUMENT_NAME_LENGTH, vio->user_data);
         else
-            write(EMPTY_INSTRUMENT_NAME, INSTRUMENT_NAME_LENGTH, user_data);
+            vio->write(EMPTY_INSTRUMENT_NAME, INSTRUMENT_NAME_LENGTH, vio->user_data);
     }
     
-    write(song->reserved1fba, sizeof(song->reserved1fba), user_data);
+    vio->write(song->reserved1fba, sizeof(song->reserved1fba), vio->user_data);
 }
 
-void read_soft_synth_parameters(lsdj_vio_read_t read, void* user_data, lsdj_synth_t* synth)
+void read_soft_synth_parameters(lsdj_vio_t* vio, lsdj_synth_t* synth)
 {
-    read(&synth->waveform, 1, user_data);
-    read(&synth->filter, 1, user_data);
-    read(&synth->resonance, 1, user_data);
-    read(&synth->distortion, 1, user_data);
-    read(&synth->phase, 1, user_data);
-    read(&synth->volumeStart, 1, user_data);
-    read(&synth->cutOffStart, 1, user_data);
-    read(&synth->phaseStart, 1, user_data);
-    read(&synth->vshiftStart, 1, user_data);
-    read(&synth->volumeEnd, 1, user_data);
-    read(&synth->cutOffEnd, 1, user_data);
-    read(&synth->phaseEnd, 1, user_data);
-    read(&synth->vshiftEnd, 1, user_data);
-    read(synth->reserved, 3, user_data);
+    vio->read(&synth->waveform, 1, vio->user_data);
+    vio->read(&synth->filter, 1, vio->user_data);
+    vio->read(&synth->resonance, 1, vio->user_data);
+    vio->read(&synth->distortion, 1, vio->user_data);
+    vio->read(&synth->phase, 1, vio->user_data);
+    vio->read(&synth->volumeStart, 1, vio->user_data);
+    vio->read(&synth->cutOffStart, 1, vio->user_data);
+    vio->read(&synth->phaseStart, 1, vio->user_data);
+    vio->read(&synth->vshiftStart, 1, vio->user_data);
+    vio->read(&synth->volumeEnd, 1, vio->user_data);
+    vio->read(&synth->cutOffEnd, 1, vio->user_data);
+    vio->read(&synth->phaseEnd, 1, vio->user_data);
+    vio->read(&synth->vshiftEnd, 1, vio->user_data);
+    vio->read(synth->reserved, 3, vio->user_data);
 }
 
-void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song, lsdj_error_t** error)
+void read_bank1(lsdj_vio_t* vio, lsdj_song_t* song, lsdj_error_t** error)
 {
-    read(song->reserved2000, sizeof(song->reserved2000), user_data);
-    seek(TABLE_ALLOC_TABLE_SIZE + INSTR_ALLOC_TABLE_SIZE, SEEK_CUR, user_data); // table and instr alloc tables already read at beginning
+    vio->read(song->reserved2000, sizeof(song->reserved2000), vio->user_data);
+    vio->seek(TABLE_ALLOC_TABLE_SIZE + INSTR_ALLOC_TABLE_SIZE, SEEK_CUR, vio->user_data); // table and instr alloc tables already read at beginning
     
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if (song->chains[i])
-            read(song->chains[i]->phrases, CHAIN_LENGTH, user_data);
+            vio->read(song->chains[i]->phrases, CHAIN_LENGTH, vio->user_data);
         else
-            seek(CHAIN_LENGTH, SEEK_CUR, user_data);
+            vio->seek(CHAIN_LENGTH, SEEK_CUR, vio->user_data);
     }
     
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if (song->chains[i])
-            read(song->chains[i]->transpositions, CHAIN_LENGTH, user_data);
+            vio->read(song->chains[i]->transpositions, CHAIN_LENGTH, vio->user_data);
         else
-            seek(CHAIN_LENGTH, SEEK_CUR, user_data);
+            vio->seek(CHAIN_LENGTH, SEEK_CUR, vio->user_data);
     }
     
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-            lsdj_read_instrument(read, seek, user_data, song->formatVersion, song->instruments[i], error);
+            lsdj_read_instrument(vio, song->formatVersion, song->instruments[i], error);
         else
-            seek(16, SEEK_CUR, user_data);
+            vio->seek(16, SEEK_CUR, vio->user_data);
         
         if (error && *error)
             return;
@@ -327,9 +327,9 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
         if (song->tables[i])
-            read(song->tables[i]->transpositions, TABLE_LENGTH, user_data);
+            vio->read(song->tables[i]->transpositions, TABLE_LENGTH, vio->user_data);
         else
-            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+            vio->seek(TABLE_LENGTH, SEEK_CUR, vio->user_data);
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
@@ -337,9 +337,9 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
         if (song->tables[i])
         {
             for (int j = 0; j < TABLE_LENGTH; ++j)
-                read(&song->tables[i]->commands1[j].command, 1, user_data);
+                vio->read(&song->tables[i]->commands1[j].command, 1, vio->user_data);
         } else {
-            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+            vio->seek(TABLE_LENGTH, SEEK_CUR, vio->user_data);
         }
     }
     
@@ -348,9 +348,9 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
         if (song->tables[i])
         {
             for (int j = 0; j < TABLE_LENGTH; ++j)
-                read(&song->tables[i]->commands1[j].value, 1, user_data);
+                vio->read(&song->tables[i]->commands1[j].value, 1, vio->user_data);
         } else {
-            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+            vio->seek(TABLE_LENGTH, SEEK_CUR, vio->user_data);
         }
     }
     
@@ -359,9 +359,9 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
         if (song->tables[i])
         {
             for (int j = 0; j < TABLE_LENGTH; ++j)
-                read(&song->tables[i]->commands2[j].command, 1, user_data);
+                vio->read(&song->tables[i]->commands2[j].command, 1, vio->user_data);
         } else {
-            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+            vio->seek(TABLE_LENGTH, SEEK_CUR, vio->user_data);
         }
     }
     
@@ -370,61 +370,61 @@ void read_bank1(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
         if (song->tables[i])
         {
             for (int j = 0; j < TABLE_LENGTH; ++j)
-                read(&song->tables[i]->commands2[j].value, 1, user_data);
+                vio->read(&song->tables[i]->commands2[j].value, 1, vio->user_data);
         } else {
-            seek(TABLE_LENGTH, SEEK_CUR, user_data);
+            vio->seek(TABLE_LENGTH, SEEK_CUR, vio->user_data);
         }
     }
     
-    seek(2, SEEK_CUR, user_data); // "rb"
-    seek(PHRASE_ALLOC_TABLE_SIZE + CHAIN_ALLOC_TABLE_SIZE, SEEK_CUR, user_data); // Already read at the beginning
+    vio->seek(2, SEEK_CUR, vio->user_data); // "rb"
+    vio->seek(PHRASE_ALLOC_TABLE_SIZE + CHAIN_ALLOC_TABLE_SIZE, SEEK_CUR, vio->user_data); // Already read at the beginning
     
     for (int i = 0; i < SYNTH_COUNT; ++i)
-        read_soft_synth_parameters(read, user_data, &song->synths[i]);
+        read_soft_synth_parameters(vio, &song->synths[i]);
     
-    read(&song->meta.workTime, 2, user_data);
-    read(&song->tempo, 1, user_data);
-    read(&song->transposition, 1, user_data);
-    read(&song->meta.totalTime, 3, user_data);
-    read(&song->reserved3fb9, 1, user_data); // time checksum, doesn't appear to be used anymore
-    read(&song->meta.keyDelay, 1, user_data);
-    read(&song->meta.keyRepeat, 1, user_data);
-    read(&song->meta.font, 1, user_data);
-    read(&song->meta.sync, 1, user_data);
-    read(&song->meta.colorSet, 1, user_data);
-    read(&song->reserved3fbf, 1, user_data);
-    read(&song->meta.clone, 1, user_data);
-    read(&song->meta.fileChangedFlag, 1, user_data);
-    read(&song->meta.powerSave, 1, user_data);
-    read(&song->meta.preListen, 1, user_data);
+    vio->read(&song->meta.workTime, 2, vio->user_data);
+    vio->read(&song->tempo, 1, vio->user_data);
+    vio->read(&song->transposition, 1, vio->user_data);
+    vio->read(&song->meta.totalTime, 3, vio->user_data);
+    vio->read(&song->reserved3fb9, 1, vio->user_data); // time checksum, doesn't appear to be used anymore
+    vio->read(&song->meta.keyDelay, 1, vio->user_data);
+    vio->read(&song->meta.keyRepeat, 1, vio->user_data);
+    vio->read(&song->meta.font, 1, vio->user_data);
+    vio->read(&song->meta.sync, 1, vio->user_data);
+    vio->read(&song->meta.colorSet, 1, vio->user_data);
+    vio->read(&song->reserved3fbf, 1, vio->user_data);
+    vio->read(&song->meta.clone, 1, vio->user_data);
+    vio->read(&song->meta.fileChangedFlag, 1, vio->user_data);
+    vio->read(&song->meta.powerSave, 1, vio->user_data);
+    vio->read(&song->meta.preListen, 1, vio->user_data);
     
     unsigned char waveSynthOverwriteLocks[2];
-    read(waveSynthOverwriteLocks, 2, user_data);
+    vio->read(waveSynthOverwriteLocks, 2, vio->user_data);
     for (int i = 0; i < SYNTH_COUNT; ++i)
         song->synths[i].overwritten = ((waveSynthOverwriteLocks[1 - (i / 8)] >> (i % 8)) & 1);
     
-    read(&song->reserved3fc6, sizeof(song->reserved3fc6), user_data);
+    vio->read(&song->reserved3fc6, sizeof(song->reserved3fc6), vio->user_data);
 }
 
-void write_soft_synth_parameters(const lsdj_synth_t* synth, lsdj_vio_write_t write, void* user_data)
+void write_soft_synth_parameters(const lsdj_synth_t* synth, lsdj_vio_t* vio)
 {
-    write(&synth->waveform, 1, user_data);
-    write(&synth->filter, 1, user_data);
-    write(&synth->resonance, 1, user_data);
-    write(&synth->distortion, 1, user_data);
-    write(&synth->phase, 1, user_data);
-    write(&synth->volumeStart, 1, user_data);
-    write(&synth->cutOffStart, 1, user_data);
-    write(&synth->phaseStart, 1, user_data);
-    write(&synth->vshiftStart, 1, user_data);
-    write(&synth->volumeEnd, 1, user_data);
-    write(&synth->cutOffEnd, 1, user_data);
-    write(&synth->phaseEnd, 1, user_data);
-    write(&synth->vshiftEnd, 1, user_data);
-    write(synth->reserved, 3, user_data);
+    vio->write(&synth->waveform, 1, vio->user_data);
+    vio->write(&synth->filter, 1, vio->user_data);
+    vio->write(&synth->resonance, 1, vio->user_data);
+    vio->write(&synth->distortion, 1, vio->user_data);
+    vio->write(&synth->phase, 1, vio->user_data);
+    vio->write(&synth->volumeStart, 1, vio->user_data);
+    vio->write(&synth->cutOffStart, 1, vio->user_data);
+    vio->write(&synth->phaseStart, 1, vio->user_data);
+    vio->write(&synth->vshiftStart, 1, vio->user_data);
+    vio->write(&synth->volumeEnd, 1, vio->user_data);
+    vio->write(&synth->cutOffEnd, 1, vio->user_data);
+    vio->write(&synth->phaseEnd, 1, vio->user_data);
+    vio->write(&synth->vshiftEnd, 1, vio->user_data);
+    vio->write(synth->reserved, 3, vio->user_data);
 }
 
-void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
+void write_bank1(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     unsigned char instrAllocTable[INSTR_ALLOC_TABLE_SIZE];
     memset(instrAllocTable, 0, INSTR_ALLOC_TABLE_SIZE);
@@ -452,33 +452,33 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
             phraseAllocTable[i / 8] |= (1 << (i % 8));
     }
     
-    write(song->reserved2000, sizeof(song->reserved2000), user_data);
-    write(tableAllocTable, TABLE_ALLOC_TABLE_SIZE, user_data);
-    write(instrAllocTable, INSTR_ALLOC_TABLE_SIZE, user_data);
+    vio->write(song->reserved2000, sizeof(song->reserved2000), vio->user_data);
+    vio->write(tableAllocTable, TABLE_ALLOC_TABLE_SIZE, vio->user_data);
+    vio->write(instrAllocTable, INSTR_ALLOC_TABLE_SIZE, vio->user_data);
     
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if (song->chains[i])
-            write(song->chains[i]->phrases, CHAIN_LENGTH, user_data);
+            vio->write(song->chains[i]->phrases, CHAIN_LENGTH, vio->user_data);
         else
-            write(CHAIN_LENGTH_FF, CHAIN_LENGTH, user_data);
+            vio->write(CHAIN_LENGTH_FF, CHAIN_LENGTH, vio->user_data);
     }
     
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if (song->chains[i])
-            write(song->chains[i]->transpositions, CHAIN_LENGTH, user_data);
+            vio->write(song->chains[i]->transpositions, CHAIN_LENGTH, vio->user_data);
         else
-            write(CHAIN_LENGTH_ZERO, CHAIN_LENGTH, user_data);
+            vio->write(CHAIN_LENGTH_ZERO, CHAIN_LENGTH, vio->user_data);
     }
     
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
         {
-            lsdj_write_instrument(song->instruments[i], song->formatVersion, write, user_data, error);
+            lsdj_write_instrument(song->instruments[i], song->formatVersion, vio, error);
         } else {
-            write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), user_data);
+            vio->write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), vio->user_data);
         }
         
         if (error && *error)
@@ -488,9 +488,9 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
     for (int i = 0; i < TABLE_COUNT; ++i)
     {
         if (song->tables[i])
-            write(song->tables[i]->transpositions, TABLE_LENGTH, user_data);
+            vio->write(song->tables[i]->transpositions, TABLE_LENGTH, vio->user_data);
         else
-            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+            vio->write(TABLE_LENGTH_ZERO, TABLE_LENGTH, vio->user_data);
     }
     
     for (int i = 0; i < TABLE_COUNT; ++i)
@@ -498,9 +498,9 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
         if (song->tables[i])
         {
             for (int j = 0; j < TABLE_LENGTH; ++j)
-                write(&song->tables[i]->commands1[j].command, 1, user_data);
+                vio->write(&song->tables[i]->commands1[j].command, 1, vio->user_data);
         } else {
-            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+            vio->write(TABLE_LENGTH_ZERO, TABLE_LENGTH, vio->user_data);
         }
     }
     
@@ -509,9 +509,9 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
         if (song->tables[i])
         {
             for (int j = 0; j < TABLE_LENGTH; ++j)
-                write(&song->tables[i]->commands1[j].value, 1, user_data);
+                vio->write(&song->tables[i]->commands1[j].value, 1, vio->user_data);
         } else {
-            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+            vio->write(TABLE_LENGTH_ZERO, TABLE_LENGTH, vio->user_data);
         }
     }
     
@@ -520,9 +520,9 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
         if (song->tables[i])
         {
             for (int j = 0; j < TABLE_LENGTH; ++j)
-                write(&song->tables[i]->commands2[j].command, 1, user_data);
+                vio->write(&song->tables[i]->commands2[j].command, 1, vio->user_data);
         } else {
-            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+            vio->write(TABLE_LENGTH_ZERO, TABLE_LENGTH, vio->user_data);
         }
     }
     
@@ -531,34 +531,34 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
         if (song->tables[i])
         {
             for (int j = 0; j < TABLE_LENGTH; ++j)
-                write(&song->tables[i]->commands2[j].value, 1, user_data);
+                vio->write(&song->tables[i]->commands2[j].value, 1, vio->user_data);
         } else {
-            write(TABLE_LENGTH_ZERO, TABLE_LENGTH, user_data);
+            vio->write(TABLE_LENGTH_ZERO, TABLE_LENGTH, vio->user_data);
         }
     }
     
-    write("rb", 2, user_data);
-    write(phraseAllocTable, PHRASE_ALLOC_TABLE_SIZE, user_data);
-    write(chainAllocTable, CHAIN_ALLOC_TABLE_SIZE, user_data);
+    vio->write("rb", 2, vio->user_data);
+    vio->write(phraseAllocTable, PHRASE_ALLOC_TABLE_SIZE, vio->user_data);
+    vio->write(chainAllocTable, CHAIN_ALLOC_TABLE_SIZE, vio->user_data);
     
     for (int i = 0; i < SYNTH_COUNT; ++i)
-        write_soft_synth_parameters(&song->synths[i], write, user_data);
+        write_soft_synth_parameters(&song->synths[i], vio);
     
-    write(&song->meta.workTime, 2, user_data);
-    write(&song->tempo, 1, user_data);
-    write(&song->transposition, 1, user_data);
-    write(&song->meta.totalTime, 3, user_data);
-    write(&song->reserved3fb9, 1, user_data); // checksum?
-    write(&song->meta.keyDelay, 1, user_data);
-    write(&song->meta.keyRepeat, 1, user_data);
-    write(&song->meta.font, 1, user_data);
-    write(&song->meta.sync, 1, user_data);
-    write(&song->meta.colorSet, 1, user_data);
-    write(&song->reserved3fbf, 1, user_data);
-    write(&song->meta.clone, 1, user_data);
-    write(&song->meta.fileChangedFlag, 1, user_data);
-    write(&song->meta.powerSave, 1, user_data);
-    write(&song->meta.preListen, 1, user_data);
+    vio->write(&song->meta.workTime, 2, vio->user_data);
+    vio->write(&song->tempo, 1, vio->user_data);
+    vio->write(&song->transposition, 1, vio->user_data);
+    vio->write(&song->meta.totalTime, 3, vio->user_data);
+    vio->write(&song->reserved3fb9, 1, vio->user_data); // checksum?
+    vio->write(&song->meta.keyDelay, 1, vio->user_data);
+    vio->write(&song->meta.keyRepeat, 1, vio->user_data);
+    vio->write(&song->meta.font, 1, vio->user_data);
+    vio->write(&song->meta.sync, 1, vio->user_data);
+    vio->write(&song->meta.colorSet, 1, vio->user_data);
+    vio->write(&song->reserved3fbf, 1, vio->user_data);
+    vio->write(&song->meta.clone, 1, vio->user_data);
+    vio->write(&song->meta.fileChangedFlag, 1, vio->user_data);
+    vio->write(&song->meta.powerSave, 1, vio->user_data);
+    vio->write(&song->meta.preListen, 1, vio->user_data);
     
     unsigned char waveSynthOverwriteLocks[2];
     memset(waveSynthOverwriteLocks, 0, sizeof(waveSynthOverwriteLocks));
@@ -567,21 +567,21 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
         if (song->synths[i].overwritten)
             waveSynthOverwriteLocks[1 - (i / 8)] |= (1 << (i % 8));
     }
-    write(waveSynthOverwriteLocks, 2, user_data);
+    vio->write(waveSynthOverwriteLocks, 2, vio->user_data);
     
-    write(&song->reserved3fc6, sizeof(song->reserved3fc6), user_data);
+    vio->write(&song->reserved3fc6, sizeof(song->reserved3fc6), vio->user_data);
 }
 
-void read_bank2(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
+void read_bank2(lsdj_vio_t* vio, lsdj_song_t* song)
 {
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
         if (song->phrases[i])
         {
             for (int j = 0; j < PHRASE_LENGTH; ++j)
-                read(&song->phrases[i]->commands[j].command, 1, user_data);
+                vio->read(&song->phrases[i]->commands[j].command, 1, vio->user_data);
         } else {
-            seek(PHRASE_LENGTH, SEEK_CUR, user_data);
+            vio->seek(PHRASE_LENGTH, SEEK_CUR, vio->user_data);
         }
     }
     
@@ -590,25 +590,25 @@ void read_bank2(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsd
         if (song->phrases[i])
         {
             for (int j = 0; j < PHRASE_LENGTH; ++j)
-                read(&song->phrases[i]->commands[j].value, 1, user_data);
+                vio->read(&song->phrases[i]->commands[j].value, 1, vio->user_data);
         } else {
-            seek(PHRASE_LENGTH, SEEK_CUR, user_data);
+            vio->seek(PHRASE_LENGTH, SEEK_CUR, vio->user_data);
         }
     }
     
-    read(song->reserved5fe0, sizeof(song->reserved5fe0), user_data);
+    vio->read(song->reserved5fe0, sizeof(song->reserved5fe0), vio->user_data);
 }
 
-void write_bank2(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
+void write_bank2(const lsdj_song_t* song, lsdj_vio_t* vio)
 {
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
         if (song->phrases[i])
         {
             for (int j = 0; j < PHRASE_LENGTH; ++j)
-                write(&song->phrases[i]->commands[j].command, 1, user_data);
+                vio->write(&song->phrases[i]->commands[j].command, 1, vio->user_data);
         } else {
-            write(PHRASE_LENGTH_ZERO, PHRASE_LENGTH, user_data);
+            vio->write(PHRASE_LENGTH_ZERO, PHRASE_LENGTH, vio->user_data);
         }
     }
     
@@ -617,91 +617,91 @@ void write_bank2(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_dat
         if (song->phrases[i])
         {
             for (int j = 0; j < PHRASE_LENGTH; ++j)
-                write(&song->phrases[i]->commands[j].value, 1, user_data);
+                vio->write(&song->phrases[i]->commands[j].value, 1, vio->user_data);
         } else {
-            write(PHRASE_LENGTH_ZERO, PHRASE_LENGTH, user_data);
+            vio->write(PHRASE_LENGTH_ZERO, PHRASE_LENGTH, vio->user_data);
         }
     }
     
-    write(song->reserved5fe0, sizeof(song->reserved5fe0), user_data);
+    vio->write(song->reserved5fe0, sizeof(song->reserved5fe0), vio->user_data);
 }
 
-void read_bank3(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, lsdj_song_t* song)
-{
-    for (int i = 0; i < WAVE_COUNT; ++i)
-        read(song->waves[i].data, WAVE_LENGTH, user_data);
-    
-    for (int i = 0; i < PHRASE_COUNT; ++i)
-    {
-        if (song->phrases[i])
-            read(&song->phrases[i]->instruments, PHRASE_LENGTH, user_data);
-        else
-            seek(PHRASE_LENGTH, SEEK_CUR, user_data);
-    }
-    
-    seek(2, SEEK_CUR, user_data); // "rb"
-    
-    read(song->reserved7ff2, sizeof(song->reserved7ff2), user_data);
-    
-    seek(1, SEEK_CUR, user_data); // Already read the version number
-}
-
-void write_bank3(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data)
+void read_bank3(lsdj_vio_t* vio, lsdj_song_t* song)
 {
     for (int i = 0; i < WAVE_COUNT; ++i)
-        write(song->waves[i].data, WAVE_LENGTH, user_data);
+        vio->read(song->waves[i].data, WAVE_LENGTH, vio->user_data);
     
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
         if (song->phrases[i])
-            write(&song->phrases[i]->instruments, PHRASE_LENGTH, user_data);
+            vio->read(&song->phrases[i]->instruments, PHRASE_LENGTH, vio->user_data);
         else
-            write(PHRASE_LENGTH_FF, PHRASE_LENGTH, user_data);
+            vio->seek(PHRASE_LENGTH, SEEK_CUR, vio->user_data);
     }
     
-    write("rb", 2, user_data);
+    vio->seek(2, SEEK_CUR, vio->user_data); // "rb"
     
-    write(song->reserved7ff2, sizeof(song->reserved7ff2), user_data);
-    write(&song->formatVersion, 1, user_data);
+    vio->read(song->reserved7ff2, sizeof(song->reserved7ff2), vio->user_data);
+    
+    vio->seek(1, SEEK_CUR, vio->user_data); // Already read the version number
 }
 
-int check_rb(lsdj_vio_read_t read, lsdj_vio_seek_t seek, void* user_data, long position)
+void write_bank3(const lsdj_song_t* song, lsdj_vio_t* vio)
+{
+    for (int i = 0; i < WAVE_COUNT; ++i)
+        vio->write(song->waves[i].data, WAVE_LENGTH, vio->user_data);
+    
+    for (int i = 0; i < PHRASE_COUNT; ++i)
+    {
+        if (song->phrases[i])
+            vio->write(&song->phrases[i]->instruments, PHRASE_LENGTH, vio->user_data);
+        else
+            vio->write(PHRASE_LENGTH_FF, PHRASE_LENGTH, vio->user_data);
+    }
+    
+    vio->write("rb", 2, vio->user_data);
+    
+    vio->write(song->reserved7ff2, sizeof(song->reserved7ff2), vio->user_data);
+    vio->write(&song->formatVersion, 1, vio->user_data);
+}
+
+int check_rb(lsdj_vio_t* vio, long position)
 {
     char data[2];
     
-    seek(position, SEEK_SET, user_data);
-    read(data, 2, user_data);
+    vio->seek(position, SEEK_SET, vio->user_data);
+    vio->read(data, 2, vio->user_data);
     
     return (data[0] == 'r' && data[1] == 'b') ? 0 : 1;
 }
 
-lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio_seek_t seek, void* user_data, lsdj_error_t** error)
+lsdj_song_t* lsdj_read_song(lsdj_vio_t* vio, lsdj_error_t** error)
 {
     // Check for incorrect input
-    if (read == NULL)
+    if (vio->read == NULL)
     {
         lsdj_create_error(error, "read is NULL");
         return NULL;
     }
     
-    if (tell == NULL)
+    if (vio->tell == NULL)
     {
         lsdj_create_error(error, "tell is NULL");
         return NULL;
     }
     
-    if (seek == NULL)
+    if (vio->seek == NULL)
     {
         lsdj_create_error(error, "seek is NULL");
         return NULL;
     }
     
-    const long begin = tell(user_data);
+    const long begin = vio->tell(vio->user_data);
     
     // Check if the 'rb' flags have been set correctly
-    if (check_rb(read, seek, user_data, begin + 0x1E78) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x1E78"); return NULL; }
-    if (check_rb(read, seek, user_data, begin + 0x3E80) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x3E80"); return NULL; }
-    if (check_rb(read, seek, user_data, begin + 0x7FF0) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x7FF0"); return NULL; }
+    if (check_rb(vio, begin + 0x1E78) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x1E78"); return NULL; }
+    if (check_rb(vio, begin + 0x3E80) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x3E80"); return NULL; }
+    if (check_rb(vio, begin + 0x7FF0) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x7FF0"); return NULL; }
     
     // We passed the 'rb' check, and can create a song now for reading
     lsdj_song_t* song = alloc_song(error);
@@ -709,8 +709,8 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio
         return NULL;
     
     // Read the version number
-    seek(begin + 0x7FFF, SEEK_SET, user_data);
-    read(&song->formatVersion, 1, user_data);
+    vio->seek(begin + 0x7FFF, SEEK_SET, vio->user_data);
+    vio->read(&song->formatVersion, 1, vio->user_data);
     
     // Read the allocation tables
     unsigned char instrAllocTable[INSTR_ALLOC_TABLE_SIZE];
@@ -718,13 +718,13 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio
     unsigned char chainAllocTable[CHAIN_ALLOC_TABLE_SIZE];
     unsigned char phraseAllocTable[PHRASE_ALLOC_TABLE_SIZE];
     
-    seek(begin + 0x2020, SEEK_SET, user_data);
-    read(tableAllocTable, TABLE_ALLOC_TABLE_SIZE, user_data);
-    read(instrAllocTable, INSTR_ALLOC_TABLE_SIZE, user_data);
+    vio->seek(begin + 0x2020, SEEK_SET, vio->user_data);
+    vio->read(tableAllocTable, TABLE_ALLOC_TABLE_SIZE, vio->user_data);
+    vio->read(instrAllocTable, INSTR_ALLOC_TABLE_SIZE, vio->user_data);
     
-    seek(begin + 0x3E82, SEEK_SET, user_data);
-    read(phraseAllocTable, PHRASE_ALLOC_TABLE_SIZE, user_data);
-    read(chainAllocTable, CHAIN_ALLOC_TABLE_SIZE, user_data);
+    vio->seek(begin + 0x3E82, SEEK_SET, vio->user_data);
+    vio->read(phraseAllocTable, PHRASE_ALLOC_TABLE_SIZE, vio->user_data);
+    vio->read(chainAllocTable, CHAIN_ALLOC_TABLE_SIZE, vio->user_data);
 
     for (int i = 0; i < TABLE_ALLOC_TABLE_SIZE; ++i)
     {
@@ -751,17 +751,17 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_read_t read, lsdj_vio_tell_t tell, lsdj_vio
     }
     
     // Read the banks
-    seek(begin, SEEK_SET, user_data);
-    read_bank0(read, seek, user_data, song);
-    read_bank1(read, seek, user_data, song, error);
+    vio->seek(begin, SEEK_SET, vio->user_data);
+    read_bank0(vio, song);
+    read_bank1(vio, song, error);
     if (error && *error)
     {
         lsdj_free_song(song);
         return NULL;
     }
     
-    read_bank2(read, seek, user_data, song);
-    read_bank3(read, seek, user_data, song);
+    read_bank2(vio, song);
+    read_bank3(vio, song);
     
     return song;
 }
@@ -778,15 +778,21 @@ lsdj_song_t* lsdj_read_song_from_memory(const unsigned char* data, size_t size, 
     mem.cur = mem.begin = (unsigned char*)data;
     mem.size = size;
     
-    return lsdj_read_song(lsdj_mread, lsdj_mtell, lsdj_mseek, &mem, error);
+    lsdj_vio_t vio;
+    vio.read = lsdj_mread;
+    vio.seek = lsdj_mseek;
+    vio.tell = lsdj_mtell;
+    vio.user_data = &mem;
+    
+    return lsdj_read_song(&vio, error);
 }
 
-void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_write_t write, void* user_data, lsdj_error_t** error)
+void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error)
 {
-    write_bank0(song, write, user_data);
-    write_bank1(song, write, user_data, error);
-    write_bank2(song, write, user_data);
-    write_bank3(song, write, user_data);
+    write_bank0(song, vio);
+    write_bank1(song, vio, error);
+    write_bank2(song, vio);
+    write_bank3(song, vio);
 }
 
 void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error)
@@ -805,7 +811,13 @@ void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, siz
     mem.cur = mem.begin;
     mem.size = size;
     
-    lsdj_write_song(song, lsdj_mwrite, &mem, error);
+    lsdj_vio_t vio;
+    vio.write = lsdj_mwrite;
+    vio.seek = lsdj_mseek;
+    vio.tell = lsdj_mtell;
+    vio.user_data = &mem;
+    
+    lsdj_write_song(song, &vio, error);
 }
 
 void lsdj_song_set_format_version(lsdj_song_t* song, unsigned char version)

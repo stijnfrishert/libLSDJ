@@ -153,9 +153,9 @@ void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_err
         wvio.user_data = &mem;
         lsdj_decompress(vio, &wvio, HEADER_START, BLOCK_SIZE);
         
-        FILE* file = fopen("/Users/stijnfrishert/Desktop/uncompressedc.hex", "wb");
-        fwrite(data, SONG_DECOMPRESSED_SIZE, 1, file);
-        fclose(file);
+//        FILE* file = fopen("/Users/stijnfrishert/Desktop/uncompressedc.hex", "wb");
+//        fwrite(data, SONG_DECOMPRESSED_SIZE, 1, file);
+//        fclose(file);
         
         // Read the song from memory
         lsdj_song_t* song = lsdj_read_song_from_memory(data, sizeof(data), error);
