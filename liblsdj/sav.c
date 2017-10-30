@@ -313,8 +313,9 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
 
     // Write project specific data
     unsigned char blocks[BLOCK_SIZE][BLOCK_COUNT];
+    
     unsigned char current_block = 1;
-	memset(blocks, 0, sizeof(blocks));
+    memset(blocks, 0, sizeof(blocks));
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
     {
         lsdj_project_t* project = sav->projects[i];
@@ -323,33 +324,36 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
         char name[PROJECT_NAME_LENGTH];
         lsdj_project_get_name(project, name, PROJECT_NAME_LENGTH);
         strncpy(&header.project_names[i * 8], name, PROJECT_NAME_LENGTH < 8 ? PROJECT_NAME_LENGTH : 8);
-
+        
         // Write project version
         header.versions[i] = lsdj_project_get_version(project);
+        
+        lsdj_song_t* song = lsdj_project_get_song(project);
+        if (song)
+        {
+            // Compress the song to memory
+            unsigned char song_data[SONG_DECOMPRESSED_SIZE];
+            lsdj_write_song_to_memory(song, song_data, SONG_DECOMPRESSED_SIZE, error);
+            
+            lsdj_memory_data_t mem;
+            mem.cur = mem.begin = blocks[current_block - 1];
+            mem.size = sizeof(blocks);
+            
+            lsdj_vio_t wvio;
+            wvio.write = lsdj_mwrite;
+            wvio.seek = lsdj_mseek;
+            wvio.tell = lsdj_mtell;
+            wvio.user_data = &mem;
+            
+//            unsigned int written_block_count = lsdj_compress(song_data, &blocks[0][0], BLOCK_SIZE, current_block, BLOCK_COUNT);
+            unsigned int written_block_count = lsdj_compress(song_data, BLOCK_SIZE, current_block, BLOCK_COUNT, &wvio);
+            
+            current_block += written_block_count;
+            for (int j = 0; j < written_block_count; ++j)
+                *table_ptr++ = (unsigned char)i;
+        }
     }
     
-    // Write the header and block alloc table
-    vio->write(&header, sizeof(header), vio->user_data);
-    vio->write(&block_alloc_table, sizeof(block_alloc_table), vio->user_data);
-
-    for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
-    {
-        lsdj_project_t* project = sav->projects[i];
-        lsdj_song_t* song = lsdj_project_get_song(project);
-        
-        if (song == NULL)
-            continue;
-        
-        // Compress the song to memory
-        unsigned char song_data[SONG_DECOMPRESSED_SIZE];
-        lsdj_write_song_to_memory(song, song_data, SONG_DECOMPRESSED_SIZE, error);
-        unsigned int written_block_count = lsdj_compress(song_data, BLOCK_SIZE, current_block, BLOCK_COUNT, vio);
-
-        current_block += written_block_count;
-        for (int j = 0; j < written_block_count; ++j)
-            *table_ptr++ = (unsigned char)i;
-    }
-
     // Write the header and blocks
     vio->write(&header, sizeof(header), vio->user_data);
     vio->write(&block_alloc_table, sizeof(block_alloc_table), vio->user_data);
