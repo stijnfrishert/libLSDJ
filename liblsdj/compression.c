@@ -87,9 +87,9 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, 
     int reading = 1;
     while (reading == 1)
     {
-//        int rcur = (int)(rvio->tell(rvio->user_data));
-//        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
-//        printf("%#06x\t%#04x\n", rcur, wcur);
+        int rcur = (int)(rvio->tell(rvio->user_data));
+        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
+        printf("%#06x\t%#04x\n", rcur, wcur);
         
         rvio->read(&byte, 1, rvio->user_data);
         
@@ -112,6 +112,32 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, 
     assert((wvio->tell(wvio->user_data) - wstart) == SONG_DECOMPRESSED_SIZE);
 }
 
+void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long firstBlockOffset, size_t blockSize, lsdj_error_t** error)
+{
+    if (path == NULL)
+    {
+        lsdj_create_error(error, "path is NULL");
+        return;
+    }
+    
+    FILE* file = fopen(path, "rb");
+    if (file == NULL)
+    {
+        lsdj_create_error(error, "could not open file for reading");
+        return;
+    }
+    
+    lsdj_vio_t vio;
+    vio.read = lsdj_fread;
+    vio.tell = lsdj_ftell;
+    vio.seek = lsdj_fseek;
+    vio.user_data = file;
+    
+    lsdj_decompress(&vio, wvio, firstBlockOffset, blockSize);
+    
+    fclose(file);
+}
+
 unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_t* wvio)
 {
     unsigned char nextEvent[3] = { 0, 0, 0 };
@@ -122,13 +148,13 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
     
     unsigned char byte = 0;
     
-    long wstart = wvio->tell(wvio->user_data);
+//    long wstart = wvio->tell(wvio->user_data);
     
     const unsigned char* end = data + SONG_DECOMPRESSED_SIZE;
     for (const unsigned char* read = data; read < end; )
     {
-        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
-        printf("%#06x\t%#04x\n", (int)(read - data), wcur);
+//        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
+//        printf("%#06x\t%#04x\n", (int)(read - data), wcur);
         
         // Are we reading a default wave? If so, we can compress these!
         unsigned char defaultWaveLengthCount = 0;
@@ -256,4 +282,38 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
     }
     
     return currentBlock - startBlock;
+}
+
+unsigned int lsdj_compress_to_file(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, const char* path, lsdj_error_t** error)
+{
+    if (path == NULL)
+    {
+        lsdj_create_error(error, "path is NULL");
+        return 0;
+    }
+    
+    if (data == NULL)
+    {
+        lsdj_create_error(error, "data is NULL");
+        return 0;
+    }
+    
+    FILE* file = fopen(path, "wb");
+    if (file == NULL)
+    {
+        lsdj_create_error(error, "could not open file for writing");
+        return 0;
+    }
+    
+    lsdj_vio_t vio;
+    vio.write = lsdj_fwrite;
+    vio.tell = lsdj_ftell;
+    vio.seek = lsdj_fseek;
+    vio.user_data = file;
+    
+    unsigned int result = lsdj_compress(data, blockSize, startBlock, blockCount, &vio);
+    
+    fclose(file);
+    
+    return result;
 }

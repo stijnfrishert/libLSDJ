@@ -153,10 +153,6 @@ void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_err
         wvio.user_data = &mem;
         lsdj_decompress(vio, &wvio, HEADER_START, BLOCK_SIZE);
         
-        FILE* file = fopen("/Users/stijnfrishert/Desktop/uncompressedc.hex", "wb");
-        fwrite(data, SONG_DECOMPRESSED_SIZE, 1, file);
-        fclose(file);
-        
         // Read the song from memory
         lsdj_song_t* song = lsdj_read_song_from_memory(data, sizeof(data), error);
         if (error && *error)
@@ -317,7 +313,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
 
     // Write project specific data
     unsigned char blocks[BLOCK_SIZE][BLOCK_COUNT];
-    unsigned char current_block = 0;
+    unsigned char current_block = 1;
 	memset(blocks, 0, sizeof(blocks));
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
     {

@@ -1,6 +1,10 @@
 #ifndef LSDJ_VIO_H
 #define LSDJ_VIO_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif    /* __cplusplus */
+
 #include <stddef.h>
 #include <stdio.h>
 
@@ -40,5 +44,9 @@ size_t lsdj_mread(void* ptr, size_t size, void* user_data);
 size_t lsdj_mwrite(const void* ptr, size_t size, void* user_data);
 long lsdj_mtell(void* user_data);
 long lsdj_mseek(long offset, int whence, void* user_data);
+    
+#ifdef __cplusplus
+}
+#endif    /* __cplusplus */
 
 #endif

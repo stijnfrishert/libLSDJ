@@ -68,9 +68,9 @@ lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     mem.size = sizeof(decompressed);
     
     lsdj_vio_t wvio;
-    wvio.write = lsdj_fwrite;
-    wvio.tell = lsdj_ftell;
-    wvio.seek = lsdj_fseek;
+    wvio.write = lsdj_mwrite;
+    wvio.tell = lsdj_mtell;
+    wvio.seek = lsdj_mseek;
     wvio.user_data = &mem;
     
     lsdj_decompress(vio, &wvio, firstBlockOffset, BLOCK_SIZE);
