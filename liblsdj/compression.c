@@ -87,9 +87,9 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, 
     int reading = 1;
     while (reading == 1)
     {
-        int rcur = (int)(rvio->tell(rvio->user_data));
-        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
-        printf("%#06x\t%#04x\n", rcur, wcur);
+//        int rcur = (int)(rvio->tell(rvio->user_data));
+//        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
+//        printf("%#06x\t%#04x\n", rcur, wcur);
         
         rvio->read(&byte, 1, rvio->user_data);
         
