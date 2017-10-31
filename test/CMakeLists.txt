@@ -10,5 +10,3 @@ source_group(\\ FILES main.cpp)
 target_compile_features(lsdj-test PUBLIC cxx_std_14)
 target_include_directories(lsdj-test PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(lsdj-test liblsdj ${Boost_LIBRARIES})
-
-install(TARGETS lsdj-test DESTINATION bin)

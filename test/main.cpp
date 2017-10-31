@@ -12,12 +12,9 @@
 
 int main(int argc, char* argv[])
 {
-    unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
-    FILE* file = fopen("/Users/stijnfrishert/Desktop/uncompressed.hex", "rb");
-    fread(decompressed, sizeof(decompressed), 1, file);
-    fclose(file);
-    
-    lsdj_compress_to_file(decompressed, 512, 0, 191, "/Users/stijnfrishert/Desktop/compressedc.hex", NULL);
+    lsdj_error_t* error = nullptr;
+    lsdj_sav_t* sav = lsdj_read_sav_from_file("/Users/stijn/Desktop/lsdj/lsdj/in.sav", &error);
+    lsdj_write_sav_to_file(sav, "/Users/stijn/Desktop/lsdj/lsdj/out.sav", &error);
     
     return 0;
 }

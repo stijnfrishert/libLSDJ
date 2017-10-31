@@ -260,7 +260,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             
             currentBlock += 1;
             currentBlockSize = 0;
-            continue;
+            // Don't continue; or something, we still need to write the event
         }
         
         wvio->write(nextEvent, eventSize, wvio->user_data);
@@ -281,7 +281,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             wvio->write(&byte, 1, wvio->user_data);
     }
     
-    return currentBlock - startBlock;
+    return currentBlock - startBlock + 1;
 }
 
 unsigned int lsdj_compress_to_file(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, const char* path, lsdj_error_t** error)

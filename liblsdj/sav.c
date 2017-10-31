@@ -23,9 +23,10 @@ struct lsdj_sav_t
     
     // The song in active working memory
     lsdj_song_t* song;
+    
+    //! Reserved empty memory
+    unsigned char reserved8120[30];
 };
-
-
 
 typedef struct
 {
@@ -219,6 +220,10 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_t* vio, lsdj_error_t** error)
     // Store the active project index
     sav->activeProject = header.active_project;
     
+    // Store the reserved empty memory at 0x8120
+    // Not sure what's really in there, but might as well keep it intact
+    memcpy(sav->reserved8120, header.empty, sizeof(sav->reserved8120));
+    
     // Read the compressed projects
     read_compressed_blocks(vio, sav->projects, error);
     if (error && *error)
@@ -305,6 +310,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
     header.init[0] = 'j';
     header.init[1] = 'k';
     header.active_project = sav->activeProject;
+    memcpy(header.empty, sav->reserved8120, sizeof(sav->reserved8120));
 
     // Create the block allocation table for writing
     unsigned char block_alloc_table[BLOCK_COUNT];
