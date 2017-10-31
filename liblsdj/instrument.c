@@ -456,7 +456,7 @@ unsigned char createTableByte(unsigned char table)
     if (table >= NO_TABLE)
         return 0;
     else
-        return table & 0xF;
+        return (table & 0x1F) | 0x20;
 }
 
 unsigned char createAutomateByte(unsigned char automate)
