@@ -154,7 +154,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
     for (const unsigned char* read = data; read < end; )
     {
 //        int wcur = (int)(wvio->tell(wvio->user_data) - wstart);
-//        printf("%#06x\t%#04x\n", (int)(read - data), wcur);
+//        printf("read: %#06x\twrite: %#04x\n", (int)(read - data), wcur);
         
         // Are we reading a default wave? If so, we can compress these!
         unsigned char defaultWaveLengthCount = 0;
@@ -254,9 +254,13 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             byte = currentBlock + 1;
             wvio->write(&byte, 1, wvio->user_data);
             
+            assert(currentBlockSize <= blockSize);
+            
             byte = 0;
             for (currentBlockSize += 2; currentBlockSize < blockSize; currentBlockSize++)
                 wvio->write(&byte, 1, wvio->user_data);
+            
+            assert(currentBlockSize == blockSize);
             
             currentBlock += 1;
             currentBlockSize = 0;

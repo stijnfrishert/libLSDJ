@@ -318,7 +318,7 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
     unsigned char* table_ptr = block_alloc_table;
 
     // Write project specific data
-    unsigned char blocks[BLOCK_SIZE][BLOCK_COUNT];
+    unsigned char blocks[BLOCK_COUNT][BLOCK_SIZE];
     
     unsigned char current_block = 1;
     memset(blocks, 0, sizeof(blocks));
