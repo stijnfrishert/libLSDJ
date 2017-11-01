@@ -142,7 +142,7 @@ lsdj_playback_mode parsePlaybackMode(unsigned char byte)
 
 lsdj_kit_distortion parseKitDistortion(unsigned char byte)
 {
-    return byte & 3;
+    return byte;
 }
 
 lsdj_scommand_type parseScommand(unsigned char byte)
