@@ -97,7 +97,7 @@ void lsdj_clear_instrument_as_noise(lsdj_instrument_t* instrument)
 unsigned char parseLength(unsigned char byte)
 {
     if (byte & 0x40)
-        return ~(byte & 0x3F);
+        return (~byte) & 0x3F;
     else
         return UNLIMITED_LENGTH;
 }
@@ -448,7 +448,7 @@ unsigned char createLengthByte(unsigned char length)
     if (length >= UNLIMITED_LENGTH)
         return 0;
     else
-        return ~(length & 0x3F);
+        return (~length & 0x3F) | 0x40;
 }
 
 unsigned char createTableByte(unsigned char table)
