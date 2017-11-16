@@ -59,7 +59,7 @@ void exportProject(const lsdj_project_t* project, boost::filesystem::path folder
     lsdj_write_lsdsng_to_file(project, folder.string().c_str(), error);
 }
 
-int exportSongs(const boost::filesystem::path& path, const std::string& output, VersionStyle versionStyle, bool underscore, bool putInFolder)
+int exportSongs(const boost::filesystem::path& path, const std::string& output, VersionStyle versionStyle, bool underscore, bool putInFolder, bool verbose)
 {
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(path.string().c_str(), &error);
@@ -68,6 +68,9 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output, 
         lsdj_free_sav(sav);
         return handle_error(error);
     }
+    
+    if (verbose)
+        std::cout << "Read " << path.string() << std::endl;
     
     const auto outputFolder = boost::filesystem::absolute(output);
     
@@ -82,6 +85,24 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output, 
         exportProject(project, outputFolder, versionStyle, underscore, putInFolder, &error);
         if (error)
             return handle_error(error);
+        
+        if (verbose)
+        {
+            std::cout << "Exported " << constructName(project, underscore);
+            
+            switch (versionStyle)
+            {
+                case VersionStyle::NONE: break;
+                case VersionStyle::HEX:
+                    std::cout << " (" << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project) << ")";
+                    break;
+                case VersionStyle::DECIMAL:
+                    std::cout << " (" << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project) << ")";
+                    break;
+            }
+            
+            std::cout << std::endl;
+        }
     }
     
     lsdj_free_sav(sav);
@@ -166,7 +187,8 @@ int main(int argc, char* argv[])
         ("print,p", "Print a list of all songs in the sav")
         ("decimal,d", "Use decimal notation for the version number, instead of hex")
         ("underscore,u", "Use an underscore for the special lightning bolt character, instead of x")
-        ("output,o", boost::program_options::value<std::string>()->default_value(""), "Output folder for the lsdsng's");
+        ("output,o", boost::program_options::value<std::string>()->default_value(""), "Output folder for the lsdsng's")
+        ("verbose,v", "Verbose output during export");
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", 1);
@@ -197,7 +219,7 @@ int main(int argc, char* argv[])
             if (vm.count("print"))
                 return print(path, version, vm.count("underscore"));
             else
-                return exportSongs(path, vm["output"].as<std::string>(), version, vm.count("underscore"), vm.count("folder"));
+                return exportSongs(path, vm["output"].as<std::string>(), version, vm.count("underscore"), vm.count("folder"), vm.count("verbose"));
         } else {
             std::cout << desc << std::endl;
             return 0;
