@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     desc.add_options()
         ("help,h", "Help screen")
         ("file,f", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more")
-        ("output,o", boost::program_options::value<std::string>()->required(), "The output file (.sav)");
+        ("output,o", boost::program_options::value<std::string>(), "The output file (.sav)");
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", -1);
@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
         {
             std::cout << desc << std::endl;
             return 0;
-        } else if (vm.count("file")) {
+        } else if (vm.count("file") && vm.count("output")) {
             return importSongs(vm["file"].as<std::vector<std::string>>(), vm["output"].as<std::string>());
         } else {
             std::cout << desc << std::endl;
