@@ -15,15 +15,27 @@ int handle_error(lsdj_error_t* error)
     return 1;
 }
 
-int importSongs(const std::vector<std::string>& songFiles, const std::string& outputFile)
+int importSongs(const std::vector<std::string>& songFiles, const std::string& outputFile, const char* savName)
 {
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = lsdj_new_sav(&error);
+    lsdj_sav_t* sav = savName ? lsdj_read_sav_from_file(boost::filesystem::absolute(savName).string().c_str(), &error) : lsdj_new_sav(&error);
     if (error)
         return handle_error(error);
     
+    auto index = 0;
+    for( ; index < lsdj_sav_get_project_count(sav); ++index)
+    {
+        lsdj_project_t* project = lsdj_sav_get_project(sav, index);
+        lsdj_song_t* song = lsdj_project_get_song(project);
+        if (!song)
+            break;
+    }
+    
     for (auto i = 0; i < songFiles.size(); ++i)
     {
+        if (index == lsdj_sav_get_project_count(sav))
+            break;
+        
         lsdj_project_t* project = lsdj_read_lsdsng_from_file(boost::filesystem::absolute(songFiles[i]).string().c_str(), &error);
         if (error)
         {
@@ -31,7 +43,7 @@ int importSongs(const std::vector<std::string>& songFiles, const std::string& ou
             return handle_error(error);
         }
         
-        lsdj_sav_set_project(sav, i, project, &error);
+        lsdj_sav_set_project(sav, index++, project, &error);
         if (error)
         {
             lsdj_free_project(project);
@@ -56,7 +68,8 @@ int main(int argc, char* argv[])
     desc.add_options()
         ("help,h", "Help screen")
         ("file,f", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more")
-        ("output,o", boost::program_options::value<std::string>(), "The output file (.sav)");
+        ("output,o", boost::program_options::value<std::string>(), "The output file (.sav)")
+        ("sav,s", boost::program_options::value<std::string>(), "A sav file to append all .lsdsng's to");
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", -1);
@@ -75,7 +88,9 @@ int main(int argc, char* argv[])
             std::cout << desc << std::endl;
             return 0;
         } else if (vm.count("file") && vm.count("output")) {
-            return importSongs(vm["file"].as<std::vector<std::string>>(), vm["output"].as<std::string>());
+            return importSongs(vm["file"].as<std::vector<std::string>>(),
+                               vm["output"].as<std::string>(),
+                               vm.count("sav") ? vm["sav"].as<std::string>().c_str() : nullptr);
         } else {
             std::cout << desc << std::endl;
             return 0;
