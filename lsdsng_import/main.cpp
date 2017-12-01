@@ -31,6 +31,7 @@ int importSongs(const std::vector<std::string>& songFiles, const std::string& ou
             break;
     }
     
+    const auto active = lsdj_sav_get_active_project(sav);
     for (auto i = 0; i < songFiles.size(); ++i)
     {
         if (index == lsdj_sav_get_project_count(sav))
@@ -50,6 +51,17 @@ int importSongs(const std::vector<std::string>& songFiles, const std::string& ou
             lsdj_free_sav(sav);
             return handle_error(error);
         }
+        
+        if (i == 0 && active == 0xFF)
+        {
+            lsdj_sav_copy_active_project(sav, i, &error);
+            if (error)
+            {
+                lsdj_free_project(project);
+                lsdj_free_sav(sav);
+                return handle_error(error);
+            }
+        }
     }
     
     lsdj_write_sav_to_file(sav, boost::filesystem::absolute(outputFile).string().c_str(), &error);
@@ -68,7 +80,7 @@ int main(int argc, char* argv[])
     desc.add_options()
         ("help,h", "Help screen")
         ("file,f", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more")
-        ("output,o", boost::program_options::value<std::string>(), "The output file (.sav)")
+        ("output,o", boost::program_options::value<std::string>()->default_value("out.sav"), "The output file (.sav)")
         ("sav,s", boost::program_options::value<std::string>(), "A sav file to append all .lsdsng's to");
     
     boost::program_options::positional_options_description positionalOptions;

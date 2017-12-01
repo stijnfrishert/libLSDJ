@@ -33,6 +33,7 @@ typedef struct lsdj_song_t lsdj_song_t;
 
 // Create/free projects
 lsdj_song_t* lsdj_new_song(lsdj_error_t** error);
+lsdj_song_t* lsdj_copy_song(const lsdj_song_t* song, lsdj_error_t** error);
 void lsdj_free_song(lsdj_song_t* song);
 
 // Deserialize a song

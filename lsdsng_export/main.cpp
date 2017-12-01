@@ -135,7 +135,7 @@ int print(const boost::filesystem::path& path)
     if (indices.empty())
     {
         std::cout << "WM. ";
-        if (active != -1)
+        if (active != 0xFF)
         {
             lsdj_project_t* project = lsdj_sav_get_project(sav, active);
             

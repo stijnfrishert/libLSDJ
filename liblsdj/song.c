@@ -155,6 +155,42 @@ lsdj_song_t* lsdj_new_song(lsdj_error_t** error)
     return song;
 }
 
+lsdj_song_t* lsdj_copy_song(const lsdj_song_t* rhs, lsdj_error_t** error)
+{
+    lsdj_song_t* song = lsdj_new_song(error);
+    if (*error)
+        return NULL;
+    
+    song->formatVersion = rhs->formatVersion;
+    song->tempo = rhs->tempo;
+    song->transposition = rhs->transposition;
+    
+    memcpy(song->rows, rhs->rows, sizeof(rhs->rows));
+    // chains
+    // phrases
+    // instruments
+    memcpy(song->synths, rhs->synths, sizeof(rhs->synths));
+    memcpy(song->waves, rhs->waves, sizeof(rhs->waves));
+    // tables
+    memcpy(song->grooves, rhs->grooves, sizeof(rhs->grooves));
+    memcpy(song->words, rhs->words, sizeof(rhs->words));
+    memcpy(song->wordNames, rhs->wordNames, sizeof(rhs->wordNames));
+    memcpy(song->bookmarks, rhs->bookmarks, sizeof(rhs->bookmarks));
+    
+    memcpy(&song->meta, &rhs->meta, sizeof(rhs->meta));
+    
+    memcpy(song->reserved1030, rhs->reserved1030, sizeof(rhs->reserved1030));
+    memcpy(song->reserved1fba, rhs->reserved1fba, sizeof(rhs->reserved1fba));
+    memcpy(song->reserved2000, rhs->reserved2000, sizeof(rhs->reserved2000));
+    memcpy(&song->reserved3fbf, &rhs->reserved3fbf, sizeof(rhs->reserved3fbf));
+    memcpy(&song->reserved3fb9, &rhs->reserved3fb9, sizeof(rhs->reserved3fb9));
+    memcpy(song->reserved3fc6, rhs->reserved3fc6, sizeof(rhs->reserved3fc6));
+    memcpy(song->reserved5fe0, rhs->reserved5fe0, sizeof(rhs->reserved5fe0));
+    memcpy(song->reserved7ff2, rhs->reserved7ff2, sizeof(rhs->reserved7ff2));
+    
+    return song;
+}
+
 void lsdj_free_song(lsdj_song_t* song)
 {
     if (song == NULL)

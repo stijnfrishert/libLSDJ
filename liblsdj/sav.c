@@ -90,14 +90,36 @@ void lsdj_free_sav(lsdj_sav_t* sav)
     }
 }
 
+void lsdj_sav_set_song(lsdj_sav_t* sav, lsdj_song_t* song)
+{
+    if (sav->song)
+        lsdj_free_song(sav->song);
+    
+    sav->song = song;
+}
+
 lsdj_song_t* lsdj_sav_get_song(const lsdj_sav_t* sav)
 {
     return sav->song;
 }
 
-int lsdj_sav_get_active_project(const lsdj_sav_t* sav)
+void lsdj_sav_copy_active_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error)
 {
-    return sav->activeProject == 0xFF ? -1 : sav->activeProject;
+    lsdj_song_t* song = lsdj_project_get_song(sav->projects[index]);
+    if (song == NULL)
+        return lsdj_create_error(error, "no song at given index");
+    
+    lsdj_song_t* copy = lsdj_copy_song(song, error);
+    if (*error)
+        return;
+    
+    lsdj_sav_set_song(sav, copy);
+    sav->activeProject = index;
+}
+
+unsigned char lsdj_sav_get_active_project(const lsdj_sav_t* sav)
+{
+    return sav->activeProject;
 }
 
 unsigned int lsdj_sav_get_project_count(const lsdj_sav_t* sav)
