@@ -376,6 +376,14 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
 //            unsigned int written_block_count = lsdj_compress(song_data, &blocks[0][0], BLOCK_SIZE, current_block, BLOCK_COUNT);
             unsigned int written_block_count = lsdj_compress(song_data, BLOCK_SIZE, current_block, BLOCK_COUNT, &wvio);
             
+            if (written_block_count == 0)
+            {
+                char message[45];
+                memset(message, 0, sizeof(message));
+                sprintf(message, "not enough space for compressing project %d", i);
+                return lsdj_create_error(error, message);
+            }
+            
             current_block += written_block_count;
             for (int j = 0; j < written_block_count; ++j)
                 *table_ptr++ = (unsigned char)i;

@@ -140,6 +140,9 @@ void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long firstBlo
 
 unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_t* wvio)
 {
+    if (startBlock == blockCount + 1)
+        return 0;
+    
     unsigned char nextEvent[3] = { 0, 0, 0 };
     unsigned short eventSize = 0;
     
@@ -148,7 +151,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
     
     unsigned char byte = 0;
     
-//    long wstart = wvio->tell(wvio->user_data);
+    long wstart = wvio->tell(wvio->user_data);
     
     const unsigned char* end = data + SONG_DECOMPRESSED_SIZE;
     for (const unsigned char* read = data; read < end; )
@@ -264,6 +267,21 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             
             currentBlock += 1;
             currentBlockSize = 0;
+            
+            if (currentBlock == blockCount + 1)
+            {
+                long pos = wvio->tell(wvio->user_data);
+                wvio->seek(wstart, SEEK_SET, wvio->user_data);
+                
+                byte = 0;
+                for (long i = 0; i < pos - wstart; ++i)
+                    wvio->write(&byte, 1, wvio->user_data);
+                
+                wvio->seek(wstart, SEEK_SET, wvio->user_data);
+                
+                return 0;
+            }
+            
             // Don't continue; or something, we still need to write the event
         }
         
