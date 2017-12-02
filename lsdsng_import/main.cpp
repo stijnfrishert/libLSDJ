@@ -34,7 +34,7 @@ int importSongs(const std::vector<std::string>& songFiles, const std::string& ou
     }
     
     if (savName)
-        std::cout << "Importing into " << savName << std::endl;
+        std::cout << "Read " << savName << ", containing " << std::to_string(index) << " saves" << std::endl;
     
     const auto active = lsdj_sav_get_active_project(sav);
     for (auto i = 0; i < songFiles.size(); ++i)
