@@ -127,12 +127,12 @@ lsdj_tuning_mode parseTuning(unsigned char byte, unsigned char version)
 
 unsigned char parseAutomate(unsigned char byte)
 {
-    return (byte >> 3) & 3;
+    return (byte >> 3) & 0x1;
 }
 
 lsdj_pulse_wave parsePulseWidth(unsigned char byte)
 {
-    return (byte >> 6) & 3;
+    return (byte >> 6) & 0x3;
 }
 
 lsdj_playback_mode parsePlaybackMode(unsigned char byte)
