@@ -281,7 +281,9 @@ lsdj_sav_t* lsdj_read_sav_from_file(const char* path, lsdj_error_t** error)
     FILE* file = fopen(path, "rb");
     if (file == NULL)
     {
-        lsdj_create_error(error, "could not open file for reading");
+        char message[512];
+        snprintf(message, 512, "could not open %s for reading", path);
+        lsdj_create_error(error, message);
         return NULL;
     }
     
@@ -406,7 +408,11 @@ void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_
     
     FILE* file = fopen(path, "wb");
     if (file == NULL)
-        return lsdj_create_error(error, "could not open file for writing");
+    {
+        char message[512];
+        snprintf(message, 512, "could not open %s for writing", path);
+        return lsdj_create_error(error, message);
+    }
     
     lsdj_vio_t vio;
     vio.write = lsdj_fwrite;

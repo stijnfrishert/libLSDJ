@@ -123,8 +123,9 @@ void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long firstBlo
     FILE* file = fopen(path, "rb");
     if (file == NULL)
     {
-        lsdj_create_error(error, "could not open file for reading");
-        return;
+        char message[512];
+        snprintf(message, 512, "could not open %s for reading", path);
+        return lsdj_create_error(error, message);
     }
     
     lsdj_vio_t vio;
@@ -323,7 +324,9 @@ unsigned int lsdj_compress_to_file(const unsigned char* data, unsigned int block
     FILE* file = fopen(path, "wb");
     if (file == NULL)
     {
-        lsdj_create_error(error, "could not open file for writing");
+        char message[512];
+        snprintf(message, 512, "could not open %s for writing", path);
+        lsdj_create_error(error, message);
         return 0;
     }
     
