@@ -54,7 +54,7 @@ void decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio)
         wvio->write(DEFAULT_INSTRUMENT_COMPRESSION, sizeof(DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data);
 }
 
-void decompress_sa_byte(lsdj_vio_t* rvio, long firstBlockOffset, size_t blockSize, lsdj_vio_t* wvio, int* reading)
+void decompress_sa_byte(lsdj_vio_t* rvio, long block1position, size_t blockSize, lsdj_vio_t* wvio, int* reading)
 {
     unsigned char byte = 0;
     rvio->read(&byte, 1, rvio->user_data);
@@ -73,12 +73,12 @@ void decompress_sa_byte(lsdj_vio_t* rvio, long firstBlockOffset, size_t blockSiz
             *reading = 0;
             break;
         default:
-            rvio->seek(firstBlockOffset + (long)(byte * blockSize), SEEK_SET, rvio->user_data);
+            rvio->seek(block1position + (long)((byte - 1) * blockSize), SEEK_SET, rvio->user_data);
             break;
     }
 }
 
-void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, size_t blockSize)
+void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long block1position, size_t blockSize)
 {
     long wstart = wvio->tell(wvio->user_data);
     
@@ -100,7 +100,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, 
                 break;
                 
             case SPECIAL_ACTION_BYTE:
-                decompress_sa_byte(rvio, firstBlockOffset, blockSize, wvio, &reading);
+                decompress_sa_byte(rvio, block1position, blockSize, wvio, &reading);
                 break;
                 
             default:
@@ -109,7 +109,8 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long firstBlockOffset, 
         }
     }
 
-    assert((wvio->tell(wvio->user_data) - wstart) == SONG_DECOMPRESSED_SIZE);
+    const long readSize = wvio->tell(wvio->user_data) - wstart;
+    assert(readSize == SONG_DECOMPRESSED_SIZE);
 }
 
 void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long firstBlockOffset, size_t blockSize, lsdj_error_t** error)
@@ -251,6 +252,8 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             }
         }
         
+        // See if the evnet would still fit in this block
+        // If not, move to a new block
         if (currentBlockSize >= blockSize - eventSize - 1)
         {
             byte = SPECIAL_ACTION_BYTE;
@@ -269,6 +272,8 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             currentBlock += 1;
             currentBlockSize = 0;
             
+            // Have we reached the maximum block count?
+            // If so, roll back
             if (currentBlock == blockCount + 1)
             {
                 long pos = wvio->tell(wvio->user_data);
@@ -283,7 +288,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
                 return 0;
             }
             
-            // Don't continue; or something, we still need to write the event
+            // Don't "continue;" but fall through. We still need to write the event
         }
         
         wvio->write(nextEvent, eventSize, wvio->user_data);

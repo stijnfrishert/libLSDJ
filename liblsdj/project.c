@@ -147,7 +147,7 @@ void lsdj_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_erro
     lsdj_write_song_to_memory(project->song, decompressed, SONG_DECOMPRESSED_SIZE, error);
     
     // Compress the song
-    lsdj_compress(decompressed, BLOCK_SIZE, 0, BLOCK_COUNT, vio);
+    lsdj_compress(decompressed, BLOCK_SIZE, 1, BLOCK_COUNT, vio);
 }
 
 void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error)
