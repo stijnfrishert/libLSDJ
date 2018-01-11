@@ -54,7 +54,7 @@ void decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio)
         wvio->write(DEFAULT_INSTRUMENT_COMPRESSION, sizeof(DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data);
 }
 
-void decompress_sa_byte(lsdj_vio_t* rvio, long block1position, size_t blockSize, lsdj_vio_t* wvio, int* reading)
+void decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, long* block1position, size_t blockSize, lsdj_vio_t* wvio, int* reading)
 {
     unsigned char byte = 0;
     rvio->read(&byte, 1, rvio->user_data);
@@ -73,14 +73,20 @@ void decompress_sa_byte(lsdj_vio_t* rvio, long block1position, size_t blockSize,
             *reading = 0;
             break;
         default:
-            rvio->seek(block1position + (long)((byte - 1) * blockSize), SEEK_SET, rvio->user_data);
+            if (block1position)
+                *currentBlockPosition = *block1position + (long)((byte - 1) * blockSize);
+            else
+                *currentBlockPosition += blockSize;
+            
+            rvio->seek(*currentBlockPosition, SEEK_SET, rvio->user_data);
             break;
     }
 }
 
-void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long block1position, size_t blockSize)
+void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long* block1position, size_t blockSize)
 {
     long wstart = wvio->tell(wvio->user_data);
+    long currentBlockPosition = rvio->tell(rvio->user_data);
     
     unsigned char byte = 0;
     
@@ -100,7 +106,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long block1position, si
                 break;
                 
             case SPECIAL_ACTION_BYTE:
-                decompress_sa_byte(rvio, block1position, blockSize, wvio, &reading);
+                decompress_sa_byte(rvio, &currentBlockPosition, block1position, blockSize, wvio, &reading);
                 break;
                 
             default:
@@ -113,7 +119,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long block1position, si
     assert(readSize == SONG_DECOMPRESSED_SIZE);
 }
 
-void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long firstBlockOffset, size_t blockSize, lsdj_error_t** error)
+void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long* firstBlockOffset, size_t blockSize, lsdj_error_t** error)
 {
     if (path == NULL)
     {

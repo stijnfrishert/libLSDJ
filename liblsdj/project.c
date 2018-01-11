@@ -59,7 +59,6 @@ lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     vio->read(&project->version, 1, vio->user_data);
 
     // Decompress the data
-    const long firstBlockOffset = vio->tell(vio->user_data);
     unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
     memset(decompressed, 0, sizeof(decompressed));
     
@@ -73,7 +72,7 @@ lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     wvio.seek = lsdj_mseek;
     wvio.user_data = &mem;
     
-    lsdj_decompress(vio, &wvio, firstBlockOffset, BLOCK_SIZE);
+    lsdj_decompress(vio, &wvio, NULL, BLOCK_SIZE);
     
     // Read in the song
     if (project->song == NULL)
