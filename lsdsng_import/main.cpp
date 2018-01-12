@@ -17,7 +17,7 @@ int handle_error(lsdj_error_t* error)
     return 1;
 }
 
-int importSongs(const std::vector<std::string>& songFiles, const std::string& outputFile, const char* savName)
+int importSongs(const std::vector<std::string>& inputs, const std::string& outputFile, const char* savName)
 {
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = savName ? lsdj_read_sav_from_file(boost::filesystem::absolute(savName).string().c_str(), &error) : lsdj_new_sav(&error);
@@ -36,13 +36,34 @@ int importSongs(const std::vector<std::string>& songFiles, const std::string& ou
     if (savName)
         std::cout << "Read " << savName << ", containing " << std::to_string(index) << " saves" << std::endl;
     
+    std::vector<boost::filesystem::path> paths;
+    for (auto& input : inputs)
+    {
+        const auto path = boost::filesystem::absolute(input);
+        if (boost::filesystem::is_regular_file(path))
+        {
+            paths.emplace_back(path);
+        }
+        else if (boost::filesystem::is_directory(path))
+        {
+            std::vector<boost::filesystem::path> contents;
+            for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
+                contents.emplace_back(it->path());
+            std::sort(contents.begin(), contents.end());
+            for (auto& path : contents)
+                paths.emplace_back(path);
+        } else {
+            throw std::runtime_error("unknown path at " + path.string());
+        }
+    }
+        
     const auto active = lsdj_sav_get_active_project(sav);
-    for (auto i = 0; i < songFiles.size(); ++i)
+    for (auto i = 0; i < paths.size(); ++i)
     {
         if (index == lsdj_sav_get_project_count(sav))
             break;
         
-        lsdj_project_t* project = lsdj_read_lsdsng_from_file(boost::filesystem::absolute(songFiles[i]).string().c_str(), &error);
+        lsdj_project_t* project = lsdj_read_lsdsng_from_file(paths[i].string().c_str(), &error);
         if (error)
         {
             lsdj_free_sav(sav);
