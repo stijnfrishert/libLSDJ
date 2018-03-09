@@ -131,7 +131,11 @@ int print(const boost::filesystem::path& path)
     }
     
     const auto active = lsdj_sav_get_active_project(sav);
+    
+    // Header
+    std::cout << "#   Name     Ver  Fmt" << std::endl;
 
+    // Working memory
     if (indices.empty())
     {
         std::cout << "WM. ";
@@ -147,10 +151,10 @@ int print(const boost::filesystem::path& path)
             std::cout << "        ";
         }
         
-    
         const lsdj_song_t* song = lsdj_sav_get_song(sav);
         if (lsdj_song_get_file_changed_flag(song))
-            std::cout << "\t*";
+            std::cout << " *    ";
+        std::cout << std::to_string(lsdj_song_get_format_version(song));
     
         std::cout << std::endl;
     }
@@ -180,12 +184,14 @@ int print(const boost::filesystem::path& path)
         {
             case VersionStyle::NONE: break;
             case VersionStyle::HEX:
-                std::cout << '\t'<< std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project);
+                std::cout << ' ' << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project) << "   ";
                 break;
             case VersionStyle::DECIMAL:
-                std::cout << '\t' << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project);
+                std::cout << ' ' << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project) << "  ";
                 break;
         }
+        
+        std::cout << std::to_string(lsdj_song_get_format_version(song));
         
         std::cout << std::endl;
     }
