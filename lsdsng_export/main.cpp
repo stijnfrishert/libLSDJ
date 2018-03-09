@@ -148,7 +148,7 @@ int print(const boost::filesystem::path& path)
             for (auto i = 0; i < (8 - name.length()); ++i)
                 std::cout << ' ';
         } else {
-            std::cout << "        ";
+            std::cout << "         ";
         }
         
         const lsdj_song_t* song = lsdj_sav_get_song(sav);
