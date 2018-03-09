@@ -258,10 +258,10 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             }
         }
         
-        // See if the evnet would still fit in this block
+        // See if the event would still fit in this block
         // If not, move to a new block
-        if (currentBlockSize >= blockSize - eventSize - 1)
-        {
+        if (currentBlockSize + eventSize >= blockSize - 2)
+        {            
             byte = SPECIAL_ACTION_BYTE;
             wvio->write(&byte, 1, wvio->user_data);
             byte = currentBlock + 1;
