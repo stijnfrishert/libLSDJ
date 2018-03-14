@@ -101,6 +101,7 @@ void exportProject(const lsdj_project_t* project, boost::filesystem::path folder
     lsdj_write_lsdsng_to_file(project, folder.string().c_str(), error);
 }
 
+// Export all songs of a file
 int exportSongs(const boost::filesystem::path& path, const std::string& output)
 {
     lsdj_error_t* error = nullptr;
@@ -119,7 +120,7 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
     const auto count = lsdj_sav_get_project_count(sav);
     for (int i = 0; i < count; ++i)
     {
-        if (!indices.empty() && std::find(std::begin(indices), std::end(indices), i + 1) == std::end(indices))
+        if (!indices.empty() && std::find(std::begin(indices), std::end(indices), i) == std::end(indices))
             continue;
         
         lsdj_project_t* project = lsdj_sav_get_project(sav, i);
@@ -155,8 +156,10 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
     return 0;
 }
 
+// Print the contents of a file
 int print(const boost::filesystem::path& path)
 {
+    // Try and read the sav
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(path.string().c_str(), &error);
     if (sav == nullptr)
@@ -165,67 +168,90 @@ int print(const boost::filesystem::path& path)
         return handle_error(error);
     }
     
-    const auto active = lsdj_sav_get_active_project(sav);
-    
     // Header
-    std::cout << "#   Name     Ver  Fmt" << std::endl;
+    std::cout << "#   Name     ";
+    if (versionStyle != VersionStyle::NONE)
+        std::cout << "Ver  ";
+    std::cout << "Fmt" << std::endl;
 
-    // Working memory
-    if (indices.empty())
+    // If no specific indices were given, or -w was flagged (index == -1),
+    // display the working memory song as well
+    if (indices.empty() || std::find(std::begin(indices), std::end(indices), -1) != std::end(indices))
     {
         std::cout << "WM. ";
+        
+        // If the working memory song represent one of the projects, display that name
+        const auto active = lsdj_sav_get_active_project(sav);
         if (active != 0xFF)
         {
             lsdj_project_t* project = lsdj_sav_get_project(sav, active);
             
             const auto name = constructName(project, underscore);
             std::cout << name;
-            for (auto i = 0; i < (8 - name.length()); ++i)
+            for (auto i = 0; i < (9 - name.length()); ++i)
                 std::cout << ' ';
         } else {
+            // The working memory doesn't represent one of the projects, so it
+            // doesn't really have a name
             std::cout << "         ";
         }
         
+        // Display whether the working memory song is "dirty"/edited, and display that
+        // as version number (it doesn't really have a version number otherwise)
         const lsdj_song_t* song = lsdj_sav_get_song(sav);
-        if (lsdj_song_get_file_changed_flag(song))
-            std::cout << " *    ";
+        if (versionStyle != VersionStyle::NONE)
+        {
+            if (lsdj_song_get_file_changed_flag(song))
+                std::cout << "*    ";
+            else
+                std::cout << "      ";
+        }
+        
+        // Display the format version of the song
         std::cout << std::to_string(lsdj_song_get_format_version(song));
     
         std::cout << std::endl;
     }
     
+    // Go through all compressed projects
     const auto count = lsdj_sav_get_project_count(sav);
     for (int i = 0; i < count; ++i)
     {
-        if (!indices.empty() && std::find(std::begin(indices), std::end(indices), i + 1) == std::end(indices))
+        // If indices were specified and this project wasn't one of them, move on to the next
+        if (!indices.empty() && std::find(std::begin(indices), std::end(indices), i) == std::end(indices))
             continue;
         
+        // Retrieve the song belonging to this project, make sure it's there
         const lsdj_project_t* project = lsdj_sav_get_project(sav, i);
         const lsdj_song_t* song = lsdj_project_get_song(project);
         if (!song)
             continue;
         
-        std::cout << std::to_string(i + 1) << ". ";
-        if (i < 9)
+        // Print out the index
+        std::cout << std::to_string(i) << ". ";
+        if (i < 10)
             std::cout << ' ';
         
+        // Display the name of the project
         const auto name = constructName(project, underscore);
         std::cout << name;
         
-        for (auto i = 0; i < (8 - name.length()); ++i)
+        for (auto i = 0; i < (9 - name.length()); ++i)
             std::cout << ' ';
         
+        // Dipslay the version number of the project
         switch (versionStyle)
         {
             case VersionStyle::NONE: break;
             case VersionStyle::HEX:
-                std::cout << ' ' << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project) << "   ";
+                std::cout << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project) << "   ";
                 break;
             case VersionStyle::DECIMAL:
-                std::cout << ' ' << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project) << "  ";
+                std::cout << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project) << "  ";
                 break;
         }
         
+        // Retrieve the sav format version of the song and display it as well
         std::cout << std::to_string(lsdj_song_get_format_version(song));
         
         std::cout << std::endl;
@@ -236,6 +262,7 @@ int print(const boost::filesystem::path& path)
 
 int main(int argc, char* argv[])
 {
+    // Setup the command-line options
     boost::program_options::options_description desc{"Options"};
     desc.add_options()
         ("help,h", "Help screen")
@@ -247,13 +274,16 @@ int main(int argc, char* argv[])
         ("underscore,u", "Use an underscore for the special lightning bolt character, instead of x")
         ("output,o", boost::program_options::value<std::string>()->default_value(""), "Output folder for the lsdsng's")
         ("verbose,v", "Verbose output during export")
-        ("index,i", boost::program_options::value<std::vector<int>>(), "Select a given project to export, 0 or more");
+        ("index,i", boost::program_options::value<std::vector<int>>(), "Single out a given project index to export, 0 or more")
+        ("working-memory,w", "Single out the working-memory song to export");
     
+    // Set up the input file command-line argument
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", 1);
     
     try
     {
+        // Parse the command-line options
         boost::program_options::variables_map vm;
         boost::program_options::command_line_parser parser(argc, argv);
         parser = parser.options(desc);
@@ -261,27 +291,34 @@ int main(int argc, char* argv[])
         boost::program_options::store(parser.run(), vm);
         boost::program_options::notify(vm);
         
+        // Show help if requested
         if (vm.count("help"))
         {
             std::cout << desc << std::endl;
             return 0;
+        // Do we have an input file?
         } else if (vm.count("file")) {
+            // What is the path of the input file, and does it exist on disk?
+            const auto path = boost::filesystem::absolute(vm["file"].as<std::string>());
+            if (!boost::filesystem::exists(path))
+            {
+                std::cerr << "File '" << path.string() << "' does not exist" << std::endl;
+                return 1;
+            }
+            
+            // Parse some of the flags manipulating output "style"
             versionStyle = vm.count("noversion") ? VersionStyle::NONE : vm.count("decimal") ? VersionStyle::DECIMAL : VersionStyle::HEX;
             underscore = vm.count("underscore");
             putInFolder = vm.count("folder");
             verbose = vm.count("verbose");
             
+            // Has the user specified one or more specific indices to export?
             if (vm.count("index"))
                 indices = vm["index"].as<std::vector<int>>();
-            
-            const auto path = boost::filesystem::absolute(vm["file"].as<std::string>());
-            
-			if (!boost::filesystem::exists(path))
-			{
-				std::cerr << "File '" << path.string() << "' does not exist" << std::endl;
-				return 1;
-			}
+            if (vm.count("working-memory"))
+                indices.emplace_back(-1); // -1 represents working memory, kind-of a hack, but meh :/
 
+            // Has the user requested a print, or an actual export?
             if (vm.count("print"))
                 return print(path);
             else
