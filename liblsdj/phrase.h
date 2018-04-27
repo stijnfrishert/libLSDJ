@@ -52,6 +52,9 @@ typedef struct
     // The effect command column for a phrase
     lsdj_command_t commands[PHRASE_LENGTH];
 } lsdj_phrase_t;
+
+// Copy a phrase
+lsdj_phrase_t* lsdj_copy_phrase(const lsdj_phrase_t* phrase);
     
 // Clear all phrase data to factory settings
 void lsdj_clear_phrase(lsdj_phrase_t* phrase);

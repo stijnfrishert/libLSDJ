@@ -55,6 +55,9 @@ typedef struct
     // The second effect command column of the table
     lsdj_command_t commands2[TABLE_LENGTH];
 } lsdj_table_t;
+
+// Copy a table
+lsdj_table_t* lsdj_copy_table(const lsdj_table_t* table);
     
 // Clear all table data to factory settings
 void lsdj_clear_table(lsdj_table_t* table);

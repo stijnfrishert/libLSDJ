@@ -87,6 +87,9 @@ typedef struct
         lsdj_instrument_noise_t noise;
     };
 } lsdj_instrument_t;
+
+// Copy a instrument
+lsdj_instrument_t* lsdj_copy_instrument(const lsdj_instrument_t* instrument);
     
 // Clear all instrument data to factory settings
 void lsdj_clear_instrument(lsdj_instrument_t* instrument);

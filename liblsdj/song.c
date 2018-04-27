@@ -216,12 +216,34 @@ lsdj_song_t* lsdj_copy_song(const lsdj_song_t* rhs, lsdj_error_t** error)
     song->drumMax = rhs->drumMax;
     
     memcpy(song->rows, rhs->rows, sizeof(rhs->rows));
-    // chains
-    // phrases
-    // instruments
+    
+    for (int i = 0; i < CHAIN_COUNT; ++i)
+    {
+        if (rhs->chains[i])
+            song->chains[i] = lsdj_copy_chain(rhs->chains[i]);
+    }
+    
+    for (int i = 0; i < PHRASE_COUNT; ++i)
+    {
+        if (rhs->phrases[i])
+            song->phrases[i] = lsdj_copy_phrase(rhs->phrases[i]);
+    }
+    
+    for (int i = 0; i < INSTRUMENT_COUNT; ++i)
+    {
+        if (rhs->instruments[i])
+            song->instruments[i] = lsdj_copy_instrument(rhs->instruments[i]);
+    }
+    
     memcpy(song->synths, rhs->synths, sizeof(rhs->synths));
     memcpy(song->waves, rhs->waves, sizeof(rhs->waves));
-    // tables
+
+    for (int i = 0; i < TABLE_COUNT; ++i)
+    {
+        if (rhs->tables[i])
+            song->tables[i] = lsdj_copy_table(rhs->tables[i]);
+    }
+    
     memcpy(song->grooves, rhs->grooves, sizeof(rhs->grooves));
     memcpy(song->words, rhs->words, sizeof(rhs->words));
     memcpy(song->wordNames, rhs->wordNames, sizeof(rhs->wordNames));

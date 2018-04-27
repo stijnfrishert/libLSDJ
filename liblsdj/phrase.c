@@ -33,9 +33,17 @@
  
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "phrase.h"
+
+lsdj_phrase_t* lsdj_copy_phrase(const lsdj_phrase_t* phrase)
+{
+    lsdj_phrase_t* newPhrase = malloc(sizeof(lsdj_phrase_t));
+    memcpy(newPhrase, phrase, sizeof(lsdj_phrase_t));
+    return newPhrase;
+}
 
 void lsdj_clear_phrase(lsdj_phrase_t* phrase)
 {

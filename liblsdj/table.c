@@ -33,9 +33,17 @@
  
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "table.h"
+
+lsdj_table_t* lsdj_copy_table(const lsdj_table_t* table)
+{
+    lsdj_table_t* newTable = malloc(sizeof(lsdj_table_t));
+    memcpy(newTable, table, sizeof(lsdj_table_t));
+    return newTable;
+}
 
 void lsdj_clear_table(lsdj_table_t* table)
 {

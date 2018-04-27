@@ -33,9 +33,17 @@
  
  */
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "chain.h"
+
+lsdj_chain_t* lsdj_copy_chain(const lsdj_chain_t* chain)
+{
+    lsdj_chain_t* newChain = malloc(sizeof(lsdj_chain_t));
+    memcpy(newChain, chain, sizeof(lsdj_chain_t));
+    return newChain;
+}
 
 void lsdj_clear_chain(lsdj_chain_t* chain)
 {

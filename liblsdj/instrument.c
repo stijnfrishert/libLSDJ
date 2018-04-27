@@ -34,9 +34,17 @@
  */
 
 #include <assert.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "instrument.h"
+
+lsdj_instrument_t* lsdj_copy_instrument(const lsdj_instrument_t* instrument)
+{
+    lsdj_instrument_t* newInstrument = malloc(sizeof(lsdj_instrument_t));
+    memcpy(newInstrument, instrument, sizeof(lsdj_instrument_t));
+    return newInstrument;
+}
 
 void lsdj_clear_instrument(lsdj_instrument_t* instrument)
 {

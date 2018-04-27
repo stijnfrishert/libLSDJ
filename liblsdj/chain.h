@@ -50,6 +50,9 @@ typedef struct
     // The transpositions for each row
     unsigned char transpositions[CHAIN_LENGTH];
 } lsdj_chain_t;
+
+// Copy a chain
+lsdj_chain_t* lsdj_copy_chain(const lsdj_chain_t* chain);
     
 // Clear chain data to factory settings
 void lsdj_clear_chain(lsdj_chain_t* chain);
