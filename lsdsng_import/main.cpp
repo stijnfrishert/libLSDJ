@@ -52,7 +52,7 @@ int handle_error(lsdj_error_t* error)
     return 1;
 }
 
-int importSongs(const std::vector<std::string>& inputs, const std::string& outputFile, const char* savName)
+int importSongs(const std::vector<std::string>& inputs, std::string outputFile, const char* savName)
 {
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = savName ? lsdj_read_sav_from_file(boost::filesystem::absolute(savName).string().c_str(), &error) : lsdj_new_sav(&error);
@@ -113,15 +113,17 @@ int importSongs(const std::vector<std::string>& inputs, const std::string& outpu
             return handle_error(error);
         }
         
-        if (verbose)
-        {
-            std::array<char, 9> name;
-            name.fill(0);
-            lsdj_project_get_name(project, name.data(), name.size());
-            std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
-        }
+        std::array<char, 9> name;
+        name.fill('\0');
+        lsdj_project_get_name(project, name.data(), 8);
         
-        if (i == 0 && active == 0xFF)
+        if (outputFile.empty() && inputs.size() == 1)
+            outputFile = std::string(name.data()) + ".sav";
+        
+        if (verbose)
+            std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
+        
+        if (i == 0 && active == NO_ACTIVE_PROJECT)
         {
             lsdj_set_working_memory_song_from_project(sav, i, &error);
             if (error)
@@ -135,6 +137,9 @@ int importSongs(const std::vector<std::string>& inputs, const std::string& outpu
         index += 1;
     }
     
+    if (outputFile.empty())
+        outputFile = "out.sav";
+        
     lsdj_write_sav_to_file(sav, boost::filesystem::absolute(outputFile).string().c_str(), &error);
     if (error)
     {
@@ -151,7 +156,7 @@ int main(int argc, char* argv[])
     desc.add_options()
         ("help,h", "Help screen")
         ("file,f", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more")
-        ("output,o", boost::program_options::value<std::string>()->default_value("out.sav"), "The output file (.sav)")
+        ("output,o", boost::program_options::value<std::string>(), "The output file (.sav)")
         ("sav,s", boost::program_options::value<std::string>(), "A sav file to append all .lsdsng's to")
         ("verbose,v", "Verbose output during import");
     
@@ -171,11 +176,11 @@ int main(int argc, char* argv[])
         {
             std::cout << desc << std::endl;
             return 0;
-        } else if (vm.count("file") && vm.count("output")) {
+        } else if (vm.count("file")) {
             verbose = vm.count("verbose");
             
             return importSongs(vm["file"].as<std::vector<std::string>>(),
-                               vm["output"].as<std::string>(),
+                               vm.count("output") ? vm["output"].as<std::string>() : "",
                                vm.count("sav") ? vm["sav"].as<std::string>().c_str() : nullptr);
         } else {
             std::cout << desc << std::endl;
