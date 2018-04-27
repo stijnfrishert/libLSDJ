@@ -56,6 +56,7 @@ bool underscore = false;
 bool putInFolder = false;
 bool verbose = false;
 std::vector<int> indices;
+std::vector<std::string> names;
 
 int handle_error(lsdj_error_t* error)
 {
@@ -104,6 +105,7 @@ void exportProject(const lsdj_project_t* project, boost::filesystem::path folder
 // Export all songs of a file
 int exportSongs(const boost::filesystem::path& path, const std::string& output)
 {
+    // Load in the save file
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(path.string().c_str(), &error);
     if (sav == nullptr)
@@ -117,21 +119,36 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
     
     const auto outputFolder = boost::filesystem::absolute(output);
     
+    // Go through every project
     const auto count = lsdj_sav_get_project_count(sav);
     for (int i = 0; i < count; ++i)
     {
+        // See if we're using indices and this project hasn't been specified
+        // If so, skip it and move on to the next one
         if (!indices.empty() && std::find(std::begin(indices), std::end(indices), i) == std::end(indices))
             continue;
         
+        // Retrieve the project
         lsdj_project_t* project = lsdj_sav_get_project(sav, i);
-        lsdj_song_t* song = lsdj_project_get_song(project);
-        if (!song)
-            continue;
         
+        // See if we're using name-based specification and whether this project has been singled out
+        // If not, skip it and move on to the next one
+        if (!names.empty())
+        {
+            char name[9];
+            std::fill_n(name, 9, '\0');
+            lsdj_project_get_name(project, name, sizeof(name));
+            const auto c = std::string(name);
+            if (std::find(std::begin(names), std::end(names), std::string(name)) == std::end(names))
+                continue;
+        }
+
+        // Export the project
         exportProject(project, outputFolder, versionStyle, underscore, putInFolder, &error);
         if (error)
             return handle_error(error);
         
+        // Let the user know if verbose output has been toggled on
         if (verbose)
         {
             std::cout << "Exported " << constructName(project, underscore);
@@ -176,7 +193,7 @@ int print(const boost::filesystem::path& path)
 
     // If no specific indices were given, or -w was flagged (index == -1),
     // display the working memory song as well
-    if (indices.empty() || std::find(std::begin(indices), std::end(indices), -1) != std::end(indices))
+    if ((indices.empty() && names.empty()) || std::find(std::begin(indices), std::end(indices), -1) != std::end(indices))
     {
         std::cout << "WM. ";
         
@@ -221,8 +238,22 @@ int print(const boost::filesystem::path& path)
         if (!indices.empty() && std::find(std::begin(indices), std::end(indices), i) == std::end(indices))
             continue;
         
-        // Retrieve the song belonging to this project, make sure it's there
+        // Retrieve the project
         const lsdj_project_t* project = lsdj_sav_get_project(sav, i);
+        
+        // See if we're using name-based specification and whether this project has been singled out
+        // If not, skip it and move on to the next one
+        if (!names.empty())
+        {
+            char name[9];
+            std::fill_n(name, 9, '\0');
+            lsdj_project_get_name(project, name, sizeof(name));
+            const auto c = std::string(name);
+            if (std::find(std::begin(names), std::end(names), std::string(name)) == std::end(names))
+                continue;
+        }
+        
+        // Retrieve the song belonging to this project, make sure it's there
         const lsdj_song_t* song = lsdj_project_get_song(project);
         if (!song)
             continue;
@@ -267,7 +298,7 @@ int main(int argc, char* argv[])
     desc.add_options()
         ("help,h", "Help screen")
         ("file", boost::program_options::value<std::string>(), "Input save file, can be a nameless option")
-        ("noversion,n", "Don't add version numbers to the filename")
+        ("noversion", "Don't add version numbers to the filename")
         ("folder,f", "Put every lsdsng in its own folder")
         ("print,p", "Print a list of all songs in the sav")
         ("decimal,d", "Use decimal notation for the version number, instead of hex")
@@ -275,6 +306,7 @@ int main(int argc, char* argv[])
         ("output,o", boost::program_options::value<std::string>()->default_value(""), "Output folder for the lsdsng's")
         ("verbose,v", "Verbose output during export")
         ("index,i", boost::program_options::value<std::vector<int>>(), "Single out a given project index to export, 0 or more")
+        ("name,n", boost::program_options::value<std::vector<std::string>>(), "Single out a given project by name to export")
         ("working-memory,w", "Single out the working-memory song to export");
     
     // Set up the input file command-line argument
@@ -317,6 +349,8 @@ int main(int argc, char* argv[])
                 indices = vm["index"].as<std::vector<int>>();
             if (vm.count("working-memory"))
                 indices.emplace_back(-1); // -1 represents working memory, kind-of a hack, but meh :/
+            if (vm.count("name"))
+                names = vm["name"].as<std::vector<std::string>>();
 
             // Has the user requested a print, or an actual export?
             if (vm.count("print"))
