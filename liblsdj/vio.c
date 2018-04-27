@@ -62,28 +62,39 @@ size_t lsdj_mread(void* ptr, size_t size, void* user_data)
 {
     lsdj_memory_data_t* mem = (lsdj_memory_data_t*)user_data;
     
-    memcpy(ptr, mem->cur, size);
-    mem->cur += size;
-    assert((mem->cur - mem->begin) <= mem->size);
+    const size_t available = mem->size - (size_t)(mem->cur - mem->begin);
+    const size_t minSize = size < available ? size : available;
     
-    return size;
+    memcpy(ptr, mem->cur, minSize);
+    mem->cur += minSize;
+    assert(mem->cur <= mem->begin + mem->size);
+    
+    return minSize;
 }
 
 size_t lsdj_mwrite(const void* ptr, size_t size, void* user_data)
 {
     lsdj_memory_data_t* mem = (lsdj_memory_data_t*)user_data;
     
-    memcpy(mem->cur, ptr, size);
-    mem->cur += size;
+    const size_t available = mem->size - (size_t)(mem->cur - mem->begin);
+    const size_t minSize = size < available ? size : available;
     
-    return size;
+    memcpy(mem->cur, ptr, minSize);
+    mem->cur += minSize;
+    assert(mem->cur <= mem->begin + mem->size);
+    
+    return minSize;
 }
 
 long lsdj_mtell(void* user_data)
 {
     const lsdj_memory_data_t* mem = (const lsdj_memory_data_t*)user_data;
     
-    return mem->cur - mem->begin;
+    long pos = mem->cur - mem->begin;
+    if (pos < 0 || pos > mem->size)
+        return -1L;
+    
+    return pos;
 }
 
 long lsdj_mseek(long offset, int whence, void* user_data)
@@ -95,6 +106,12 @@ long lsdj_mseek(long offset, int whence, void* user_data)
         case SEEK_SET: mem->cur = mem->begin + offset; break;
         case SEEK_CUR: mem->cur = mem->cur + offset; break;
         case SEEK_END: mem->cur = mem->begin + mem->size + offset; break;
+    }
+    
+    if (mem->cur < mem->begin ||
+        mem->cur > mem->begin + mem->size)
+    {
+        return 1;
     }
     
     return 0;

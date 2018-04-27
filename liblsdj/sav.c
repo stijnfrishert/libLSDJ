@@ -211,7 +211,9 @@ void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_err
         wvio.tell = lsdj_mtell;
         wvio.seek = lsdj_mseek;
         wvio.user_data = &mem;
-        lsdj_decompress(vio, &wvio, &block1position, BLOCK_SIZE);
+        lsdj_decompress(vio, &wvio, &block1position, BLOCK_SIZE, error);
+        if (error && *error)
+            return;
         
         // Read the song from memory
         lsdj_song_t* song = lsdj_read_song_from_memory(data, sizeof(data), error);

@@ -88,7 +88,7 @@ int importSongs(const std::vector<std::string>& inputs, const std::string& outpu
             for (auto& path : contents)
                 paths.emplace_back(path);
         } else {
-            throw std::runtime_error("unknown path at " + path.string());
+            throw std::runtime_error(path.string() + " is not a file or directory");
         }
     }
         
