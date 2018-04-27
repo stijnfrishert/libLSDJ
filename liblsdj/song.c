@@ -36,7 +36,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "chain.h"
+#include "error.h"
+#include "groove.h"
+#include "instrument.h"
+#include "phrase.h"
+#include "row.h"
 #include "song.h"
+#include "synth.h"
+#include "table.h"
+#include "vio.h"
+#include "wave.h"
+#include "word.h"
 
 static char DEFAULT_WORD_NAMES[WORD_COUNT][WORD_NAME_LENGTH] =
 {
@@ -59,6 +70,7 @@ struct lsdj_song_t
     unsigned char formatVersion;
     unsigned char tempo;
     unsigned char transposition;
+    unsigned char drumMax;
     
     // The sequences of chains in the song
     lsdj_row_t rows[ROW_COUNT];
@@ -122,7 +134,8 @@ struct lsdj_song_t
     unsigned char reserved2000[32];
     unsigned char reserved3fbf;
     unsigned char reserved3fb9;
-    unsigned char reserved3fc6[58];
+    unsigned char reserved3fc6[10];
+    unsigned char reserved3fd1[47];
     unsigned char reserved5fe0[32];
     unsigned char reserved7ff2[13];
 };
@@ -148,6 +161,7 @@ lsdj_song_t* lsdj_new_song(lsdj_error_t** error)
     song->formatVersion = 4;
     song->tempo = 128;
     song->transposition = 0;
+    song->drumMax = 0x6C;
     
     for (int i = 0; i < ROW_COUNT; ++i)
         lsdj_clear_row(&song->rows[i]);
@@ -199,6 +213,7 @@ lsdj_song_t* lsdj_copy_song(const lsdj_song_t* rhs, lsdj_error_t** error)
     song->formatVersion = rhs->formatVersion;
     song->tempo = rhs->tempo;
     song->transposition = rhs->transposition;
+    song->drumMax = rhs->drumMax;
     
     memcpy(song->rows, rhs->rows, sizeof(rhs->rows));
     // chains
@@ -220,6 +235,7 @@ lsdj_song_t* lsdj_copy_song(const lsdj_song_t* rhs, lsdj_error_t** error)
     memcpy(&song->reserved3fbf, &rhs->reserved3fbf, sizeof(rhs->reserved3fbf));
     memcpy(&song->reserved3fb9, &rhs->reserved3fb9, sizeof(rhs->reserved3fb9));
     memcpy(song->reserved3fc6, rhs->reserved3fc6, sizeof(rhs->reserved3fc6));
+    memcpy(song->reserved3fd1, rhs->reserved3fd1, sizeof(rhs->reserved3fd1));
     memcpy(song->reserved5fe0, rhs->reserved5fe0, sizeof(rhs->reserved5fe0));
     memcpy(song->reserved7ff2, rhs->reserved7ff2, sizeof(rhs->reserved7ff2));
     
@@ -475,6 +491,8 @@ void read_bank1(lsdj_vio_t* vio, lsdj_song_t* song, lsdj_error_t** error)
         song->synths[i].overwritten = ((waveSynthOverwriteLocks[1 - (i / 8)] >> (i % 8)) & 1);
     
     vio->read(&song->reserved3fc6, sizeof(song->reserved3fc6), vio->user_data);
+    vio->read(&song->drumMax, 1, vio->user_data);
+    vio->read(&song->reserved3fd1, sizeof(song->reserved3fd1), vio->user_data);
 }
 
 void write_soft_synth_parameters(const lsdj_synth_t* synth, lsdj_vio_t* vio)
@@ -641,6 +659,8 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error)
     vio->write(waveSynthOverwriteLocks, 2, vio->user_data);
     
     vio->write(&song->reserved3fc6, sizeof(song->reserved3fc6), vio->user_data);
+    vio->write(&song->drumMax, 1, vio->user_data);
+    vio->write(&song->reserved3fd1, sizeof(song->reserved3fd1), vio->user_data);
 }
 
 void read_bank2(lsdj_vio_t* vio, lsdj_song_t* song)
@@ -926,3 +946,12 @@ unsigned char lsdj_song_get_file_changed_flag(const lsdj_song_t* song)
     return song->meta.fileChangedFlag;
 }
 
+void lsdj_song_set_drum_max(lsdj_song_t* song, unsigned char drumMax)
+{
+    song->drumMax = drumMax;
+}
+
+unsigned char lsdj_song_get_drum_max(const lsdj_song_t* song)
+{
+    return song->drumMax;
+}

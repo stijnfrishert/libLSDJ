@@ -37,7 +37,9 @@
 #include <string.h>
 
 #include "compression.h"
+#include "instrument.h"
 #include "song.h"
+#include "wave.h"
 
 #define RUN_LENGTH_ENCODING_BYTE 0xC0
 #define SPECIAL_ACTION_BYTE 0xE0

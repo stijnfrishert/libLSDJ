@@ -36,17 +36,7 @@
 #ifndef LSDJ_SONG_H
 #define LSDJ_SONG_H
 
-#include "chain.h"
-#include "error.h"
-#include "groove.h"
-#include "instrument.h"
-#include "phrase.h"
-#include "row.h"
-#include "synth.h"
-#include "table.h"
 #include "vio.h"
-#include "wave.h"
-#include "word.h"
 
 #define SONG_DECOMPRESSED_SIZE 0x8000
 #define ROW_COUNT 256
@@ -87,5 +77,7 @@ unsigned char lsdj_song_get_tempo(const lsdj_song_t* song);
 void lsdj_song_set_transposition(lsdj_song_t* song, unsigned char transposition);
 unsigned char lsdj_song_get_transposition(const lsdj_song_t* song);
 unsigned char lsdj_song_get_file_changed_flag(const lsdj_song_t* song);
+void lsdj_song_set_drum_max(lsdj_song_t* song, unsigned char drumMax);
+unsigned char lsdj_song_get_drum_max(const lsdj_song_t* song);
 
 #endif
