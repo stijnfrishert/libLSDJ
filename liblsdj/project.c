@@ -90,8 +90,19 @@ lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
 {
     lsdj_project_t* project = alloc_project(error);
     
-    vio->read(project->name, PROJECT_NAME_LENGTH, vio->user_data);
-    vio->read(&project->version, 1, vio->user_data);
+    if (vio->read(project->name, PROJECT_NAME_LENGTH, vio->user_data) != PROJECT_NAME_LENGTH)
+    {
+        lsdj_create_error(error, "could not read project name");
+        free(project);
+        return NULL;
+    }
+    
+    if (vio->read(&project->version, 1, vio->user_data) != 1)
+    {
+        lsdj_create_error(error, "could not read project version");
+        free(project);
+        return NULL;
+    }
 
     // Decompress the data
     unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
@@ -175,15 +186,21 @@ void lsdj_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_erro
     if (project->song == NULL)
         return lsdj_create_error(error, "project does not contain a song");
     
-    vio->write(project->name, PROJECT_NAME_LENGTH, vio->user_data);
-    vio->write(&project->version, 1, vio->user_data);
+    if (vio->write(project->name, PROJECT_NAME_LENGTH, vio->user_data) != PROJECT_NAME_LENGTH)
+        return lsdj_create_error(error, "could not write project name for lsdsng");
+    
+    if (vio->write(&project->version, 1, vio->user_data) != 1)
+        return lsdj_create_error(error, "could not write project version for lsdsng");
     
     // Write the song to memory
     unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
+    memset(decompressed, 0x34, SONG_DECOMPRESSED_SIZE);
     lsdj_write_song_to_memory(project->song, decompressed, SONG_DECOMPRESSED_SIZE, error);
+    if (error && *error)
+        return;
     
     // Compress the song
-    lsdj_compress(decompressed, BLOCK_SIZE, 1, BLOCK_COUNT, vio);
+    lsdj_compress(decompressed, BLOCK_SIZE, 1, BLOCK_COUNT, vio, error);
 }
 
 void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error)

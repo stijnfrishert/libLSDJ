@@ -49,7 +49,7 @@ void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long* firstBl
 
 // Compress a song buffer to a set of blocks
 /*! Returns the amount of blocks written */
-unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_t* wvio);
+unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_t* wvio, lsdj_error_t** error);
 unsigned int lsdj_compress_to_file(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, const char* path, lsdj_error_t** error);
     
 #ifdef __cplusplus

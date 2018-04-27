@@ -40,12 +40,12 @@
 
 size_t lsdj_fread(void* ptr, size_t size, void* user_data)
 {
-    return fread(ptr, size, 1, (FILE*)user_data);
+    return fread(ptr, size, 1, (FILE*)user_data) * size;
 }
 
 size_t lsdj_fwrite(const void* ptr, size_t size, void* user_data)
 {
-    return fwrite(ptr, size, 1, (FILE*)user_data);
+    return fwrite(ptr, size, 1, (FILE*)user_data) * size;
 }
 
 long lsdj_ftell(void* user_data)
