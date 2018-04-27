@@ -63,19 +63,31 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
 void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
 void lsdj_write_sav_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error);
     
-// Change data in a sav
-void lsdj_sav_set_song(lsdj_sav_t* sav, lsdj_song_t* song);
-lsdj_song_t* lsdj_sav_get_song(const lsdj_sav_t* sav);
+// Set the working memory song of a sav
+// The sav takes ownership of the given song, so make sure you copy it first if need be!
+void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, lsdj_song_t* song);
+    
+// Retrieve the working memory song from a sav
+lsdj_song_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav);
+    
+// Change the working memory song by copying from one of the projects
+void lsdj_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
+    
+// Retrieve the index of the project the working memory song represents
+// If the working memory doesn't represent any project, this is NO_ACTIVE_PROJECT
+unsigned char lsdj_sav_get_active_project(const lsdj_sav_t* sav);
     
 // Create a project that contains the working memory song
 lsdj_project_t* lsdj_create_project_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error);
-void lsdj_sav_copy_active_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
     
-// Retrieve hte project that is currently active
-// If the working memory doesn't represent any active project, this is NO_ACTIVE_PROJECT
-unsigned char lsdj_sav_get_active_project(const lsdj_sav_t* sav);
+// Retrieve the amount of projects in the sav (should always be 32)
 unsigned int lsdj_sav_get_project_count(const lsdj_sav_t* sav);
+    
+// Change one of the projects in the sav
+// The sav takes ownership of the given project, so make sure you copy it first if need be!
 void lsdj_sav_set_project(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project, lsdj_error_t** error);
+    
+// Retrieve one of the projects
 lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char project);
 
 #ifdef __cplusplus

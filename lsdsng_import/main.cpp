@@ -123,7 +123,7 @@ int importSongs(const std::vector<std::string>& inputs, const std::string& outpu
         
         if (i == 0 && active == 0xFF)
         {
-            lsdj_sav_copy_active_project(sav, i, &error);
+            lsdj_set_working_memory_song_from_project(sav, i, &error);
             if (error)
             {
                 lsdj_free_project(project);

@@ -241,7 +241,7 @@ int print(const boost::filesystem::path& path)
         
         // Display whether the working memory song is "dirty"/edited, and display that
         // as version number (it doesn't really have a version number otherwise)
-        const lsdj_song_t* song = lsdj_sav_get_song(sav);
+        const lsdj_song_t* song = lsdj_sav_get_working_memory_song(sav);
         if (versionStyle != VersionStyle::NONE)
         {
             if (lsdj_song_get_file_changed_flag(song))
