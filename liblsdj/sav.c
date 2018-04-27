@@ -216,7 +216,8 @@ void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_err
 {
     // Read the block allocation table
     unsigned char blocks_alloc_table[BLOCK_COUNT];
-    vio->read(blocks_alloc_table, sizeof(blocks_alloc_table), vio->user_data);
+    if (vio->read(blocks_alloc_table, sizeof(blocks_alloc_table), vio->user_data) != sizeof(blocks_alloc_table))
+        return lsdj_create_error(error, "could not read block allocation table");
     
     // Pointers for storing decompressed song data
     // Handle decompression
@@ -254,7 +255,7 @@ void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_err
         lsdj_song_t* song = lsdj_read_song_from_memory(data, sizeof(data), error);
         if (error && *error)
         {
-            free(song);
+            lsdj_free_song(song);
             return;
         }
         
@@ -283,6 +284,12 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_t* vio, lsdj_error_t** error)
     
     // Skip memory representing the working song (we'll get to that)
     const long begin = vio->tell(vio->user_data);
+    if (begin == -1L)
+    {
+        lsdj_create_error(error, "could not tell begin of sav read");
+        lsdj_free_sav(sav);
+        return NULL;
+    }
     vio->seek(begin + HEADER_START, SEEK_SET, vio->user_data);
     
     // Read the header block, before we start processing each song
@@ -293,6 +300,7 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_t* vio, lsdj_error_t** error)
     // probably not dealing with an actual LSDJ sav format file.
     if (header.init[0] != 'j' || header.init[1] != 'k')
     {
+        lsdj_free_sav(sav);
         lsdj_create_error(error, "SRAM initialization check wasn't 'jk'");
         return NULL;
     }
@@ -323,13 +331,29 @@ lsdj_sav_t* lsdj_read_sav(lsdj_vio_t* vio, lsdj_error_t** error)
     // Read the compressed projects
     read_compressed_blocks(vio, sav->projects, error);
     if (error && *error)
+    {
+        lsdj_free_sav(sav);
         return NULL;
+    }
     
     // Read the working song
     const long end = vio->tell(vio->user_data);
+    if (end == -1L)
+    {
+        lsdj_create_error(error, "could not tell end of sav read");
+        lsdj_free_sav(sav);
+        return NULL;
+    }
+    
     vio->seek(begin, SEEK_SET, vio->user_data);
     unsigned char song_data[SONG_DECOMPRESSED_SIZE];
-    vio->read(song_data, sizeof(song_data), vio->user_data);
+    if (vio->read(song_data, sizeof(song_data), vio->user_data) != sizeof(song_data))
+    {
+        lsdj_free_sav(sav);
+        lsdj_create_error(error, "could not read compressed song data");
+        return NULL;
+    }
+    
     sav->song = lsdj_new_song(error);
     if (error && *error)
     {
@@ -400,7 +424,8 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
     // Write the working project
     unsigned char song_data[SONG_DECOMPRESSED_SIZE];
     lsdj_write_song_to_memory(sav->song, song_data, SONG_DECOMPRESSED_SIZE, error);
-    vio->write(song_data, sizeof(song_data), vio->user_data);
+    if (vio->write(song_data, sizeof(song_data), vio->user_data) != sizeof(song_data))
+        return lsdj_create_error(error, "could not write compressed song data");
 
     // Create the header for writing
     header_t header;
@@ -469,9 +494,12 @@ void lsdj_write_sav(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
     }
     
     // Write the header and blocks
-    vio->write(&header, sizeof(header), vio->user_data);
-    vio->write(&block_alloc_table, sizeof(block_alloc_table), vio->user_data);
-    vio->write(blocks, sizeof(blocks), vio->user_data);
+    if (vio->write(&header, sizeof(header), vio->user_data) != sizeof(header))
+        return lsdj_create_error(error, "could not write header");
+    if (vio->write(&block_alloc_table, sizeof(block_alloc_table), vio->user_data) != sizeof(block_alloc_table))
+        return lsdj_create_error(error, "could not write block allocation table");
+    if (vio->write(blocks, sizeof(blocks), vio->user_data) != sizeof(blocks))
+        return lsdj_create_error(error, "could not write blocks");
 }
 
 void lsdj_write_sav_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error)

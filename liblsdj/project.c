@@ -93,14 +93,14 @@ lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     if (vio->read(project->name, PROJECT_NAME_LENGTH, vio->user_data) != PROJECT_NAME_LENGTH)
     {
         lsdj_create_error(error, "could not read project name");
-        free(project);
+        lsdj_free_project(project);
         return NULL;
     }
     
     if (vio->read(&project->version, 1, vio->user_data) != 1)
     {
         lsdj_create_error(error, "could not read project version");
-        free(project);
+        lsdj_free_project(project);
         return NULL;
     }
 
@@ -259,7 +259,7 @@ void lsdj_clear_project(lsdj_project_t* project)
     
     if (project->song)
     {
-        free(project->song);
+        lsdj_free_song(project->song);
         project->song = NULL;
     }
 }
@@ -290,7 +290,7 @@ unsigned char lsdj_project_get_version(const lsdj_project_t* project)
 void lsdj_project_set_song(lsdj_project_t* project, lsdj_song_t* song)
 {
     if (project->song)
-        free(project->song);
+        lsdj_free_song(project->song);
     
     project->song = song;
 }

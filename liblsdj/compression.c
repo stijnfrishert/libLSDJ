@@ -82,8 +82,7 @@ void decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error
     
     for (int i = 0; i < count; ++i)
     {
-        const size_t c = wvio->write(DEFAULT_WAVE, sizeof(DEFAULT_WAVE), wvio->user_data);
-        if (c != sizeof(DEFAULT_INSTRUMENT_COMPRESSION))
+        if (wvio->write(DEFAULT_WAVE, sizeof(DEFAULT_WAVE), wvio->user_data) != sizeof(DEFAULT_WAVE))
             return lsdj_create_error(error, "could not write default wave byte");
     }
 }
@@ -96,8 +95,7 @@ void decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj
     
     for (int i = 0; i < count; ++i)
     {
-        const size_t c = wvio->write(DEFAULT_INSTRUMENT_COMPRESSION, sizeof(DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data);
-        if (c != sizeof(DEFAULT_INSTRUMENT_COMPRESSION))
+        if (wvio->write(DEFAULT_INSTRUMENT_COMPRESSION, sizeof(DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data) != sizeof(DEFAULT_INSTRUMENT_COMPRESSION))
             return lsdj_create_error(error, "could not write default instrument byte");
     }
 }
