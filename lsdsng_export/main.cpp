@@ -76,9 +76,11 @@ std::string constructName(const lsdj_project_t* project, bool underscore)
     return name;
 }
 
-void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, VersionStyle versionStyle, bool underscore, bool putInFolder, lsdj_error_t** error)
+void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, VersionStyle versionStyle, bool underscore, bool putInFolder, bool workingMemory, lsdj_error_t** error)
 {
-    const auto name = constructName(project, underscore);
+    auto name = constructName(project, underscore);
+    if (name.empty())
+        name = "(EMPTY)";
     
     if (putInFolder)
         folder /= name;
@@ -96,6 +98,10 @@ void exportProject(const lsdj_project_t* project, boost::filesystem::path folder
             stream << "." << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project);
             break;
     }
+    
+    if (workingMemory)
+        stream << ".WM";
+    
     stream << ".lsdsng";
     folder /= stream.str();
     
@@ -109,15 +115,31 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(path.string().c_str(), &error);
     if (sav == nullptr)
-    {
-        lsdj_free_sav(sav);
         return handle_error(error);
-    }
     
     if (verbose)
         std::cout << "Read '" << path.string() << "'" << std::endl;
     
     const auto outputFolder = boost::filesystem::absolute(output);
+    
+    // If no specific indices were given, or -w was flagged (index == -1),
+    // display the working memory song as well
+    if ((indices.empty() && names.empty()) || std::find(std::begin(indices), std::end(indices), -1) != std::end(indices))
+    {
+        lsdj_project_t* project = lsdj_create_project_from_working_memory_song(sav, &error);
+        if (error)
+        {
+            lsdj_free_sav(sav);
+            return handle_error(error);
+        }
+        
+        exportProject(project, outputFolder, versionStyle, underscore, putInFolder, true, &error);
+        if (error)
+        {
+            lsdj_free_sav(sav);
+            return handle_error(error);
+        }
+    }
     
     // Go through every project
     const auto count = lsdj_sav_get_project_count(sav);
@@ -142,11 +164,18 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
             if (std::find(std::begin(names), std::end(names), std::string(name)) == std::end(names))
                 continue;
         }
+        
+        // Does this project contain a song? If not, it's empty
+        if (lsdj_project_get_song(project) == NULL)
+            continue;
 
         // Export the project
-        exportProject(project, outputFolder, versionStyle, underscore, putInFolder, &error);
+        exportProject(project, outputFolder, versionStyle, underscore, putInFolder, false, &error);
         if (error)
+        {
+            lsdj_free_sav(sav);
             return handle_error(error);
+        }
         
         // Let the user know if verbose output has been toggled on
         if (verbose)
@@ -180,10 +209,7 @@ int print(const boost::filesystem::path& path)
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_read_sav_from_file(path.string().c_str(), &error);
     if (sav == nullptr)
-    {
-        lsdj_free_sav(sav);
         return handle_error(error);
-    }
     
     // Header
     std::cout << "#   Name     ";
@@ -199,7 +225,7 @@ int print(const boost::filesystem::path& path)
         
         // If the working memory song represent one of the projects, display that name
         const auto active = lsdj_sav_get_active_project(sav);
-        if (active != 0xFF)
+        if (active != NO_ACTIVE_PROJECT)
         {
             lsdj_project_t* project = lsdj_sav_get_project(sav, active);
             
