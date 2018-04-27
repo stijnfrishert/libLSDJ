@@ -44,6 +44,13 @@
 
 #include "../liblsdj/sav.h"
 
+bool compareCaseInsensitive(std::string str1, std::string str2)
+{
+    std::transform(str1.begin(), str1.end(), str1.begin(), ::tolower);
+    std::transform(str2.begin(), str2.end(), str2.begin(), ::tolower);
+    return str1 == str2;
+}
+
 enum class VersionStyle
 {
     NONE,
@@ -160,8 +167,8 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
             char name[9];
             std::fill_n(name, 9, '\0');
             lsdj_project_get_name(project, name, sizeof(name));
-            const auto c = std::string(name);
-            if (std::find(std::begin(names), std::end(names), std::string(name)) == std::end(names))
+            const auto namestr = std::string(name);
+            if (std::find_if(std::begin(names), std::end(names), [&](const auto& x){ return compareCaseInsensitive(x, namestr); }) == std::end(names))
                 continue;
         }
         
@@ -274,8 +281,8 @@ int print(const boost::filesystem::path& path)
             char name[9];
             std::fill_n(name, 9, '\0');
             lsdj_project_get_name(project, name, sizeof(name));
-            const auto c = std::string(name);
-            if (std::find(std::begin(names), std::end(names), std::string(name)) == std::end(names))
+            const auto namestr = std::string(name);
+            if (std::find_if(std::begin(names), std::end(names), [&](const auto& x){ return compareCaseInsensitive(x, namestr); }) == std::end(names))
                 continue;
         }
         
