@@ -387,7 +387,12 @@ void read_soft_synth_parameters(lsdj_vio_t* vio, lsdj_synth_t* synth)
 {
     vio->read(&synth->waveform, 1, vio->user_data);
     vio->read(&synth->filter, 1, vio->user_data);
-    vio->read(&synth->resonance, 1, vio->user_data);
+
+    unsigned char resonance = 0;
+    vio->read(&resonance, 1, vio->user_data);
+    synth->resonanceStart = (resonance & 0xF0) >> 4;
+    synth->resonanceEnd = resonance & 0x0F;
+
     vio->read(&synth->distortion, 1, vio->user_data);
     vio->read(&synth->phase, 1, vio->user_data);
     vio->read(&synth->volumeStart, 1, vio->user_data);
@@ -521,7 +526,10 @@ void write_soft_synth_parameters(const lsdj_synth_t* synth, lsdj_vio_t* vio)
 {
     vio->write(&synth->waveform, 1, vio->user_data);
     vio->write(&synth->filter, 1, vio->user_data);
-    vio->write(&synth->resonance, 1, vio->user_data);
+
+    unsigned char resonance = (unsigned char)((synth->resonanceStart & 0x0F) << 4) | (synth->resonanceEnd & 0x0F);
+    vio->write(&resonance, 1, vio->user_data);
+    
     vio->write(&synth->distortion, 1, vio->user_data);
     vio->write(&synth->phase, 1, vio->user_data);
     vio->write(&synth->volumeStart, 1, vio->user_data);

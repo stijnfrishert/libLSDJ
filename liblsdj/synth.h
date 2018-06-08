@@ -57,7 +57,8 @@ typedef struct
 {
     unsigned char waveform;
     unsigned char filter;
-    unsigned char resonance;
+    unsigned char resonanceStart;
+    unsigned char resonanceEnd;
     unsigned char distortion;
     unsigned char phase;
     
