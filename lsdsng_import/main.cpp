@@ -52,6 +52,16 @@ int handle_error(lsdj_error_t* error)
     return 1;
 }
 
+bool isHiddenFile(const std::string& str)
+{
+    switch (str.size())
+    {
+        case 0: return true;
+        case 1: return str.front() == '.';
+        default: return str[0] == '.' && str[1] != '.' && str[1] != '/';
+    }
+}
+
 int importSongs(const std::vector<std::string>& inputs, std::string outputFile, const char* savName)
 {
     lsdj_error_t* error = nullptr;
@@ -75,6 +85,9 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
     for (auto& input : inputs)
     {
         const auto path = boost::filesystem::absolute(input);
+        if (isHiddenFile(path.filename().string()))
+            continue;
+
         if (boost::filesystem::is_regular_file(path))
         {
             paths.emplace_back(path);
@@ -83,7 +96,14 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         {
             std::vector<boost::filesystem::path> contents;
             for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
-                contents.emplace_back(it->path());
+            {
+                const auto path = it->path();
+                if (isHiddenFile(path.filename().string()) || !boost::filesystem::is_regular_file(path))
+                    continue;
+
+                contents.emplace_back(path);
+            }
+
             std::sort(contents.begin(), contents.end());
             for (auto& path : contents)
                 paths.emplace_back(path);
