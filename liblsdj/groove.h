@@ -46,6 +46,6 @@ typedef struct
 } lsdj_groove_t;
 
     // Clear all groove data to factory settings
-void lsdj_clear_groove(lsdj_groove_t* groove);
+void lsdj_groove_clear(lsdj_groove_t* groove);
     
 #endif

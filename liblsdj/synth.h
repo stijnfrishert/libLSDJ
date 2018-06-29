@@ -78,6 +78,6 @@ typedef struct
 } lsdj_synth_t;
 
 // Clear all soft synth data to factory settings
-void lsdj_clear_synth(lsdj_synth_t* synth);
+void lsdj_synth_clear(lsdj_synth_t* synth);
     
 #endif

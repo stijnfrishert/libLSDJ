@@ -52,9 +52,9 @@ typedef struct
 } lsdj_chain_t;
 
 // Copy a chain
-lsdj_chain_t* lsdj_copy_chain(const lsdj_chain_t* chain);
+lsdj_chain_t* lsdj_chain_copy(const lsdj_chain_t* chain);
     
 // Clear chain data to factory settings
-void lsdj_clear_chain(lsdj_chain_t* chain);
+void lsdj_chain_clear(lsdj_chain_t* chain);
 
 #endif

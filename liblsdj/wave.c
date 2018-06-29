@@ -37,7 +37,7 @@
 
 #include "wave.h"
 
-void lsdj_clear_wave(lsdj_wave_t* wave)
+void lsdj_wave_clear(lsdj_wave_t* wave)
 {
     memcpy(wave->data, DEFAULT_WAVE, WAVE_LENGTH);
 }

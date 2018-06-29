@@ -49,6 +49,6 @@ typedef struct
 } lsdj_wave_t;
     
 // Clear all wave data to factory settings
-void lsdj_clear_wave(lsdj_wave_t* wave);
+void lsdj_wave_clear(lsdj_wave_t* wave);
 
 #endif

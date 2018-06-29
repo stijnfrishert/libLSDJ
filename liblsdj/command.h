@@ -47,6 +47,6 @@ typedef struct
 } lsdj_command_t;
     
 // Clear the command to factory settings
-void lsdj_clear_command(lsdj_command_t* command);
+void lsdj_command_clear(lsdj_command_t* command);
 
 #endif

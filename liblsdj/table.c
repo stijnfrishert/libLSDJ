@@ -79,8 +79,8 @@ void lsdj_clear_table(lsdj_table_t* table)
     
     for (int i = 0; i < TABLE_LENGTH; ++i)
     {
-        lsdj_clear_command(&table->commands1[i]);
-        lsdj_clear_command(&table->commands2[i]);
+        lsdj_command_clear(&table->commands1[i]);
+        lsdj_command_clear(&table->commands2[i]);
     }
 }
 

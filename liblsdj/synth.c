@@ -37,7 +37,7 @@
 
 #include "synth.h"
 
-void lsdj_clear_synth(lsdj_synth_t* synth)
+void lsdj_synth_clear(lsdj_synth_t* synth)
 {
     synth->waveform = SYNTH_WAVEFORM_SAWTOOTH;
     synth->filter = SYNTH_FILTER_LOW_PASS;

@@ -38,18 +38,18 @@
 
 #include "phrase.h"
 
-lsdj_phrase_t* lsdj_copy_phrase(const lsdj_phrase_t* phrase)
+lsdj_phrase_t* lsdj_phrase_copy(const lsdj_phrase_t* phrase)
 {
     lsdj_phrase_t* newPhrase = malloc(sizeof(lsdj_phrase_t));
     memcpy(newPhrase, phrase, sizeof(lsdj_phrase_t));
     return newPhrase;
 }
 
-void lsdj_clear_phrase(lsdj_phrase_t* phrase)
+void lsdj_phrase_clear(lsdj_phrase_t* phrase)
 {
     memset(phrase->notes, 0, PHRASE_LENGTH);
     memset(phrase->instruments, 0xFF, PHRASE_LENGTH);
     
     for (int i = 0; i < PHRASE_LENGTH; ++i)
-        lsdj_clear_command(&phrase->commands[i]);
+        lsdj_command_clear(&phrase->commands[i]);
 }

@@ -35,7 +35,7 @@
 
 #include "row.h"
 
-void lsdj_clear_row(lsdj_row_t* row)
+void lsdj_row_clear(lsdj_row_t* row)
 {
     row->pulse1 = 0xFF;
     row->pulse2 = 0xFF;

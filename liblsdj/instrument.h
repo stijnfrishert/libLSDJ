@@ -89,17 +89,17 @@ typedef struct
 } lsdj_instrument_t;
 
 // Copy a instrument
-lsdj_instrument_t* lsdj_copy_instrument(const lsdj_instrument_t* instrument);
+lsdj_instrument_t* lsdj_instrument_copy(const lsdj_instrument_t* instrument);
     
 // Clear all instrument data to factory settings
-void lsdj_clear_instrument(lsdj_instrument_t* instrument);
-void lsdj_clear_instrument_as_pulse(lsdj_instrument_t* instrument);
-void lsdj_clear_instrument_as_wave(lsdj_instrument_t* instrument);
-void lsdj_clear_instrument_as_kit(lsdj_instrument_t* instrument);
-void lsdj_clear_instrument_as_noise(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear_as_pulse(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear_as_wave(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear_as_kit(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear_as_noise(lsdj_instrument_t* instrument);
 
 // Instrument I/O
-void lsdj_read_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error);
-void lsdj_write_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_t* vio, lsdj_error_t** error);
+void lsdj_instrument_read(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error);
+void lsdj_instrument_write(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_t* vio, lsdj_error_t** error);
 
 #endif

@@ -39,20 +39,20 @@
 
 #include "instrument.h"
 
-lsdj_instrument_t* lsdj_copy_instrument(const lsdj_instrument_t* instrument)
+lsdj_instrument_t* lsdj_instrument_copy(const lsdj_instrument_t* instrument)
 {
     lsdj_instrument_t* newInstrument = malloc(sizeof(lsdj_instrument_t));
     memcpy(newInstrument, instrument, sizeof(lsdj_instrument_t));
     return newInstrument;
 }
 
-void lsdj_clear_instrument(lsdj_instrument_t* instrument)
+void lsdj_instrument_clear(lsdj_instrument_t* instrument)
 {
     memset(instrument->name, 0, INSTRUMENT_NAME_LENGTH);
-    lsdj_clear_instrument_as_pulse(instrument);
+    lsdj_instrument_clear_as_pulse(instrument);
 }
 
-void lsdj_clear_instrument_as_pulse(lsdj_instrument_t* instrument)
+void lsdj_instrument_clear_as_pulse(lsdj_instrument_t* instrument)
 {
     instrument->type = INSTR_PULSE;
     instrument->envelope = 0xA8;
@@ -72,7 +72,7 @@ void lsdj_clear_instrument_as_pulse(lsdj_instrument_t* instrument)
     instrument->pulse.fineTune = 0;
 }
 
-void lsdj_clear_instrument_as_wave(lsdj_instrument_t* instrument)
+void lsdj_instrument_clear_as_wave(lsdj_instrument_t* instrument)
 {
     instrument->type = INSTR_WAVE;
     instrument->volume = 3;
@@ -92,7 +92,7 @@ void lsdj_clear_instrument_as_wave(lsdj_instrument_t* instrument)
     instrument->wave.speed = 4;
 }
 
-void lsdj_clear_instrument_as_kit(lsdj_instrument_t* instrument)
+void lsdj_instrument_clear_as_kit(lsdj_instrument_t* instrument)
 {
     instrument->type = INSTR_KIT;
     instrument->volume = 3;
@@ -117,7 +117,7 @@ void lsdj_clear_instrument_as_kit(lsdj_instrument_t* instrument)
     instrument->kit.vibShape = LSDJ_VIB_TRIANGLE;
 }
 
-void lsdj_clear_instrument_as_noise(lsdj_instrument_t* instrument)
+void lsdj_instrument_clear_as_noise(lsdj_instrument_t* instrument)
 {
     instrument->type = INSTR_NOISE;
     instrument->envelope = 0xA8;
@@ -451,16 +451,16 @@ void read_noise_instrument(lsdj_vio_t* vio, lsdj_instrument_t* instrument, lsdj_
     vio->seek(8, SEEK_CUR, vio->user_data); // Bytes 8-15 are empty
 }
 
-void lsdj_read_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
+void lsdj_instrument_read(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
     if (vio->read == NULL)
-        return lsdj_create_error(error, "read is NULL");
+        return lsdj_error_new(error, "read is NULL");
     
     if (vio->seek == NULL)
-        return lsdj_create_error(error, "seek is NULL");
+        return lsdj_error_new(error, "seek is NULL");
     
     if (instrument == NULL)
-        return lsdj_create_error(error, "instrument is NULL");
+        return lsdj_error_new(error, "instrument is NULL");
     
     unsigned char type;
     vio->read(&type, 1, vio->user_data);
@@ -473,7 +473,7 @@ void lsdj_read_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrumen
         case 1: read_wave_instrument(vio, version, instrument, error); break;
         case 2: read_kit_instrument(vio, version, instrument, error); break;
         case 3: read_noise_instrument(vio, instrument, error); break;
-        default: return lsdj_create_error(error, "unknown instrument type");
+        default: return lsdj_error_new(error, "unknown instrument type");
     }
     
     assert(vio->tell(vio->user_data) - pos == 15);
@@ -756,13 +756,13 @@ void write_noise_instrument(const lsdj_instrument_t* instrument, lsdj_vio_t* vio
     vio->write(empty, sizeof(empty), vio->user_data); // Bytes 8-15 are empty
 }
 
-void lsdj_write_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_t* vio, lsdj_error_t** error)
+void lsdj_instrument_write(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     if (vio->write == NULL)
-        return lsdj_create_error(error, "write is NULL");
+        return lsdj_error_new(error, "write is NULL");
     
     if (instrument == NULL)
-        return lsdj_create_error(error, "instrument is NULL");
+        return lsdj_error_new(error, "instrument is NULL");
     
     const long pos = vio->tell(vio->user_data);
     

@@ -61,14 +61,14 @@ lsdj_project_t* alloc_project(lsdj_error_t** error)
     lsdj_project_t* project = (lsdj_project_t*)calloc(sizeof(lsdj_project_t), 1);
     if (project == NULL)
     {
-        lsdj_create_error(error, "could not allocate project");
+        lsdj_error_new(error, "could not allocate project");
         return NULL;
     }
     
     return project;
 }
 
-lsdj_project_t* lsdj_new_project(lsdj_error_t** error)
+lsdj_project_t* lsdj_project_new(lsdj_error_t** error)
 {
     lsdj_project_t* project = alloc_project(error);
     if (project == NULL)
@@ -81,26 +81,26 @@ lsdj_project_t* lsdj_new_project(lsdj_error_t** error)
     return project;
 }
 
-void lsdj_free_project(lsdj_project_t* project)
+void lsdj_project_free(lsdj_project_t* project)
 {
     free(project);
 }
 
-lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
+lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
 {
     lsdj_project_t* project = alloc_project(error);
     
     if (vio->read(project->name, PROJECT_NAME_LENGTH, vio->user_data) != PROJECT_NAME_LENGTH)
     {
-        lsdj_create_error(error, "could not read project name");
-        lsdj_free_project(project);
+        lsdj_error_new(error, "could not read project name");
+        lsdj_project_free(project);
         return NULL;
     }
     
     if (vio->read(&project->version, 1, vio->user_data) != 1)
     {
-        lsdj_create_error(error, "could not read project version");
-        lsdj_free_project(project);
+        lsdj_error_new(error, "could not read project version");
+        lsdj_project_free(project);
         return NULL;
     }
 
@@ -124,16 +124,16 @@ lsdj_project_t* lsdj_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     
     // Read in the song
     if (project->song == NULL)
-        project->song = lsdj_read_song_from_memory(decompressed, sizeof(decompressed), error);
+        project->song = lsdj_song_read_from_memory(decompressed, sizeof(decompressed), error);
     
     return project;
 }
 
-lsdj_project_t* lsdj_read_lsdsng_from_file(const char* path, lsdj_error_t** error)
+lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error)
 {
     if (path == NULL)
     {
-        lsdj_create_error(error, "path is NULL");
+        lsdj_error_new(error, "path is NULL");
         return NULL;
     }
     
@@ -142,7 +142,7 @@ lsdj_project_t* lsdj_read_lsdsng_from_file(const char* path, lsdj_error_t** erro
     {
         char message[512];
         snprintf(message, 512, "could not open %s for reading", path);
-        lsdj_create_error(error, message);
+        lsdj_error_new(error, message);
         return NULL;
     }
     
@@ -152,18 +152,18 @@ lsdj_project_t* lsdj_read_lsdsng_from_file(const char* path, lsdj_error_t** erro
     vio.seek = lsdj_fseek;
     vio.user_data = file;
     
-    lsdj_project_t* project = lsdj_read_lsdsng(&vio, error);
+    lsdj_project_t* project = lsdj_project_read_lsdsng(&vio, error);
     
     fclose(file);
     
     return project;
 }
 
-lsdj_project_t* lsdj_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
 {
     if (data == NULL)
     {
-        lsdj_create_error(error, "data is NULL");
+        lsdj_error_new(error, "data is NULL");
         return NULL;
     }
     
@@ -178,24 +178,24 @@ lsdj_project_t* lsdj_read_lsdsng_from_memory(const unsigned char* data, size_t s
     vio.seek = lsdj_mseek;
     vio.user_data = &mem;
     
-    return lsdj_read_lsdsng(&vio, error);
+    return lsdj_project_read_lsdsng(&vio, error);
 }
 
-void lsdj_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error)
+void lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     if (project->song == NULL)
-        return lsdj_create_error(error, "project does not contain a song");
+        return lsdj_error_new(error, "project does not contain a song");
     
     if (vio->write(project->name, PROJECT_NAME_LENGTH, vio->user_data) != PROJECT_NAME_LENGTH)
-        return lsdj_create_error(error, "could not write project name for lsdsng");
+        return lsdj_error_new(error, "could not write project name for lsdsng");
     
     if (vio->write(&project->version, 1, vio->user_data) != 1)
-        return lsdj_create_error(error, "could not write project version for lsdsng");
+        return lsdj_error_new(error, "could not write project version for lsdsng");
     
     // Write the song to memory
     unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
     memset(decompressed, 0x34, SONG_DECOMPRESSED_SIZE);
-    lsdj_write_song_to_memory(project->song, decompressed, SONG_DECOMPRESSED_SIZE, error);
+    lsdj_song_write_to_memory(project->song, decompressed, SONG_DECOMPRESSED_SIZE, error);
     if (error && *error)
         return;
     
@@ -203,20 +203,20 @@ void lsdj_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_erro
     lsdj_compress(decompressed, BLOCK_SIZE, 1, BLOCK_COUNT, vio, error);
 }
 
-void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error)
+void lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error)
 {
     if (path == NULL)
-        return lsdj_create_error(error, "path is NULL");
+        return lsdj_error_new(error, "path is NULL");
     
     if (project == NULL)
-        return lsdj_create_error(error, "project is NULL");
+        return lsdj_error_new(error, "project is NULL");
     
     FILE* file = fopen(path, "wb");
     if (file == NULL)
     {
         char message[512];
         snprintf(message, 512, "could not open %s for writing", path);
-        return lsdj_create_error(error, message);
+        return lsdj_error_new(error, message);
     }
     
     lsdj_vio_t vio;
@@ -225,18 +225,18 @@ void lsdj_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, 
     vio.seek = lsdj_fseek;
     vio.user_data = file;
     
-    lsdj_write_lsdsng(project, &vio, error);
+    lsdj_project_write_lsdsng(project, &vio, error);
     
     fclose(file);
 }
 
-void lsdj_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t size, lsdj_error_t** error)
+void lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t size, lsdj_error_t** error)
 {
     if (project == NULL)
-        return lsdj_create_error(error, "project is NULL");
+        return lsdj_error_new(error, "project is NULL");
     
     if (data == NULL)
-        return lsdj_create_error(error, "data is NULL");
+        return lsdj_error_new(error, "data is NULL");
     
     lsdj_memory_data_t mem;
     mem.begin = data;
@@ -249,7 +249,7 @@ void lsdj_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* d
     vio.seek = lsdj_mseek;
     vio.user_data = &mem;
     
-    lsdj_write_lsdsng(project, &vio, error);
+    lsdj_project_write_lsdsng(project, &vio, error);
 }
 
 void lsdj_clear_project(lsdj_project_t* project)
@@ -259,7 +259,7 @@ void lsdj_clear_project(lsdj_project_t* project)
     
     if (project->song)
     {
-        lsdj_free_song(project->song);
+        lsdj_song_free(project->song);
         project->song = NULL;
     }
 }
@@ -290,7 +290,7 @@ unsigned char lsdj_project_get_version(const lsdj_project_t* project)
 void lsdj_project_set_song(lsdj_project_t* project, lsdj_song_t* song)
 {
     if (project->song)
-        lsdj_free_song(project->song);
+        lsdj_song_free(project->song);
     
     project->song = song;
 }

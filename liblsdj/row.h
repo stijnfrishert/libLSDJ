@@ -48,6 +48,6 @@ typedef struct
 } lsdj_row_t;
     
 // Clear all row data to factory settings
-void lsdj_clear_row(lsdj_row_t* row);
+void lsdj_row_clear(lsdj_row_t* row);
 
 #endif

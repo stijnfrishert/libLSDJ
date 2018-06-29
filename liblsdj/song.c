@@ -140,21 +140,21 @@ struct lsdj_song_t
     unsigned char reserved7ff2[13];
 };
 
-lsdj_song_t* alloc_song(lsdj_error_t** error)
+lsdj_song_t* lsdj_song_alloc(lsdj_error_t** error)
 {
     lsdj_song_t* song = (lsdj_song_t*)calloc(sizeof(lsdj_song_t), 1);
     if (song == NULL)
     {
-        lsdj_create_error(error, "could not allocate song");
+        lsdj_error_new(error, "could not allocate song");
         return NULL;
     }
     
     return song;
 }
 
-lsdj_song_t* lsdj_new_song(lsdj_error_t** error)
+lsdj_song_t* lsdj_song_new(lsdj_error_t** error)
 {
-    lsdj_song_t* song = alloc_song(error);
+    lsdj_song_t* song = lsdj_song_alloc(error);
     if (song == NULL)
         return NULL;
     
@@ -164,7 +164,7 @@ lsdj_song_t* lsdj_new_song(lsdj_error_t** error)
     song->drumMax = 0x6C;
     
     for (int i = 0; i < ROW_COUNT; ++i)
-        lsdj_clear_row(&song->rows[i]);
+        lsdj_row_clear(&song->rows[i]);
     
     memset(song->chains, 0, sizeof(song->chains));
     memset(song->phrases, 0, sizeof(song->phrases));
@@ -172,15 +172,15 @@ lsdj_song_t* lsdj_new_song(lsdj_error_t** error)
     memset(song->synths, 0, sizeof(song->synths));
     
     for (int i = 0; i < WAVE_COUNT; ++i)
-        lsdj_clear_wave(&song->waves[i]);
+        lsdj_wave_clear(&song->waves[i]);
     
     memset(song->tables, 0, sizeof(song->tables));
     
     for (int i = 0; i < GROOVE_COUNT; ++i)
-        lsdj_clear_groove(&song->grooves[i]);
+        lsdj_groove_clear(&song->grooves[i]);
     
     for (int i = 0; i < WORD_COUNT; ++i)
-        lsdj_clear_word(&song->words[i]);
+        lsdj_word_clear(&song->words[i]);
     
     memcpy(song->wordNames, DEFAULT_WORD_NAMES, sizeof(song->wordNames));
     memset(song->bookmarks, 0xFF, sizeof(song->bookmarks));
@@ -204,9 +204,9 @@ lsdj_song_t* lsdj_new_song(lsdj_error_t** error)
     return song;
 }
 
-lsdj_song_t* lsdj_copy_song(const lsdj_song_t* rhs, lsdj_error_t** error)
+lsdj_song_t* lsdj_song_copy(const lsdj_song_t* rhs, lsdj_error_t** error)
 {
-    lsdj_song_t* song = lsdj_new_song(error);
+    lsdj_song_t* song = lsdj_song_new(error);
     if (*error)
         return NULL;
     
@@ -220,19 +220,19 @@ lsdj_song_t* lsdj_copy_song(const lsdj_song_t* rhs, lsdj_error_t** error)
     for (int i = 0; i < CHAIN_COUNT; ++i)
     {
         if (rhs->chains[i])
-            song->chains[i] = lsdj_copy_chain(rhs->chains[i]);
+            song->chains[i] = lsdj_chain_copy(rhs->chains[i]);
     }
     
     for (int i = 0; i < PHRASE_COUNT; ++i)
     {
         if (rhs->phrases[i])
-            song->phrases[i] = lsdj_copy_phrase(rhs->phrases[i]);
+            song->phrases[i] = lsdj_phrase_copy(rhs->phrases[i]);
     }
     
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (rhs->instruments[i])
-            song->instruments[i] = lsdj_copy_instrument(rhs->instruments[i]);
+            song->instruments[i] = lsdj_instrument_copy(rhs->instruments[i]);
     }
     
     memcpy(song->synths, rhs->synths, sizeof(rhs->synths));
@@ -264,7 +264,7 @@ lsdj_song_t* lsdj_copy_song(const lsdj_song_t* rhs, lsdj_error_t** error)
     return song;
 }
 
-void lsdj_free_song(lsdj_song_t* song)
+void lsdj_song_free(lsdj_song_t* song)
 {
     if (song == NULL)
         return;
@@ -439,7 +439,7 @@ void read_bank1(lsdj_vio_t* vio, lsdj_song_t* song, lsdj_error_t** error)
     for (int i = 0; i < INSTRUMENT_COUNT; ++i)
     {
         if (song->instruments[i])
-            lsdj_read_instrument(vio, song->formatVersion, song->instruments[i], error);
+            lsdj_instrument_read(vio, song->formatVersion, song->instruments[i], error);
         else
             vio->seek(16, SEEK_CUR, vio->user_data);
         
@@ -610,7 +610,7 @@ void write_bank1(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error)
     {
         if (song->instruments[i])
         {
-            lsdj_write_instrument(song->instruments[i], song->formatVersion, vio, error);
+            lsdj_instrument_write(song->instruments[i], song->formatVersion, vio, error);
         } else {
             vio->write(DEFAULT_INSTRUMENT, sizeof(DEFAULT_INSTRUMENT), vio->user_data);
         }
@@ -816,36 +816,36 @@ int check_rb(lsdj_vio_t* vio, long position)
     return (data[0] == 'r' && data[1] == 'b') ? 0 : 1;
 }
 
-lsdj_song_t* lsdj_read_song(lsdj_vio_t* vio, lsdj_error_t** error)
+lsdj_song_t* lsdj_song_read(lsdj_vio_t* vio, lsdj_error_t** error)
 {
     // Check for incorrect input
     if (vio->read == NULL)
     {
-        lsdj_create_error(error, "read is NULL");
+        lsdj_error_new(error, "read is NULL");
         return NULL;
     }
     
     if (vio->tell == NULL)
     {
-        lsdj_create_error(error, "tell is NULL");
+        lsdj_error_new(error, "tell is NULL");
         return NULL;
     }
     
     if (vio->seek == NULL)
     {
-        lsdj_create_error(error, "seek is NULL");
+        lsdj_error_new(error, "seek is NULL");
         return NULL;
     }
     
     const long begin = vio->tell(vio->user_data);
     
     // Check if the 'rb' flags have been set correctly
-    if (check_rb(vio, begin + 0x1E78) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x1E78"); return NULL; }
-    if (check_rb(vio, begin + 0x3E80) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x3E80"); return NULL; }
-    if (check_rb(vio, begin + 0x7FF0) != 0) { lsdj_create_error(error, "memory flag 'rb' not found at 0x7FF0"); return NULL; }
+    if (check_rb(vio, begin + 0x1E78) != 0) { lsdj_error_new(error, "memory flag 'rb' not found at 0x1E78"); return NULL; }
+    if (check_rb(vio, begin + 0x3E80) != 0) { lsdj_error_new(error, "memory flag 'rb' not found at 0x3E80"); return NULL; }
+    if (check_rb(vio, begin + 0x7FF0) != 0) { lsdj_error_new(error, "memory flag 'rb' not found at 0x7FF0"); return NULL; }
     
     // We passed the 'rb' check, and can create a song now for reading
-    lsdj_song_t* song = alloc_song(error);
+    lsdj_song_t* song = lsdj_song_alloc(error);
     if (error && *error)
         return NULL;
     
@@ -897,7 +897,7 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_t* vio, lsdj_error_t** error)
     read_bank1(vio, song, error);
     if (error && *error)
     {
-        lsdj_free_song(song);
+        lsdj_song_free(song);
         return NULL;
     }
     
@@ -907,11 +907,11 @@ lsdj_song_t* lsdj_read_song(lsdj_vio_t* vio, lsdj_error_t** error)
     return song;
 }
 
-lsdj_song_t* lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+lsdj_song_t* lsdj_song_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
 {
     if (data == NULL)
     {
-        lsdj_create_error(error, "data is NULL");
+        lsdj_error_new(error, "data is NULL");
         return NULL;
     }
     
@@ -925,10 +925,10 @@ lsdj_song_t* lsdj_read_song_from_memory(const unsigned char* data, size_t size, 
     vio.tell = lsdj_mtell;
     vio.user_data = &mem;
     
-    return lsdj_read_song(&vio, error);
+    return lsdj_song_read(&vio, error);
 }
 
-void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error)
+void lsdj_song_write(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     write_bank0(song, vio);
     write_bank1(song, vio, error);
@@ -936,16 +936,16 @@ void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** er
     write_bank3(song, vio);
 }
 
-void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error)
+void lsdj_song_write_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error)
 {
     if (song == NULL)
-        return lsdj_create_error(error, "song is NULL");
+        return lsdj_error_new(error, "song is NULL");
     
     if (data == NULL)
-        return lsdj_create_error(error, "data is NULL");
+        return lsdj_error_new(error, "data is NULL");
     
     if (size < SONG_DECOMPRESSED_SIZE)
-        return lsdj_create_error(error, "memory is not big enough to store song");
+        return lsdj_error_new(error, "memory is not big enough to store song");
     
     lsdj_memory_data_t mem;
     mem.begin = data;
@@ -958,7 +958,7 @@ void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, siz
     vio.tell = lsdj_mtell;
     vio.user_data = &mem;
     
-    lsdj_write_song(song, &vio, error);
+    lsdj_song_write(song, &vio, error);
 }
 
 void lsdj_song_set_format_version(lsdj_song_t* song, unsigned char version)

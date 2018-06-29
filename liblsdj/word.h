@@ -50,6 +50,6 @@ typedef struct
 } lsdj_word_t;
     
 // Clear all word data to factory settings
-void lsdj_clear_word(lsdj_word_t* word);
+void lsdj_word_clear(lsdj_word_t* word);
 
 #endif

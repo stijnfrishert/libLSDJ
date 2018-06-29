@@ -47,8 +47,8 @@ bool verbose = false;
 
 int handle_error(lsdj_error_t* error)
 {
-    std::cerr << "ERROR: " << lsdj_get_error_c_str(error) << std::endl;
-    lsdj_free_error(error);
+    std::cerr << "ERROR: " << lsdj_error_get_c_str(error) << std::endl;
+    lsdj_error_free(error);
     return 1;
 }
 
@@ -65,7 +65,7 @@ bool isHiddenFile(const std::string& str)
 int importSongs(const std::vector<std::string>& inputs, std::string outputFile, const char* savName)
 {
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = savName ? lsdj_read_sav_from_file(boost::filesystem::absolute(savName).string().c_str(), &error) : lsdj_new_sav(&error);
+    lsdj_sav_t* sav = savName ? lsdj_sav_read_from_file(boost::filesystem::absolute(savName).string().c_str(), &error) : lsdj_sav_new(&error);
     if (error)
         return handle_error(error);
     
@@ -118,18 +118,18 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         if (index == lsdj_sav_get_project_count(sav))
             break;
         
-        lsdj_project_t* project = lsdj_read_lsdsng_from_file(paths[i].string().c_str(), &error);
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(paths[i].string().c_str(), &error);
         if (error)
         {
-            lsdj_free_sav(sav);
+            lsdj_sav_free(sav);
             return handle_error(error);
         }
         
         lsdj_sav_set_project(sav, index, project, &error);
         if (error)
         {
-            lsdj_free_project(project);
-            lsdj_free_sav(sav);
+            lsdj_project_free(project);
+            lsdj_sav_free(sav);
             return handle_error(error);
         }
         
@@ -145,11 +145,11 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         
         if (i == 0 && active == NO_ACTIVE_PROJECT)
         {
-            lsdj_set_working_memory_song_from_project(sav, i, &error);
+            lsdj_sav_set_working_memory_song_from_project(sav, i, &error);
             if (error)
             {
-                lsdj_free_project(project);
-                lsdj_free_sav(sav);
+                lsdj_project_free(project);
+                lsdj_sav_free(sav);
                 return handle_error(error);
             }
         }
@@ -160,10 +160,10 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
     if (outputFile.empty())
         outputFile = "out.sav";
         
-    lsdj_write_sav_to_file(sav, boost::filesystem::absolute(outputFile).string().c_str(), &error);
+    lsdj_sav_write_to_file(sav, boost::filesystem::absolute(outputFile).string().c_str(), &error);
     if (error)
     {
-        lsdj_free_sav(sav);
+        lsdj_sav_free(sav);
         return handle_error(error);
     }
     

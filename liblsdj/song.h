@@ -58,17 +58,17 @@ static const unsigned char CLONE_SLIM = 1;
 typedef struct lsdj_song_t lsdj_song_t;
 
 // Create/free projects
-lsdj_song_t* lsdj_new_song(lsdj_error_t** error);
-lsdj_song_t* lsdj_copy_song(const lsdj_song_t* song, lsdj_error_t** error);
-void lsdj_free_song(lsdj_song_t* song);
+lsdj_song_t* lsdj_song_new(lsdj_error_t** error);
+lsdj_song_t* lsdj_song_copy(const lsdj_song_t* song, lsdj_error_t** error);
+void lsdj_song_free(lsdj_song_t* song);
 
 // Deserialize a song
-lsdj_song_t* lsdj_read_song(lsdj_vio_t* vio, lsdj_error_t** error);
-lsdj_song_t* lsdj_read_song_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+lsdj_song_t* lsdj_song_read(lsdj_vio_t* vio, lsdj_error_t** error);
+lsdj_song_t* lsdj_song_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
 // Serialize a song
-void lsdj_write_song(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error);
-void lsdj_write_song_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error);
+void lsdj_song_write(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error);
+void lsdj_song_write_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error);
 
 // Change data in a song
 void lsdj_song_set_format_version(lsdj_song_t* song, unsigned char version);

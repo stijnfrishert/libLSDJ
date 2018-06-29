@@ -40,14 +40,14 @@
 typedef struct lsdj_error_t lsdj_error_t;
     
 // Create an error with a given message
-/*! Every call to lsdj_create_error() should be paired with one to lsdj_free_error() */
-void lsdj_create_error(lsdj_error_t** error, const char* message);
+/*! Every call to lsdj_error_new() should be paired with one to lsdj_error_free() */
+void lsdj_error_new(lsdj_error_t** error, const char* message);
     
 // Free error data returned from an lsdj function call
-/*! Every call to lsdj_create_error() should be paired with one to lsdj_free_error() */
-void lsdj_free_error(lsdj_error_t* error);
+/*! Every call to lsdj_error_new() should be paired with one to lsdj_error_free() */
+void lsdj_error_free(lsdj_error_t* error);
     
 // Retrieve a string description of an error
-const char* lsdj_get_error_c_str(lsdj_error_t* error);
+const char* lsdj_error_get_c_str(lsdj_error_t* error);
 
 #endif
