@@ -98,7 +98,7 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
             for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
             {
                 const auto path = it->path();
-                if (isHiddenFile(path.filename().string()) || !boost::filesystem::is_regular_file(path))
+                if (isHiddenFile(path.filename().string()) || !boost::filesystem::is_regular_file(path) || path.extension() != ".lsdsng")
                     continue;
 
                 contents.emplace_back(path);
