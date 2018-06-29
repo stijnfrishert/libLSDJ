@@ -39,11 +39,44 @@
 
 #include "instrument.h"
 
+// Structure representing one instrument
+typedef struct lsdj_instrument_t
+{
+    char name[INSTRUMENT_NAME_LENGTH];
+    
+    instrument_type type;
+    
+    union { unsigned char envelope; unsigned char volume; };
+    lsdj_panning panning;
+    unsigned char table; // 0x20 or higher = NO_TABLE
+    unsigned char automate;
+    
+    union
+    {
+        lsdj_instrument_pulse_t pulse;
+        lsdj_instrument_wave_t wave;
+        lsdj_instrument_kit_t kit;
+        lsdj_instrument_noise_t noise;
+    };
+} lsdj_instrument_t;
+
+lsdj_instrument_t* lsdj_instrument_new()
+{
+    lsdj_instrument_t* instrument = malloc(sizeof(lsdj_instrument_t));
+    lsdj_instrument_clear(instrument);
+    return instrument;
+}
+
 lsdj_instrument_t* lsdj_instrument_copy(const lsdj_instrument_t* instrument)
 {
     lsdj_instrument_t* newInstrument = malloc(sizeof(lsdj_instrument_t));
     memcpy(newInstrument, instrument, sizeof(lsdj_instrument_t));
     return newInstrument;
+}
+
+void lsdj_instrument_free(lsdj_instrument_t* instrument)
+{
+    free(instrument);
 }
 
 void lsdj_instrument_clear(lsdj_instrument_t* instrument)
@@ -775,4 +808,27 @@ void lsdj_instrument_write(const lsdj_instrument_t* instrument, unsigned char ve
     }
     
     assert(vio->tell(vio->user_data) - pos == 16);
+}
+
+void lsdj_instrument_set_name(lsdj_instrument_t* instrument, const char* data, size_t size)
+{
+    strncpy(instrument->name, data, size < INSTRUMENT_NAME_LENGTH ? size : INSTRUMENT_NAME_LENGTH);
+}
+
+void lsdj_instrument_get_name(const lsdj_instrument_t* instrument, char* data, size_t size)
+{
+    const size_t len = strnlen(instrument->name, INSTRUMENT_NAME_LENGTH);
+    strncpy(data, instrument->name, len);
+    if (len < size)
+        data[len] = '\0';
+}
+
+void lsdj_instrument_set_panning(lsdj_instrument_t* instrument, lsdj_panning panning)
+{
+    instrument->panning = panning;
+}
+
+lsdj_panning lsdj_instrument_get_panning(const lsdj_instrument_t* instrument)
+{
+    return instrument->panning;
 }

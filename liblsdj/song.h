@@ -36,6 +36,7 @@
 #ifndef LSDJ_SONG_H
 #define LSDJ_SONG_H
 
+#include "instrument.h"
 #include "table.h"
 #include "vio.h"
 
@@ -81,6 +82,7 @@ unsigned char lsdj_song_get_file_changed_flag(const lsdj_song_t* song);
 void lsdj_song_set_drum_max(lsdj_song_t* song, unsigned char drumMax);
 unsigned char lsdj_song_get_drum_max(const lsdj_song_t* song);
 
+lsdj_instrument_t* lsdj_song_get_instrument(lsdj_song_t* song, size_t index);
 lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index);
 
 #endif
