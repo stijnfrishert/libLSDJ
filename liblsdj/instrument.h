@@ -41,6 +41,7 @@
 #include "instrument_noise.h"
 #include "instrument_pulse.h"
 #include "instrument_wave.h"
+#include "panning.h"
 #include "vio.h"
 
 // The default constant length of an instrument name
@@ -56,12 +57,6 @@ typedef enum
     INSTR_KIT,
     INSTR_NOISE
 } instrument_type;
-
-typedef unsigned char lsdj_panning;
-static const lsdj_panning LSDJ_PAN_NONE = 0;
-static const lsdj_panning LSDJ_PAN_RIGHT = 1;
-static const lsdj_panning LSDJ_PAN_LEFT = 2;
-static const lsdj_panning LSDJ_PAN_LEFT_RIGHT = 3;
 
 static const unsigned char NO_TABLE = 0x20;
 static const unsigned char UNLIMITED_LENGTH = 0x40;

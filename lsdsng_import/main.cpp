@@ -57,7 +57,7 @@ bool isHiddenFile(const std::string& str)
     switch (str.size())
     {
         case 0: return true;
-        case 1: return str.front() == '.';
+        case 1: return false;
         default: return str[0] == '.' && str[1] != '.' && str[1] != '/';
     }
 }
