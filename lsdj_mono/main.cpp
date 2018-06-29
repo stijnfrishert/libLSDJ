@@ -41,7 +41,6 @@
 #include "../liblsdj/sav.h"
 
 bool verbose = false;
-bool leaveCommands = false;
 bool convertInstruments = false;
 bool convertTables = false;
 bool convertPhrases = false;
@@ -77,15 +76,7 @@ void convertCommand(lsdj_command_t* command)
 {
     if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
     {
-        if (leaveCommands)
-        {
-            command->value = LSDJ_PAN_LEFT_RIGHT;
-        }
-        else
-        {
-            command->command = 0;
-            command->value = 0;
-        }
+        command->value = LSDJ_PAN_LEFT_RIGHT;
     }
 }
 
@@ -264,7 +255,6 @@ int main(int argc, char* argv[])
         ("help,h", "Help screen")
         ("file", boost::program_options::value<std::vector<std::string>>(), ".sav or .lsdng file(s), 0 or more")
         ("verbose,v", "Verbose output during import")
-        ("command,c", "Leave O commands as OLR")
         ("instrument,i", "Only adjust instruments")
         ("table,t", "Only adjust tables")
         ("phrase,p", "Only adjust phrases");
@@ -287,7 +277,6 @@ int main(int argc, char* argv[])
             return 0;
         } else if (vm.count("file")) {
             verbose = vm.count("verbose");
-            leaveCommands = vm.count("command");
             convertInstruments = vm.count("instrument");
             convertPhrases = vm.count("phrase");
             convertTables = vm.count("table");
