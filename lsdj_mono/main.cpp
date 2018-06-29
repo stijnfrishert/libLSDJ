@@ -42,6 +42,9 @@
 
 bool verbose = false;
 bool leaveCommands = false;
+bool convertInstruments = false;
+bool convertTables = false;
+bool convertPhrases = false;
 
 boost::filesystem::path addMonoSuffix(const boost::filesystem::path& path)
 {
@@ -109,14 +112,23 @@ void convertPhrase(lsdj_phrase_t* phrase)
 
 void convertSong(lsdj_song_t* song)
 {
-    for (int i = 0; i < LSDJ_INSTRUMENT_COUNT; ++i)
-        convertInstrument(lsdj_song_get_instrument(song, i));
+    if (convertInstruments)
+    {
+        for (int i = 0; i < LSDJ_INSTRUMENT_COUNT; ++i)
+            convertInstrument(lsdj_song_get_instrument(song, i));
+    }
     
-    for (int i = 0; i < LSDJ_TABLE_COUNT; ++i)
-        convertTable(lsdj_song_get_table(song, i));
+    if (convertTables)
+    {
+        for (int i = 0; i < LSDJ_TABLE_COUNT; ++i)
+            convertTable(lsdj_song_get_table(song, i));
+    }
     
-    for (int i = 0; i < LSDJ_PHRASE_COUNT; ++i)
-        convertPhrase(lsdj_song_get_phrase(song, i));
+    if (convertPhrases)
+    {
+        for (int i = 0; i < LSDJ_PHRASE_COUNT; ++i)
+            convertPhrase(lsdj_song_get_phrase(song, i));
+    }
 }
 
 int processSav(const boost::filesystem::path& path)
@@ -252,7 +264,10 @@ int main(int argc, char* argv[])
         ("help,h", "Help screen")
         ("file", boost::program_options::value<std::vector<std::string>>(), ".sav or .lsdng file(s), 0 or more")
         ("verbose,v", "Verbose output during import")
-        ("command,c", "Leave O commands as OLR");
+        ("command,c", "Leave O commands as OLR")
+        ("instrument,i", "Only adjust instruments")
+        ("table,t", "Only adjust tables")
+        ("phrase,p", "Only adjust phrases");
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", -1);
@@ -273,6 +288,11 @@ int main(int argc, char* argv[])
         } else if (vm.count("file")) {
             verbose = vm.count("verbose");
             leaveCommands = vm.count("command");
+            convertInstruments = vm.count("instrument");
+            convertPhrases = vm.count("phrase");
+            convertTables = vm.count("table");
+            if (!convertInstruments && !convertPhrases && !convertTables)
+                convertInstruments = convertPhrases = convertTables = true;
             
             return process(vm["file"].as<std::vector<std::string>>());
         } else {
