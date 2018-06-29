@@ -35,6 +35,18 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
       -s [ --sav ] arg               A sav file to append all .lsdsng's to
       -v [ --verbose ]               Verbose output during import
 
+## lsdj-mono
+
+*lsdj-mono* is a command-line tool that transforms any .sav, .lsdsngs or folder containing such files to mono. In essence, it changes all `OL_` and `O_R` commands to `OLR` (leaving `O__` untouched), and sets all instruments to play `LR` as well.
+
+    Options:
+      -h [ --help ]         Help screen
+      --file arg            .sav or .lsdng file(s), 0 or more
+      -v [ --verbose ]      Verbose output during import
+      -i [ --instrument ]   Only adjust instruments
+      -t [ --table ]        Only adjust tables
+      -p [ --phrase ]       Only adjust phrases
+
 # System Requirements
 
 The nature of *liblsdj* as a C library makes it compilable on nearly all common OSes. Both tools included have been tested on macOS Sierra and Windows 7 and seem to be working. Precompiled binaries can be found here _(to-do)_.
