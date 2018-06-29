@@ -105,7 +105,7 @@ void convertSong(lsdj_song_t* song)
         convertPhrase(lsdj_song_get_phrase(song, i));
 }
 
-int processSav(boost::filesystem::path path)
+int processSav(const boost::filesystem::path& path)
 {
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);
@@ -142,7 +142,7 @@ int processSav(boost::filesystem::path path)
     return 0;
 }
 
-int processLsdsng(boost::filesystem::path path)
+int processLsdsng(const boost::filesystem::path& path)
 {
     lsdj_error_t* error = nullptr;
     lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.string().c_str(), &error);
@@ -170,25 +170,50 @@ int processLsdsng(boost::filesystem::path path)
     return 0;
 }
 
+int process(const boost::filesystem::path& path);
+
+int processDirectory(const boost::filesystem::path& path)
+{
+    for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
+    {
+        if (process(it->path()) != 0)
+            return 1;
+    }
+    
+    return 0;
+}
+
+int process(const boost::filesystem::path& path)
+{
+    if (isHiddenFile(path.filename().string()))
+        return 0;
+    
+    if (boost::filesystem::is_directory(path))
+    {
+        if (processDirectory(path) != 0)
+            return 1;
+    }
+    else if (path.extension() == ".sav")
+    {
+        if (processSav(path) != 0)
+            return 1;
+    }
+    else if (path.extension() == ".lsdsng")
+    {
+        if (processLsdsng(path) != 0)
+            return 1;
+    }
+    
+    return 0;
+}
+
 int process(const std::vector<std::string>& inputs)
 {
     for (auto& input : inputs)
     {
         const auto path = boost::filesystem::absolute(input);
-        if (isHiddenFile(path.filename().string()))
-            continue;
-        
-        const auto extension = path.extension();
-        if (path.extension() == ".sav")
-        {
-            if (processSav(path) != 0)
-                return 1;
-        }
-        else if (path.extension() == ".lsdsng")
-        {
-            if (processLsdsng(path) != 0)
-                return 1;
-        }
+        if (process(path) != 0)
+            return 1;
     }
     
     return 0;
