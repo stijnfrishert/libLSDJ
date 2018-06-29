@@ -52,7 +52,8 @@ typedef struct
     lsdj_plvib_speed plvibSpeed;
     lsdj_vib_shape vibShape;
     lsdj_vib_direction vibratoDirection;
-    lsdj_tuning_mode tuning;
+    char transpose;
+    char drumMode;
     unsigned char pulse2tune;
     unsigned char fineTune;
 } lsdj_instrument_pulse_t;

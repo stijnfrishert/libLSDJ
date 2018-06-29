@@ -66,7 +66,8 @@ void lsdj_clear_instrument_as_pulse(lsdj_instrument_t* instrument)
     instrument->pulse.plvibSpeed = LSDJ_PLVIB_FAST;
     instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
     instrument->pulse.vibratoDirection = LSDJ_VIB_UP;
-    instrument->pulse.tuning = LSDJ_TUNE_12_TONE;
+    instrument->pulse.transpose = 1;
+    instrument->pulse.drumMode = 0;
     instrument->pulse.pulse2tune = 0;
     instrument->pulse.fineTune = 0;
 }
@@ -82,7 +83,8 @@ void lsdj_clear_instrument_as_wave(lsdj_instrument_t* instrument)
     instrument->wave.plvibSpeed = LSDJ_PLVIB_FAST;
     instrument->wave.vibShape = LSDJ_VIB_TRIANGLE;
     instrument->wave.vibratoDirection = LSDJ_VIB_UP;
-    instrument->wave.tuning = LSDJ_TUNE_12_TONE;
+    instrument->wave.transpose = 1;
+    instrument->wave.drumMode = 0;
     instrument->wave.synth = 0;
     instrument->wave.playback = LSDJ_PLAY_ONCE;
     instrument->wave.length = 0x0F;
@@ -151,14 +153,20 @@ lsdj_panning parsePanning(unsigned char byte)
     return byte & 3;
 }
 
-lsdj_tuning_mode parseTuning(unsigned char byte, unsigned char version)
+char parseDrumMode(unsigned char byte, unsigned char version)
 {
     if (version < 3)
-        return LSDJ_TUNE_12_TONE;
-    else if (version == 3)
-        return (byte & 0x20) ? LSDJ_TUNE_FIXED : LSDJ_TUNE_12_TONE;
+        return 0;
     else
-        return (byte >> 5) & 0x3;
+        return (byte & 0x40) ? 1 : 0;
+}
+
+char parseTranspose(unsigned char byte, unsigned char version)
+{
+    if (version < 3)
+        return 0;
+    else
+        return (byte & 0x20) ? 0 : 1;
 }
 
 unsigned char parseAutomate(unsigned char byte)
@@ -204,7 +212,8 @@ void read_pulse_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrume
     
     // 5
     vio->read(&byte, 1, vio->user_data);
-    instrument->pulse.tuning = parseTuning(byte, version);
+    instrument->pulse.drumMode = parseDrumMode(byte, version);
+    instrument->pulse.transpose = parseTranspose(byte, version);
     instrument->automate = parseAutomate(byte);
     instrument->pulse.vibratoDirection = byte & 1;
     
@@ -270,7 +279,8 @@ void read_wave_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrumen
     vio->seek(2, SEEK_CUR, vio->user_data); // Bytes 3 and 4 are empty
     
     vio->read(&byte, 1, vio->user_data);
-    instrument->wave.tuning = parseTuning(byte, version);
+    instrument->wave.drumMode = parseDrumMode(byte, version);
+    instrument->wave.transpose = parseTranspose(byte, version);
     instrument->automate = parseAutomate(byte);
     instrument->wave.vibratoDirection = byte & 1;
     
@@ -500,14 +510,20 @@ unsigned char createAutomateByte(unsigned char automate)
     return (automate == 0) ? 0x0 : 0x8;
 }
 
-unsigned char createTuningByte(lsdj_tuning_mode tuning, unsigned char version)
+unsigned char createDrumModeByte(char drumMode, unsigned char version)
 {
     if (version < 3)
         return 0;
-    else if (version == 3)
-        return tuning == LSDJ_TUNE_FIXED ? 0x20 : 0;
     else
-        return (unsigned char)((tuning & 3) << 5);
+        return (drumMode == 1) ? 0x40 : 0x0;
+}
+
+unsigned char createTransposeByte(char transpose, unsigned char version)
+{
+    if (version < 3)
+        return 0;
+    else
+        return (transpose == 1) ? 0x0 : 0x20;
 }
 
 unsigned char createVibrationDirectionByte(lsdj_vib_direction dir)
@@ -546,8 +562,10 @@ void write_pulse_instrument(const lsdj_instrument_t* instrument, unsigned char v
     vio->write(&byte, 1, vio->user_data);
     vio->write(&instrument->pulse.sweep, 1, vio->user_data);
     
-    byte = createTuningByte(instrument->pulse.tuning, version);
-    byte |= createAutomateByte(instrument->automate) | createVibrationDirectionByte(instrument->pulse.vibratoDirection);
+    byte = createDrumModeByte(instrument->pulse.drumMode, version);
+    byte |= createTransposeByte(instrument->pulse.transpose, version);
+    byte |= createAutomateByte(instrument->automate);
+    byte |= createVibrationDirectionByte(instrument->pulse.vibratoDirection);
     
     if (version < 4)
     {
@@ -602,8 +620,10 @@ void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char ve
     byte = 0xFF;
     vio->write(&byte, 1, vio->user_data);
     
-    byte = createTuningByte(instrument->wave.tuning, version);
-    byte |= createAutomateByte(instrument->automate) | createVibrationDirectionByte(instrument->wave.vibratoDirection);
+    byte = createDrumModeByte(instrument->wave.drumMode, version);
+    byte |= createTransposeByte(instrument->wave.transpose, version);
+    byte |= createAutomateByte(instrument->automate);
+    byte |= createVibrationDirectionByte(instrument->wave.vibratoDirection);
     if (version < 4)
     {
         switch (instrument->wave.vibShape)

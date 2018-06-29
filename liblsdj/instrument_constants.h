@@ -50,9 +50,4 @@ typedef unsigned char lsdj_vib_direction;
 static const lsdj_vib_direction LSDJ_VIB_UP = 0;
 static const lsdj_vib_direction LSDJ_VIB_DOWN = 1;
 
-typedef unsigned char lsdj_tuning_mode;
-static const lsdj_tuning_mode LSDJ_TUNE_12_TONE = 0;
-static const lsdj_tuning_mode LSDJ_TUNE_FIXED = 1;
-static const lsdj_tuning_mode LSDJ_TUNE_DRUM = 2;
-
 #endif
