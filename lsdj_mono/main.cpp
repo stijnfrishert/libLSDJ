@@ -42,6 +42,11 @@
 
 bool verbose = false;
 
+boost::filesystem::path addMonoSuffix(const boost::filesystem::path& path)
+{
+    return path.parent_path() / (path.stem().string() + ".MONO" + path.extension().string());
+}
+
 bool isHiddenFile(const std::string& str)
 {
     switch (str.size())
@@ -102,6 +107,38 @@ void convertSong(lsdj_song_t* song)
 
 int processSav(boost::filesystem::path path)
 {
+    lsdj_error_t* error = nullptr;
+    lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);
+    if (error != nullptr)
+    {
+        lsdj_sav_free(sav);
+        return 1;
+    }
+    
+    convertSong(lsdj_sav_get_working_memory_song(sav));
+    
+    for (int i = 0; i < lsdj_sav_get_project_count(sav); ++i)
+    {
+        lsdj_project_t* project = lsdj_sav_get_project(sav, i);
+        if (project == nullptr)
+            continue;
+        
+        lsdj_song_t* song = lsdj_project_get_song(project);
+        if (song == nullptr)
+            continue;
+        
+        convertSong(song);
+    }
+    
+    lsdj_sav_write_to_file(sav, addMonoSuffix(path).string().c_str(), &error);
+    if (error != nullptr)
+    {
+        lsdj_sav_free(sav);
+        return 1;
+    }
+    
+    lsdj_sav_free(sav);
+    
     return 0;
 }
 
@@ -121,7 +158,7 @@ int processLsdsng(boost::filesystem::path path)
     
     convertSong(song);
     
-    lsdj_project_write_lsdsng_to_file(project, (path.parent_path() / (path.stem().string() + ".MONO.lsdsng")).string().c_str(), &error);
+    lsdj_project_write_lsdsng_to_file(project, addMonoSuffix(path).string().c_str(), &error);
     if (error != nullptr)
     {
         lsdj_project_free(project);
