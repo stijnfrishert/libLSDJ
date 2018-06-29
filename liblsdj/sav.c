@@ -125,13 +125,13 @@ void lsdj_sav_free(lsdj_sav_t* sav)
     }
 }
 
-void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, lsdj_song_t* song)
+void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, lsdj_song_t* song, unsigned char activeProject)
 {
     if (sav->song)
         lsdj_song_free(sav->song);
     
     sav->song = song;
-    sav->activeProject = NO_ACTIVE_PROJECT;
+    sav->activeProject = activeProject;
 }
 
 lsdj_song_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav)
@@ -149,7 +149,11 @@ void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned cha
     if (*error)
         return;
     
-    lsdj_sav_set_working_memory_song(sav, copy);
+    lsdj_sav_set_working_memory_song(sav, copy, index);
+}
+
+void lsdj_sav_set_active_project(lsdj_sav_t* sav, unsigned char index)
+{
     sav->activeProject = index;
 }
 

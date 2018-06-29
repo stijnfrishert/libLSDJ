@@ -65,13 +65,16 @@ void lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t
     
 // Set the working memory song of a sav
 // The sav takes ownership of the given song, so make sure you copy it first if need be!
-void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, lsdj_song_t* song);
+void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, lsdj_song_t* song, unsigned char activeProject);
     
 // Retrieve the working memory song from a sav
 lsdj_song_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav);
     
 // Change the working memory song by copying from one of the projects
 void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
+    
+// Change which song is referenced by the working memory song
+void lsdj_sav_set_active_project(lsdj_sav_t* sav, unsigned char index);
     
 // Retrieve the index of the project the working memory song represents
 // If the working memory doesn't represent any project, this is NO_ACTIVE_PROJECT

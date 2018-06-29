@@ -82,6 +82,7 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         std::cout << "Read " << savName << ", containing " << std::to_string(index) << " saves" << std::endl;
     
     std::vector<boost::filesystem::path> paths;
+    boost::filesystem::path workingMemoryPath;
     for (auto& input : inputs)
     {
         const auto path = boost::filesystem::absolute(input);
@@ -100,6 +101,13 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
                 const auto path = it->path();
                 if (isHiddenFile(path.filename().string()) || !boost::filesystem::is_regular_file(path) || path.extension() != ".lsdsng")
                     continue;
+                
+                const auto str = path.stem().string();
+                if (str.size() >= 3 && str.substr(str.length() - 3) == ".WM")
+                {
+                    workingMemoryPath = path;
+                    continue;
+                }
 
                 contents.emplace_back(path);
             }
@@ -143,7 +151,7 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         if (verbose)
             std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
         
-        if (i == 0 && active == NO_ACTIVE_PROJECT)
+        if (i == 0 && active == NO_ACTIVE_PROJECT && workingMemoryPath.empty())
         {
             lsdj_sav_set_working_memory_song_from_project(sav, i, &error);
             if (error)
@@ -155,6 +163,41 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         }
         
         index += 1;
+    }
+    
+    if (!workingMemoryPath.empty())
+    {
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(workingMemoryPath.string().c_str(), &error);
+        if (error)
+        {
+            lsdj_project_free(project);
+            lsdj_sav_free(sav);
+            return handle_error(error);
+        }
+        
+        lsdj_song_t* song = lsdj_song_copy(lsdj_project_get_song(project), &error);
+        if (error)
+        {
+            lsdj_project_free(project);
+            lsdj_sav_free(sav);
+            return handle_error(error);
+        }
+        
+        int active = NO_ACTIVE_PROJECT;
+        const auto str = workingMemoryPath.stem().string();
+        const auto stem = str.substr(0, str.size() - 3);
+        for (int i = 0; i != paths.size(); ++i)
+        {
+            if (stem == paths[i].stem().string())
+            {
+                active = i;
+                break;
+            }
+        }
+        
+        lsdj_sav_set_working_memory_song(sav, song, active);
+        
+        lsdj_project_free(project);
     }
     
     if (outputFile.empty())
