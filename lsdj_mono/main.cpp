@@ -47,6 +47,12 @@ boost::filesystem::path addMonoSuffix(const boost::filesystem::path& path)
     return path.parent_path() / (path.stem().string() + ".MONO" + path.extension().string());
 }
 
+bool alreadyEndsWithMono(const boost::filesystem::path& path)
+{
+    const auto stem = path.stem().string();
+    return stem.size() >= 5 && stem.substr(stem.size() - 5) == ".MONO";
+}
+
 bool isHiddenFile(const std::string& str)
 {
     switch (str.size())
@@ -107,6 +113,9 @@ void convertSong(lsdj_song_t* song)
 
 int processSav(const boost::filesystem::path& path)
 {
+    if (alreadyEndsWithMono(path))
+        return 0;
+    
     lsdj_error_t* error = nullptr;
     lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);
     if (error != nullptr)
@@ -114,6 +123,9 @@ int processSav(const boost::filesystem::path& path)
         lsdj_sav_free(sav);
         return 1;
     }
+    
+    if (verbose)
+        std::cout << "Processing '" + path.string() + "'" << std::endl;
     
     convertSong(lsdj_sav_get_working_memory_song(sav));
     
@@ -144,6 +156,9 @@ int processSav(const boost::filesystem::path& path)
 
 int processLsdsng(const boost::filesystem::path& path)
 {
+    if (alreadyEndsWithMono(path))
+        return 0;
+    
     lsdj_error_t* error = nullptr;
     lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.string().c_str(), &error);
     if (error != nullptr)
@@ -151,6 +166,9 @@ int processLsdsng(const boost::filesystem::path& path)
         lsdj_project_free(project);
         return 1;
     }
+    
+    if (verbose)
+        std::cout << "Processing '" + path.string() + "'" << std::endl;
     
     lsdj_song_t* song = lsdj_project_get_song(project);
     if (song == nullptr)
