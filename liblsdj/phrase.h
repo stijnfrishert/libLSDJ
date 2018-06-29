@@ -39,18 +39,18 @@
 #include "command.h"
 
 // The default constant lenght of a phrase
-#define PHRASE_LENGTH 16
+#define LSDJ_PHRASE_LENGTH (16)
 
 typedef struct
 {
     // The notes in the phrase
-    unsigned char notes[PHRASE_LENGTH];
+    unsigned char notes[LSDJ_PHRASE_LENGTH];
     
     // The instruments the phrase uses for each row
-    unsigned char instruments[PHRASE_LENGTH];
+    unsigned char instruments[LSDJ_PHRASE_LENGTH];
     
     // The effect command column for a phrase
-    lsdj_command_t commands[PHRASE_LENGTH];
+    lsdj_command_t commands[LSDJ_PHRASE_LENGTH];
 } lsdj_phrase_t;
 
 // Copy a phrase

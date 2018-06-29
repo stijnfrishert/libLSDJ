@@ -42,13 +42,13 @@
 // Structure representing one instrument
 typedef struct lsdj_instrument_t
 {
-    char name[INSTRUMENT_NAME_LENGTH];
+    char name[LSDJ_INSTRUMENT_NAME_LENGTH];
     
     instrument_type type;
     
     union { unsigned char envelope; unsigned char volume; };
     lsdj_panning panning;
-    unsigned char table; // 0x20 or higher = NO_TABLE
+    unsigned char table; // 0x20 or higher = LSDJ_NO_TABLE
     unsigned char automate;
     
     union
@@ -81,20 +81,20 @@ void lsdj_instrument_free(lsdj_instrument_t* instrument)
 
 void lsdj_instrument_clear(lsdj_instrument_t* instrument)
 {
-    memset(instrument->name, 0, INSTRUMENT_NAME_LENGTH);
+    memset(instrument->name, 0, LSDJ_INSTRUMENT_NAME_LENGTH);
     lsdj_instrument_clear_as_pulse(instrument);
 }
 
 void lsdj_instrument_clear_as_pulse(lsdj_instrument_t* instrument)
 {
-    instrument->type = INSTR_PULSE;
+    instrument->type = LSDJ_INSTR_PULSE;
     instrument->envelope = 0xA8;
     instrument->panning = LSDJ_PAN_LEFT_RIGHT;
-    instrument->table = NO_TABLE;
+    instrument->table = LSDJ_NO_TABLE;
     instrument->automate = 0;
     
     instrument->pulse.pulseWidth = LSDJ_PULSE_WAVE_PW_125;
-    instrument->pulse.length = UNLIMITED_LENGTH;
+    instrument->pulse.length = LSDJ_INSTRUMENT_UNLIMITED_LENGTH;
     instrument->pulse.sweep = 0xFF;
     instrument->pulse.plvibSpeed = LSDJ_PLVIB_FAST;
     instrument->pulse.vibShape = LSDJ_VIB_TRIANGLE;
@@ -107,10 +107,10 @@ void lsdj_instrument_clear_as_pulse(lsdj_instrument_t* instrument)
 
 void lsdj_instrument_clear_as_wave(lsdj_instrument_t* instrument)
 {
-    instrument->type = INSTR_WAVE;
+    instrument->type = LSDJ_INSTR_WAVE;
     instrument->volume = 3;
     instrument->panning = LSDJ_PAN_LEFT_RIGHT;
-    instrument->table = NO_TABLE;
+    instrument->table = LSDJ_NO_TABLE;
     instrument->automate = 0;
     
     instrument->wave.plvibSpeed = LSDJ_PLVIB_FAST;
@@ -127,20 +127,20 @@ void lsdj_instrument_clear_as_wave(lsdj_instrument_t* instrument)
 
 void lsdj_instrument_clear_as_kit(lsdj_instrument_t* instrument)
 {
-    instrument->type = INSTR_KIT;
+    instrument->type = LSDJ_INSTR_KIT;
     instrument->volume = 3;
     instrument->panning = LSDJ_PAN_LEFT_RIGHT;
-    instrument->table = NO_TABLE;
+    instrument->table = LSDJ_NO_TABLE;
     instrument->automate = 0;
     
     instrument->kit.kit1 = 0;
     instrument->kit.offset1 = 0;
-    instrument->kit.length1 = KIT_LENGTH_AUTO;
+    instrument->kit.length1 = LSDJ_KIT_LENGTH_AUTO;
     instrument->kit.loop1 = LSDJ_KIT_LOOP_OFF;
     
     instrument->kit.kit2 = 0;
     instrument->kit.offset2 = 0;
-    instrument->kit.length2 = KIT_LENGTH_AUTO;
+    instrument->kit.length2 = LSDJ_KIT_LENGTH_AUTO;
     instrument->kit.loop2 = LSDJ_KIT_LOOP_OFF;
     
     instrument->kit.pitch = 0;
@@ -152,13 +152,13 @@ void lsdj_instrument_clear_as_kit(lsdj_instrument_t* instrument)
 
 void lsdj_instrument_clear_as_noise(lsdj_instrument_t* instrument)
 {
-    instrument->type = INSTR_NOISE;
+    instrument->type = LSDJ_INSTR_NOISE;
     instrument->envelope = 0xA8;
     instrument->panning = LSDJ_PAN_LEFT_RIGHT;
-    instrument->table = NO_TABLE;
+    instrument->table = LSDJ_NO_TABLE;
     instrument->automate = 0;
     
-    instrument->noise.length = UNLIMITED_LENGTH;
+    instrument->noise.length = LSDJ_INSTRUMENT_UNLIMITED_LENGTH;
     instrument->noise.shape = 0xFF;
     instrument->noise.sCommand = LSDJ_SCOMMAND_FREE;
 }
@@ -170,7 +170,7 @@ unsigned char parseLength(unsigned char byte)
     if (byte & 0x40)
         return (~byte) & 0x3F;
     else
-        return UNLIMITED_LENGTH;
+        return LSDJ_INSTRUMENT_UNLIMITED_LENGTH;
 }
 
 unsigned char parseTable(unsigned char byte)
@@ -178,7 +178,7 @@ unsigned char parseTable(unsigned char byte)
     if (byte & 0x20)
         return byte & 0x1F;
     else
-        return NO_TABLE;
+        return LSDJ_NO_TABLE;
 }
 
 lsdj_panning parsePanning(unsigned char byte)
@@ -229,7 +229,7 @@ lsdj_scommand_type parseScommand(unsigned char byte)
 
 void read_pulse_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
-    instrument->type = INSTR_PULSE; // 0
+    instrument->type = LSDJ_INSTR_PULSE; // 0
     
     vio->read(&instrument->envelope, 1, vio->user_data); // 1
     
@@ -302,7 +302,7 @@ void read_pulse_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrume
 
 void read_wave_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
-    instrument->type = INSTR_WAVE;
+    instrument->type = LSDJ_INSTR_WAVE;
     vio->read(&instrument->volume, 1, vio->user_data);
     
     unsigned char byte;
@@ -378,7 +378,7 @@ void read_wave_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrumen
 
 void read_kit_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
-    instrument->type = INSTR_KIT;
+    instrument->type = LSDJ_INSTR_KIT;
     vio->read(&instrument->volume, 1, vio->user_data);
     
     instrument->kit.loop1 = LSDJ_KIT_LOOP_OFF;
@@ -460,7 +460,7 @@ void read_kit_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrument
 
 void read_noise_instrument(lsdj_vio_t* vio, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
-    instrument->type = INSTR_NOISE;
+    instrument->type = LSDJ_INSTR_NOISE;
     vio->read(&instrument->envelope, 1, vio->user_data);
     
     unsigned char byte;
@@ -524,7 +524,7 @@ unsigned char createPanningByte(lsdj_panning pan)
 
 unsigned char createLengthByte(unsigned char length)
 {
-    if (length >= UNLIMITED_LENGTH)
+    if (length >= LSDJ_INSTRUMENT_UNLIMITED_LENGTH)
         return 0;
     else
         return (~length & 0x3F) | 0x40;
@@ -532,7 +532,7 @@ unsigned char createLengthByte(unsigned char length)
 
 unsigned char createTableByte(unsigned char table)
 {
-    if (table >= NO_TABLE)
+    if (table >= LSDJ_NO_TABLE)
         return 0;
     else
         return (table & 0x1F) | 0x20;
@@ -801,10 +801,10 @@ void lsdj_instrument_write(const lsdj_instrument_t* instrument, unsigned char ve
     
     switch (instrument->type)
     {
-        case INSTR_PULSE: write_pulse_instrument(instrument, version, vio); break;
-        case INSTR_WAVE: write_wave_instrument(instrument, version, vio); break;
-        case INSTR_KIT: write_kit_instrument(instrument, version, vio); break;
-        case INSTR_NOISE: write_noise_instrument(instrument, vio); break;
+        case LSDJ_INSTR_PULSE: write_pulse_instrument(instrument, version, vio); break;
+        case LSDJ_INSTR_WAVE: write_wave_instrument(instrument, version, vio); break;
+        case LSDJ_INSTR_KIT: write_kit_instrument(instrument, version, vio); break;
+        case LSDJ_INSTR_NOISE: write_noise_instrument(instrument, vio); break;
     }
     
     assert(vio->tell(vio->user_data) - pos == 16);
@@ -812,12 +812,12 @@ void lsdj_instrument_write(const lsdj_instrument_t* instrument, unsigned char ve
 
 void lsdj_instrument_set_name(lsdj_instrument_t* instrument, const char* data, size_t size)
 {
-    strncpy(instrument->name, data, size < INSTRUMENT_NAME_LENGTH ? size : INSTRUMENT_NAME_LENGTH);
+    strncpy(instrument->name, data, size < LSDJ_INSTRUMENT_NAME_LENGTH ? size : LSDJ_INSTRUMENT_NAME_LENGTH);
 }
 
 void lsdj_instrument_get_name(const lsdj_instrument_t* instrument, char* data, size_t size)
 {
-    const size_t len = strnlen(instrument->name, INSTRUMENT_NAME_LENGTH);
+    const size_t len = strnlen(instrument->name, LSDJ_INSTRUMENT_NAME_LENGTH);
     strncpy(data, instrument->name, len);
     if (len < size)
         data[len] = '\0';

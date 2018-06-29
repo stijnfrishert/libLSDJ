@@ -42,7 +42,7 @@
 #include "sav.h"
 
 #define LSDJ_SAV_PROJECT_COUNT 32
-#define HEADER_START SONG_DECOMPRESSED_SIZE
+#define HEADER_START LSDJ_SONG_DECOMPRESSED_SIZE
 #define BLOCK_COUNT 191
 #define BLOCK_SIZE 0x200
 
@@ -182,7 +182,7 @@ lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav,
     char name[9];
     memset(name, '\0', 9);
     unsigned char version = 0;
-    if (active != NO_ACTIVE_PROJECT)
+    if (active != LSDJ_NO_ACTIVE_PROJECT)
     {
         lsdj_project_t* oldProject = lsdj_sav_get_project(sav, active);
         lsdj_project_get_name(oldProject, name, 8);
@@ -235,7 +235,7 @@ void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_err
         if (lsdj_project_get_song(project) != NULL)
             continue;
         
-        unsigned char data[SONG_DECOMPRESSED_SIZE];
+        unsigned char data[LSDJ_SONG_DECOMPRESSED_SIZE];
         memset(data, 0x00, sizeof(data));
         
         vio->seek(HEADER_START + (i + 1) * BLOCK_SIZE, SEEK_SET, vio->user_data);
@@ -350,7 +350,7 @@ lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error)
     }
     
     vio->seek(begin, SEEK_SET, vio->user_data);
-    unsigned char song_data[SONG_DECOMPRESSED_SIZE];
+    unsigned char song_data[LSDJ_SONG_DECOMPRESSED_SIZE];
     if (vio->read(song_data, sizeof(song_data), vio->user_data) != sizeof(song_data))
     {
         lsdj_sav_free(sav);
@@ -426,8 +426,8 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, ls
 void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     // Write the working project
-    unsigned char song_data[SONG_DECOMPRESSED_SIZE];
-    lsdj_song_write_to_memory(sav->song, song_data, SONG_DECOMPRESSED_SIZE, error);
+    unsigned char song_data[LSDJ_SONG_DECOMPRESSED_SIZE];
+    lsdj_song_write_to_memory(sav->song, song_data, LSDJ_SONG_DECOMPRESSED_SIZE, error);
     if (vio->write(song_data, sizeof(song_data), vio->user_data) != sizeof(song_data))
         return lsdj_error_new(error, "could not write compressed song data");
 
@@ -454,9 +454,9 @@ void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
         lsdj_project_t* project = sav->projects[i];
         
         // Write project name
-        char name[PROJECT_NAME_LENGTH];
-        lsdj_project_get_name(project, name, PROJECT_NAME_LENGTH);
-        strncpy(&header.project_names[i * 8], name, PROJECT_NAME_LENGTH < 8 ? PROJECT_NAME_LENGTH : 8);
+        char name[LSDJ_PROJECT_NAME_LENGTH];
+        lsdj_project_get_name(project, name, LSDJ_PROJECT_NAME_LENGTH);
+        strncpy(&header.project_names[i * 8], name, LSDJ_PROJECT_NAME_LENGTH < 8 ? LSDJ_PROJECT_NAME_LENGTH : 8);
         
         // Write project version
         header.versions[i] = lsdj_project_get_version(project);
@@ -465,8 +465,8 @@ void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
         if (song)
         {
             // Compress the song to memory
-            unsigned char song_data[SONG_DECOMPRESSED_SIZE];
-            lsdj_song_write_to_memory(song, song_data, SONG_DECOMPRESSED_SIZE, error);
+            unsigned char song_data[LSDJ_SONG_DECOMPRESSED_SIZE];
+            lsdj_song_write_to_memory(song, song_data, LSDJ_SONG_DECOMPRESSED_SIZE, error);
             
             lsdj_memory_data_t mem;
             mem.cur = mem.begin = blocks[current_block - 1];

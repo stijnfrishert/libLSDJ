@@ -151,7 +151,7 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         if (verbose)
             std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
         
-        if (i == 0 && active == NO_ACTIVE_PROJECT && workingMemoryPath.empty())
+        if (i == 0 && active == LSDJ_NO_ACTIVE_PROJECT && workingMemoryPath.empty())
         {
             lsdj_sav_set_working_memory_song_from_project(sav, i, &error);
             if (error)
@@ -183,7 +183,7 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
             return handle_error(error);
         }
         
-        int active = NO_ACTIVE_PROJECT;
+        int active = LSDJ_NO_ACTIVE_PROJECT;
         const auto str = workingMemoryPath.stem().string();
         const auto stem = str.substr(0, str.size() - 3);
         for (int i = 0; i != paths.size(); ++i)

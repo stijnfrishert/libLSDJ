@@ -44,10 +44,10 @@
 #define RUN_LENGTH_ENCODING_BYTE 0xC0
 #define SPECIAL_ACTION_BYTE 0xE0
 #define END_OF_FILE_BYTE 0xFF
-#define DEFAULT_WAVE_BYTE 0xF0
-#define DEFAULT_INSTRUMENT_BYTE 0xF1
+#define LSDJ_DEFAULT_WAVE_BYTE 0xF0
+#define LSDJ_DEFAULT_INSTRUMENT_BYTE 0xF1
 
-static const unsigned char DEFAULT_INSTRUMENT_COMPRESSION[DEFAULT_INSTRUMENT_LENGTH] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
+static const unsigned char LSDJ_DEFAULT_INSTRUMENT_COMPRESSION[LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
 
 void decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
 {
@@ -74,7 +74,7 @@ void decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** erro
     }
 }
 
-void decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
+void decompress_LSDJ_DEFAULT_WAVE_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
 {
     unsigned char count = 0;
     if (rvio->read(&count, 1, rvio->user_data) != 1)
@@ -82,12 +82,12 @@ void decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error
     
     for (int i = 0; i < count; ++i)
     {
-        if (wvio->write(DEFAULT_WAVE, sizeof(DEFAULT_WAVE), wvio->user_data) != sizeof(DEFAULT_WAVE))
+        if (wvio->write(LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE), wvio->user_data) != sizeof(LSDJ_DEFAULT_WAVE))
             return lsdj_error_new(error, "could not write default wave byte");
     }
 }
 
-void decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
+void decompress_LSDJ_DEFAULT_INSTRUMENT_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
 {
     unsigned char count = 0;
     if (rvio->read(&count, 1, rvio->user_data) != 1)
@@ -95,7 +95,7 @@ void decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj
     
     for (int i = 0; i < count; ++i)
     {
-        if (wvio->write(DEFAULT_INSTRUMENT_COMPRESSION, sizeof(DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data) != sizeof(DEFAULT_INSTRUMENT_COMPRESSION))
+        if (wvio->write(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data) != sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION))
             return lsdj_error_new(error, "could not write default instrument byte");
     }
 }
@@ -112,13 +112,13 @@ void decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, long* bloc
             if (wvio->write(&byte, 1, wvio->user_data) != 1)
                 return lsdj_error_new(error, "could not write SA byte");
             break;
-        case DEFAULT_WAVE_BYTE:
-            decompress_default_wave_byte(rvio, wvio, error);
+        case LSDJ_DEFAULT_WAVE_BYTE:
+            decompress_LSDJ_DEFAULT_WAVE_byte(rvio, wvio, error);
             if (error && *error)
                 return;
             break;
-        case DEFAULT_INSTRUMENT_BYTE:
-            decompress_default_instrument_byte(rvio, wvio, error);
+        case LSDJ_DEFAULT_INSTRUMENT_BYTE:
+            decompress_LSDJ_DEFAULT_INSTRUMENT_byte(rvio, wvio, error);
             if (error && *error)
                 return;
             break;
@@ -181,7 +181,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long* block1position, s
         return lsdj_error_new(error, "could not tell compression end");
     
     const long readSize = wend - wstart;
-    if (wend - wstart != SONG_DECOMPRESSED_SIZE)
+    if (wend - wstart != LSDJ_SONG_DECOMPRESSED_SIZE)
     {
         char buffer[100];
         memset(buffer, '\0', sizeof(buffer));
@@ -237,7 +237,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         return 0;
     }
     
-    const unsigned char* end = data + SONG_DECOMPRESSED_SIZE;
+    const unsigned char* end = data + LSDJ_SONG_DECOMPRESSED_SIZE;
     for (const unsigned char* read = data; read < end; )
     {
         // Uncomment this to print the current read and write positions
@@ -246,31 +246,31 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         
         // Are we reading a default wave? If so, we can compress these!
         unsigned char defaultWaveLengthCount = 0;
-        while (read + WAVE_LENGTH < end && memcmp(read, DEFAULT_WAVE, WAVE_LENGTH) == 0 && defaultWaveLengthCount != 0xFF)
+        while (read + LSDJ_WAVE_LENGTH < end && memcmp(read, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) == 0 && defaultWaveLengthCount != 0xFF)
         {
-            read += WAVE_LENGTH;
+            read += LSDJ_WAVE_LENGTH;
             ++defaultWaveLengthCount;
         }
         
         if (defaultWaveLengthCount > 0)
         {
             nextEvent[0] = SPECIAL_ACTION_BYTE;
-            nextEvent[1] = DEFAULT_WAVE_BYTE;
+            nextEvent[1] = LSDJ_DEFAULT_WAVE_BYTE;
             nextEvent[2] = defaultWaveLengthCount;
             eventSize = 3;
         } else {
             // Are we reading a default instrument? If so, we can compress these!
             unsigned char defaultInstrumentLengthCount = 0;
-            while (read + DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, DEFAULT_INSTRUMENT_COMPRESSION, DEFAULT_INSTRUMENT_LENGTH) == 0 && defaultInstrumentLengthCount != 0xFF)
+            while (read + LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH) == 0 && defaultInstrumentLengthCount != 0xFF)
             {
-                read += DEFAULT_INSTRUMENT_LENGTH;
+                read += LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH;
                 ++defaultInstrumentLengthCount;
             }
             
             if (defaultInstrumentLengthCount > 0)
             {
                 nextEvent[0] = SPECIAL_ACTION_BYTE;
-                nextEvent[1] = DEFAULT_INSTRUMENT_BYTE;
+                nextEvent[1] = LSDJ_DEFAULT_INSTRUMENT_BYTE;
                 nextEvent[2] = defaultInstrumentLengthCount;
                 eventSize = 3;
             } else {

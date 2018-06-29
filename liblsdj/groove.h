@@ -37,12 +37,12 @@
 #define LSDJ_GROOVE_H
 
 // The default constant length of a groove
-#define GROOVE_LENGTH 16
+#define LSDJ_GROOVE_LENGTH (16)
 
 // Structure representing a groove
 typedef struct
 {
-    unsigned char data[GROOVE_LENGTH];
+    unsigned char data[LSDJ_GROOVE_LENGTH];
 } lsdj_groove_t;
 
     // Clear all groove data to factory settings

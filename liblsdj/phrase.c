@@ -47,9 +47,9 @@ lsdj_phrase_t* lsdj_phrase_copy(const lsdj_phrase_t* phrase)
 
 void lsdj_phrase_clear(lsdj_phrase_t* phrase)
 {
-    memset(phrase->notes, 0, PHRASE_LENGTH);
-    memset(phrase->instruments, 0xFF, PHRASE_LENGTH);
+    memset(phrase->notes, 0, LSDJ_PHRASE_LENGTH);
+    memset(phrase->instruments, 0xFF, LSDJ_PHRASE_LENGTH);
     
-    for (int i = 0; i < PHRASE_LENGTH; ++i)
+    for (int i = 0; i < LSDJ_PHRASE_LENGTH; ++i)
         lsdj_command_clear(&phrase->commands[i]);
 }

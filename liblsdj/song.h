@@ -40,20 +40,20 @@
 #include "table.h"
 #include "vio.h"
 
-#define SONG_DECOMPRESSED_SIZE 0x8000
-#define ROW_COUNT 256
-#define CHAIN_COUNT 128
-#define PHRASE_COUNT 0xFF
-#define BOOKMARK_COUNT 64
-#define INSTRUMENT_COUNT 64
-#define SYNTH_COUNT 16
-#define TABLE_COUNT 32
-#define WAVE_COUNT 256
-#define GROOVE_COUNT 32
-#define WORD_COUNT 42
+#define LSDJ_SONG_DECOMPRESSED_SIZE (0x8000)
+#define LSDJ_ROW_COUNT (256)
+#define LSDJ_CHAIN_COUNT (128)
+#define LSDJ_PHRASE_COUNT (0xFF)
+#define LSDJ_BOOKMARK_COUNT (64)
+#define LSDJ_INSTRUMENT_COUNT (64)
+#define LSDJ_SYNTH_COUNT (16)
+#define LSDJ_TABLE_COUNT (32)
+#define LSDJ_WAVE_COUNT (256)
+#define LSDJ_GROOVE_COUNT (32)
+#define LSDJ_WORD_COUNT (42)
     
-static const unsigned char CLONE_DEEP = 0;
-static const unsigned char CLONE_SLIM = 1;
+static const unsigned char LSDJ_CLONE_DEEP = 0;
+static const unsigned char LSDJ_CLONE_SLIM = 1;
 
 // An LSDJ song
 typedef struct lsdj_song_t lsdj_song_t;

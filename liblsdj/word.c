@@ -39,6 +39,6 @@
 
 void lsdj_word_clear(lsdj_word_t* word)
 {
-    memset(word->allophones, 0, WORD_LENGTH);
-    memset(word->lengths, 0, WORD_LENGTH);
+    memset(word->allophones, 0, LSDJ_WORD_LENGTH);
+    memset(word->lengths, 0, LSDJ_WORD_LENGTH);
 }

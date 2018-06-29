@@ -45,7 +45,7 @@ extern "C" {
 #include "song.h"
 #include "vio.h"
     
-#define NO_ACTIVE_PROJECT (0xFF)
+#define LSDJ_NO_ACTIVE_PROJECT (0xFF)
     
 typedef struct lsdj_sav_t lsdj_sav_t;
 
@@ -77,7 +77,7 @@ void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned cha
 void lsdj_sav_set_active_project(lsdj_sav_t* sav, unsigned char index);
     
 // Retrieve the index of the project the working memory song represents
-// If the working memory doesn't represent any project, this is NO_ACTIVE_PROJECT
+// If the working memory doesn't represent any project, this is LSDJ_NO_ACTIVE_PROJECT
 unsigned char lsdj_sav_get_active_project(const lsdj_sav_t* sav);
     
 // Create a project that contains the working memory song

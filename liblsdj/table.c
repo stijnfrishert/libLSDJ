@@ -41,16 +41,16 @@
 typedef struct lsdj_table_t
 {
     // The volume column of the table
-    unsigned char volumes[TABLE_LENGTH];
+    unsigned char volumes[LSDJ_TABLE_LENGTH];
     
     // The transposition column of the table
-    unsigned char transpositions[TABLE_LENGTH];
+    unsigned char transpositions[LSDJ_TABLE_LENGTH];
     
     // The first effect command column of the table
-    lsdj_command_t commands1[TABLE_LENGTH];
+    lsdj_command_t commands1[LSDJ_TABLE_LENGTH];
     
     // The second effect command column of the table
-    lsdj_command_t commands2[TABLE_LENGTH];
+    lsdj_command_t commands2[LSDJ_TABLE_LENGTH];
 } lsdj_table_t;
 
 lsdj_table_t* lsdj_table_new()
@@ -74,10 +74,10 @@ void lsdj_table_free(lsdj_table_t* table)
 
 void lsdj_clear_table(lsdj_table_t* table)
 {
-    memset(table->volumes, 0, TABLE_LENGTH);
-    memset(table->transpositions, 0, TABLE_LENGTH);
+    memset(table->volumes, 0, LSDJ_TABLE_LENGTH);
+    memset(table->transpositions, 0, LSDJ_TABLE_LENGTH);
     
-    for (int i = 0; i < TABLE_LENGTH; ++i)
+    for (int i = 0; i < LSDJ_TABLE_LENGTH; ++i)
     {
         lsdj_command_clear(&table->commands1[i]);
         lsdj_command_clear(&table->commands2[i]);

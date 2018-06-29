@@ -45,22 +45,22 @@
 #include "vio.h"
 
 // The default constant length of an instrument name
-#define INSTRUMENT_NAME_LENGTH 5
+#define LSDJ_INSTRUMENT_NAME_LENGTH (5)
 
-#define DEFAULT_INSTRUMENT_LENGTH 16
-static const unsigned char DEFAULT_INSTRUMENT[DEFAULT_INSTRUMENT_LENGTH] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
+#define LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH (16)
+static const unsigned char LSDJ_DEFAULT_INSTRUMENT[LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
 
 typedef enum
 {
-    INSTR_PULSE,
-    INSTR_WAVE,
-    INSTR_KIT,
-    INSTR_NOISE
+    LSDJ_INSTR_PULSE,
+    LSDJ_INSTR_WAVE,
+    LSDJ_INSTR_KIT,
+    LSDJ_INSTR_NOISE
 } instrument_type;
 
-static const unsigned char NO_TABLE = 0x20;
-static const unsigned char UNLIMITED_LENGTH = 0x40;
-static const unsigned char KIT_LENGTH_AUTO = 0x0;
+static const unsigned char LSDJ_NO_TABLE = 0x20;
+static const unsigned char LSDJ_INSTRUMENT_UNLIMITED_LENGTH = 0x40;
+static const unsigned char LSDJ_KIT_LENGTH_AUTO = 0x0;
 
 typedef struct lsdj_instrument_t lsdj_instrument_t;
 

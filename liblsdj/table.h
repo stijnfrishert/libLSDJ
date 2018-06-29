@@ -39,7 +39,7 @@
 #include "command.h"
 
 // The default constant length of a table
-#define TABLE_LENGTH 16
+#define LSDJ_TABLE_LENGTH (16)
 
 typedef struct lsdj_table_t lsdj_table_t;
 

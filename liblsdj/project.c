@@ -46,7 +46,7 @@
 struct lsdj_project_t
 {
     // The name of the project
-    char name[PROJECT_NAME_LENGTH];
+    char name[LSDJ_PROJECT_NAME_LENGTH];
     
     // The version of the project
     unsigned char version;
@@ -90,7 +90,7 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
 {
     lsdj_project_t* project = alloc_project(error);
     
-    if (vio->read(project->name, PROJECT_NAME_LENGTH, vio->user_data) != PROJECT_NAME_LENGTH)
+    if (vio->read(project->name, LSDJ_PROJECT_NAME_LENGTH, vio->user_data) != LSDJ_PROJECT_NAME_LENGTH)
     {
         lsdj_error_new(error, "could not read project name");
         lsdj_project_free(project);
@@ -105,7 +105,7 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     }
 
     // Decompress the data
-    unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
+    unsigned char decompressed[LSDJ_SONG_DECOMPRESSED_SIZE];
     memset(decompressed, 0, sizeof(decompressed));
     
     lsdj_memory_data_t mem;
@@ -186,16 +186,16 @@ void lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, l
     if (project->song == NULL)
         return lsdj_error_new(error, "project does not contain a song");
     
-    if (vio->write(project->name, PROJECT_NAME_LENGTH, vio->user_data) != PROJECT_NAME_LENGTH)
+    if (vio->write(project->name, LSDJ_PROJECT_NAME_LENGTH, vio->user_data) != LSDJ_PROJECT_NAME_LENGTH)
         return lsdj_error_new(error, "could not write project name for lsdsng");
     
     if (vio->write(&project->version, 1, vio->user_data) != 1)
         return lsdj_error_new(error, "could not write project version for lsdsng");
     
     // Write the song to memory
-    unsigned char decompressed[SONG_DECOMPRESSED_SIZE];
-    memset(decompressed, 0x34, SONG_DECOMPRESSED_SIZE);
-    lsdj_song_write_to_memory(project->song, decompressed, SONG_DECOMPRESSED_SIZE, error);
+    unsigned char decompressed[LSDJ_SONG_DECOMPRESSED_SIZE];
+    memset(decompressed, 0x34, LSDJ_SONG_DECOMPRESSED_SIZE);
+    lsdj_song_write_to_memory(project->song, decompressed, LSDJ_SONG_DECOMPRESSED_SIZE, error);
     if (error && *error)
         return;
     
@@ -254,7 +254,7 @@ void lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned
 
 void lsdj_clear_project(lsdj_project_t* project)
 {
-    memset(project->name, 0, PROJECT_NAME_LENGTH);
+    memset(project->name, 0, LSDJ_PROJECT_NAME_LENGTH);
     project->version = 0;
     
     if (project->song)
@@ -266,12 +266,12 @@ void lsdj_clear_project(lsdj_project_t* project)
 
 void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size)
 {
-    strncpy(project->name, data, size < PROJECT_NAME_LENGTH ? size : PROJECT_NAME_LENGTH);
+    strncpy(project->name, data, size < LSDJ_PROJECT_NAME_LENGTH ? size : LSDJ_PROJECT_NAME_LENGTH);
 }
 
 void lsdj_project_get_name(const lsdj_project_t* project, char* data, size_t size)
 {
-    const size_t len = strnlen(project->name, PROJECT_NAME_LENGTH);
+    const size_t len = strnlen(project->name, LSDJ_PROJECT_NAME_LENGTH);
     strncpy(data, project->name, len);
     if (len < size)
         data[len] = '\0';

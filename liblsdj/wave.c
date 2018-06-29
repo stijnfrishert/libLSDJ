@@ -39,5 +39,5 @@
 
 void lsdj_wave_clear(lsdj_wave_t* wave)
 {
-    memcpy(wave->data, DEFAULT_WAVE, WAVE_LENGTH);
+    memcpy(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH);
 }
