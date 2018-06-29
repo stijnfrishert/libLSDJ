@@ -16,8 +16,7 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
       -n [ --noversion ]    Don't add version numbers to the filename
       -f [ --folder ]       Put every lsdsng in its own folder
       -p [ --print ]        Print a list of all songs in the sav
-      -d [ --decimal ]      Use decimal notation for the version number, instead of
-                        hex
+      -d [ --decimal ]      Use decimal notation for the version number, instead of hex
       -u [ --underscore ]   Use an underscore for the special lightning bolt 
                         character, instead of x
       -o [ --output ] arg   Output folder for the lsdsng's
@@ -30,7 +29,7 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 
     Options:
       -h [ --help ]                  Help screen
-      --file arg              .lsdsng file(s), 0 or more
+      --file arg                     .lsdsng file(s), 0 or more
       -o [ --output ] arg (=out.sav) The output file (.sav)
       -s [ --sav ] arg               A sav file to append all .lsdsng's to
       -v [ --verbose ]               Verbose output during import
