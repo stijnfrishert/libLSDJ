@@ -30,7 +30,7 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 
     Options:
       -h [ --help ]                  Help screen
-      -f [ --file ] arg              .lsdsng file(s), 0 or more
+      --file arg              .lsdsng file(s), 0 or more
       -o [ --output ] arg (=out.sav) The output file (.sav)
       -s [ --sav ] arg               A sav file to append all .lsdsng's to
       -v [ --verbose ]               Verbose output during import
