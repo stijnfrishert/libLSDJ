@@ -40,26 +40,25 @@
 
 // The default constant length of a table
 #define TABLE_LENGTH 16
-    
-typedef struct
-{
-    // The volume column of the table
-    unsigned char volumes[TABLE_LENGTH];
-    
-    // The transposition column of the table
-    unsigned char transpositions[TABLE_LENGTH];
-    
-    // The first effect command column of the table
-    lsdj_command_t commands1[TABLE_LENGTH];
-    
-    // The second effect command column of the table
-    lsdj_command_t commands2[TABLE_LENGTH];
-} lsdj_table_t;
 
-// Copy a table
+typedef struct lsdj_table_t lsdj_table_t;
+
+lsdj_table_t* lsdj_table_new();
 lsdj_table_t* lsdj_copy_table(const lsdj_table_t* table);
+void lsdj_table_free(lsdj_table_t* table);
     
 // Clear all table data to factory settings
 void lsdj_clear_table(lsdj_table_t* table);
+
+void lsdj_table_set_volume(lsdj_table_t* table, size_t index, unsigned char volume);
+void lsdj_table_set_volumes(lsdj_table_t* table, unsigned char* volumes);
+unsigned char lsdj_table_get_volume(const lsdj_table_t* table, size_t index);
+
+void lsdj_table_set_transposition(lsdj_table_t* table, size_t index, unsigned char transposition);
+void lsdj_table_set_transpositions(lsdj_table_t* table, unsigned char* transpositions);
+unsigned char lsdj_table_get_transposition(const lsdj_table_t* table, size_t index);
+
+lsdj_command_t* lsdj_table_get_command1(lsdj_table_t* table, size_t index);
+lsdj_command_t* lsdj_table_get_command2(lsdj_table_t* table, size_t index);
 
 #endif
