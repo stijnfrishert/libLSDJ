@@ -34,7 +34,6 @@
  */
 
 #include <boost/filesystem.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include <iomanip>
@@ -218,7 +217,7 @@ int main(int argc, char* argv[])
     boost::program_options::options_description desc{"Options"};
     desc.add_options()
         ("help,h", "Help screen")
-        ("file,f", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more")
+        ("file", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more")
         ("output,o", boost::program_options::value<std::string>(), "The output file (.sav)")
         ("sav,s", boost::program_options::value<std::string>(), "A sav file to append all .lsdsng's to")
         ("verbose,v", "Verbose output during import");
