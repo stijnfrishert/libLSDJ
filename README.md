@@ -17,8 +17,7 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
       -f [ --folder ]       Put every lsdsng in its own folder
       -p [ --print ]        Print a list of all songs in the sav
       -d [ --decimal ]      Use decimal notation for the version number, instead of hex
-      -u [ --underscore ]   Use an underscore for the special lightning bolt 
-                        character, instead of x
+      -u [ --underscore ]   Use an underscore for the special lightning bolt character, instead of x
       -o [ --output ] arg   Output folder for the lsdsng's
       -v [ --verbose ]      Verbose output during export
       -i [ --index ] arg    Select a given project to export, 0 or more
