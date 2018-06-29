@@ -41,6 +41,7 @@
 #include "../liblsdj/sav.h"
 
 bool verbose = false;
+bool leaveCommands = false;
 
 boost::filesystem::path addMonoSuffix(const boost::filesystem::path& path)
 {
@@ -69,6 +70,22 @@ void convertInstrument(lsdj_instrument_t* instrument)
         lsdj_instrument_set_panning(instrument, LSDJ_PAN_LEFT_RIGHT);
 }
 
+void convertCommand(lsdj_command_t* command)
+{
+    if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
+    {
+        if (leaveCommands)
+        {
+            command->value = LSDJ_PAN_LEFT_RIGHT;
+        }
+        else
+        {
+            command->command = 0;
+            command->value = 0;
+        }
+    }
+}
+
 void convertTable(lsdj_table_t* table)
 {
     if (table == nullptr)
@@ -76,13 +93,8 @@ void convertTable(lsdj_table_t* table)
     
     for (int i = 0; i < LSDJ_TABLE_LENGTH; ++i)
     {
-        lsdj_command_t* command = lsdj_table_get_command1(table, i);
-        if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
-            command->value = LSDJ_PAN_LEFT_RIGHT;
-        
-        command = lsdj_table_get_command2(table, i);
-        if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
-            command->value = LSDJ_PAN_LEFT_RIGHT;
+        convertCommand(lsdj_table_get_command1(table, i));
+        convertCommand(lsdj_table_get_command2(table, i));
     }
 }
 
@@ -92,11 +104,7 @@ void convertPhrase(lsdj_phrase_t* phrase)
         return;
     
     for (int i = 0; i < LSDJ_PHRASE_LENGTH; ++i)
-    {
-        lsdj_command_t* command = &phrase->commands[i];
-        if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
-            command->value = LSDJ_PAN_LEFT_RIGHT;
-    }
+        convertCommand(&phrase->commands[i]);
 }
 
 void convertSong(lsdj_song_t* song)
@@ -243,7 +251,8 @@ int main(int argc, char* argv[])
     desc.add_options()
         ("help,h", "Help screen")
         ("file", boost::program_options::value<std::vector<std::string>>(), ".sav or .lsdng file(s), 0 or more")
-        ("verbose,v", "Verbose output during import");
+        ("verbose,v", "Verbose output during import")
+        ("command,c", "Leave O commands as OLR");
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", -1);
@@ -263,6 +272,7 @@ int main(int argc, char* argv[])
             return 0;
         } else if (vm.count("file")) {
             verbose = vm.count("verbose");
+            leaveCommands = vm.count("command");
             
             return process(vm["file"].as<std::vector<std::string>>());
         } else {
