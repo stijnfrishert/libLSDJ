@@ -54,7 +54,7 @@ bool isHiddenFile(const std::string& str)
 
 void convertInstrument(lsdj_instrument_t* instrument)
 {
-    if (instrument != nullptr)
+    if (instrument != nullptr && lsdj_instrument_get_panning(instrument) != LSDJ_PAN_NONE)
         lsdj_instrument_set_panning(instrument, LSDJ_PAN_LEFT_RIGHT);
 }
 
@@ -66,7 +66,24 @@ void convertTable(lsdj_table_t* table)
     for (int i = 0; i < LSDJ_TABLE_LENGTH; ++i)
     {
         lsdj_command_t* command = lsdj_table_get_command1(table, i);
-        if (command->command == 'O')
+        if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
+            command->value = LSDJ_PAN_LEFT_RIGHT;
+        
+        command = lsdj_table_get_command2(table, i);
+        if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
+            command->value = LSDJ_PAN_LEFT_RIGHT;
+    }
+}
+
+void convertPhrase(lsdj_phrase_t* phrase)
+{
+    if (phrase == nullptr)
+        return;
+    
+    for (int i = 0; i < LSDJ_PHRASE_LENGTH; ++i)
+    {
+        lsdj_command_t* command = &phrase->commands[i];
+        if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
             command->value = LSDJ_PAN_LEFT_RIGHT;
     }
 }
@@ -78,6 +95,9 @@ void convertSong(lsdj_song_t* song)
     
     for (int i = 0; i < LSDJ_TABLE_COUNT; ++i)
         convertTable(lsdj_song_get_table(song, i));
+    
+    for (int i = 0; i < LSDJ_PHRASE_COUNT; ++i)
+        convertPhrase(lsdj_song_get_phrase(song, i));
 }
 
 int processSav(boost::filesystem::path path)

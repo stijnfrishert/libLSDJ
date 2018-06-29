@@ -39,6 +39,8 @@
 #include <stddef.h>
 #include <stdio.h>
 
+#define LSDJ_COMMAND_O (11)
+
 // Structure representing an effect command with its argument value
 typedef struct
 {

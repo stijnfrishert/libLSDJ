@@ -1023,3 +1023,8 @@ lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index)
 {
     return song->tables[index];
 }
+
+lsdj_phrase_t* lsdj_song_get_phrase(lsdj_song_t* song, size_t index)
+{
+    return song->phrases[index];
+}
