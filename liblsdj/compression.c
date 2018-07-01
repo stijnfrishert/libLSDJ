@@ -44,59 +44,59 @@
 #define RUN_LENGTH_ENCODING_BYTE 0xC0
 #define SPECIAL_ACTION_BYTE 0xE0
 #define END_OF_FILE_BYTE 0xFF
-#define DEFAULT_WAVE_BYTE 0xF0
-#define DEFAULT_INSTRUMENT_BYTE 0xF1
+#define LSDJ_DEFAULT_WAVE_BYTE 0xF0
+#define LSDJ_DEFAULT_INSTRUMENT_BYTE 0xF1
 
-static const unsigned char DEFAULT_INSTRUMENT_COMPRESSION[DEFAULT_INSTRUMENT_LENGTH] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
+static const unsigned char LSDJ_DEFAULT_INSTRUMENT_COMPRESSION[LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
 
 void decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
 {
     unsigned char byte;
     if (rvio->read(&byte, 1, rvio->user_data) != 1)
-        return lsdj_create_error(error, "could not read RLE byte");
+        return lsdj_error_new(error, "could not read RLE byte");
     
     if (byte == RUN_LENGTH_ENCODING_BYTE)
     {
         if (wvio->write(&byte, 1, wvio->user_data) != 1)
-            return lsdj_create_error(error, "could not write RLE byte");
+            return lsdj_error_new(error, "could not write RLE byte");
     }
     else
     {
         unsigned char count = 0;
         if (rvio->read(&count, 1, rvio->user_data) != 1)
-            return lsdj_create_error(error, "could not read RLE count byte");
+            return lsdj_error_new(error, "could not read RLE count byte");
         
         for (int i = 0; i < count; ++i)
         {
             if (wvio->write(&byte, 1, wvio->user_data) != 1)
-                return lsdj_create_error(error, "could not write byte for RLE expansion");
+                return lsdj_error_new(error, "could not write byte for RLE expansion");
         }
     }
 }
 
-void decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
+void decompress_LSDJ_DEFAULT_WAVE_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
 {
     unsigned char count = 0;
     if (rvio->read(&count, 1, rvio->user_data) != 1)
-        return lsdj_create_error(error, "could not read default wave count byte");
+        return lsdj_error_new(error, "could not read default wave count byte");
     
     for (int i = 0; i < count; ++i)
     {
-        if (wvio->write(DEFAULT_WAVE, sizeof(DEFAULT_WAVE), wvio->user_data) != sizeof(DEFAULT_WAVE))
-            return lsdj_create_error(error, "could not write default wave byte");
+        if (wvio->write(LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE), wvio->user_data) != sizeof(LSDJ_DEFAULT_WAVE))
+            return lsdj_error_new(error, "could not write default wave byte");
     }
 }
 
-void decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
+void decompress_LSDJ_DEFAULT_INSTRUMENT_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, lsdj_error_t** error)
 {
     unsigned char count = 0;
     if (rvio->read(&count, 1, rvio->user_data) != 1)
-        return lsdj_create_error(error, "could not read default instrument count byte");
+        return lsdj_error_new(error, "could not read default instrument count byte");
     
     for (int i = 0; i < count; ++i)
     {
-        if (wvio->write(DEFAULT_INSTRUMENT_COMPRESSION, sizeof(DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data) != sizeof(DEFAULT_INSTRUMENT_COMPRESSION))
-            return lsdj_create_error(error, "could not write default instrument byte");
+        if (wvio->write(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data) != sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION))
+            return lsdj_error_new(error, "could not write default instrument byte");
     }
 }
 
@@ -104,21 +104,21 @@ void decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, long* bloc
 {
     unsigned char byte = 0;
     if (rvio->read(&byte, 1, rvio->user_data) != 1)
-        return lsdj_create_error(error, "could not read SA byte");
+        return lsdj_error_new(error, "could not read SA byte");
     
     switch (byte)
     {
         case SPECIAL_ACTION_BYTE:
             if (wvio->write(&byte, 1, wvio->user_data) != 1)
-                return lsdj_create_error(error, "could not write SA byte");
+                return lsdj_error_new(error, "could not write SA byte");
             break;
-        case DEFAULT_WAVE_BYTE:
-            decompress_default_wave_byte(rvio, wvio, error);
+        case LSDJ_DEFAULT_WAVE_BYTE:
+            decompress_LSDJ_DEFAULT_WAVE_byte(rvio, wvio, error);
             if (error && *error)
                 return;
             break;
-        case DEFAULT_INSTRUMENT_BYTE:
-            decompress_default_instrument_byte(rvio, wvio, error);
+        case LSDJ_DEFAULT_INSTRUMENT_BYTE:
+            decompress_LSDJ_DEFAULT_INSTRUMENT_byte(rvio, wvio, error);
             if (error && *error)
                 return;
             break;
@@ -132,7 +132,7 @@ void decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, long* bloc
                 *currentBlockPosition += blockSize;
             
             if (rvio->seek(*currentBlockPosition, SEEK_SET, rvio->user_data) != 0)
-                return lsdj_create_error(error, "could not seek to new block position");
+                return lsdj_error_new(error, "could not seek to new block position");
             break;
     }
 }
@@ -142,7 +142,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long* block1position, s
     long wstart = wvio->tell(wvio->user_data);
     long currentBlockPosition = rvio->tell(rvio->user_data);
     if (currentBlockPosition == -1L)
-        return lsdj_create_error(error, "could not tell current block position");
+        return lsdj_error_new(error, "could not tell current block position");
     
     unsigned char byte = 0;
     
@@ -155,7 +155,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long* block1position, s
 //        printf("read: 0x%lx\twrite: 0x%lx\n", rcur, wcur);
         
         if (rvio->read(&byte, 1, rvio->user_data) != 1)
-            return lsdj_create_error(error, "could not read byte for decompression");
+            return lsdj_error_new(error, "could not read byte for decompression");
         
         switch (byte)
         {
@@ -171,22 +171,22 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long* block1position, s
                 break;
             default:
                 if (wvio->write(&byte, 1, wvio->user_data) != 1)
-                    return lsdj_create_error(error, "could not write decompression byte");
+                    return lsdj_error_new(error, "could not write decompression byte");
                 break;
         }
     }
 
     const long wend = wvio->tell(wvio->user_data);
     if (wend == -1L)
-        return lsdj_create_error(error, "could not tell compression end");
+        return lsdj_error_new(error, "could not tell compression end");
     
     const long readSize = wend - wstart;
-    if (wend - wstart != SONG_DECOMPRESSED_SIZE)
+    if (wend - wstart != LSDJ_SONG_DECOMPRESSED_SIZE)
     {
         char buffer[100];
         memset(buffer, '\0', sizeof(buffer));
         snprintf(buffer, sizeof(buffer), "decompressed size does not line up with 0x8000 bytes (but 0x%lx)", wend - wstart);
-        return lsdj_create_error(error, buffer);
+        return lsdj_error_new(error, buffer);
     }
 }
 
@@ -194,7 +194,7 @@ void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long* firstBl
 {
     if (path == NULL)
     {
-        lsdj_create_error(error, "path is NULL");
+        lsdj_error_new(error, "path is NULL");
         return;
     }
     
@@ -203,7 +203,7 @@ void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long* firstBl
     {
         char message[512];
         snprintf(message, 512, "could not open %s for reading", path);
-        return lsdj_create_error(error, message);
+        return lsdj_error_new(error, message);
     }
     
     lsdj_vio_t vio;
@@ -233,11 +233,11 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
     long wstart = wvio->tell(wvio->user_data);
     if (wstart == -1L)
     {
-        lsdj_create_error(error, "could not tell write position on compression");
+        lsdj_error_new(error, "could not tell write position on compression");
         return 0;
     }
     
-    const unsigned char* end = data + SONG_DECOMPRESSED_SIZE;
+    const unsigned char* end = data + LSDJ_SONG_DECOMPRESSED_SIZE;
     for (const unsigned char* read = data; read < end; )
     {
         // Uncomment this to print the current read and write positions
@@ -246,31 +246,31 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         
         // Are we reading a default wave? If so, we can compress these!
         unsigned char defaultWaveLengthCount = 0;
-        while (read + WAVE_LENGTH < end && memcmp(read, DEFAULT_WAVE, WAVE_LENGTH) == 0 && defaultWaveLengthCount != 0xFF)
+        while (read + LSDJ_WAVE_LENGTH < end && memcmp(read, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) == 0 && defaultWaveLengthCount != 0xFF)
         {
-            read += WAVE_LENGTH;
+            read += LSDJ_WAVE_LENGTH;
             ++defaultWaveLengthCount;
         }
         
         if (defaultWaveLengthCount > 0)
         {
             nextEvent[0] = SPECIAL_ACTION_BYTE;
-            nextEvent[1] = DEFAULT_WAVE_BYTE;
+            nextEvent[1] = LSDJ_DEFAULT_WAVE_BYTE;
             nextEvent[2] = defaultWaveLengthCount;
             eventSize = 3;
         } else {
             // Are we reading a default instrument? If so, we can compress these!
             unsigned char defaultInstrumentLengthCount = 0;
-            while (read + DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, DEFAULT_INSTRUMENT_COMPRESSION, DEFAULT_INSTRUMENT_LENGTH) == 0 && defaultInstrumentLengthCount != 0xFF)
+            while (read + LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH) == 0 && defaultInstrumentLengthCount != 0xFF)
             {
-                read += DEFAULT_INSTRUMENT_LENGTH;
+                read += LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH;
                 ++defaultInstrumentLengthCount;
             }
             
             if (defaultInstrumentLengthCount > 0)
             {
                 nextEvent[0] = SPECIAL_ACTION_BYTE;
-                nextEvent[1] = DEFAULT_INSTRUMENT_BYTE;
+                nextEvent[1] = LSDJ_DEFAULT_INSTRUMENT_BYTE;
                 nextEvent[2] = defaultInstrumentLengthCount;
                 eventSize = 3;
             } else {
@@ -337,14 +337,14 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             byte = SPECIAL_ACTION_BYTE;
             if (wvio->write(&byte, 1, wvio->user_data) != 1)
             {
-                lsdj_create_error(error, "could not write SA byte for next block command");
+                lsdj_error_new(error, "could not write SA byte for next block command");
                 return 0;
             }
             
             byte = currentBlock + 1;
             if (wvio->write(&byte, 1, wvio->user_data) != 1)
             {
-                lsdj_create_error(error, "could not write next block byte for compression");
+                lsdj_error_new(error, "could not write next block byte for compression");
                 return 0;
             }
             
@@ -357,7 +357,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             {
                 if (wvio->write(&byte, 1, wvio->user_data) != 1)
                 {
-                    lsdj_create_error(error, "could not write 0 for block padding");
+                    lsdj_error_new(error, "could not write 0 for block padding");
                     return 0;
                 }
             }
@@ -365,7 +365,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
             // Make sure we filled up the block entirely
             if (currentBlockSize != blockSize)
             {
-                lsdj_create_error(error, "block wasn't completely filled upon compression");
+                lsdj_error_new(error, "block wasn't completely filled upon compression");
                 return 0;
             }
             
@@ -380,7 +380,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
                 long pos = wvio->tell(wvio->user_data);
                 if (wvio->seek(wstart, SEEK_SET, wvio->user_data) != 0)
                 {
-                    lsdj_create_error(error, "could not roll back after reaching max block count for compression");
+                    lsdj_error_new(error, "could not roll back after reaching max block count for compression");
                     return 0;
                 }
                 
@@ -389,14 +389,14 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
                 {
                     if (wvio->write(&byte, 1, wvio->user_data) != 1)
                     {
-                        lsdj_create_error(error, "could not fill rolled back data with 0 for compression");
+                        lsdj_error_new(error, "could not fill rolled back data with 0 for compression");
                         return 0;
                     }
                 }
                 
                 if (wvio->seek(wstart, SEEK_SET, wvio->user_data) != 0)
                 {
-                    lsdj_create_error(error, "could not fill roll back to start for compression roll back");
+                    lsdj_error_new(error, "could not fill roll back to start for compression roll back");
                     return 0;
                 }
                 
@@ -408,7 +408,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         
         if (wvio->write(nextEvent, eventSize, wvio->user_data) != eventSize)
         {
-            lsdj_create_error(error, "could not write event for compression");
+            lsdj_error_new(error, "could not write event for compression");
             return 0;
         }
         
@@ -420,14 +420,14 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
     byte = SPECIAL_ACTION_BYTE;
     if (wvio->write(&byte, 1, wvio->user_data) != 1)
     {
-        lsdj_create_error(error, "could not write SA for EOF for compression");
+        lsdj_error_new(error, "could not write SA for EOF for compression");
         return 0;
     }
     
     byte = END_OF_FILE_BYTE;
     if (wvio->write(&byte, 1, wvio->user_data) != 1)
     {
-        lsdj_create_error(error, "could not write EOF for compression");
+        lsdj_error_new(error, "could not write EOF for compression");
         return 0;
     }
     
@@ -438,7 +438,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         {
             if (wvio->write(&byte, 1, wvio->user_data) != 1)
             {
-                lsdj_create_error(error, "could not write 0 for block padding");
+                lsdj_error_new(error, "could not write 0 for block padding");
                 return 0;
             }
         }
@@ -451,13 +451,13 @@ unsigned int lsdj_compress_to_file(const unsigned char* data, unsigned int block
 {
     if (path == NULL)
     {
-        lsdj_create_error(error, "path is NULL");
+        lsdj_error_new(error, "path is NULL");
         return 0;
     }
     
     if (data == NULL)
     {
-        lsdj_create_error(error, "data is NULL");
+        lsdj_error_new(error, "data is NULL");
         return 0;
     }
     
@@ -466,7 +466,7 @@ unsigned int lsdj_compress_to_file(const unsigned char* data, unsigned int block
     {
         char message[512];
         snprintf(message, 512, "could not open %s for writing", path);
-        lsdj_create_error(error, message);
+        lsdj_error_new(error, message);
         return 0;
     }
     

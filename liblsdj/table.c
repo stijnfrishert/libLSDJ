@@ -38,6 +38,28 @@
 
 #include "table.h"
 
+typedef struct lsdj_table_t
+{
+    // The volume column of the table
+    unsigned char volumes[LSDJ_TABLE_LENGTH];
+    
+    // The transposition column of the table
+    unsigned char transpositions[LSDJ_TABLE_LENGTH];
+    
+    // The first effect command column of the table
+    lsdj_command_t commands1[LSDJ_TABLE_LENGTH];
+    
+    // The second effect command column of the table
+    lsdj_command_t commands2[LSDJ_TABLE_LENGTH];
+} lsdj_table_t;
+
+lsdj_table_t* lsdj_table_new()
+{
+    lsdj_table_t* table = (lsdj_table_t*)malloc(sizeof(lsdj_table_t));
+    lsdj_clear_table(table);
+    return table;
+}
+
 lsdj_table_t* lsdj_copy_table(const lsdj_table_t* table)
 {
     lsdj_table_t* newTable = malloc(sizeof(lsdj_table_t));
@@ -45,14 +67,59 @@ lsdj_table_t* lsdj_copy_table(const lsdj_table_t* table)
     return newTable;
 }
 
+void lsdj_table_free(lsdj_table_t* table)
+{
+    free(table);
+}
+
 void lsdj_clear_table(lsdj_table_t* table)
 {
-    memset(table->volumes, 0, TABLE_LENGTH);
-    memset(table->transpositions, 0, TABLE_LENGTH);
+    memset(table->volumes, 0, LSDJ_TABLE_LENGTH);
+    memset(table->transpositions, 0, LSDJ_TABLE_LENGTH);
     
-    for (int i = 0; i < TABLE_LENGTH; ++i)
+    for (int i = 0; i < LSDJ_TABLE_LENGTH; ++i)
     {
-        lsdj_clear_command(&table->commands1[i]);
-        lsdj_clear_command(&table->commands2[i]);
+        lsdj_command_clear(&table->commands1[i]);
+        lsdj_command_clear(&table->commands2[i]);
     }
+}
+
+void lsdj_table_set_volume(lsdj_table_t* table, size_t index, unsigned char volume)
+{
+    table->volumes[index] = volume;
+}
+
+void lsdj_table_set_volumes(lsdj_table_t* table, unsigned char* volumes)
+{
+    memcpy(table->volumes, volumes, sizeof(table->volumes));
+}
+
+unsigned char lsdj_table_get_volume(const lsdj_table_t* table, size_t index)
+{
+    return table->volumes[index];
+}
+
+void lsdj_table_set_transposition(lsdj_table_t* table, size_t index, unsigned char transposition)
+{
+    table->transpositions[index] = transposition;
+}
+
+void lsdj_table_set_transpositions(lsdj_table_t* table, unsigned char* transpositions)
+{
+    memcpy(table->transpositions, transpositions, sizeof(table->transpositions));
+}
+
+unsigned char lsdj_table_get_transposition(const lsdj_table_t* table, size_t index)
+{
+    return table->transpositions[index];
+}
+
+lsdj_command_t* lsdj_table_get_command1(lsdj_table_t* table, size_t index)
+{
+    return &table->commands1[index];
+}
+
+lsdj_command_t* lsdj_table_get_command2(lsdj_table_t* table, size_t index)
+{
+    return &table->commands2[index];
 }

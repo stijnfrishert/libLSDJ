@@ -34,7 +34,6 @@
  */
 
 #include <boost/filesystem.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include <iomanip>
@@ -67,8 +66,8 @@ std::vector<std::string> names;
 
 int handle_error(lsdj_error_t* error)
 {
-    std::cerr << "ERROR: " << lsdj_get_error_c_str(error) << std::endl;
-    lsdj_free_error(error);
+    std::cerr << "ERROR: " << lsdj_error_get_c_str(error) << std::endl;
+    lsdj_error_free(error);
     return 1;
 }
 
@@ -112,7 +111,7 @@ void exportProject(const lsdj_project_t* project, boost::filesystem::path folder
     stream << ".lsdsng";
     folder /= stream.str();
     
-    lsdj_write_lsdsng_to_file(project, folder.string().c_str(), error);
+    lsdj_project_write_lsdsng_to_file(project, folder.string().c_str(), error);
 }
 
 // Export all songs of a file
@@ -120,7 +119,7 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
 {
     // Load in the save file
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = lsdj_read_sav_from_file(path.string().c_str(), &error);
+    lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);
     if (sav == nullptr)
         return handle_error(error);
     
@@ -133,17 +132,17 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
     // display the working memory song as well
     if ((indices.empty() && names.empty()) || std::find(std::begin(indices), std::end(indices), -1) != std::end(indices))
     {
-        lsdj_project_t* project = lsdj_create_project_from_working_memory_song(sav, &error);
+        lsdj_project_t* project = lsdj_project_new_from_working_memory_song(sav, &error);
         if (error)
         {
-            lsdj_free_sav(sav);
+            lsdj_sav_free(sav);
             return handle_error(error);
         }
         
         exportProject(project, outputFolder, versionStyle, underscore, putInFolder, true, &error);
         if (error)
         {
-            lsdj_free_sav(sav);
+            lsdj_sav_free(sav);
             return handle_error(error);
         }
     }
@@ -180,7 +179,7 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
         exportProject(project, outputFolder, versionStyle, underscore, putInFolder, false, &error);
         if (error)
         {
-            lsdj_free_sav(sav);
+            lsdj_sav_free(sav);
             return handle_error(error);
         }
         
@@ -204,7 +203,7 @@ int exportSongs(const boost::filesystem::path& path, const std::string& output)
         }
     }
     
-    lsdj_free_sav(sav);
+    lsdj_sav_free(sav);
     
     return 0;
 }
@@ -214,7 +213,7 @@ int print(const boost::filesystem::path& path)
 {
     // Try and read the sav
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = lsdj_read_sav_from_file(path.string().c_str(), &error);
+    lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);
     if (sav == nullptr)
         return handle_error(error);
     
@@ -232,7 +231,7 @@ int print(const boost::filesystem::path& path)
         
         // If the working memory song represent one of the projects, display that name
         const auto active = lsdj_sav_get_active_project(sav);
-        if (active != NO_ACTIVE_PROJECT)
+        if (active != LSDJ_NO_ACTIVE_PROJECT)
         {
             lsdj_project_t* project = lsdj_sav_get_project(sav, active);
             

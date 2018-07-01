@@ -34,7 +34,6 @@
  */
 
 #include <boost/filesystem.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include <iomanip>
@@ -47,15 +46,25 @@ bool verbose = false;
 
 int handle_error(lsdj_error_t* error)
 {
-    std::cerr << "ERROR: " << lsdj_get_error_c_str(error) << std::endl;
-    lsdj_free_error(error);
+    std::cerr << "ERROR: " << lsdj_error_get_c_str(error) << std::endl;
+    lsdj_error_free(error);
     return 1;
+}
+
+bool isHiddenFile(const std::string& str)
+{
+    switch (str.size())
+    {
+        case 0: return true;
+        case 1: return false;
+        default: return str[0] == '.' && str[1] != '.' && str[1] != '/';
+    }
 }
 
 int importSongs(const std::vector<std::string>& inputs, std::string outputFile, const char* savName)
 {
     lsdj_error_t* error = nullptr;
-    lsdj_sav_t* sav = savName ? lsdj_read_sav_from_file(boost::filesystem::absolute(savName).string().c_str(), &error) : lsdj_new_sav(&error);
+    lsdj_sav_t* sav = savName ? lsdj_sav_read_from_file(boost::filesystem::absolute(savName).string().c_str(), &error) : lsdj_sav_new(&error);
     if (error)
         return handle_error(error);
     
@@ -72,9 +81,13 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         std::cout << "Read " << savName << ", containing " << std::to_string(index) << " saves" << std::endl;
     
     std::vector<boost::filesystem::path> paths;
+    boost::filesystem::path workingMemoryPath;
     for (auto& input : inputs)
     {
         const auto path = boost::filesystem::absolute(input);
+        if (isHiddenFile(path.filename().string()))
+            continue;
+
         if (boost::filesystem::is_regular_file(path))
         {
             paths.emplace_back(path);
@@ -83,7 +96,21 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         {
             std::vector<boost::filesystem::path> contents;
             for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
-                contents.emplace_back(it->path());
+            {
+                const auto path = it->path();
+                if (isHiddenFile(path.filename().string()) || !boost::filesystem::is_regular_file(path) || path.extension() != ".lsdsng")
+                    continue;
+                
+                const auto str = path.stem().string();
+                if (str.size() >= 3 && str.substr(str.length() - 3) == ".WM")
+                {
+                    workingMemoryPath = path;
+                    continue;
+                }
+
+                contents.emplace_back(path);
+            }
+
             std::sort(contents.begin(), contents.end());
             for (auto& path : contents)
                 paths.emplace_back(path);
@@ -98,18 +125,18 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         if (index == lsdj_sav_get_project_count(sav))
             break;
         
-        lsdj_project_t* project = lsdj_read_lsdsng_from_file(paths[i].string().c_str(), &error);
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(paths[i].string().c_str(), &error);
         if (error)
         {
-            lsdj_free_sav(sav);
+            lsdj_sav_free(sav);
             return handle_error(error);
         }
         
         lsdj_sav_set_project(sav, index, project, &error);
         if (error)
         {
-            lsdj_free_project(project);
-            lsdj_free_sav(sav);
+            lsdj_project_free(project);
+            lsdj_sav_free(sav);
             return handle_error(error);
         }
         
@@ -123,13 +150,13 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         if (verbose)
             std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
         
-        if (i == 0 && active == NO_ACTIVE_PROJECT)
+        if (i == 0 && active == LSDJ_NO_ACTIVE_PROJECT && workingMemoryPath.empty())
         {
-            lsdj_set_working_memory_song_from_project(sav, i, &error);
+            lsdj_sav_set_working_memory_song_from_project(sav, i, &error);
             if (error)
             {
-                lsdj_free_project(project);
-                lsdj_free_sav(sav);
+                lsdj_project_free(project);
+                lsdj_sav_free(sav);
                 return handle_error(error);
             }
         }
@@ -137,13 +164,48 @@ int importSongs(const std::vector<std::string>& inputs, std::string outputFile, 
         index += 1;
     }
     
+    if (!workingMemoryPath.empty())
+    {
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(workingMemoryPath.string().c_str(), &error);
+        if (error)
+        {
+            lsdj_project_free(project);
+            lsdj_sav_free(sav);
+            return handle_error(error);
+        }
+        
+        lsdj_song_t* song = lsdj_song_copy(lsdj_project_get_song(project), &error);
+        if (error)
+        {
+            lsdj_project_free(project);
+            lsdj_sav_free(sav);
+            return handle_error(error);
+        }
+        
+        int active = LSDJ_NO_ACTIVE_PROJECT;
+        const auto str = workingMemoryPath.stem().string();
+        const auto stem = str.substr(0, str.size() - 3);
+        for (int i = 0; i != paths.size(); ++i)
+        {
+            if (stem == paths[i].stem().string())
+            {
+                active = i;
+                break;
+            }
+        }
+        
+        lsdj_sav_set_working_memory_song(sav, song, active);
+        
+        lsdj_project_free(project);
+    }
+    
     if (outputFile.empty())
         outputFile = "out.sav";
         
-    lsdj_write_sav_to_file(sav, boost::filesystem::absolute(outputFile).string().c_str(), &error);
+    lsdj_sav_write_to_file(sav, boost::filesystem::absolute(outputFile).string().c_str(), &error);
     if (error)
     {
-        lsdj_free_sav(sav);
+        lsdj_sav_free(sav);
         return handle_error(error);
     }
     
@@ -155,7 +217,7 @@ int main(int argc, char* argv[])
     boost::program_options::options_description desc{"Options"};
     desc.add_options()
         ("help,h", "Help screen")
-        ("file,f", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more")
+        ("file", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more")
         ("output,o", boost::program_options::value<std::string>(), "The output file (.sav)")
         ("sav,s", boost::program_options::value<std::string>(), "A sav file to append all .lsdsng's to")
         ("verbose,v", "Verbose output during import");

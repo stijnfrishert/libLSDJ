@@ -33,32 +33,13 @@
  
  */
 
-#ifndef LSDJ_TABLE_H
-#define LSDJ_TABLE_H
+#ifndef LSDJ_PANNING_H
+#define LSDJ_PANNING_H
 
-#include "command.h"
-
-// The default constant length of a table
-#define LSDJ_TABLE_LENGTH (16)
-
-typedef struct lsdj_table_t lsdj_table_t;
-
-lsdj_table_t* lsdj_table_new();
-lsdj_table_t* lsdj_copy_table(const lsdj_table_t* table);
-void lsdj_table_free(lsdj_table_t* table);
-    
-// Clear all table data to factory settings
-void lsdj_clear_table(lsdj_table_t* table);
-
-void lsdj_table_set_volume(lsdj_table_t* table, size_t index, unsigned char volume);
-void lsdj_table_set_volumes(lsdj_table_t* table, unsigned char* volumes);
-unsigned char lsdj_table_get_volume(const lsdj_table_t* table, size_t index);
-
-void lsdj_table_set_transposition(lsdj_table_t* table, size_t index, unsigned char transposition);
-void lsdj_table_set_transpositions(lsdj_table_t* table, unsigned char* transpositions);
-unsigned char lsdj_table_get_transposition(const lsdj_table_t* table, size_t index);
-
-lsdj_command_t* lsdj_table_get_command1(lsdj_table_t* table, size_t index);
-lsdj_command_t* lsdj_table_get_command2(lsdj_table_t* table, size_t index);
+typedef unsigned char lsdj_panning;
+static const lsdj_panning LSDJ_PAN_NONE = 0;
+static const lsdj_panning LSDJ_PAN_RIGHT = 1;
+static const lsdj_panning LSDJ_PAN_LEFT = 2;
+static const lsdj_panning LSDJ_PAN_LEFT_RIGHT = 3;
 
 #endif

@@ -36,28 +36,29 @@
 #ifndef LSDJ_SYNTH_H
 #define LSDJ_SYNTH_H
 
-static const unsigned char SYNTH_WAVEFORM_SAWTOOTH = 0;
-static const unsigned char SYNTH_WAVEFORM_SQUARE = 1;
-static const unsigned char SYNTH_WAVEFORM_TRIANGLE = 2;
+static const unsigned char LSDJ_SYNTH_WAVEFORM_SAWTOOTH = 0;
+static const unsigned char LSDJ_SYNTH_WAVEFORM_SQUARE = 1;
+static const unsigned char LSDJ_SYNTH_WAVEFORM_TRIANGLE = 2;
     
-static const unsigned char SYNTH_FILTER_LOW_PASS = 0;
-static const unsigned char SYNTH_FILTER_HIGH_PASS = 1;
-static const unsigned char SYNTH_FILTER_BAND_PASS = 2;
-static const unsigned char SYNTH_FILTER_ALL_PASS = 3;
+static const unsigned char LSDJ_SYNTH_FILTER_LOW_PASS = 0;
+static const unsigned char LSDJ_SYNTH_FILTER_HIGH_PASS = 1;
+static const unsigned char LSDJ_SYNTH_FILTER_BAND_PASS = 2;
+static const unsigned char LSDJ_SYNTH_FILTER_ALL_PASS = 3;
     
-static const unsigned char SYNTH_DISTORTION_CLIP = 0;
-static const unsigned char SYNTH_DISTORTION_WRAP = 1;
+static const unsigned char LSDJ_SYNTH_DISTORTION_CLIP = 0;
+static const unsigned char LSDJ_SYNTH_DISTORTION_WRAP = 1;
     
-static const unsigned char SYNTH_PHASE_NORMAL = 0;
-static const unsigned char SYNTH_PHASE_RESYNC = 1;
-static const unsigned char SYNTH_PHASE_RESYNC2 = 2;
+static const unsigned char LSDJ_SYNTH_PHASE_NORMAL = 0;
+static const unsigned char LSDJ_SYNTH_PHASE_RESYNC = 1;
+static const unsigned char LSDJ_SYNTH_PHASE_RESYNC2 = 2;
 
 // Structure representing soft synth data
 typedef struct
 {
     unsigned char waveform;
     unsigned char filter;
-    unsigned char resonance;
+    unsigned char resonanceStart;
+    unsigned char resonanceEnd;
     unsigned char distortion;
     unsigned char phase;
     
@@ -77,6 +78,6 @@ typedef struct
 } lsdj_synth_t;
 
 // Clear all soft synth data to factory settings
-void lsdj_clear_synth(lsdj_synth_t* synth);
+void lsdj_synth_clear(lsdj_synth_t* synth);
     
 #endif

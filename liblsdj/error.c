@@ -43,7 +43,7 @@ struct lsdj_error_t
     char* message;
 };
 
-void lsdj_create_error(lsdj_error_t** error, const char* message)
+void lsdj_error_new(lsdj_error_t** error, const char* message)
 {
     if (error == NULL)
         return;
@@ -54,7 +54,7 @@ void lsdj_create_error(lsdj_error_t** error, const char* message)
     strncpy((*error)->message, message, length);
 }
 
-void lsdj_free_error(lsdj_error_t* error)
+void lsdj_error_free(lsdj_error_t* error)
 {
     if (error)
     {
@@ -68,7 +68,7 @@ void lsdj_free_error(lsdj_error_t* error)
     }
 }
 
-const char* lsdj_get_error_c_str(lsdj_error_t* error)
+const char* lsdj_error_get_c_str(lsdj_error_t* error)
 {
     if (error == NULL)
         return NULL;

@@ -38,15 +38,15 @@
 
 #include "chain.h"
 
-lsdj_chain_t* lsdj_copy_chain(const lsdj_chain_t* chain)
+lsdj_chain_t* lsdj_chain_copy(const lsdj_chain_t* chain)
 {
     lsdj_chain_t* newChain = malloc(sizeof(lsdj_chain_t));
     memcpy(newChain, chain, sizeof(lsdj_chain_t));
     return newChain;
 }
 
-void lsdj_clear_chain(lsdj_chain_t* chain)
+void lsdj_chain_clear(lsdj_chain_t* chain)
 {
-    memset(chain->phrases, 0xFF, CHAIN_LENGTH);
-    memset(chain->transpositions, 0, CHAIN_LENGTH);
+    memset(chain->phrases, 0xFF, LSDJ_CHAIN_LENGTH);
+    memset(chain->transpositions, 0, LSDJ_CHAIN_LENGTH);
 }

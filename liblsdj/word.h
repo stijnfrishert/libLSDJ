@@ -37,19 +37,19 @@
 #define LSDJ_WORD_H
 
 // The default constant length of a word
-#define WORD_LENGTH 16
+#define LSDJ_WORD_LENGTH (16)
 
 // The constant length of all word names
-#define WORD_NAME_LENGTH 4
+#define LSDJ_WORD_NAME_LENGTH (4)
 
 // Structure representing word data for the speech synthesizer
 typedef struct
 {
-    unsigned char allophones[WORD_LENGTH];
-    unsigned char lengths[WORD_LENGTH];
+    unsigned char allophones[LSDJ_WORD_LENGTH];
+    unsigned char lengths[LSDJ_WORD_LENGTH];
 } lsdj_word_t;
     
 // Clear all word data to factory settings
-void lsdj_clear_word(lsdj_word_t* word);
+void lsdj_word_clear(lsdj_word_t* word);
 
 #endif

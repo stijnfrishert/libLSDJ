@@ -35,7 +35,7 @@
 
 #include "command.h"
 
-void lsdj_clear_command(lsdj_command_t* command)
+void lsdj_command_clear(lsdj_command_t* command)
 {
     command->command = 0;
     command->value = 0;

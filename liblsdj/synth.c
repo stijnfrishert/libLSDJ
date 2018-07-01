@@ -37,13 +37,14 @@
 
 #include "synth.h"
 
-void lsdj_clear_synth(lsdj_synth_t* synth)
+void lsdj_synth_clear(lsdj_synth_t* synth)
 {
-    synth->waveform = SYNTH_WAVEFORM_SAWTOOTH;
-    synth->filter = SYNTH_FILTER_LOW_PASS;
-    synth->resonance = 0;
-    synth->distortion = SYNTH_DISTORTION_CLIP;
-    synth->phase = SYNTH_PHASE_NORMAL;
+    synth->waveform = LSDJ_SYNTH_WAVEFORM_SAWTOOTH;
+    synth->filter = LSDJ_SYNTH_FILTER_LOW_PASS;
+    synth->resonanceStart = 0;
+    synth->resonanceEnd = 0;
+    synth->distortion = LSDJ_SYNTH_DISTORTION_CLIP;
+    synth->phase = LSDJ_SYNTH_PHASE_NORMAL;
     synth->volumeStart = 0x10;
     synth->cutOffStart = 0xFF;
     synth->phaseStart = 0;

@@ -41,65 +41,49 @@
 #include "instrument_noise.h"
 #include "instrument_pulse.h"
 #include "instrument_wave.h"
+#include "panning.h"
 #include "vio.h"
 
 // The default constant length of an instrument name
-#define INSTRUMENT_NAME_LENGTH 5
+#define LSDJ_INSTRUMENT_NAME_LENGTH (5)
 
-#define DEFAULT_INSTRUMENT_LENGTH 16
-static const unsigned char DEFAULT_INSTRUMENT[DEFAULT_INSTRUMENT_LENGTH] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
+#define LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH (16)
+static const unsigned char LSDJ_DEFAULT_INSTRUMENT[LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH] = { 0, 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0 };
 
 typedef enum
 {
-    INSTR_PULSE,
-    INSTR_WAVE,
-    INSTR_KIT,
-    INSTR_NOISE
+    LSDJ_INSTR_PULSE,
+    LSDJ_INSTR_WAVE,
+    LSDJ_INSTR_KIT,
+    LSDJ_INSTR_NOISE
 } instrument_type;
 
-typedef unsigned char lsdj_panning;
-static const lsdj_panning LSDJ_PAN_NONE = 0;
-static const lsdj_panning LSDJ_PAN_RIGHT = 1;
-static const lsdj_panning LSDJ_PAN_LEFT = 2;
-static const lsdj_panning LSDJ_PAN_LEFT_RIGHT = 3;
+static const unsigned char LSDJ_NO_TABLE = 0x20;
+static const unsigned char LSDJ_INSTRUMENT_UNLIMITED_LENGTH = 0x40;
+static const unsigned char LSDJ_KIT_LENGTH_AUTO = 0x0;
 
-static const unsigned char NO_TABLE = 0x20;
-static const unsigned char UNLIMITED_LENGTH = 0x40;
-static const unsigned char KIT_LENGTH_AUTO = 0x0;
-    
-// Structure representing one instrument
-typedef struct
-{
-    char name[INSTRUMENT_NAME_LENGTH];
-
-    instrument_type type;
-    
-    union { unsigned char envelope; unsigned char volume; };
-    lsdj_panning panning;
-    unsigned char table; // 0x20 or higher = NO_TABLE
-    unsigned char automate;
-    
-    union
-    {
-        lsdj_instrument_pulse_t pulse;
-        lsdj_instrument_wave_t wave;
-        lsdj_instrument_kit_t kit;
-        lsdj_instrument_noise_t noise;
-    };
-} lsdj_instrument_t;
+typedef struct lsdj_instrument_t lsdj_instrument_t;
 
 // Copy a instrument
-lsdj_instrument_t* lsdj_copy_instrument(const lsdj_instrument_t* instrument);
+lsdj_instrument_t* lsdj_instrument_new();
+lsdj_instrument_t* lsdj_instrument_copy(const lsdj_instrument_t* instrument);
+void lsdj_instrument_free(lsdj_instrument_t* instrument);
     
 // Clear all instrument data to factory settings
-void lsdj_clear_instrument(lsdj_instrument_t* instrument);
-void lsdj_clear_instrument_as_pulse(lsdj_instrument_t* instrument);
-void lsdj_clear_instrument_as_wave(lsdj_instrument_t* instrument);
-void lsdj_clear_instrument_as_kit(lsdj_instrument_t* instrument);
-void lsdj_clear_instrument_as_noise(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear_as_pulse(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear_as_wave(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear_as_kit(lsdj_instrument_t* instrument);
+void lsdj_instrument_clear_as_noise(lsdj_instrument_t* instrument);
 
 // Instrument I/O
-void lsdj_read_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error);
-void lsdj_write_instrument(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_t* vio, lsdj_error_t** error);
+void lsdj_instrument_read(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error);
+void lsdj_instrument_write(const lsdj_instrument_t* instrument, unsigned char version, lsdj_vio_t* vio, lsdj_error_t** error);
+
+void lsdj_instrument_set_name(lsdj_instrument_t* instrument, const char* data, size_t size);
+void lsdj_instrument_get_name(const lsdj_instrument_t* instrument, char* data, size_t size);
+
+void lsdj_instrument_set_panning(lsdj_instrument_t* instrument, lsdj_panning panning);
+lsdj_panning lsdj_instrument_get_panning(const lsdj_instrument_t* instrument);
 
 #endif

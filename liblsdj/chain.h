@@ -39,22 +39,22 @@
 #include "command.h"
 
 // The length of a chain
-#define CHAIN_LENGTH 16
+#define LSDJ_CHAIN_LENGTH (16)
     
 // Structure representing a chain
 typedef struct
 {
     // The phrases in the chain (indices, actual phrases are stored in the song)
-    unsigned char phrases[CHAIN_LENGTH];
+    unsigned char phrases[LSDJ_CHAIN_LENGTH];
     
     // The transpositions for each row
-    unsigned char transpositions[CHAIN_LENGTH];
+    unsigned char transpositions[LSDJ_CHAIN_LENGTH];
 } lsdj_chain_t;
 
 // Copy a chain
-lsdj_chain_t* lsdj_copy_chain(const lsdj_chain_t* chain);
+lsdj_chain_t* lsdj_chain_copy(const lsdj_chain_t* chain);
     
 // Clear chain data to factory settings
-void lsdj_clear_chain(lsdj_chain_t* chain);
+void lsdj_chain_clear(lsdj_chain_t* chain);
 
 #endif
