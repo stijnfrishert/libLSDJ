@@ -29,41 +29,7 @@ namespace lsdj
         return str1 == str2;
     }
     
-    std::string Exporter::constructName(const lsdj_project_t* project)
-    {
-        char name[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-        lsdj_project_get_name(project, name, sizeof(name));
-        
-        if (underscore)
-            std::replace(name, name + 9, 'x', '_');
-        
-        return name;
-    }
-    
-    void Exporter::exportProject(const lsdj_project_t* project, boost::filesystem::path folder, bool workingMemory, lsdj_error_t** error)
-    {
-        auto name = constructName(project);
-        if (name.empty())
-            name = "(EMPTY)";
-        
-        if (putInFolder)
-            folder /= name;
-        boost::filesystem::create_directories(folder);
-        
-        std::stringstream stream;
-        stream << name << convertVersionToString(lsdj_project_get_version(project), true);
-        
-        if (workingMemory)
-            stream << ".WM";
-        
-        stream << ".lsdsng";
-        folder /= stream.str();
-        
-        lsdj_project_write_lsdsng_to_file(project, folder.string().c_str(), error);
-    }
-    
-    // Export all songs of a file
-    int Exporter::exportSongs(const boost::filesystem::path& path, const std::string& output)
+    int Exporter::exportProjects(const boost::filesystem::path& path, const std::string& output)
     {
         // Load in the save file
         lsdj_error_t* error = nullptr;
@@ -130,30 +96,44 @@ namespace lsdj
                 lsdj_sav_free(sav);
                 return handle_error(error);
             }
-            
-            // Let the user know if verbose output has been toggled on
-            if (verbose)
-            {
-                std::cout << "Exported " << constructName(project);
-                
-                switch (versionStyle)
-                {
-                    case VersionStyle::NONE: break;
-                    case VersionStyle::HEX:
-                        std::cout << " (" << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project) << ")";
-                        break;
-                    case VersionStyle::DECIMAL:
-                        std::cout << " (" << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project) << ")";
-                        break;
-                }
-                
-                std::cout << std::endl;
-            }
         }
         
         lsdj_sav_free(sav);
         
         return 0;
+    }
+    
+    void Exporter::exportProject(const lsdj_project_t* project, boost::filesystem::path folder, bool workingMemory, lsdj_error_t** error)
+    {
+        auto name = constructName(project);
+        if (name.empty())
+            name = "(EMPTY)";
+        
+        boost::filesystem::path path = folder;
+        
+        if (putInFolder)
+            path /= name;
+        boost::filesystem::create_directories(folder);
+        
+        std::stringstream stream;
+        stream << name << convertVersionToString(lsdj_project_get_version(project), true);
+        
+        if (workingMemory)
+            stream << ".WM";
+        
+        stream << ".lsdsng";
+        path /= stream.str();
+        
+        lsdj_project_write_lsdsng_to_file(project, path.string().c_str(), error);
+        
+        if (*error != nullptr)
+            return;
+        
+        // Let the user know if verbose output has been toggled on
+        if (verbose)
+        {
+            std::cout << "Exported " << boost::filesystem::relative(path, folder).string() << std::endl;
+        }
     }
     
     int Exporter::print(const boost::filesystem::path& path)
@@ -300,5 +280,16 @@ namespace lsdj
         
         // Retrieve the sav format version of the song and display it as well
         std::cout << std::to_string(lsdj_song_get_format_version(song)) << std::endl;
+    }
+    
+    std::string Exporter::constructName(const lsdj_project_t* project)
+    {
+        char name[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        lsdj_project_get_name(project, name, sizeof(name));
+        
+        if (underscore)
+            std::replace(name, name + 9, 'x', '_');
+        
+        return name;
     }
 }

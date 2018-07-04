@@ -16,9 +16,6 @@
 
 namespace lsdj
 {
-    int handle_error(lsdj_error_t* error);
-    bool compareCaseInsensitive(std::string str1, std::string str2);
-    
     class Exporter
     {
     public:
@@ -30,9 +27,8 @@ namespace lsdj
         };
         
     public:
-        std::string constructName(const lsdj_project_t* project);
+        int exportProjects(const boost::filesystem::path& path, const std::string& output);
         void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, bool workingMemory, lsdj_error_t** error);
-        int exportSongs(const boost::filesystem::path& path, const std::string& output);
         int print(const boost::filesystem::path& path);
         
     public:
@@ -52,7 +48,12 @@ namespace lsdj
         
         // Print the working memory song line
         void printWorkingMemorySong(const lsdj_sav_t* sav);
+        
+        // Print a sav project line
         void printProject(const lsdj_sav_t* sav, std::size_t index);
+        
+        std::string constructName(const lsdj_project_t* project);
+
     };
 }
 

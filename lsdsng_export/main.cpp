@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
             if (vm.count("print"))
                 return exporter.print(path);
             else
-                return exporter.exportSongs(path, vm["output"].as<std::string>());
+                return exporter.exportProjects(path, vm["output"].as<std::string>());
         } else {
             std::cout << desc << std::endl;
             return 0;
