@@ -36,6 +36,10 @@
 #ifndef LSDJ_ERROR_H
 #define LSDJ_ERROR_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Structure containing specific error details
 typedef struct lsdj_error_t lsdj_error_t;
     
@@ -49,5 +53,9 @@ void lsdj_error_free(lsdj_error_t* error);
     
 // Retrieve a string description of an error
 const char* lsdj_error_get_c_str(lsdj_error_t* error);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

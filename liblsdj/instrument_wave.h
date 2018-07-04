@@ -36,6 +36,10 @@
 #ifndef LSDJ_INSTRUMENT_WAVE_H
 #define LSDJ_INSTRUMENT_WAVE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "instrument_constants.h"
 
 typedef unsigned char lsdj_playback_mode;
@@ -57,5 +61,9 @@ typedef struct
     unsigned char repeat;
     unsigned char speed;
 } lsdj_instrument_wave_t;
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

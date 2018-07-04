@@ -38,7 +38,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif    /* __cplusplus */
+#endif
 
 #include "error.h"
 #include "vio.h"
@@ -54,6 +54,6 @@ unsigned int lsdj_compress_to_file(const unsigned char* data, unsigned int block
     
 #ifdef __cplusplus
 }
-#endif    /* __cplusplus */
+#endif
 
 #endif

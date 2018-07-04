@@ -36,6 +36,10 @@
 #ifndef LSDJ_COMMAND_H
 #define LSDJ_COMMAND_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 #include <stdio.h>
 
@@ -50,5 +54,9 @@ typedef struct
     
 // Clear the command to factory settings
 void lsdj_command_clear(lsdj_command_t* command);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

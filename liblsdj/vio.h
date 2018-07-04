@@ -38,7 +38,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif    /* __cplusplus */
+#endif
 
 #include <stddef.h>
 #include <stdio.h>
@@ -82,6 +82,6 @@ long lsdj_mseek(long offset, int whence, void* user_data);
     
 #ifdef __cplusplus
 }
-#endif    /* __cplusplus */
+#endif
 
 #endif

@@ -36,6 +36,10 @@
 #ifndef LSDJ_WORD_H
 #define LSDJ_WORD_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // The default constant length of a word
 #define LSDJ_WORD_LENGTH (16)
 
@@ -51,5 +55,9 @@ typedef struct
     
 // Clear all word data to factory settings
 void lsdj_word_clear(lsdj_word_t* word);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -36,6 +36,10 @@
 #ifndef LSDJ_SONG_H
 #define LSDJ_SONG_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "instrument.h"
 #include "phrase.h"
 #include "table.h"
@@ -86,5 +90,9 @@ unsigned char lsdj_song_get_drum_max(const lsdj_song_t* song);
 lsdj_instrument_t* lsdj_song_get_instrument(lsdj_song_t* song, size_t index);
 lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index);
 lsdj_phrase_t* lsdj_song_get_phrase(lsdj_song_t* song, size_t index);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

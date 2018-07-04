@@ -36,6 +36,10 @@
 #ifndef LSDJ_INSTRUMENT_KIT_H
 #define LSDJ_INSTRUMENT_KIT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "instrument_constants.h"
 
 typedef unsigned char lsdj_kit_loop_mode;
@@ -73,5 +77,9 @@ typedef struct
     lsdj_vib_shape vibShape;
     lsdj_vib_direction vibratoDirection;
 } lsdj_instrument_kit_t;
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

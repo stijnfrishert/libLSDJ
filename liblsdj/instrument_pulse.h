@@ -36,6 +36,10 @@
 #ifndef LSDJ_INSTRUMENT_PULSE_H
 #define LSDJ_INSTRUMENT_PULSE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "instrument_constants.h"
 
 typedef unsigned char lsdj_pulse_wave;
@@ -57,5 +61,9 @@ typedef struct
     unsigned char pulse2tune;
     unsigned char fineTune;
 } lsdj_instrument_pulse_t;
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif
