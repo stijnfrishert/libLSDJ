@@ -51,17 +51,7 @@ namespace lsdj
         boost::filesystem::create_directories(folder);
         
         std::stringstream stream;
-        stream << name;
-        switch (versionStyle)
-        {
-            case VersionStyle::NONE: break;
-            case VersionStyle::HEX:
-                stream << "." << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project);
-                break;
-            case VersionStyle::DECIMAL:
-                stream << "." << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project);
-                break;
-        }
+        stream << name << convertVersionToString(lsdj_project_get_version(project), true);
         
         if (workingMemory)
             stream << ".WM";
@@ -205,12 +195,18 @@ namespace lsdj
             // Display whether the working memory song is "dirty"/edited, and display that
             // as version number (it doesn't really have a version number otherwise)
             const lsdj_song_t* song = lsdj_sav_get_working_memory_song(sav);
-            if (versionStyle != VersionStyle::NONE)
+            if (lsdj_song_get_file_changed_flag(song))
             {
-                if (lsdj_song_get_file_changed_flag(song))
-                    std::cout << "*    ";
-                else
-                    std::cout << "      ";
+                switch (versionStyle)
+                {
+                    case VersionStyle::NONE: break;
+                    case VersionStyle::HEX:
+                        std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
+                        break;
+                    case VersionStyle::DECIMAL:
+                        std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
+                        break;
+                }
             }
             
             // Display the format version of the song
@@ -260,15 +256,12 @@ namespace lsdj
                 std::cout << ' ';
             
             // Dipslay the version number of the project
+            std::cout << convertVersionToString(lsdj_project_get_version(project), false);
             switch (versionStyle)
             {
                 case VersionStyle::NONE: break;
-                case VersionStyle::HEX:
-                    std::cout << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << (unsigned int)lsdj_project_get_version(project) << "   ";
-                    break;
-                case VersionStyle::DECIMAL:
-                    std::cout << std::setfill('0') << std::setw(3) << (unsigned int)lsdj_project_get_version(project) << "  ";
-                    break;
+                case VersionStyle::HEX: std::cout << " \t"; break;
+                case VersionStyle::DECIMAL: std::cout << "\t"; break;
             }
             
             // Retrieve the sav format version of the song and display it as well
@@ -278,5 +271,28 @@ namespace lsdj
         }
         
         return 0;
+    }
+    
+    std::string Exporter::convertVersionToString(unsigned char version, bool prefixDot) const
+    {
+        std::ostringstream stream;
+        
+        switch (versionStyle)
+        {
+            case VersionStyle::NONE:
+                break;
+            case VersionStyle::HEX:
+                if (prefixDot)
+                    stream << '.';
+                stream << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(version);
+                break;
+            case VersionStyle::DECIMAL:
+                if (prefixDot)
+                    stream << '.';
+                stream << std::setfill('0') << std::setw(3) << static_cast<unsigned int>(version);
+                break;
+        }
+        
+        return stream.str();
     }
 }

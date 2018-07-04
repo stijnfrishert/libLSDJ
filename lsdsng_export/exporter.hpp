@@ -45,6 +45,10 @@ namespace lsdj
         
         std::vector<int> indices;
         std::vector<std::string> names;
+        
+    private:
+        // Converts a project version to a string representation using the current VersionStyle
+        std::string convertVersionToString(unsigned char version, bool prefixDot) const;
     };
 }
 
