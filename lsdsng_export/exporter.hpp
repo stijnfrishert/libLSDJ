@@ -49,6 +49,10 @@ namespace lsdj
     private:
         // Converts a project version to a string representation using the current VersionStyle
         std::string convertVersionToString(unsigned char version, bool prefixDot) const;
+        
+        // Print the working memory song line
+        void printWorkingMemorySong(const lsdj_sav_t* sav);
+        void printProject(const lsdj_sav_t* sav, std::size_t index);
     };
 }
 

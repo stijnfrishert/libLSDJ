@@ -167,52 +167,14 @@ namespace lsdj
         // Header
         std::cout << "#   Name     ";
         if (versionStyle != VersionStyle::NONE)
-            std::cout << "Ver  ";
+            std::cout << "Ver    ";
         std::cout << "Fmt" << std::endl;
         
         // If no specific indices were given, or -w was flagged (index == -1),
         // display the working memory song as well
         if ((indices.empty() && names.empty()) || std::find(std::begin(indices), std::end(indices), -1) != std::end(indices))
         {
-            std::cout << "WM. ";
-            
-            // If the working memory song represent one of the projects, display that name
-            const auto active = lsdj_sav_get_active_project(sav);
-            if (active != LSDJ_NO_ACTIVE_PROJECT)
-            {
-                lsdj_project_t* project = lsdj_sav_get_project(sav, active);
-                
-                const auto name = constructName(project);
-                std::cout << name;
-                for (auto i = 0; i < (9 - name.length()); ++i)
-                    std::cout << ' ';
-            } else {
-                // The working memory doesn't represent one of the projects, so it
-                // doesn't really have a name
-                std::cout << "         ";
-            }
-            
-            // Display whether the working memory song is "dirty"/edited, and display that
-            // as version number (it doesn't really have a version number otherwise)
-            const lsdj_song_t* song = lsdj_sav_get_working_memory_song(sav);
-            if (lsdj_song_get_file_changed_flag(song))
-            {
-                switch (versionStyle)
-                {
-                    case VersionStyle::NONE: break;
-                    case VersionStyle::HEX:
-                        std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
-                        break;
-                    case VersionStyle::DECIMAL:
-                        std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
-                        break;
-                }
-            }
-            
-            // Display the format version of the song
-            std::cout << std::to_string(lsdj_song_get_format_version(song));
-            
-            std::cout << std::endl;
+            printWorkingMemorySong(sav);
         }
         
         // Go through all compressed projects
@@ -223,51 +185,7 @@ namespace lsdj
             if (!indices.empty() && std::find(std::begin(indices), std::end(indices), i) == std::end(indices))
                 continue;
             
-            // Retrieve the project
-            const lsdj_project_t* project = lsdj_sav_get_project(sav, i);
-            
-            // See if we're using name-based specification and whether this project has been singled out
-            // If not, skip it and move on to the next one
-            if (!names.empty())
-            {
-                char name[9];
-                std::fill_n(name, 9, '\0');
-                lsdj_project_get_name(project, name, sizeof(name));
-                const auto namestr = std::string(name);
-                if (std::find_if(std::begin(names), std::end(names), [&](const auto& x){ return lsdj::compareCaseInsensitive(x, namestr); }) == std::end(names))
-                    continue;
-            }
-            
-            // Retrieve the song belonging to this project, make sure it's there
-            const lsdj_song_t* song = lsdj_project_get_song(project);
-            if (!song)
-                continue;
-            
-            // Print out the index
-            std::cout << std::to_string(i) << ". ";
-            if (i < 10)
-                std::cout << ' ';
-            
-            // Display the name of the project
-            const auto name = constructName(project);
-            std::cout << name;
-            
-            for (auto i = 0; i < (9 - name.length()); ++i)
-                std::cout << ' ';
-            
-            // Dipslay the version number of the project
-            std::cout << convertVersionToString(lsdj_project_get_version(project), false);
-            switch (versionStyle)
-            {
-                case VersionStyle::NONE: break;
-                case VersionStyle::HEX: std::cout << " \t"; break;
-                case VersionStyle::DECIMAL: std::cout << "\t"; break;
-            }
-            
-            // Retrieve the sav format version of the song and display it as well
-            std::cout << std::to_string(lsdj_song_get_format_version(song));
-            
-            std::cout << std::endl;
+            printProject(sav, i);
         }
         
         return 0;
@@ -294,5 +212,93 @@ namespace lsdj
         }
         
         return stream.str();
+    }
+    
+    void Exporter::printWorkingMemorySong(const lsdj_sav_t* sav)
+    {
+        std::cout << "WM  ";
+        
+        // If the working memory song represent one of the projects, display that name
+        const auto active = lsdj_sav_get_active_project(sav);
+        if (active != LSDJ_NO_ACTIVE_PROJECT)
+        {
+            lsdj_project_t* project = lsdj_sav_get_project(sav, active);
+            
+            const auto name = constructName(project);
+            std::cout << name;
+            for (auto i = 0; i < (9 - name.length()); ++i)
+                std::cout << ' ';
+        } else {
+            // The working memory doesn't represent one of the projects, so it
+            // doesn't really have a name
+            std::cout << "         ";
+        }
+        
+        // Display whether the working memory song is "dirty"/edited, and display that
+        // as version number (it doesn't really have a version number otherwise)
+        const lsdj_song_t* song = lsdj_sav_get_working_memory_song(sav);
+        if (lsdj_song_get_file_changed_flag(song))
+        {
+            switch (versionStyle)
+            {
+                case VersionStyle::NONE: break;
+                case VersionStyle::HEX:
+                    std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
+                    break;
+                case VersionStyle::DECIMAL:
+                    std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
+                    break;
+            }
+        }
+        
+        // Display the format version of the song
+        std::cout << std::to_string(lsdj_song_get_format_version(song)) << std::endl;
+    }
+
+    void Exporter::printProject(const lsdj_sav_t* sav, std::size_t index)
+    {
+        // Retrieve the project
+        const lsdj_project_t* project = lsdj_sav_get_project(sav, index);
+        
+        // See if we're using name-based specification and whether this project has been singled out
+        // If not, skip it and move on to the next one
+        if (!names.empty())
+        {
+            char name[9];
+            std::fill_n(name, 9, '\0');
+            lsdj_project_get_name(project, name, sizeof(name));
+            const auto namestr = std::string(name);
+            if (std::find_if(std::begin(names), std::end(names), [&](const auto& x){ return lsdj::compareCaseInsensitive(x, namestr); }) == std::end(names))
+                return;
+        }
+        
+        // Retrieve the song belonging to this project, make sure it's there
+        const lsdj_song_t* song = lsdj_project_get_song(project);
+        if (!song)
+            return;
+        
+        // Print out the index
+        std::cout << std::to_string(index) << "  ";
+        if (index < 10)
+            std::cout << ' ';
+        
+        // Display the name of the project
+        const auto name = constructName(project);
+        std::cout << name;
+        
+        for (auto i = 0; i < (9 - name.length()); ++i)
+            std::cout << ' ';
+        
+        // Dipslay the version number of the project
+        std::cout << convertVersionToString(lsdj_project_get_version(project), false);
+        switch (versionStyle)
+        {
+            case VersionStyle::NONE: break;
+            case VersionStyle::HEX: std::cout << " \t"; break;
+            case VersionStyle::DECIMAL: std::cout << "\t"; break;
+        }
+        
+        // Retrieve the sav format version of the song and display it as well
+        std::cout << std::to_string(lsdj_song_get_format_version(song)) << std::endl;
     }
 }
