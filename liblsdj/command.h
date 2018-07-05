@@ -62,7 +62,11 @@ extern "C" {
 #define LSDJ_COMMAND_V (0x10)
 #define LSDJ_COMMAND_W (0x11)
 #define LSDJ_COMMAND_Z (0x12)
-
+#define LSDJ_COMMAND_ARDUINO_BOY_N (0x13)
+#define LSDJ_COMMAND_ARDUINO_BOY_X (0x14)
+#define LSDJ_COMMAND_ARDUINO_BOY_Q (0x15)
+#define LSDJ_COMMAND_ARDUINO_BOY_Y (0x16)
+    
 // Structure representing an effect command with its argument value
 typedef struct
 {
