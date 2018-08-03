@@ -53,7 +53,10 @@ void lsdj_synth_clear(lsdj_synth_t* synth)
     synth->cutOffEnd = 0xFF;
     synth->phaseEnd = 0;
     synth->vshiftEnd = 0;
-    synth->reserved[0] = synth->reserved[1] = synth->reserved[2] = 0;
+    synth->limitStart = 0xF;
+    synth->limitEnd = 0xF;
+    synth->reserved[0] = 0;
+    synth->reserved[1] = 0;
     
     synth->overwritten = 0;
 }

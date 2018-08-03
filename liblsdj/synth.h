@@ -77,7 +77,10 @@ typedef struct
     unsigned char vshiftStart;
     unsigned char vshiftEnd;
     
-    unsigned char reserved[3];
+    unsigned char limitStart;
+    unsigned char limitEnd;
+    
+    unsigned char reserved[2];
     
     unsigned char overwritten; // 0 if false, 1 if true
 } lsdj_synth_t;

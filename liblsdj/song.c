@@ -430,7 +430,14 @@ void read_soft_synth_parameters(lsdj_vio_t* vio, lsdj_synth_t* synth)
     vio->read(&synth->cutOffEnd, 1, vio->user_data);
     vio->read(&synth->phaseEnd, 1, vio->user_data);
     vio->read(&synth->vshiftEnd, 1, vio->user_data);
-    vio->read(synth->reserved, 3, vio->user_data);
+    
+    unsigned char byte = 0x00;
+    vio->read(&byte, 1, vio->user_data);
+    byte = 0xFF - byte;
+    synth->limitStart = (byte >> 4) & 0xF;
+    synth->limitEnd = byte & 0xF;
+    
+    vio->read(synth->reserved, 2, vio->user_data);
 }
 
 void read_bank1(lsdj_vio_t* vio, lsdj_song_t* song, lsdj_error_t** error)
@@ -573,7 +580,11 @@ void write_soft_synth_parameters(const lsdj_synth_t* synth, lsdj_vio_t* vio)
     vio->write(&synth->cutOffEnd, 1, vio->user_data);
     vio->write(&synth->phaseEnd, 1, vio->user_data);
     vio->write(&synth->vshiftEnd, 1, vio->user_data);
-    vio->write(synth->reserved, 3, vio->user_data);
+    
+    unsigned char byte = 0xFF - (unsigned char)((synth->limitStart << 4) | synth->limitEnd);
+    vio->write(&byte, 1, vio->user_data);
+    
+    vio->write(synth->reserved, 2, vio->user_data);
 }
 
 void write_bank1(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error)
