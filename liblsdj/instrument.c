@@ -827,8 +827,8 @@ void lsdj_instrument_get_name(const lsdj_instrument_t* instrument, char* data, s
 {
     const size_t len = strnlen(instrument->name, LSDJ_INSTRUMENT_NAME_LENGTH);
     strncpy(data, instrument->name, len);
-    if (len < size)
-        data[len] = '\0';
+    for (size_t i = len; i < LSDJ_INSTRUMENT_NAME_LENGTH; i += 1)
+        data[i] = '\0';
 }
 
 void lsdj_instrument_set_panning(lsdj_instrument_t* instrument, lsdj_panning panning)
