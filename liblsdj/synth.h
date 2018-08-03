@@ -51,6 +51,7 @@ static const unsigned char LSDJ_SYNTH_FILTER_ALL_PASS = 3;
     
 static const unsigned char LSDJ_SYNTH_DISTORTION_CLIP = 0;
 static const unsigned char LSDJ_SYNTH_DISTORTION_WRAP = 1;
+static const unsigned char LSDJ_SYNTH_DISTORTION_FOLD = 2;
     
 static const unsigned char LSDJ_SYNTH_PHASE_NORMAL = 0;
 static const unsigned char LSDJ_SYNTH_PHASE_RESYNC = 1;
