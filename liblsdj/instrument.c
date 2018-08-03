@@ -394,10 +394,11 @@ void read_kit_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrument
     
     vio->seek(1, SEEK_CUR, vio->user_data); // Byte 4 is empty
     
+    // Byte 5
     vio->read(&byte, 1, vio->user_data);
     if (instrument->kit.loop1 != LSDJ_KIT_LOOP_ATTACK)
-        instrument->kit.loop1 = ((byte >> 6) & 1) ? LSDJ_KIT_LOOP_ON : LSDJ_KIT_LOOP_OFF;
-    instrument->kit.loop2 = ((byte >> 6) & 1) ? LSDJ_KIT_LOOP_ON : LSDJ_KIT_LOOP_OFF;
+        instrument->kit.loop1 = (byte & 0x40) ? LSDJ_KIT_LOOP_ON : LSDJ_KIT_LOOP_OFF;
+    instrument->kit.loop2 = (byte & 0x20) ? LSDJ_KIT_LOOP_ON : LSDJ_KIT_LOOP_OFF;
     instrument->automate = parseAutomate(byte);
     
     instrument->kit.vibratoDirection = byte & 1;
@@ -435,25 +436,30 @@ void read_kit_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrument
         }
     }
     
+    // byte 6
     vio->read(&byte, 1, vio->user_data);
     instrument->table = parseTable(byte);
     
+    // byte 7
     vio->read(&byte, 1, vio->user_data);
     instrument->panning = parsePanning(byte);
     
+    // byte 8
     vio->read(&instrument->kit.pitch, 1, vio->user_data);
     
+    // byte 9
     vio->read(&byte, 1, vio->user_data);
     if ((byte >> 7) & 1)
         instrument->kit.loop2 = LSDJ_KIT_LOOP_ATTACK;
     instrument->kit.kit2 = byte & 0x3F;
     
+    // byte 10
     vio->read(&byte, 1, vio->user_data);
     instrument->kit.distortion = parseKitDistortion(byte);
     
-    vio->read(&instrument->kit.length2, 1, vio->user_data);
-    vio->read(&instrument->kit.offset1, 1, vio->user_data);
-    vio->read(&instrument->kit.offset2, 1, vio->user_data);
+    vio->read(&instrument->kit.length2, 1, vio->user_data); // byte 11
+    vio->read(&instrument->kit.offset1, 1, vio->user_data); // byte 12
+    vio->read(&instrument->kit.offset2, 1, vio->user_data); // byte 13
     
     vio->seek(2, SEEK_CUR, vio->user_data); // Bytes 14 and 15 are empty
 }
@@ -720,19 +726,21 @@ void write_kit_instrument(const lsdj_instrument_t* instrument, unsigned char ver
     byte = 0xFF;
     vio->write(&byte, 1, vio->user_data); // Byte 4 is empty
     
-    byte = ((instrument->kit.loop1 == LSDJ_KIT_LOOP_ON) ? 0x80 : 0x0) |
-           ((instrument->kit.loop2 == LSDJ_KIT_LOOP_ON) ? 0x40 : 0x0) |
+    // byte 5
+    byte = ((instrument->kit.loop1 == LSDJ_KIT_LOOP_ON) ? 0x40 : 0x0) |
+           ((instrument->kit.loop2 == LSDJ_KIT_LOOP_ON) ? 0x20 : 0x0) |
            createAutomateByte(instrument->automate);
     
     if (version < 4)
     {
         byte |= (instrument->kit.plvibSpeed & 3) << 1;
     } else {
-        byte |= (instrument->kit.vibShape & 3) << 1;
-        if (instrument->kit.plvibSpeed == LSDJ_PLVIB_TICK)
-            byte |= 0x10;
-        else if (instrument->kit.plvibSpeed == LSDJ_PLVIB_STEP)
-            byte |= 0x80;
+        switch (instrument->kit.plvibSpeed)
+        {
+            case LSDJ_PLVIB_FAST: break;
+            case LSDJ_PLVIB_TICK: byte |= 0x10; break;
+            case LSDJ_PLVIB_STEP: byte |= 0x80; break;
+        }
     }
     vio->write(&byte, 1, vio->user_data);
     
