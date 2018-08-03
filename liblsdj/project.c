@@ -273,8 +273,8 @@ void lsdj_project_get_name(const lsdj_project_t* project, char* data, size_t siz
 {
     const size_t len = strnlen(project->name, LSDJ_PROJECT_NAME_LENGTH);
     strncpy(data, project->name, len);
-    if (len < size)
-        data[len] = '\0';
+    for (size_t i = len; i < LSDJ_PROJECT_NAME_LENGTH; i += 1)
+        data[i] = '\0';
 }
 
 void lsdj_project_set_version(lsdj_project_t* project, unsigned char version)

@@ -36,19 +36,22 @@
 #ifndef LSDJ_ROW_H
 #define LSDJ_ROW_H
 
+#include "channel.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 // Structure representing a row in an LSDJ song sequence
-typedef struct
+typedef union
 {
     // Four chain indices
     /* The chains themselves are stored in the encompassing song */
-    unsigned char pulse1;
-    unsigned char pulse2;
-    unsigned char wave;
-    unsigned char noise;
+    struct
+    {
+        unsigned char pulse1, pulse2, wave, noise;
+    };
+    unsigned char channels[LSDJ_CHANNEL_COUNT];
 } lsdj_row_t;
     
 // Clear all row data to factory settings

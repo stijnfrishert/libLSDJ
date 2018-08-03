@@ -40,22 +40,29 @@
 extern "C" {
 #endif
 
+#include "chain.h"
+#include "groove.h"
 #include "instrument.h"
 #include "phrase.h"
+#include "row.h"
+#include "synth.h"
 #include "table.h"
 #include "vio.h"
+#include "wave.h"
+#include "word.h"
 
 #define LSDJ_SONG_DECOMPRESSED_SIZE (0x8000)
 #define LSDJ_ROW_COUNT (256)
 #define LSDJ_CHAIN_COUNT (128)
 #define LSDJ_PHRASE_COUNT (0xFF)
-#define LSDJ_BOOKMARK_COUNT (64)
 #define LSDJ_INSTRUMENT_COUNT (64)
 #define LSDJ_SYNTH_COUNT (16)
 #define LSDJ_TABLE_COUNT (32)
 #define LSDJ_WAVE_COUNT (256)
 #define LSDJ_GROOVE_COUNT (32)
 #define LSDJ_WORD_COUNT (42)
+#define LSDJ_BOOKMARK_POSITION_COUNT (16)
+#define LSDJ_NO_BOOKMARK (0xFF)
     
 static const unsigned char LSDJ_CLONE_DEEP = 0;
 static const unsigned char LSDJ_CLONE_SLIM = 1;
@@ -87,9 +94,19 @@ unsigned char lsdj_song_get_file_changed_flag(const lsdj_song_t* song);
 void lsdj_song_set_drum_max(lsdj_song_t* song, unsigned char drumMax);
 unsigned char lsdj_song_get_drum_max(const lsdj_song_t* song);
 
-lsdj_instrument_t* lsdj_song_get_instrument(lsdj_song_t* song, size_t index);
-lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index);
+lsdj_row_t* lsdj_song_get_row(lsdj_song_t* song, size_t index);
+lsdj_chain_t* lsdj_song_get_chain(lsdj_song_t* song, size_t index);
 lsdj_phrase_t* lsdj_song_get_phrase(lsdj_song_t* song, size_t index);
+lsdj_instrument_t* lsdj_song_get_instrument(lsdj_song_t* song, size_t index);
+lsdj_synth_t* lsdj_song_get_synth(lsdj_song_t* song, size_t index);
+lsdj_wave_t* lsdj_song_get_wave(lsdj_song_t* song, size_t index);
+lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index);
+lsdj_groove_t* lsdj_song_get_groove(lsdj_song_t* song, size_t index);
+lsdj_word_t* lsdj_song_get_word(lsdj_song_t* song, size_t index);
+void lsdj_song_set_word_name(lsdj_song_t* song, size_t index, const char* data, size_t size);
+void lsdj_song_get_word_name(lsdj_song_t* song, size_t index, char* data, size_t size);
+void lsdj_song_set_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position, unsigned char bookmark);
+unsigned char lsdj_song_get_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position);
     
 #ifdef __cplusplus
 }
