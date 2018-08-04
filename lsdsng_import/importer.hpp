@@ -35,18 +35,32 @@
 #ifndef LSDJ_IMPORTER_HPP
 #define LSDJ_IMPORTER_HPP
 
+#include <boost/filesystem.hpp>
 #include <string>
 #include <vector>
+
+#include "../liblsdj/error.h"
+#include "../liblsdj/sav.h"
 
 namespace lsdj
 {
     class Importer
     {
     public:
-        int importSongs(const std::vector<std::string>& inputs, std::string outputFile, const char* savName);
+        int importSongs(const char* savName);
         
     public:
+        std::vector<std::string> inputs;
+        std::string outputFile;
         bool verbose = false;
+        
+    private:
+        void importSong(const std::string& path, lsdj_sav_t* sav, unsigned char index, unsigned char active, lsdj_error_t** error);
+        void importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<boost::filesystem::path>& paths, lsdj_error_t** error);
+        
+    private:
+        //! The path that refers to the working memory song
+        boost::filesystem::path workingMemoryPath;
     };
 }
 

@@ -33,12 +33,10 @@
  
  */
 
+#include <algorithm>
 #include <array>
-#include <boost/filesystem.hpp>
 #include <iostream>
 
-#include "../liblsdj/error.h"
-#include "../liblsdj/sav.h"
 #include "../liblsdj/song.h"
 #include "../liblsdj/project.h"
 
@@ -47,13 +45,57 @@
 
 namespace lsdj
 {
-    int Importer::importSongs(const std::vector<std::string>& inputs, std::string outputFile, const char* savName)
+    // Scan a path, see whether it's either an .lsdsng or a folder containing .lsdsng's
+    // Returns the path to the .WM (working memory) file, or {} is there was none
+    boost::filesystem::path scanPath(const boost::filesystem::path& path, std::vector<boost::filesystem::path>& paths)
     {
+        if (isHiddenFile(path.filename().string()))
+            return {};
+        
+        if (boost::filesystem::is_regular_file(path))
+        {
+            paths.emplace_back(path);
+            return {};
+        }
+        else if (boost::filesystem::is_directory(path))
+        {
+            boost::filesystem::path workingMemoryPath;
+            std::vector<boost::filesystem::path> contents;
+            for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
+            {
+                const auto path = it->path();
+                if (isHiddenFile(path.filename().string()) || !boost::filesystem::is_regular_file(path) || path.extension() != ".lsdsng")
+                    continue;
+                
+                const auto str = path.stem().string();
+                if (str.size() >= 3 && str.substr(str.length() - 3) == ".WM")
+                {
+                    workingMemoryPath = path;
+                    continue;
+                }
+                
+                contents.emplace_back(path);
+            }
+            
+            std::sort(contents.begin(), contents.end());
+            for (auto& path : contents)
+                paths.emplace_back(path);
+            
+            return workingMemoryPath;
+        } else {
+            throw std::runtime_error(path.string() + " is not a file or directory");
+        }
+    }
+    
+    int Importer::importSongs(const char* savName)
+    {
+        // Try to load the provided destination sav, or create a new one
         lsdj_error_t* error = nullptr;
         lsdj_sav_t* sav = savName ? lsdj_sav_read_from_file(boost::filesystem::absolute(savName).string().c_str(), &error) : lsdj_sav_new(&error);
         if (error)
             return handle_error(error);
         
+        // Find the first available project slot index
         auto index = 0;
         for( ; index < lsdj_sav_get_project_count(sav); ++index)
         {
@@ -63,88 +105,50 @@ namespace lsdj
                 break;
         }
         
-        if (savName)
+        if (savName && verbose)
             std::cout << "Read " << savName << ", containing " << std::to_string(index) << " saves" << std::endl;
         
+        // Go through all input files and recursively find all .lsdsngs's (and the working memory file)
         std::vector<boost::filesystem::path> paths;
-        boost::filesystem::path workingMemoryPath;
         for (auto& input : inputs)
         {
-            const auto path = boost::filesystem::absolute(input);
-            if (isHiddenFile(path.filename().string()))
-                continue;
-            
-            if (boost::filesystem::is_regular_file(path))
+            const auto wm = scanPath(boost::filesystem::absolute(input), paths);
+            if (!wm.empty())
             {
-                paths.emplace_back(path);
-            }
-            else if (boost::filesystem::is_directory(path))
-            {
-                std::vector<boost::filesystem::path> contents;
-                for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
+                if (!workingMemoryPath.empty())
                 {
-                    const auto path = it->path();
-                    if (isHiddenFile(path.filename().string()) || !boost::filesystem::is_regular_file(path) || path.extension() != ".lsdsng")
-                        continue;
-                    
-                    const auto str = path.stem().string();
-                    if (str.size() >= 3 && str.substr(str.length() - 3) == ".WM")
-                    {
-                        workingMemoryPath = path;
-                        continue;
-                    }
-                    
-                    contents.emplace_back(path);
+                    std::cerr << "Multiple working memory (.WM) .lsdsng's found" << std::endl;
+                    return 1;
                 }
                 
-                std::sort(contents.begin(), contents.end());
-                for (auto& path : contents)
-                    paths.emplace_back(path);
-            } else {
-                throw std::runtime_error(path.string() + " is not a file or directory");
+                workingMemoryPath = wm;
             }
         }
         
+        // Construct an output file name if it's empty
+        if (outputFile.empty())
+        {
+            if (inputs.size() == 1)
+                outputFile = std::string(paths.front().filename().string()) + ".sav";
+            else
+                outputFile = "out.sav";
+        }
+        
+        // Import all lsdsng files
         const auto active = lsdj_sav_get_active_project(sav);
         for (auto i = 0; i < paths.size(); ++i)
         {
             if (index == lsdj_sav_get_project_count(sav))
+            {
+                std::cerr << "Reached maximum project count, can't write " << paths[i].string() << std::endl;
                 break;
+            }
             
-            lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(paths[i].string().c_str(), &error);
+            importSong(paths[i].string(), sav, index, active, &error);
             if (error)
             {
                 lsdj_sav_free(sav);
                 return handle_error(error);
-            }
-            
-            lsdj_sav_set_project(sav, index, project, &error);
-            if (error)
-            {
-                lsdj_project_free(project);
-                lsdj_sav_free(sav);
-                return handle_error(error);
-            }
-            
-            std::array<char, 9> name;
-            name.fill('\0');
-            lsdj_project_get_name(project, name.data(), 8);
-            
-            if (outputFile.empty() && inputs.size() == 1)
-                outputFile = std::string(name.data()) + ".sav";
-            
-            if (verbose)
-                std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
-            
-            if (i == 0 && active == LSDJ_NO_ACTIVE_PROJECT && workingMemoryPath.empty())
-            {
-                lsdj_sav_set_working_memory_song_from_project(sav, i, &error);
-                if (error)
-                {
-                    lsdj_project_free(project);
-                    lsdj_sav_free(sav);
-                    return handle_error(error);
-                }
             }
             
             index += 1;
@@ -152,42 +156,18 @@ namespace lsdj
         
         if (!workingMemoryPath.empty())
         {
-            lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(workingMemoryPath.string().c_str(), &error);
+            importWorkingMemorySong(sav, paths, &error);
             if (error)
             {
-                lsdj_project_free(project);
                 lsdj_sav_free(sav);
                 return handle_error(error);
             }
-            
-            lsdj_song_t* song = lsdj_song_copy(lsdj_project_get_song(project), &error);
-            if (error)
-            {
-                lsdj_project_free(project);
-                lsdj_sav_free(sav);
-                return handle_error(error);
-            }
-            
-            int active = LSDJ_NO_ACTIVE_PROJECT;
-            const auto str = workingMemoryPath.stem().string();
-            const auto stem = str.substr(0, str.size() - 3);
-            for (int i = 0; i != paths.size(); ++i)
-            {
-                if (stem == paths[i].stem().string())
-                {
-                    active = i;
-                    break;
-                }
-            }
-            
-            lsdj_sav_set_working_memory_song(sav, song, active);
-            
-            lsdj_project_free(project);
         }
         
         if (outputFile.empty())
             outputFile = "out.sav";
         
+        // Write the sav to file
         lsdj_sav_write_to_file(sav, boost::filesystem::absolute(outputFile).string().c_str(), &error);
         if (error)
         {
@@ -196,5 +176,57 @@ namespace lsdj
         }
         
         return 0;
+    }
+    
+    void Importer::importSong(const std::string& path, lsdj_sav_t* sav, unsigned char index, unsigned char active, lsdj_error_t** error)
+    {
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.c_str(), error);
+        if (*error != nullptr)
+            return;
+        
+        lsdj_sav_set_project(sav, index, project, error);
+        if (*error != nullptr)
+            return lsdj_project_free(project);
+        
+        std::array<char, 9> name;
+        name.fill('\0');
+        lsdj_project_get_name(project, name.data(), 8);
+        
+        if (verbose)
+            std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
+        
+        if (index == 0 && active == LSDJ_NO_ACTIVE_PROJECT && workingMemoryPath.empty())
+        {
+            lsdj_sav_set_working_memory_song_from_project(sav, index, error);
+            if (*error != nullptr)
+                return lsdj_project_free(project);
+        }
+    }
+    
+    void Importer::importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<boost::filesystem::path>& paths, lsdj_error_t** error)
+    {
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(workingMemoryPath.string().c_str(), error);
+        if (*error != nullptr)
+            return lsdj_project_free(project);
+        
+        lsdj_song_t* song = lsdj_song_copy(lsdj_project_get_song(project), error);
+        if (*error != nullptr)
+            return lsdj_project_free(project);
+        
+        int active = LSDJ_NO_ACTIVE_PROJECT;
+        const auto str = workingMemoryPath.stem().string();
+        const auto stem = str.substr(0, str.size() - 3);
+        for (int i = 0; i != paths.size(); ++i)
+        {
+            if (stem == paths[i].stem().string())
+            {
+                active = i;
+                break;
+            }
+        }
+        
+        lsdj_sav_set_working_memory_song(sav, song, active);
+        
+        lsdj_project_free(project);
     }
 }

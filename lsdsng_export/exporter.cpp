@@ -140,7 +140,6 @@ namespace lsdj
         path /= stream.str();
         
         lsdj_project_write_lsdsng_to_file(project, path.string().c_str(), error);
-        
         if (*error != nullptr)
             return;
         

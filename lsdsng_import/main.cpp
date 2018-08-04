@@ -68,11 +68,11 @@ int main(int argc, char* argv[])
         } else if (vm.count("file")) {
             lsdj::Importer importer;
             
+            importer.inputs = vm["file"].as<std::vector<std::string>>();
+            importer.outputFile = vm.count("output") ? vm["output"].as<std::string>() : "";
             importer.verbose = vm.count("verbose");
             
-            return importer.importSongs(vm["file"].as<std::vector<std::string>>(),
-                               vm.count("output") ? vm["output"].as<std::string>() : "",
-                               vm.count("sav") ? vm["sav"].as<std::string>().c_str() : nullptr);
+            return importer.importSongs(vm.count("sav") ? vm["sav"].as<std::string>().c_str() : nullptr);
         } else {
             std::cout << desc << std::endl;
             return 0;
