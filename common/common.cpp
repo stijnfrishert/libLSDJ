@@ -33,55 +33,44 @@
  
  */
 
-#ifndef LSDJ_EXPORTER_HPP
-#define LSDJ_EXPORTER_HPP
+#include <iostream>
 
-#include <boost/filesystem/path.hpp>
-
-#include "../liblsdj/error.h"
-#include "../liblsdj/project.h"
-#include "../liblsdj/sav.h"
+#include "common.hpp"
 
 namespace lsdj
 {
-    class Exporter
+    int handle_error(lsdj_error_t* error)
     {
-    public:
-        enum class VersionStyle
+        std::cerr << "ERROR: " << lsdj_error_get_c_str(error) << std::endl;
+        lsdj_error_free(error);
+        return 1;
+    }
+    
+    bool compareCaseInsensitive(std::string str1, std::string str2)
+    {
+        std::transform(str1.begin(), str1.end(), str1.begin(), ::tolower);
+        std::transform(str2.begin(), str2.end(), str2.begin(), ::tolower);
+        return str1 == str2;
+    }
+    
+    std::string constructProjectName(const lsdj_project_t* project, bool underscore)
+    {
+        char name[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        lsdj_project_get_name(project, name, sizeof(name));
+        
+        if (underscore)
+            std::replace(name, name + 9, 'x', '_');
+        
+        return name;
+    }
+    
+    bool isHiddenFile(const std::string& str)
+    {
+        switch (str.size())
         {
-            NONE,
-            HEX,
-            DECIMAL
-        };
-        
-    public:
-        int exportProjects(const boost::filesystem::path& path, const std::string& output);
-        void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, bool workingMemory, lsdj_error_t** error);
-        int print(const boost::filesystem::path& path);
-        
-    public:
-        // The version exporting style
-        VersionStyle versionStyle = VersionStyle::HEX;
-        
-        bool underscore = false;
-        bool putInFolder = false;
-        bool verbose = false;
-        
-        std::vector<int> indices;
-        std::vector<std::string> names;
-        
-    private:
-        // Converts a project version to a string representation using the current VersionStyle
-        std::string convertVersionToString(unsigned char version, bool prefixDot) const;
-        
-        // Print the working memory song line
-        void printWorkingMemorySong(const lsdj_sav_t* sav);
-        
-        // Print a sav project line
-        void printProject(const lsdj_sav_t* sav, std::size_t index);
-        
-        std::string constructName(const lsdj_project_t* project);
-    };
+            case 0: return true;
+            case 1: return false;
+            default: return str[0] == '.' && str[1] != '.' && str[1] != '/';
+        }
+    }
 }
-
-#endif
