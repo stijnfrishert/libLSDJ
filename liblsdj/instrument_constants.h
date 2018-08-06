@@ -36,6 +36,10 @@
 #ifndef LSDJ_INSTRUMENT_CONSTANTS_H
 #define LSDJ_INSTRUMENT_CONSTANTS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef unsigned char lsdj_plvib_speed;
 static const lsdj_plvib_speed LSDJ_PLVIB_FAST = 0;
 static const lsdj_plvib_speed LSDJ_PLVIB_TICK = 1;
@@ -49,5 +53,9 @@ typedef unsigned char lsdj_vib_shape;
 typedef unsigned char lsdj_vib_direction;
 static const lsdj_vib_direction LSDJ_VIB_UP = 0;
 static const lsdj_vib_direction LSDJ_VIB_DOWN = 1;
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -36,6 +36,10 @@
 #ifndef LSDJ_INSTRUMENT_NOISE_H
 #define LSDJ_INSTRUMENT_NOISE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef unsigned char lsdj_scommand_type;
 static const lsdj_scommand_type LSDJ_SCOMMAND_FREE = 0;
 static const lsdj_scommand_type LSDJ_SCOMMAND_STABLE = 1;
@@ -46,5 +50,9 @@ typedef struct
     unsigned char shape;
     lsdj_scommand_type sCommand;
 } lsdj_instrument_noise_t;
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

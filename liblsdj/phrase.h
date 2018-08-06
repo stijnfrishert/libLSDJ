@@ -36,6 +36,10 @@
 #ifndef LSDJ_PHRASE_H
 #define LSDJ_PHRASE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "command.h"
 
 // The default constant lenght of a phrase
@@ -58,5 +62,9 @@ lsdj_phrase_t* lsdj_phrase_copy(const lsdj_phrase_t* phrase);
     
 // Clear all phrase data to factory settings
 void lsdj_phrase_clear(lsdj_phrase_t* phrase);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

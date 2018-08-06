@@ -36,6 +36,10 @@
 #ifndef LSDJ_SYNTH_H
 #define LSDJ_SYNTH_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 static const unsigned char LSDJ_SYNTH_WAVEFORM_SAWTOOTH = 0;
 static const unsigned char LSDJ_SYNTH_WAVEFORM_SQUARE = 1;
 static const unsigned char LSDJ_SYNTH_WAVEFORM_TRIANGLE = 2;
@@ -47,6 +51,7 @@ static const unsigned char LSDJ_SYNTH_FILTER_ALL_PASS = 3;
     
 static const unsigned char LSDJ_SYNTH_DISTORTION_CLIP = 0;
 static const unsigned char LSDJ_SYNTH_DISTORTION_WRAP = 1;
+static const unsigned char LSDJ_SYNTH_DISTORTION_FOLD = 2;
     
 static const unsigned char LSDJ_SYNTH_PHASE_NORMAL = 0;
 static const unsigned char LSDJ_SYNTH_PHASE_RESYNC = 1;
@@ -72,12 +77,19 @@ typedef struct
     unsigned char vshiftStart;
     unsigned char vshiftEnd;
     
-    unsigned char reserved[3];
+    unsigned char limitStart;
+    unsigned char limitEnd;
+    
+    unsigned char reserved[2];
     
     unsigned char overwritten; // 0 if false, 1 if true
 } lsdj_synth_t;
 
 // Clear all soft synth data to factory settings
 void lsdj_synth_clear(lsdj_synth_t* synth);
+    
+#ifdef __cplusplus
+}
+#endif
     
 #endif

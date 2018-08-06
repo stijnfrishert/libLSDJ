@@ -36,6 +36,10 @@
 #ifndef LSDJ_WAVE_H
 #define LSDJ_WAVE_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "command.h"
 
 // The default length of wave data
@@ -50,5 +54,9 @@ typedef struct
     
 // Clear all wave data to factory settings
 void lsdj_wave_clear(lsdj_wave_t* wave);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

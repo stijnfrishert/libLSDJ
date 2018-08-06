@@ -33,29 +33,44 @@
  
  */
 
-#ifndef LSDJ_ERROR_H
-#define LSDJ_ERROR_H
+#include <iostream>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "common.hpp"
 
-// Structure containing specific error details
-typedef struct lsdj_error_t lsdj_error_t;
+namespace lsdj
+{
+    int handle_error(lsdj_error_t* error)
+    {
+        std::cerr << "ERROR: " << lsdj_error_get_c_str(error) << std::endl;
+        lsdj_error_free(error);
+        return 1;
+    }
     
-// Create an error with a given message
-/*! Every call to lsdj_error_new() should be paired with one to lsdj_error_free() */
-void lsdj_error_new(lsdj_error_t** error, const char* message);
+    bool compareCaseInsensitive(std::string str1, std::string str2)
+    {
+        std::transform(str1.begin(), str1.end(), str1.begin(), ::tolower);
+        std::transform(str2.begin(), str2.end(), str2.begin(), ::tolower);
+        return str1 == str2;
+    }
     
-// Free error data returned from an lsdj function call
-/*! Every call to lsdj_error_new() should be paired with one to lsdj_error_free() */
-void lsdj_error_free(lsdj_error_t* error);
+    std::string constructProjectName(const lsdj_project_t* project, bool underscore)
+    {
+        char name[9] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        lsdj_project_get_name(project, name, sizeof(name));
+        
+        if (underscore)
+            std::replace(name, name + 9, 'x', '_');
+        
+        return name;
+    }
     
-// Retrieve a string description of an error
-const char* lsdj_error_get_c_str(lsdj_error_t* error);
-    
-#ifdef __cplusplus
+    bool isHiddenFile(const std::string& str)
+    {
+        switch (str.size())
+        {
+            case 0: return true;
+            case 1: return false;
+            default: return str[0] == '.' && str[1] != '.' && str[1] != '/';
+        }
+    }
 }
-#endif
-
-#endif

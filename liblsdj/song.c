@@ -101,7 +101,17 @@ struct lsdj_song_t
     char wordNames[LSDJ_WORD_COUNT][LSDJ_WORD_NAME_LENGTH];
     
     // Bookmarks
-    unsigned char bookmarks[LSDJ_BOOKMARK_COUNT];
+    union
+    {
+        struct
+        {
+            unsigned char pulse1[LSDJ_BOOKMARK_POSITION_COUNT];
+            unsigned char pulse2[LSDJ_BOOKMARK_POSITION_COUNT];
+            unsigned char wave[LSDJ_BOOKMARK_POSITION_COUNT];
+            unsigned char noise[LSDJ_BOOKMARK_POSITION_COUNT];
+        };
+        unsigned char channels[LSDJ_BOOKMARK_POSITION_COUNT][LSDJ_CHANNEL_COUNT];
+    } bookmarks;
     
     struct
     {
@@ -183,7 +193,7 @@ lsdj_song_t* lsdj_song_new(lsdj_error_t** error)
         lsdj_word_clear(&song->words[i]);
     
     memcpy(song->wordNames, DEFAULT_WORD_NAMES, sizeof(song->wordNames));
-    memset(song->bookmarks, 0xFF, sizeof(song->bookmarks));
+    memset(&song->bookmarks, LSDJ_NO_BOOKMARK, sizeof(song->bookmarks));
     
     song->meta.keyDelay = 7;
     song->meta.keyRepeat = 2;
@@ -247,7 +257,7 @@ lsdj_song_t* lsdj_song_copy(const lsdj_song_t* rhs, lsdj_error_t** error)
     memcpy(song->grooves, rhs->grooves, sizeof(rhs->grooves));
     memcpy(song->words, rhs->words, sizeof(rhs->words));
     memcpy(song->wordNames, rhs->wordNames, sizeof(rhs->wordNames));
-    memcpy(song->bookmarks, rhs->bookmarks, sizeof(rhs->bookmarks));
+    song->bookmarks = rhs->bookmarks;
     
     memcpy(&song->meta, &rhs->meta, sizeof(rhs->meta));
     
@@ -306,7 +316,7 @@ void read_bank0(lsdj_vio_t* vio, lsdj_song_t* song)
             vio->seek(LSDJ_PHRASE_LENGTH, SEEK_CUR, vio->user_data);
     }
 
-    vio->read(song->bookmarks, sizeof(song->bookmarks), vio->user_data);
+    vio->read(&song->bookmarks, sizeof(song->bookmarks), vio->user_data);
     vio->read(song->reserved1030, sizeof(song->reserved1030), vio->user_data);
     vio->read(song->grooves, sizeof(song->grooves), vio->user_data);
     vio->read(song->rows, sizeof(song->rows), vio->user_data);
@@ -357,7 +367,7 @@ void write_bank0(const lsdj_song_t* song, lsdj_vio_t* vio)
             vio->write(LSDJ_PHRASE_LENGTH_ZERO, LSDJ_PHRASE_LENGTH, vio->user_data);
     }
     
-    vio->write(song->bookmarks, sizeof(song->bookmarks), vio->user_data);
+    vio->write(&song->bookmarks, sizeof(song->bookmarks), vio->user_data);
     vio->write(song->reserved1030, sizeof(song->reserved1030), vio->user_data);
     vio->write(song->grooves, sizeof(song->grooves), vio->user_data);
     vio->write(song->rows, sizeof(song->rows), vio->user_data);
@@ -420,7 +430,14 @@ void read_soft_synth_parameters(lsdj_vio_t* vio, lsdj_synth_t* synth)
     vio->read(&synth->cutOffEnd, 1, vio->user_data);
     vio->read(&synth->phaseEnd, 1, vio->user_data);
     vio->read(&synth->vshiftEnd, 1, vio->user_data);
-    vio->read(synth->reserved, 3, vio->user_data);
+    
+    unsigned char byte = 0x00;
+    vio->read(&byte, 1, vio->user_data);
+    byte = 0xFF - byte;
+    synth->limitStart = (byte >> 4) & 0xF;
+    synth->limitEnd = byte & 0xF;
+    
+    vio->read(synth->reserved, 2, vio->user_data);
 }
 
 void read_bank1(lsdj_vio_t* vio, lsdj_song_t* song, lsdj_error_t** error)
@@ -563,7 +580,11 @@ void write_soft_synth_parameters(const lsdj_synth_t* synth, lsdj_vio_t* vio)
     vio->write(&synth->cutOffEnd, 1, vio->user_data);
     vio->write(&synth->phaseEnd, 1, vio->user_data);
     vio->write(&synth->vshiftEnd, 1, vio->user_data);
-    vio->write(synth->reserved, 3, vio->user_data);
+    
+    unsigned char byte = 0xFF - (unsigned char)((synth->limitStart << 4) | synth->limitEnd);
+    vio->write(&byte, 1, vio->user_data);
+    
+    vio->write(synth->reserved, 2, vio->user_data);
 }
 
 void write_bank1(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error)
@@ -1014,9 +1035,34 @@ unsigned char lsdj_song_get_drum_max(const lsdj_song_t* song)
     return song->drumMax;
 }
 
+lsdj_row_t* lsdj_song_get_row(lsdj_song_t* song, size_t index)
+{
+    return &song->rows[index];
+}
+
+lsdj_chain_t* lsdj_song_get_chain(lsdj_song_t* song, size_t index)
+{
+    return song->chains[index];
+}
+
+lsdj_phrase_t* lsdj_song_get_phrase(lsdj_song_t* song, size_t index)
+{
+    return song->phrases[index];
+}
+
 lsdj_instrument_t* lsdj_song_get_instrument(lsdj_song_t* song, size_t index)
 {
     return song->instruments[index];
+}
+
+lsdj_synth_t* lsdj_song_get_synth(lsdj_song_t* song, size_t index)
+{
+    return &song->synths[index];
+}
+
+lsdj_wave_t* lsdj_song_get_wave(lsdj_song_t* song, size_t index)
+{
+    return &song->waves[index];
 }
 
 lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index)
@@ -1024,7 +1070,35 @@ lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index)
     return song->tables[index];
 }
 
-lsdj_phrase_t* lsdj_song_get_phrase(lsdj_song_t* song, size_t index)
+lsdj_groove_t* lsdj_song_get_groove(lsdj_song_t* song, size_t index)
 {
-    return song->phrases[index];
+    return &song->grooves[index];
+}
+
+lsdj_word_t* lsdj_song_get_word(lsdj_song_t* song, size_t index)
+{
+    return &song->words[index];
+}
+
+void lsdj_song_set_word_name(lsdj_song_t* song, size_t index, const char* data, size_t size)
+{
+    strncpy(song->wordNames[index], data, size < LSDJ_WORD_NAME_LENGTH ? size : LSDJ_WORD_NAME_LENGTH);
+}
+
+void lsdj_song_get_word_name(lsdj_song_t* song, size_t index, char* data, size_t size)
+{
+    const size_t len = strnlen(song->wordNames[index], LSDJ_WORD_NAME_LENGTH);
+    strncpy(data, song->wordNames[index], len);
+    for (size_t i = len; i < LSDJ_WORD_LENGTH; i += 1)
+        data[i] = '\0';
+}
+
+void lsdj_song_set_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position, unsigned char bookmark)
+{
+    song->bookmarks.channels[channel][position] = bookmark;
+}
+
+unsigned char lsdj_song_get_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position)
+{
+    return song->bookmarks.channels[channel][position];
 }

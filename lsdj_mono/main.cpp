@@ -38,6 +38,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
+#include "../common/common.hpp"
 #include "../liblsdj/sav.h"
 
 bool verbose = false;
@@ -54,16 +55,6 @@ bool alreadyEndsWithMono(const boost::filesystem::path& path)
 {
     const auto stem = path.stem().string();
     return stem.size() >= 5 && stem.substr(stem.size() - 5) == ".MONO";
-}
-
-bool isHiddenFile(const std::string& str)
-{
-    switch (str.size())
-    {
-        case 0: return true;
-        case 1: return false;
-        default: return str[0] == '.' && str[1] != '.' && str[1] != '/';
-    }
 }
 
 void convertInstrument(lsdj_instrument_t* instrument)
@@ -214,7 +205,7 @@ int processDirectory(const boost::filesystem::path& path)
 
 int process(const boost::filesystem::path& path)
 {
-    if (isHiddenFile(path.filename().string()))
+    if (lsdj::isHiddenFile(path.filename().string()))
         return 0;
     
     if (boost::filesystem::is_directory(path))

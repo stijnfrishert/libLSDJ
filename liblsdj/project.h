@@ -36,6 +36,10 @@
 #ifndef LSDJ_PROJECT_H
 #define LSDJ_PROJECT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stddef.h>
 
 #include "error.h"
@@ -69,5 +73,9 @@ void lsdj_project_set_version(lsdj_project_t* project, unsigned char version);
 unsigned char lsdj_project_get_version(const lsdj_project_t* project);
 void lsdj_project_set_song(lsdj_project_t* project, lsdj_song_t* song);
 lsdj_song_t* lsdj_project_get_song(const lsdj_project_t* project);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif

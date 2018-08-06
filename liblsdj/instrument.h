@@ -36,6 +36,10 @@
 #ifndef LSDJ_INSTRUMENT_H
 #define LSDJ_INSTRUMENT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "error.h"
 #include "instrument_kit.h"
 #include "instrument_noise.h"
@@ -85,5 +89,9 @@ void lsdj_instrument_get_name(const lsdj_instrument_t* instrument, char* data, s
 
 void lsdj_instrument_set_panning(lsdj_instrument_t* instrument, lsdj_panning panning);
 lsdj_panning lsdj_instrument_get_panning(const lsdj_instrument_t* instrument);
+    
+#ifdef __cplusplus
+}
+#endif
 
 #endif
