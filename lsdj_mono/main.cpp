@@ -205,7 +205,7 @@ int processDirectory(const boost::filesystem::path& path)
 
 int process(const boost::filesystem::path& path)
 {
-    if (isHiddenFile(path.filename().string()))
+    if (lsdj::isHiddenFile(path.filename().string()))
         return 0;
     
     if (boost::filesystem::is_directory(path))
