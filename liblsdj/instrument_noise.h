@@ -41,8 +41,8 @@ extern "C" {
 #endif
 
 typedef unsigned char lsdj_scommand_type;
-static const lsdj_scommand_type LSDJ_SCOMMAND_FREE = 0;
-static const lsdj_scommand_type LSDJ_SCOMMAND_STABLE = 1;
+#define LSDJ_SCOMMAND_FREE (0)
+#define LSDJ_SCOMMAND_STABLE (1)
 
 typedef struct
 {

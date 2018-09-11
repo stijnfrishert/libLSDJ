@@ -41,10 +41,10 @@ extern "C" {
 #endif
 
 typedef unsigned char lsdj_panning;
-static const lsdj_panning LSDJ_PAN_NONE = 0;
-static const lsdj_panning LSDJ_PAN_RIGHT = 1;
-static const lsdj_panning LSDJ_PAN_LEFT = 2;
-static const lsdj_panning LSDJ_PAN_LEFT_RIGHT = 3;
+#define LSDJ_PAN_NONE (0)
+#define LSDJ_PAN_RIGHT (1)
+#define LSDJ_PAN_LEFT (2)
+#define LSDJ_PAN_LEFT_RIGHT (3)
     
 #ifdef __cplusplus
 }

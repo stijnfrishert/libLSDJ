@@ -62,9 +62,9 @@ typedef enum
     LSDJ_INSTR_NOISE
 } instrument_type;
 
-static const unsigned char LSDJ_NO_TABLE = 0x20;
-static const unsigned char LSDJ_INSTRUMENT_UNLIMITED_LENGTH = 0x40;
-static const unsigned char LSDJ_KIT_LENGTH_AUTO = 0x0;
+#define LSDJ_NO_TABLE (0x20)
+#define LSDJ_INSTRUMENT_UNLIMITED_LENGTH (0x40)
+#define LSDJ_KIT_LENGTH_AUTO (0x0)
 
 typedef struct lsdj_instrument_t lsdj_instrument_t;
 
