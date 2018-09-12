@@ -235,7 +235,9 @@ namespace lsdj
         {
             switch (versionStyle)
             {
-                case VersionStyle::NONE: break;
+                case VersionStyle::NONE:
+                    std::cout << "\t\t";
+                    break;
                 case VersionStyle::HEX:
                     std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
                     break;
@@ -243,6 +245,8 @@ namespace lsdj
                     std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
                     break;
             }
+        } else {
+            std::cout << "\t\t";
         }
         
         // Display the format version of the song
