@@ -368,7 +368,15 @@ void read_wave_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrumen
     instrument->wave.playback = parsePlaybackMode(byte);
     
     // WAVE length and speed changed in version 6
-    if (version >= 6)
+    if (version >= 7)
+    {
+        vio->read(&byte, 1, vio->user_data); // Byte 10
+        instrument->wave.length = 0xF - (byte & 0xF);
+        
+        vio->read(&byte, 1, vio->user_data); // Byte 11
+        instrument->wave.speed = byte + 4;
+    }
+    else if (version == 6)
     {
         vio->read(&byte, 1, vio->user_data); // Byte 10
         instrument->wave.length = (byte & 0xF);
@@ -712,7 +720,15 @@ void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char ve
     byte = createPlaybackModeByte(instrument->wave.playback);
     vio->write(&byte, 1, vio->user_data);
     
-    if (version >= 6)
+    if (version >= 7)
+    {
+        byte = 0xF - (instrument->wave.length & 0xF);
+        vio->write(&byte, 1, vio->user_data);
+        
+        byte = instrument->wave.speed - 4;
+        vio->write(&byte, 1, vio->user_data);
+    }
+    else if (version == 6)
     {
         byte = (instrument->wave.length & 0xF);
         vio->write(&byte, 1, vio->user_data);
