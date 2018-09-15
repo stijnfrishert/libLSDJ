@@ -64,8 +64,8 @@ extern "C" {
 #define LSDJ_BOOKMARK_POSITION_COUNT (16)
 #define LSDJ_NO_BOOKMARK (0xFF)
     
-static const unsigned char LSDJ_CLONE_DEEP = 0;
-static const unsigned char LSDJ_CLONE_SLIM = 1;
+#define LSDJ_CLONE_DEEP (0)
+#define LSDJ_CLONE_SLIM (1)
 
 // An LSDJ song
 typedef struct lsdj_song_t lsdj_song_t;

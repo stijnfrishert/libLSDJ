@@ -40,22 +40,22 @@
 extern "C" {
 #endif
 
-static const unsigned char LSDJ_SYNTH_WAVEFORM_SAWTOOTH = 0;
-static const unsigned char LSDJ_SYNTH_WAVEFORM_SQUARE = 1;
-static const unsigned char LSDJ_SYNTH_WAVEFORM_TRIANGLE = 2;
+#define LSDJ_SYNTH_WAVEFORM_SAWTOOTH (0)
+#define LSDJ_SYNTH_WAVEFORM_SQUARE (1)
+#define LSDJ_SYNTH_WAVEFORM_TRIANGLE (2)
     
-static const unsigned char LSDJ_SYNTH_FILTER_LOW_PASS = 0;
-static const unsigned char LSDJ_SYNTH_FILTER_HIGH_PASS = 1;
-static const unsigned char LSDJ_SYNTH_FILTER_BAND_PASS = 2;
-static const unsigned char LSDJ_SYNTH_FILTER_ALL_PASS = 3;
+#define LSDJ_SYNTH_FILTER_LOW_PASS (0)
+#define LSDJ_SYNTH_FILTER_HIGH_PASS (1)
+#define LSDJ_SYNTH_FILTER_BAND_PASS (2)
+#define LSDJ_SYNTH_FILTER_ALL_PASS (3)
     
-static const unsigned char LSDJ_SYNTH_DISTORTION_CLIP = 0;
-static const unsigned char LSDJ_SYNTH_DISTORTION_WRAP = 1;
-static const unsigned char LSDJ_SYNTH_DISTORTION_FOLD = 2;
+#define LSDJ_SYNTH_DISTORTION_CLIP (0)
+#define LSDJ_SYNTH_DISTORTION_WRAP (1)
+#define LSDJ_SYNTH_DISTORTION_FOLD (2)
     
-static const unsigned char LSDJ_SYNTH_PHASE_NORMAL = 0;
-static const unsigned char LSDJ_SYNTH_PHASE_RESYNC = 1;
-static const unsigned char LSDJ_SYNTH_PHASE_RESYNC2 = 2;
+#define LSDJ_SYNTH_PHASE_NORMAL (0)
+#define LSDJ_SYNTH_PHASE_RESYNC (1)
+#define LSDJ_SYNTH_PHASE_RESYNC2 (2)
 
 // Structure representing soft synth data
 typedef struct

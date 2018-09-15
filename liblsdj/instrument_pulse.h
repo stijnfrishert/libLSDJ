@@ -43,10 +43,10 @@ extern "C" {
 #include "instrument_constants.h"
 
 typedef unsigned char lsdj_pulse_wave;
-static const lsdj_pulse_wave LSDJ_PULSE_WAVE_PW_125 = 0;
-static const lsdj_pulse_wave LSDJ_PULSE_WAVE_PW_25 = 1;
-static const lsdj_pulse_wave LSDJ_PULSE_WAVE_PW_50 = 2;
-static const lsdj_pulse_wave LSDJ_PULSE_WAVE_PW_75 = 3;
+#define LSDJ_PULSE_WAVE_PW_125 (0)
+#define LSDJ_PULSE_WAVE_PW_25 (1)
+#define LSDJ_PULSE_WAVE_PW_50 (2)
+#define LSDJ_PULSE_WAVE_PW_75 (3)
 
 typedef struct
 {

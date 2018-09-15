@@ -367,11 +367,36 @@ void read_wave_instrument(lsdj_vio_t* vio, unsigned char version, lsdj_instrumen
     vio->read(&byte, 1, vio->user_data);
     instrument->wave.playback = parsePlaybackMode(byte);
     
-    vio->seek(4, SEEK_CUR, vio->user_data); // Bytes 10-13 are empty
+    // WAVE length and speed changed in version 6
+    if (version >= 7)
+    {
+        vio->read(&byte, 1, vio->user_data); // Byte 10
+        instrument->wave.length = 0xF - (byte & 0xF);
+        
+        vio->read(&byte, 1, vio->user_data); // Byte 11
+        instrument->wave.speed = byte + 4;
+    }
+    else if (version == 6)
+    {
+        vio->read(&byte, 1, vio->user_data); // Byte 10
+        instrument->wave.length = (byte & 0xF);
+        
+        vio->read(&byte, 1, vio->user_data); // Byte 11
+        instrument->wave.speed = byte + 1;
+    } else {
+        vio->seek(2, SEEK_CUR, vio->user_data); // Bytes 12-13 are empty
+    }
+    
+    vio->seek(2, SEEK_CUR, vio->user_data); // Bytes 10-13 are empty
     
     vio->read(&byte, 1, vio->user_data);
-    instrument->wave.length = ((byte >> 4) & 0xF);
-    instrument->wave.speed = (byte & 0xF);
+    
+    // WAVE length and speed changed in version 6
+    if (version < 6)
+    {
+        instrument->wave.length = ((byte >> 4) & 0xF);
+        instrument->wave.speed = (byte & 0xF) + 1;
+    }
     
     vio->seek(1, SEEK_CUR, vio->user_data); // Byte 15 is empty
 }
@@ -695,16 +720,39 @@ void write_wave_instrument(const lsdj_instrument_t* instrument, unsigned char ve
     byte = createPlaybackModeByte(instrument->wave.playback);
     vio->write(&byte, 1, vio->user_data);
     
-    byte = 0xD0;
-    vio->write(&byte, 1, vio->user_data); // Byte 10 is empty
+    if (version >= 7)
+    {
+        byte = 0xF - (instrument->wave.length & 0xF);
+        vio->write(&byte, 1, vio->user_data);
+        
+        byte = instrument->wave.speed - 4;
+        vio->write(&byte, 1, vio->user_data);
+    }
+    else if (version == 6)
+    {
+        byte = (instrument->wave.length & 0xF);
+        vio->write(&byte, 1, vio->user_data);
+        
+        byte = instrument->wave.speed - 1;
+        vio->write(&byte, 1, vio->user_data);
+    } else {
+        byte = 0;
+        vio->write(&byte, 1, vio->user_data); // Byte 10 is empty
+        vio->write(&byte, 1, vio->user_data); // Byte 11 is empty
+    }
     
     byte = 0;
-    vio->write(&byte, 1, vio->user_data); // Byte 11 is empty
     vio->write(&byte, 1, vio->user_data); // Byte 12 is empty
     vio->write(&byte, 1, vio->user_data); // Byte 13 is empty
     
-    byte = (unsigned char)(((instrument->wave.length & 0xF) << 4) | (instrument->wave.speed & 0xF));
-    vio->write(&byte, 1, vio->user_data);
+    if (version < 6)
+    {
+        byte = (unsigned char)(((instrument->wave.length & 0xF) << 4) | ((instrument->wave.speed - 1) & 0xF));
+        vio->write(&byte, 1, vio->user_data);
+    } else {
+        byte = 0;
+        vio->write(&byte, 1, vio->user_data); // Byte 14 is empty
+    }
     
     byte = 0;
     vio->write(&byte, 1, vio->user_data); // Byte 15 is empty

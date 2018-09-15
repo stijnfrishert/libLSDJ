@@ -43,10 +43,10 @@ extern "C" {
 #include "instrument_constants.h"
 
 typedef unsigned char lsdj_playback_mode;
-static const lsdj_playback_mode LSDJ_PLAY_ONCE = 0;
-static const lsdj_playback_mode LSDJ_PLAY_LOOP = 1;
-static const lsdj_playback_mode LSDJ_PLAY_PING_PONG = 2;
-static const lsdj_playback_mode LSDJ_PLAY_MANUAL = 3;
+#define LSDJ_PLAY_ONCE (0)
+#define LSDJ_PLAY_LOOP (1)
+#define LSDJ_PLAY_PING_PONG (2)
+#define LSDJ_PLAY_MANUAL (3)
 
 typedef struct
 {
