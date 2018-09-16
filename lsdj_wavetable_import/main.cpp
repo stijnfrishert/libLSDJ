@@ -74,9 +74,17 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
     }
     
     // Make sure the wavetable is the correct size
-    if (boost::filesystem::file_size(wavetablePath) != 256)
+    const auto wavetableSize = boost::filesystem::file_size(wavetablePath);
+    if (wavetableSize % 16 != 0)
     {
-        std::cerr << "The wavetable file size is not 256 bytes" << std::endl;
+        std::cerr << "The wavetable file size is not a multiple of 16 bytes" << std::endl;
+        lsdj_project_free(project);
+        return 1;
+    }
+    
+    if (wavetableSize > 256)
+    {
+        std::cerr << "The wavetable file size is bigger than 256 bytes" << std::endl;
         lsdj_project_free(project);
         return 1;
     }
@@ -91,12 +99,24 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
     }
     
     // Apply the wavetable
+    const auto frameCount = wavetableSize / 16;
     std::array<char, LSDJ_WAVE_LENGTH> table;
-    for (auto frame = 0; frame < 16; frame++)
+    for (auto frame = 0; frame < frameCount; frame++)
     {
         wavetableStream.read(table.data(), sizeof(table));
         lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
         memcpy(wave->data, table.data(), sizeof(table));
+    }
+    
+    if (false)
+    {
+        table.fill(0x88);
+        for (auto frame = frameCount; frame < 16; frame++)
+        {
+            wavetableStream.read(table.data(), sizeof(table));
+            lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
+            memcpy(wave->data, table.data(), sizeof(table));
+        }
     }
     
     // Write the project back to file
