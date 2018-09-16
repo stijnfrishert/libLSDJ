@@ -44,6 +44,8 @@
 #include "../common/common.hpp"
 #include "../liblsdj/project.h"
 
+bool zero = false;
+
 int apply(const std::string& projectName, const std::string& wavetableName, unsigned int synthIndex)
 {
     const auto projectPath = boost::filesystem::absolute(projectName);
@@ -108,7 +110,7 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
         memcpy(wave->data, table.data(), sizeof(table));
     }
     
-    if (false)
+    if (zero)
     {
         table.fill(0x88);
         for (auto frame = frameCount; frame < 16; frame++)
@@ -147,7 +149,8 @@ int main(int argc, char* argv[])
     
     boost::program_options::options_description cmdOptions{"Options"};
     cmdOptions.add_options()
-        ("help,h", "Help screen");
+        ("help,h", "Help screen")
+        ("zero,0", "Pad the wavetable with empty frames if the file < 256 bytes");
     
     boost::program_options::options_description options;
     options.add(cmdOptions).add(hidden);
@@ -171,6 +174,9 @@ int main(int argc, char* argv[])
             printHelp(cmdOptions);
             return 0;
         } else if (vm.count("project") && vm.count("wavetable") && vm.count("synth")) {
+            if (vm.count("zero"))
+                zero = true;
+            
             return apply(vm["project"].as<std::string>(), vm["wavetable"].as<std::string>(), vm["synth"].as<unsigned int>());
         } else {
             printHelp(cmdOptions);
