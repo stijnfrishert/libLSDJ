@@ -167,7 +167,7 @@ void printHelp(const boost::program_options::options_description& desc)
 unsigned char parseSynthIndex(const std::string& str)
 {
     assert(!str.empty());
-    switch (std::tolower(str[0]))
+    switch (::tolower(str[0]))
     {
         case 'a': return 10;
         case 'b': return 11;
