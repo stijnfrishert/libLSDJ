@@ -45,6 +45,7 @@
 #include "../liblsdj/project.h"
 
 bool zero = false;
+bool force = false;
 
 int apply(const std::string& projectName, const std::string& wavetableName, unsigned int synthIndex)
 {
@@ -102,20 +103,24 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
     
     // Check to see if we're overwriting non-default wavetables
     const auto frameCount = wavetableSize / 16;
-    for (auto frame = 0; frame < frameCount; frame++)
+    
+    if (!force)
     {
-        lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
-        if (memcmp(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) != 0)
+        for (auto frame = 0; frame < frameCount; frame++)
         {
-            std::cout << "Some of the wavetable frames you are trying to overwrite already contain data. Do you want to continue? y/n\n> ";
-            char answer = 'n';
-            std::cin >> answer;
-            if (answer != 'y')
+            lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
+            if (memcmp(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) != 0)
             {
-                lsdj_project_free(project);
-                return 0;
-            } else {
-                break;
+                std::cout << "Some of the wavetable frames you are trying to overwrite already contain data. Do you want to continue? y/n\n> ";
+                char answer = 'n';
+                std::cin >> answer;
+                if (answer != 'y')
+                {
+                    lsdj_project_free(project);
+                    return 0;
+                } else {
+                    break;
+                }
             }
         }
     }
@@ -164,7 +169,8 @@ int main(int argc, char* argv[])
     hidden.add_options()
         ("project", "The .lsdsng project to which the wavetable should be applied")
         ("wavetable", "The wavetable that is applied to the project")
-        ("synth", boost::program_options::value<unsigned int>(), "The index of the synth which wavetables need to be changed");
+        ("synth", boost::program_options::value<unsigned int>(), "The index of the synth which wavetables need to be changed")
+        ("force,f", "Force writing the frames, even though non-default data may be in them");
     
     boost::program_options::options_description cmdOptions{"Options"};
     cmdOptions.add_options()
@@ -193,8 +199,8 @@ int main(int argc, char* argv[])
             printHelp(cmdOptions);
             return 0;
         } else if (vm.count("project") && vm.count("wavetable") && vm.count("synth")) {
-            if (vm.count("zero"))
-                zero = true;
+            zero = vm.count("zero");
+            force = vm.count("force");
             
             return apply(vm["project"].as<std::string>(), vm["wavetable"].as<std::string>(), vm["synth"].as<unsigned int>());
         } else {
