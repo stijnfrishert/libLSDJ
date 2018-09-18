@@ -185,14 +185,14 @@ int main(int argc, char* argv[])
     hidden.add_options()
         ("project", "The .lsdsng project to which the wavetable should be applied")
         ("wavetable", "The wavetable that is applied to the project")
-        ("synth", "The index of the synth which wavetables need to be changed")
-        ("force,f", "Force writing the frames, even though non-default data may be in them")
-        ("output,o", boost::program_options::value<std::string>(), "The output .lsdsng to write to");
+        ("synth", "The index of the synth which wavetables need to be changed");
     
     boost::program_options::options_description cmdOptions{"Options"};
     cmdOptions.add_options()
         ("help,h", "Help screen")
-        ("zero,0", "Pad the wavetable with empty frames if the file < 256 bytes");
+        ("zero,0", "Pad the wavetable with empty frames if the file < 256 bytes")
+        ("force,f", "Force writing the frames, even though non-default data may be in them")
+        ("output,o", boost::program_options::value<std::string>(), "The output .lsdsng to write to");
     
     boost::program_options::options_description options;
     options.add(cmdOptions).add(hidden);
