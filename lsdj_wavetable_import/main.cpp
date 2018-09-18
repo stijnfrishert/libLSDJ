@@ -33,11 +33,13 @@
  
  */
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
@@ -86,28 +88,25 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
         return 1;
     }
     
-    if (wavetableSize > 256)
-    {
-        std::cerr << "The wavetable file size is bigger than 256 bytes" << std::endl;
-        lsdj_project_free(project);
-        return 1;
-    }
-    
     // Load the wavetable file
     std::ifstream wavetableStream(wavetablePath.string());
     if (!wavetableStream.is_open())
     {
-        std::cerr << "could not open " << wavetablePath.filename().string() << std::endl;
+        std::cerr << "Could not open " << wavetablePath.filename().string() << std::endl;
         lsdj_project_free(project);
         return 1;
     }
     
-    // Check to see if we're overwriting non-default wavetables
+    // Compute the amount of frames we will write
     const auto frameCount = wavetableSize / 16;
+    const auto actualFrameCount = std::min<unsigned int>(0x100 - synthIndex * 16, frameCount);
+    if (frameCount != actualFrameCount)
+        std::cout << "Last " << std::to_string(frameCount - actualFrameCount) << " frames won't fit in the song" << std::endl;
     
+    // Check to see if we're overwriting non-default wavetables
     if (!force)
     {
-        for (auto frame = 0; frame < frameCount; frame++)
+        for (auto frame = 0; frame < actualFrameCount; frame++)
         {
             lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
             if (memcmp(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) != 0)
@@ -128,7 +127,7 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
     
     // Apply the wavetable
     std::array<char, LSDJ_WAVE_LENGTH> table;
-    for (auto frame = 0; frame < frameCount; frame++)
+    for (auto frame = 0; frame < actualFrameCount; frame++)
     {
         wavetableStream.read(table.data(), sizeof(table));
         lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
@@ -138,7 +137,7 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
     if (zero)
     {
         table.fill(0x88);
-        for (auto frame = frameCount; frame < 16; frame++)
+        for (auto frame = actualFrameCount; frame < 16; frame++)
         {
             wavetableStream.read(table.data(), sizeof(table));
             lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
@@ -154,7 +153,7 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
         return 1;
     }
     
-    std::cout << "Successfully wrote " << std::to_string(frameCount) << " frames to synth " << std::hex << std::to_string(synthIndex) << std::endl;
+    std::cout << "Successfully wrote " << std::to_string(actualFrameCount) << " frames to synth " << std::hex << std::to_string(synthIndex) << std::endl;
     
     return 0;
 }
