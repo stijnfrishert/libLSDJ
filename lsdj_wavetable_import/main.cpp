@@ -100,8 +100,27 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
         return 1;
     }
     
-    // Apply the wavetable
+    // Check to see if we're overwriting non-default wavetables
     const auto frameCount = wavetableSize / 16;
+    for (auto frame = 0; frame < frameCount; frame++)
+    {
+        lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
+        if (memcmp(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) != 0)
+        {
+            std::cout << "Some of the wavetable frames you are trying to overwrite already contain data. Do you want to continue? y/n\n> ";
+            char answer = 'n';
+            std::cin >> answer;
+            if (answer != 'y')
+            {
+                lsdj_project_free(project);
+                return 0;
+            } else {
+                break;
+            }
+        }
+    }
+    
+    // Apply the wavetable
     std::array<char, LSDJ_WAVE_LENGTH> table;
     for (auto frame = 0; frame < frameCount; frame++)
     {
@@ -129,7 +148,7 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
         return 1;
     }
     
-    std::cout << "Consider it done" << std::endl;
+    std::cout << "Successfully wrote " << std::to_string(frameCount) << " frames to synth " << std::hex << std::to_string(synthIndex) << std::endl;
     
     return 0;
 }
