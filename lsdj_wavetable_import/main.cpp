@@ -50,7 +50,7 @@
 bool zero = false;
 bool force = false;
 
-int apply(const std::string& projectName, const std::string& wavetableName, unsigned char synthIndex)
+int apply(const std::string& projectName, const std::string& outputName, const std::string& wavetableName, unsigned char synthIndex)
 {
     const auto projectPath = boost::filesystem::absolute(projectName);
     if (!boost::filesystem::exists(projectPath))
@@ -146,14 +146,15 @@ int apply(const std::string& projectName, const std::string& wavetableName, unsi
     }
     
     // Write the project back to file
-    lsdj_project_write_lsdsng_to_file(project, projectPath.string().c_str(), &error);
+    const auto outputPath = boost::filesystem::absolute(outputName);
+    lsdj_project_write_lsdsng_to_file(project, outputPath.string().c_str(), &error);
     if (error != nullptr)
     {
         lsdj_project_free(project);
         return 1;
     }
     
-    std::cout << "Successfully wrote " << std::to_string(actualFrameCount) << " frames to synth " << std::hex << std::to_string(synthIndex) << std::endl;
+    std::cout << "Successfully wrote " << std::to_string(actualFrameCount) << " frames to synth " << std::hex << std::to_string(synthIndex) << " to " << outputPath.filename().string() << std::endl;
     
     return 0;
 }
@@ -185,7 +186,8 @@ int main(int argc, char* argv[])
         ("project", "The .lsdsng project to which the wavetable should be applied")
         ("wavetable", "The wavetable that is applied to the project")
         ("synth", "The index of the synth which wavetables need to be changed")
-        ("force,f", "Force writing the frames, even though non-default data may be in them");
+        ("force,f", "Force writing the frames, even though non-default data may be in them")
+        ("output,o", boost::program_options::value<std::string>(), "The output .lsdsng to write to");
     
     boost::program_options::options_description cmdOptions{"Options"};
     cmdOptions.add_options()
@@ -217,7 +219,10 @@ int main(int argc, char* argv[])
             zero = vm.count("zero");
             force = vm.count("force");
             
-            return apply(vm["project"].as<std::string>(), vm["wavetable"].as<std::string>(), parseSynthIndex(vm["synth"].as<std::string>()));
+            auto project = vm["project"].as<std::string>();
+            auto output = vm.count("output") ? vm["output"].as<std::string>() : project;
+            
+            return apply(project, output, vm["wavetable"].as<std::string>(), parseSynthIndex(vm["synth"].as<std::string>()));
         } else {
             printHelp(cmdOptions);
             return 0;
