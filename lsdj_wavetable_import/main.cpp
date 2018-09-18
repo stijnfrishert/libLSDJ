@@ -34,6 +34,7 @@
  */
 
 #include <array>
+#include <cassert>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -47,7 +48,7 @@
 bool zero = false;
 bool force = false;
 
-int apply(const std::string& projectName, const std::string& wavetableName, unsigned int synthIndex)
+int apply(const std::string& projectName, const std::string& wavetableName, unsigned char synthIndex)
 {
     const auto projectPath = boost::filesystem::absolute(projectName);
     if (!boost::filesystem::exists(projectPath))
@@ -163,13 +164,28 @@ void printHelp(const boost::program_options::options_description& desc)
     std::cout << "lsdj-wavetable-import [project] [wavetable] [index]\n\n" << desc;
 }
 
+unsigned char parseSynthIndex(const std::string& str)
+{
+    assert(!str.empty());
+    switch (std::tolower(str[0]))
+    {
+        case 'a': return 10;
+        case 'b': return 11;
+        case 'c': return 12;
+        case 'd': return 13;
+        case 'e': return 14;
+        case 'f': return 15;
+        default: return static_cast<unsigned char>(std::stoul(str));
+    }
+}
+
 int main(int argc, char* argv[])
 {
     boost::program_options::options_description hidden{"Hidden"};
     hidden.add_options()
         ("project", "The .lsdsng project to which the wavetable should be applied")
         ("wavetable", "The wavetable that is applied to the project")
-        ("synth", boost::program_options::value<unsigned int>(), "The index of the synth which wavetables need to be changed")
+        ("synth", "The index of the synth which wavetables need to be changed")
         ("force,f", "Force writing the frames, even though non-default data may be in them");
     
     boost::program_options::options_description cmdOptions{"Options"};
@@ -202,7 +218,7 @@ int main(int argc, char* argv[])
             zero = vm.count("zero");
             force = vm.count("force");
             
-            return apply(vm["project"].as<std::string>(), vm["wavetable"].as<std::string>(), vm["synth"].as<unsigned int>());
+            return apply(vm["project"].as<std::string>(), vm["wavetable"].as<std::string>(), parseSynthIndex(vm["synth"].as<std::string>()));
         } else {
             printHelp(cmdOptions);
             return 0;
