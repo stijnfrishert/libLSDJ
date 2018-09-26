@@ -50,9 +50,25 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 	  -t [ --table ]        Only adjust tables
 	  -p [ --phrase ]       Only adjust phrases
 
+## lsdj-wavetable-import
+
+*lsdj-wavetable-import* is a command-line tool that imports *.snt* files (directly containing bytes that represent wavetable data) into your *.lsdsng* files.
+
+	lsdj-wavetable-import [project] [wavetable] [index]
+
+	Options:
+	  -h [ --help ]         Help screen
+	  -0 [ --zero ]         Pad the wavetable with empty frames if the file < 256 
+	                        bytes
+	  -f [ --force ]        Force writing the frames, even though non-default data 
+	                        may be in them
+	  -o [ --output ] arg   The output .lsdsng to write to
+	  -i [ --index ]        The index should be interpreted as a wavetable index 
+	                        instead of synth
+
 # System Requirements
 
-The nature of *liblsdj* as a C library makes it compilable on nearly all common OSes. Both tools included have been tested on macOS Sierra and Windows 7/10 and seem to be working.
+The nature of *liblsdj* as a C library makes it compilable on nearly all common OSes. Both tools included have been tested on macOS Sierra and Windows 7/10 and seem to be working. DigiPack has also successfully built *liblsdj* on Arch Linux.
 
 # Download
 
