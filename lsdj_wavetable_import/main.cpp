@@ -50,7 +50,7 @@
 bool zero = false;
 bool force = false;
 
-int apply(const std::string& projectName, const std::string& outputName, const std::string& wavetableName, unsigned char synthIndex)
+int apply(const std::string& projectName, const std::string& outputName, const std::string& wavetableName, unsigned char wavetableIndex)
 {
     const auto projectPath = boost::filesystem::absolute(projectName);
     if (!boost::filesystem::exists(projectPath))
@@ -99,7 +99,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
     
     // Compute the amount of frames we will write
     const auto frameCount = wavetableSize / 16;
-    const auto actualFrameCount = std::min<unsigned int>(0x100 - synthIndex * 16, frameCount);
+    const auto actualFrameCount = std::min<unsigned int>(0x100 - wavetableIndex, frameCount);
     if (frameCount != actualFrameCount)
         std::cout << "Last " << std::to_string(frameCount - actualFrameCount) << " frames won't fit in the song" << std::endl;
     
@@ -108,7 +108,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
     {
         for (auto frame = 0; frame < actualFrameCount; frame++)
         {
-            lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
+            lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
             if (memcmp(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) != 0)
             {
                 std::cout << "Some of the wavetable frames you are trying to overwrite already contain data. Do you want to continue? y/n\n> ";
@@ -130,7 +130,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
     for (auto frame = 0; frame < actualFrameCount; frame++)
     {
         wavetableStream.read(table.data(), sizeof(table));
-        lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
+        lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
         memcpy(wave->data, table.data(), sizeof(table));
     }
     
@@ -140,7 +140,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
         for (auto frame = actualFrameCount; frame < 16; frame++)
         {
             wavetableStream.read(table.data(), sizeof(table));
-            lsdj_wave_t* wave = lsdj_song_get_wave(song, synthIndex * 16 + frame);
+            lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
             memcpy(wave->data, table.data(), sizeof(table));
         }
     }
@@ -154,7 +154,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
         return 1;
     }
     
-    std::cout << "Successfully wrote " << std::to_string(actualFrameCount) << " frames to synth " << std::hex << std::to_string(synthIndex) << " to " << outputPath.filename().string() << std::endl;
+    std::cout << "Successfully wrote " << std::to_string(actualFrameCount) << " frames starting at " << std::hex << std::to_string(wavetableIndex) << " to " << outputPath.filename().string() << std::endl;
     
     return 0;
 }
@@ -167,16 +167,18 @@ void printHelp(const boost::program_options::options_description& desc)
 unsigned char parseSynthIndex(const std::string& str)
 {
     assert(!str.empty());
-    switch (::tolower(str[0]))
-    {
-        case 'a': return 10;
-        case 'b': return 11;
-        case 'c': return 12;
-        case 'd': return 13;
-        case 'e': return 14;
-        case 'f': return 15;
-        default: return static_cast<unsigned char>(std::stoul(str));
-    }
+    if (str.size() == 1)
+        return static_cast<unsigned char>(std::stoul(str, nullptr, 16));
+    else
+        return static_cast<unsigned char>(std::stoul(str));
+}
+
+unsigned char parseIndex(const std::string& str, bool isWavetableIndex)
+{
+    if (isWavetableIndex)
+        return static_cast<unsigned char>(std::stoul(str, nullptr, 16));
+    else
+        return parseSynthIndex(str) * 16;
 }
 
 int main(int argc, char* argv[])
@@ -192,7 +194,8 @@ int main(int argc, char* argv[])
         ("help,h", "Help screen")
         ("zero,0", "Pad the wavetable with empty frames if the file < 256 bytes")
         ("force,f", "Force writing the frames, even though non-default data may be in them")
-        ("output,o", boost::program_options::value<std::string>(), "The output .lsdsng to write to");
+        ("output,o", boost::program_options::value<std::string>(), "The output .lsdsng to write to")
+        ("index,i", "The index should be interpreted as a wavetable index instead of synth");
     
     boost::program_options::options_description options;
     options.add(cmdOptions).add(hidden);
@@ -222,7 +225,7 @@ int main(int argc, char* argv[])
             auto project = vm["project"].as<std::string>();
             auto output = vm.count("output") ? vm["output"].as<std::string>() : project;
             
-            return apply(project, output, vm["wavetable"].as<std::string>(), parseSynthIndex(vm["synth"].as<std::string>()));
+            return apply(project, output, vm["wavetable"].as<std::string>(), parseIndex(vm["synth"].as<std::string>(), vm.count("index")));
         } else {
             printHelp(cmdOptions);
             return 0;
