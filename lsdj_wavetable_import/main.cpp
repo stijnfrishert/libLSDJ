@@ -44,11 +44,14 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
+#include <fmt/format.h>
+
 #include "../common/common.hpp"
 #include "../liblsdj/project.h"
 
 bool zero = false;
 bool force = false;
+bool verbose = false;
 
 int apply(const std::string& projectName, const std::string& outputName, const std::string& wavetableName, unsigned char wavetableIndex)
 {
@@ -67,6 +70,9 @@ int apply(const std::string& projectName, const std::string& outputName, const s
         lsdj_project_free(project);
         return 1;
     }
+    
+    if (verbose)
+        std::cout << "Loaded project " + projectPath.string() << std::endl;
     
     lsdj_song_t* song = lsdj_project_get_song(project);
     
@@ -99,19 +105,30 @@ int apply(const std::string& projectName, const std::string& outputName, const s
     
     // Compute the amount of frames we will write
     const auto frameCount = wavetableSize / 16;
+    if (verbose)
+        fmt::print("Found {} frames in {}\n", frameCount, wavetablePath.string());
+    
     const auto actualFrameCount = std::min<unsigned int>(0x100 - wavetableIndex, frameCount);
     if (frameCount != actualFrameCount)
-        std::cout << "Last " << std::to_string(frameCount - actualFrameCount) << " frames won't fit in the song" << std::endl;
+    {
+        fmt::print("Last {} frames won't fit in the song\n", frameCount - actualFrameCount);
+        
+        if (verbose)
+            fmt::print("Writing only {} frames due to space limits\n", actualFrameCount);
+    }
     
     // Check to see if we're overwriting non-default wavetables
     if (!force)
     {
+        if (verbose)
+            std::cout << "Comparing frames to ensure no overwriting" << std::endl;
+        
         for (auto frame = 0; frame < actualFrameCount; frame++)
         {
             lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
             if (memcmp(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) != 0)
             {
-                std::cout << "Some of the wavetable frames you are trying to overwrite already contain data. Do you want to continue? y/n\n> ";
+                std::cout << "Some of the wavetable frames you are trying to overwrite already contain data.\nDo you want to continue? y/n\n> ";
                 char answer = 'n';
                 std::cin >> answer;
                 if (answer != 'y')
@@ -121,27 +138,50 @@ int apply(const std::string& projectName, const std::string& outputName, const s
                 } else {
                     break;
                 }
+            } else if (verbose) {
+                fmt::print("Frame 0x{0:02X} is default\n", wavetableIndex + frame);
             }
         }
     }
     
     // Apply the wavetable
-    std::array<char, LSDJ_WAVE_LENGTH> table;
-    for (auto frame = 0; frame < actualFrameCount; frame++)
+    for (unsigned char frame = 0; frame < actualFrameCount; frame++)
     {
-        wavetableStream.read(table.data(), sizeof(table));
         lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
-        memcpy(wave->data, table.data(), sizeof(table));
+        wavetableStream.read(reinterpret_cast<char*>(wave->data), sizeof(wave->data));
+        
+        if (verbose)
+        {
+            fmt::print("Wrote {} bytes to frame 0x{:02X} (", sizeof(wave->data), wavetableIndex + frame);
+            
+            for (auto i = 0; i < sizeof(wave->data); i++)
+                fmt::print("{:02X}", wave->data[i]);
+            std::cout << ")" << std::endl;
+        }
     }
     
+    // Write zero wavetables
     if (zero)
     {
+        if (verbose)
+            std::cout << "Padding empty frames" << std::endl;
+        
+        std::array<char, LSDJ_WAVE_LENGTH> table;
         table.fill(0x88);
-        for (auto frame = actualFrameCount; frame < 16; frame++)
+        
+        for (unsigned char frame = actualFrameCount; frame < 16; frame++)
         {
-            wavetableStream.read(table.data(), sizeof(table));
             lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
             memcpy(wave->data, table.data(), sizeof(table));
+            
+            if (verbose)
+            {
+                fmt::print("Wrote {} bytes to frame 0x{:02X} (", sizeof(wave->data), wavetableIndex + frame);
+                
+                for (auto i = 0; i < sizeof(wave->data); i++)
+                    fmt::print("{:02X}", wave->data[i]);
+                std::cout << ")" << std::endl;
+            }
         }
     }
     
@@ -154,7 +194,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
         return 1;
     }
     
-    std::cout << "Successfully wrote " << std::to_string(actualFrameCount) << " frames starting at " << std::hex << std::to_string(wavetableIndex) << " to " << outputPath.filename().string() << std::endl;
+    fmt::print("Wrote {} frames starting at 0x{:02X} to {}\n", actualFrameCount, wavetableIndex, outputPath.filename().string());
     
     return 0;
 }
@@ -195,7 +235,8 @@ int main(int argc, char* argv[])
         ("zero,0", "Pad the wavetable with empty frames if the file < 256 bytes")
         ("force,f", "Force writing the frames, even though non-default data may be in them")
         ("output,o", boost::program_options::value<std::string>(), "The output .lsdsng to write to")
-        ("index,i", "The index should be interpreted as a wavetable index instead of synth");
+        ("index,i", "The index should be interpreted as a wavetable index instead of synth")
+        ("verbose,v", "Verbose output");
     
     boost::program_options::options_description options;
     options.add(cmdOptions).add(hidden);
@@ -221,6 +262,7 @@ int main(int argc, char* argv[])
         } else if (vm.count("project") && vm.count("wavetable") && vm.count("synth")) {
             zero = vm.count("zero");
             force = vm.count("force");
+            verbose = vm.count("verbose");
             
             auto project = vm["project"].as<std::string>();
             auto output = vm.count("output") ? vm["output"].as<std::string>() : project;
