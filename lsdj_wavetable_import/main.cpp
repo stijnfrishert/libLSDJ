@@ -95,7 +95,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
     }
     
     // Load the wavetable file
-    std::ifstream wavetableStream(wavetablePath.string());
+    std::ifstream wavetableStream(wavetablePath.string(), std::ios_base::binary);
     if (!wavetableStream.is_open())
     {
         std::cerr << "Could not open " << wavetablePath.filename().string() << std::endl;
