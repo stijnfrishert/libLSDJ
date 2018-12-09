@@ -44,8 +44,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 
-#include <fmt/format.h>
-
 #include "../common/common.hpp"
 #include "../liblsdj/project.h"
 
@@ -106,15 +104,15 @@ int apply(const std::string& projectName, const std::string& outputName, const s
     // Compute the amount of frames we will write
     const auto frameCount = wavetableSize / 16;
     if (verbose)
-        fmt::print("Found {} frames in {}\n", frameCount, wavetablePath.string());
+        std::cout << "Found " << std::dec << frameCount << " frames in " << wavetablePath.string() << std::endl;
     
     const auto actualFrameCount = std::min<unsigned int>(0x100 - wavetableIndex, frameCount);
     if (frameCount != actualFrameCount)
     {
-        fmt::print("Last {} frames won't fit in the song\n", frameCount - actualFrameCount);
+        std::cout << "Last " << std::dec << (frameCount - actualFrameCount) << " won't fit in the song" << std::endl;
         
         if (verbose)
-            fmt::print("Writing only {} frames due to space limits\n", actualFrameCount);
+            std::cout << "Writing only " << std::dec << actualFrameCount << " frames due to space limits" << std::endl;
     }
     
     // Check to see if we're overwriting non-default wavetables
@@ -139,7 +137,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
                     break;
                 }
             } else if (verbose) {
-                fmt::print("Frame 0x{0:02X} is default\n", wavetableIndex + frame);
+                std::cout << "Frame 0x" << std::hex << (wavetableIndex + frame) << " is default" << std::endl;
             }
         }
     }
@@ -151,13 +149,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
         wavetableStream.read(reinterpret_cast<char*>(wave->data), sizeof(wave->data));
         
         if (verbose)
-        {
-            fmt::print("Wrote {} bytes to frame 0x{:02X} (", sizeof(wave->data), wavetableIndex + frame);
-            
-            for (auto i = 0; i < sizeof(wave->data); i++)
-                fmt::print("{:02X}", wave->data[i]);
-            std::cout << ")" << std::endl;
-        }
+            std::cout << "Wrote " << std::dec << sizeof(wave->data) << " bytes to frame 0x" << std::hex << (wavetableIndex + frame) << std::endl;
     }
     
     // Write zero wavetables
@@ -175,13 +167,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
             memcpy(wave->data, table.data(), sizeof(table));
             
             if (verbose)
-            {
-                fmt::print("Wrote {} bytes to frame 0x{:02X} (", sizeof(wave->data), wavetableIndex + frame);
-                
-                for (auto i = 0; i < sizeof(wave->data); i++)
-                    fmt::print("{:02X}", wave->data[i]);
-                std::cout << ")" << std::endl;
-            }
+                std::cout << "Wrote default bytes to frame 0x" << std::hex << (wavetableIndex + frame) << std::endl;
         }
     }
     
@@ -194,7 +180,7 @@ int apply(const std::string& projectName, const std::string& outputName, const s
         return 1;
     }
     
-    fmt::print("Wrote {} frames starting at 0x{:02X} to {}\n", actualFrameCount, wavetableIndex, outputPath.filename().string());
+    std::cout << "Wrote " << std::dec << actualFrameCount << " frames starting at 0x" << std::hex << wavetableIndex << " to " << outputPath.string() << std::endl;
     
     return 0;
 }
