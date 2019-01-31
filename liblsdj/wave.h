@@ -11,7 +11,7 @@
  
  MIT License
  
- Copyright (c) 2018 Stijn Frishert
+ Copyright (c) 2018 - 2019 Stijn Frishert
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
