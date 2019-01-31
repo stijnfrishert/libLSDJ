@@ -46,148 +46,11 @@
 
 #include "../common/common.hpp"
 #include "../liblsdj/project.h"
-
-bool zero = false;
-bool force = false;
-bool verbose = false;
-
-int apply(const std::string& projectName, const std::string& outputName, const std::string& wavetableName, unsigned char wavetableIndex)
-{
-    const auto projectPath = boost::filesystem::absolute(projectName);
-    if (!boost::filesystem::exists(projectPath))
-    {
-        std::cerr << projectPath.filename().string() << " does not exist" << std::endl;
-        return 1;
-    }
-    
-    // Load the project
-    lsdj_error_t* error = nullptr;
-    lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(projectPath.string().c_str(), &error);
-    if (error != nullptr)
-    {
-        lsdj_project_free(project);
-        return 1;
-    }
-    
-    if (verbose)
-        std::cout << "Loaded project " + projectPath.string() << std::endl;
-    
-    lsdj_song_t* song = lsdj_project_get_song(project);
-    
-    // Find the wavetable file
-    const auto wavetablePath = boost::filesystem::absolute(wavetableName);
-    if (!boost::filesystem::exists(wavetablePath))
-    {
-        std::cerr << wavetablePath.filename().string() << " does not exist" << std::endl;
-        lsdj_project_free(project);
-        return 1;
-    }
-    
-    // Make sure the wavetable is the correct size
-    const auto wavetableSize = boost::filesystem::file_size(wavetablePath);
-    if (wavetableSize % 16 != 0)
-    {
-        std::cerr << "The wavetable file size is not a multiple of 16 bytes" << std::endl;
-        lsdj_project_free(project);
-        return 1;
-    }
-    
-    // Load the wavetable file
-    std::ifstream wavetableStream(wavetablePath.string(), std::ios_base::binary);
-    if (!wavetableStream.is_open())
-    {
-        std::cerr << "Could not open " << wavetablePath.filename().string() << std::endl;
-        lsdj_project_free(project);
-        return 1;
-    }
-    
-    // Compute the amount of frames we will write
-    const auto frameCount = wavetableSize / 16;
-    if (verbose)
-        std::cout << "Found " << std::dec << frameCount << " frames in " << wavetablePath.string() << std::endl;
-    
-    const auto actualFrameCount = std::min<unsigned int>(0x100 - wavetableIndex, frameCount);
-    if (frameCount != actualFrameCount)
-    {
-        std::cout << "Last " << std::dec << (frameCount - actualFrameCount) << " won't fit in the song" << std::endl;
-        
-        if (verbose)
-            std::cout << "Writing only " << std::dec << actualFrameCount << " frames due to space limits" << std::endl;
-    }
-    
-    // Check to see if we're overwriting non-default wavetables
-    if (!force)
-    {
-        if (verbose)
-            std::cout << "Comparing frames to ensure no overwriting" << std::endl;
-        
-        for (auto frame = 0; frame < actualFrameCount; frame++)
-        {
-            lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
-            if (memcmp(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) != 0)
-            {
-                std::cout << "Some of the wavetable frames you are trying to overwrite already contain data.\nDo you want to continue? y/n\n> ";
-                char answer = 'n';
-                std::cin >> answer;
-                if (answer != 'y')
-                {
-                    lsdj_project_free(project);
-                    return 0;
-                } else {
-                    break;
-                }
-            } else if (verbose) {
-                std::cout << "Frame 0x" << std::hex << (wavetableIndex + frame) << " is default" << std::endl;
-            }
-        }
-    }
-    
-    // Apply the wavetable
-    for (unsigned char frame = 0; frame < actualFrameCount; frame++)
-    {
-        lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
-        wavetableStream.read(reinterpret_cast<char*>(wave->data), sizeof(wave->data));
-        
-        if (verbose)
-            std::cout << "Wrote " << std::dec << sizeof(wave->data) << " bytes to frame 0x" << std::hex << (wavetableIndex + frame) << std::endl;
-    }
-    
-    // Write zero wavetables
-    if (zero)
-    {
-        if (verbose)
-            std::cout << "Padding empty frames" << std::endl;
-        
-        std::array<char, LSDJ_WAVE_LENGTH> table;
-        table.fill(0x88);
-        
-        for (unsigned char frame = actualFrameCount; frame < 16; frame++)
-        {
-            lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
-            memcpy(wave->data, table.data(), sizeof(table));
-            
-            if (verbose)
-                std::cout << "Wrote default bytes to frame 0x" << std::hex << (wavetableIndex + frame) << std::endl;
-        }
-    }
-    
-    // Write the project back to file
-    const auto outputPath = boost::filesystem::absolute(outputName);
-    lsdj_project_write_lsdsng_to_file(project, outputPath.string().c_str(), &error);
-    if (error != nullptr)
-    {
-        lsdj_project_free(project);
-        return 1;
-    }
-    
-    std::cout << "Wrote " << std::dec << actualFrameCount << " frames starting at 0x" << std::hex << wavetableIndex << " to " << outputPath.string() << std::endl;
-    
-    return 0;
-}
+#include "wavetable_importer.hpp"
 
 void printHelp(const boost::program_options::options_description& desc)
 {
-    std::cout << "lsdj-wavetable-import [project] [wavetable] [index]\n\n" << desc;
+    std::cout << "lsdj-wavetable-import [destination] [wavetable] [index]\n\n" << desc;
 }
 
 unsigned char parseSynthIndex(const std::string& str)
@@ -211,7 +74,7 @@ int main(int argc, char* argv[])
 {
     boost::program_options::options_description hidden{"Hidden"};
     hidden.add_options()
-        ("project", "The .lsdsng project to which the wavetable should be applied")
+        ("destination", "The .lsdsng project or .sav to which the wavetable should be applied")
         ("wavetable", "The wavetable that is applied to the project")
         ("synth", "The index of the synth which wavetables need to be changed");
     
@@ -246,14 +109,17 @@ int main(int argc, char* argv[])
             printHelp(cmd);
             return 0;
         } else if (vm.count("project") && vm.count("wavetable") && vm.count("synth")) {
-            zero = vm.count("zero");
-            force = vm.count("force");
-            verbose = vm.count("verbose");
+            lsdj::WavetableImporter importer;
             
-            auto project = vm["project"].as<std::string>();
-            auto output = vm.count("output") ? vm["output"].as<std::string>() : project;
+            const auto destination = vm["destination"].as<std::string>();
             
-            return apply(project, output, vm["wavetable"].as<std::string>(), parseIndex(vm["synth"].as<std::string>(), vm.count("index")));
+            importer.outputName = vm.count("output") ? vm["output"].as<std::string>() : destination;
+            importer.wavetableIndex = parseIndex(vm["synth"].as<std::string>(), vm.count("index"));
+            importer.zero = vm.count("zero");
+            importer.force = vm.count("force");
+            importer.verbose = vm.count("verbose");
+            
+            return importer.import(destination, vm["wavetable"].as<std::string>()) ? 0 : 1;
         } else {
             printHelp(cmd);
             return 0;
