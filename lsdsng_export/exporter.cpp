@@ -120,6 +120,13 @@ namespace lsdj
     
     void Exporter::exportProject(const lsdj_project_t* project, boost::filesystem::path folder, bool workingMemory, lsdj_error_t** error)
     {
+        // See if there's actually a song here. If not, this is an (EMPTY) project among
+        // existing projects, which is a thing that can happen in older versions of LSDJ
+        // Since we're exporting, let's skip this project entirely
+        const auto song = lsdj_project_get_song(project);
+        if (!song)
+            return;
+        
         auto name = constructName(project);
         if (name.empty())
             name = "(EMPTY)";
