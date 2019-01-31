@@ -83,8 +83,14 @@ int main(int argc, char* argv[])
             lsdj::Importer importer;
             
             importer.inputs = vm["file"].as<std::vector<std::string>>();
-            importer.outputFile = vm.count("output") ? vm["output"].as<std::string>() : generateOutputFilename(importer.inputs);
             importer.verbose = vm.count("verbose");
+            
+            if (vm.count("output"))
+                importer.outputFile = vm["output"].as<std::string>();
+            else if (vm.count("sav"))
+                importer.outputFile = boost::filesystem::absolute(vm["sav"].as<std::string>()).stem().filename().string() + ".sav";
+            else
+                importer.outputFile = generateOutputFilename(importer.inputs);
             
             return importer.importSongs(vm.count("sav") ? vm["sav"].as<std::string>().c_str() : nullptr);
         } else {
