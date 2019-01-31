@@ -47,10 +47,13 @@
 int main(int argc, char* argv[])
 {
     // Setup the command-line options
-    boost::program_options::options_description desc{"Options"};
-    desc.add_options()
+    boost::program_options::options_description hidden{"Hidden"};
+    hidden.add_options()
+        ("file", boost::program_options::value<std::string>(), "Input save file");
+    
+    boost::program_options::options_description cmd{"Options"};
+    cmd.add_options()
         ("help,h", "Help screen")
-        ("file", boost::program_options::value<std::string>(), "Input save file, can be a nameless option")
         ("noversion", "Don't add version numbers to the filename")
         ("folder,f", "Put every lsdsng in its own folder")
         ("print,p", "Print a list of all songs in the sav")
@@ -62,6 +65,9 @@ int main(int argc, char* argv[])
         ("name,n", boost::program_options::value<std::vector<std::string>>(), "Single out a given project by name to export")
         ("working-memory,w", "Single out the working-memory song to export");
     
+    boost::program_options::options_description options;
+    options.add(cmd).add(hidden);
+    
     // Set up the input file command-line argument
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", 1);
@@ -71,7 +77,7 @@ int main(int argc, char* argv[])
         // Parse the command-line options
         boost::program_options::variables_map vm;
         boost::program_options::command_line_parser parser(argc, argv);
-        parser = parser.options(desc);
+        parser = parser.options(options);
         parser = parser.positional(positionalOptions);
         boost::program_options::store(parser.run(), vm);
         boost::program_options::notify(vm);
@@ -79,7 +85,7 @@ int main(int argc, char* argv[])
         // Show help if requested
         if (vm.count("help"))
         {
-            std::cout << desc << std::endl;
+            std::cout << cmd << std::endl;
             return 0;
         // Do we have an input file?
         } else if (vm.count("file")) {
@@ -114,7 +120,7 @@ int main(int argc, char* argv[])
             else
                 return exporter.exportProjects(path, vm["output"].as<std::string>());
         } else {
-            std::cout << desc << std::endl;
+            std::cout << cmd << std::endl;
             return 0;
         }
     } catch (const boost::program_options::error& e) {

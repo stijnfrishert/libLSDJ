@@ -215,8 +215,8 @@ int main(int argc, char* argv[])
         ("wavetable", "The wavetable that is applied to the project")
         ("synth", "The index of the synth which wavetables need to be changed");
     
-    boost::program_options::options_description cmdOptions{"Options"};
-    cmdOptions.add_options()
+    boost::program_options::options_description cmd{"Options"};
+    cmd.add_options()
         ("help,h", "Help screen")
         ("zero,0", "Pad the wavetable with empty frames if the file < 256 bytes")
         ("force,f", "Force writing the frames, even though non-default data may be in them")
@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
         ("verbose,v", "Verbose output");
     
     boost::program_options::options_description options;
-    options.add(cmdOptions).add(hidden);
+    options.add(cmd).add(hidden);
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("project", 1);
@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
         
         if (vm.count("help"))
         {
-            printHelp(cmdOptions);
+            printHelp(cmd);
             return 0;
         } else if (vm.count("project") && vm.count("wavetable") && vm.count("synth")) {
             zero = vm.count("zero");
@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
             
             return apply(project, output, vm["wavetable"].as<std::string>(), parseIndex(vm["synth"].as<std::string>(), vm.count("index")));
         } else {
-            printHelp(cmdOptions);
+            printHelp(cmd);
             return 0;
         }
     } catch (const boost::program_options::error& e) {
