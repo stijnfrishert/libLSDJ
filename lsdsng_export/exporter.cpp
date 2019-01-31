@@ -195,9 +195,21 @@ namespace lsdj
             printWorkingMemorySong(sav);
         }
         
-        // Go through all compressed projects
+        // Find out what the last non-empty project is
         const auto count = lsdj_sav_get_project_count(sav);
-        for (int i = 0; i < count; ++i)
+        int lastNonEmptyProject = count - 1;
+        while (lastNonEmptyProject != 0)
+        {
+            const auto project = lsdj_sav_get_project(sav, lastNonEmptyProject);
+            const auto song = lsdj_project_get_song(project);
+            if (song)
+                break;
+            
+            lastNonEmptyProject -= 1;
+        }
+        
+        // Go through all compressed projects
+        for (int i = 0; i <= lastNonEmptyProject; i++)
         {
             // If indices were specified and this project wasn't one of them, move on to the next
             if (!indices.empty() && std::find(std::begin(indices), std::end(indices), i) == std::end(indices))
@@ -294,15 +306,20 @@ namespace lsdj
                 return;
         }
         
-        // Retrieve the song belonging to this project, make sure it's there
-        const lsdj_song_t* song = lsdj_project_get_song(project);
-        if (!song)
-            return;
-        
         // Print out the index
         std::cout << std::to_string(index) << "  ";
         if (index < 10)
             std::cout << ' ';
+        
+        // See if there's actually a song here. If not, this is an (EMPTY) project among
+        // existing projects, which is a thing that can happen in older versions of LSDJ
+        // Since we're printing, we should show the user this slot is effectively empty
+        const lsdj_song_t* song = lsdj_project_get_song(project);
+        if (!song)
+        {
+            std::cout << "(EMPTY)" << std::endl;
+            return;
+        }
         
         // Display the name of the project
         const auto name = constructName(project);
