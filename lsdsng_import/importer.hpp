@@ -32,6 +32,7 @@
  SOFTWARE.
  
  */
+
 #ifndef LSDJ_IMPORTER_HPP
 #define LSDJ_IMPORTER_HPP
 

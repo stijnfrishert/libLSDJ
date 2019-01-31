@@ -39,6 +39,20 @@
 
 #include "importer.hpp"
 
+std::string generateOutputFilename(const std::vector<std::string>& inputs)
+{
+    // If we've got no output file and are only importing one folder,
+    // we take that folder name as output. In case of multiple folders,
+    if (inputs.size() == 1)
+    {
+        const auto path = boost::filesystem::absolute(inputs.front());
+        if (boost::filesystem::is_directory(path))
+            return path.stem().filename().string() + ".sav";
+    }
+    
+    return "out.sav";
+}
+
 int main(int argc, char* argv[])
 {
     boost::program_options::options_description desc{"Options"};
@@ -69,7 +83,7 @@ int main(int argc, char* argv[])
             lsdj::Importer importer;
             
             importer.inputs = vm["file"].as<std::vector<std::string>>();
-            importer.outputFile = vm.count("output") ? vm["output"].as<std::string>() : "";
+            importer.outputFile = vm.count("output") ? vm["output"].as<std::string>() : generateOutputFilename(importer.inputs);
             importer.verbose = vm.count("verbose");
             
             return importer.importSongs(vm.count("sav") ? vm["sav"].as<std::string>().c_str() : nullptr);
