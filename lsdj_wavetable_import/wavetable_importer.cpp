@@ -104,7 +104,7 @@ namespace lsdj
             return false;
         }
         
-        std::cout << "Wrote " << std::dec << frameCount << " frames starting at 0x" << std::hex << wavetableIndex << " to " << outputPath.string() << std::endl;
+        std::cout << "Wrote " << std::dec << frameCount << " frames starting at 0x" << std::hex << (int)wavetableIndex << " to " << outputPath.string() << std::endl;
         
         return true;
     }
@@ -143,7 +143,7 @@ namespace lsdj
             return false;
         }
         
-        std::cout << "Wrote " << std::dec << frameCount << " frames starting at 0x" << std::hex << wavetableIndex << " to " << outputPath.string() << std::endl;
+        std::cout << "Wrote " << std::dec << frameCount << " frames starting at 0x" << std::hex << (int)wavetableIndex << " to " << outputPath.string() << std::endl;
         
         return true;
     }

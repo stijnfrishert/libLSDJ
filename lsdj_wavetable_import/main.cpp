@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     options.add(cmd).add(hidden);
     
     boost::program_options::positional_options_description positionalOptions;
-    positionalOptions.add("project", 1);
+    positionalOptions.add("destination", 1);
     positionalOptions.add("wavetable", 1);
     positionalOptions.add("synth", 1);
     
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
         {
             printHelp(cmd);
             return 0;
-        } else if (vm.count("project") && vm.count("wavetable") && vm.count("synth")) {
+        } else if (vm.count("destination") && vm.count("wavetable") && vm.count("synth")) {
             lsdj::WavetableImporter importer;
             
             const auto destination = vm["destination"].as<std::string>();
