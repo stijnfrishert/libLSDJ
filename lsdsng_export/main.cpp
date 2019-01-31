@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     // Setup the command-line options
     boost::program_options::options_description hidden{"Hidden"};
     hidden.add_options()
-        ("file", boost::program_options::value<std::string>(), "Input save file");
+        ("file", boost::program_options::value<std::string>(), "Input save file, or folder for print");
     
     boost::program_options::options_description cmd{"Options"};
     cmd.add_options()
@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
             const auto path = boost::filesystem::absolute(vm["file"].as<std::string>());
             if (!boost::filesystem::exists(path))
             {
-                std::cerr << "File '" << path.string() << "' does not exist" << std::endl;
+                std::cerr << "Path '" << path.string() << "' does not exist" << std::endl;
                 return 1;
             }
             

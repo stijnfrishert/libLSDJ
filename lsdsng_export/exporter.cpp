@@ -152,6 +152,30 @@ namespace lsdj
     
     int Exporter::print(const boost::filesystem::path& path)
     {
+        if (boost::filesystem::is_directory(path))
+            return printFolder(path);
+        else
+            return printSav(path);
+    }
+    
+    int Exporter::printFolder(const boost::filesystem::path& path)
+    {
+        for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
+        {
+            const auto path = it->path();
+            if (isHiddenFile(path.filename().string()) || path.extension() != ".sav")
+                continue;
+            
+            std::cout << path.filename().string() << std::endl;
+            if (printSav(path) != 0)
+                return 1;
+        }
+        
+        return 0;
+    }
+    
+    int Exporter::printSav(const boost::filesystem::path& path)
+    {
         // Try and read the sav
         lsdj_error_t* error = nullptr;
         lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);

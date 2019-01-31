@@ -71,6 +71,10 @@ namespace lsdj
         std::vector<std::string> names;
         
     private:
+        int printFolder(const boost::filesystem::path& path);
+        int printSav(const boost::filesystem::path& path);
+        
+    private:
         // Converts a project version to a string representation using the current VersionStyle
         std::string convertVersionToString(unsigned char version, bool prefixDot) const;
         
