@@ -55,13 +55,19 @@ std::string generateOutputFilename(const std::vector<std::string>& inputs)
 
 int main(int argc, char* argv[])
 {
-    boost::program_options::options_description desc{"Options"};
-    desc.add_options()
+    boost::program_options::options_description hidden{"Hidden"};
+    hidden.add_options()
+        ("file", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more");
+    
+    boost::program_options::options_description cmd{"Options"};
+    cmd.add_options()
         ("help,h", "Help screen")
-        ("file", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more")
         ("output,o", boost::program_options::value<std::string>(), "The output file (.sav)")
         ("sav,s", boost::program_options::value<std::string>(), "A sav file to append all .lsdsng's to")
         ("verbose,v", "Verbose output during import");
+    
+    boost::program_options::options_description options;
+    options.add(cmd).add(hidden);
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", -1);
@@ -70,14 +76,14 @@ int main(int argc, char* argv[])
     {
         boost::program_options::variables_map vm;
         boost::program_options::command_line_parser parser(argc, argv);
-        parser = parser.options(desc);
+        parser = parser.options(options);
         parser = parser.positional(positionalOptions);
         boost::program_options::store(parser.run(), vm);
         boost::program_options::notify(vm);
         
         if (vm.count("help"))
         {
-            std::cout << desc << std::endl;
+            std::cout << cmd << std::endl;
             return 0;
         } else if (vm.count("file")) {
             lsdj::Importer importer;
@@ -94,7 +100,7 @@ int main(int argc, char* argv[])
             
             return importer.importSongs(vm.count("sav") ? vm["sav"].as<std::string>().c_str() : nullptr);
         } else {
-            std::cout << desc << std::endl;
+            std::cout << cmd << std::endl;
             return 0;
         }
     } catch (const boost::program_options::error& e) {
