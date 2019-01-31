@@ -59,6 +59,8 @@ namespace lsdj
         bool verbose = false;
         
     private:
+        bool importToSav(const boost::filesystem::path& path, const std::string& wavetableName);
+        bool importToLsdsng(const boost::filesystem::path& path, const std::string& wavetableName);
         std::pair<bool, unsigned int> importToSong(lsdj_song_t* song, const std::string& wavetableName);
     };
 }

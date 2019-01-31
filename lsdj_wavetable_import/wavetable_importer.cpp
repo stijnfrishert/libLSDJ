@@ -37,26 +37,83 @@
 #include <array>
 #include <iostream>
 
-#include "../liblsdj/song.h"
 #include "../liblsdj/project.h"
+#include "../liblsdj/sav.h"
 
 #include "../common/common.hpp"
 #include "wavetable_importer.hpp"
 
 namespace lsdj
 {
-    bool WavetableImporter::import(const std::string& projectName, const std::string& wavetableName)
+    bool WavetableImporter::import(const std::string& destination, const std::string& wavetableName)
     {
-        const auto projectPath = boost::filesystem::absolute(projectName);
-        if (!boost::filesystem::exists(projectPath))
+        const auto path = boost::filesystem::absolute(destination);
+        if (!boost::filesystem::exists(path))
         {
-            std::cerr << projectPath.filename().string() << " does not exist" << std::endl;
+            std::cerr << path.filename().string() << " does not exist" << std::endl;
             return false;
         }
         
+        if (path.extension() == ".sav")
+            return importToSav(path, wavetableName);
+        else if (path.extension() == ".lsdsng")
+            return importToLsdsng(path, wavetableName);
+        else
+        {
+            std::cerr << "Unknown file format at '" << path.string() << "'" << std::endl;
+            return false;
+        }
+    }
+    
+    bool WavetableImporter::importToSav(const boost::filesystem::path& path, const std::string& wavetableName)
+    {
+        // Load the sav
+        lsdj_error_t* error = nullptr;
+        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);
+        if (error != nullptr)
+        {
+            lsdj_sav_free(sav);
+            return false;
+        }
+        
+        if (verbose)
+            std::cout << "Loaded sav " + path.string() << std::endl;
+        
+        lsdj_song_t* song = lsdj_sav_get_working_memory_song(sav);
+        if (!song)
+        {
+            lsdj_sav_free(sav);
+            return false;
+        }
+        
+        // Do the actual import
+        const auto result = importToSong(song, wavetableName);
+        if (!result.first)
+        {
+            lsdj_sav_free(sav);
+            return false;
+        }
+        const auto frameCount = result.second;
+        
+        // Write the sav back to file
+        const auto outputPath = boost::filesystem::absolute(outputName);
+        lsdj_sav_write_to_file(sav, outputPath.string().c_str(), &error);
+        if (error != nullptr)
+        {
+            lsdj_sav_free(sav);
+            return false;
+        }
+        
+        std::cout << "Wrote " << std::dec << frameCount << " frames starting at 0x" << std::hex << wavetableIndex << " to " << outputPath.string() << std::endl;
+        
+        return true;
+    }
+    
+    bool WavetableImporter::importToLsdsng(const boost::filesystem::path& path, const std::string& wavetableName)
+    {
         // Load the project
         lsdj_error_t* error = nullptr;
-        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(projectPath.string().c_str(), &error);
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.string().c_str(), &error);
         if (error != nullptr)
         {
             lsdj_project_free(project);
@@ -64,10 +121,11 @@ namespace lsdj
         }
         
         if (verbose)
-            std::cout << "Loaded project " + projectPath.string() << std::endl;
+            std::cout << "Loaded project " + path.string() << std::endl;
         
         lsdj_song_t* song = lsdj_project_get_song(project);
         
+        // Do the actual import
         const auto result = importToSong(song, wavetableName);
         if (!result.first)
         {
