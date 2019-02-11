@@ -89,3 +89,7 @@ Developers that would like to help out are warmly invited to do so. This project
 ---
 
 Special thanks for Defense Mechanism (urbster1) for thinking along and helping out where needed.
+
+# Appreciation
+
+LibLSDJ is open source and freely available to anyone. If you'd like to show your appreciation and help me further developer it, a [donation](https://bit.ly/2RZCAi0) goes a long way.
