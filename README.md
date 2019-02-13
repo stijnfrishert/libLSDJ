@@ -54,7 +54,7 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 
 *lsdj-wavetable-import* is a command-line tool that imports *.snt* files (directly containing bytes that represent wavetable data) into your *.lsdsng* files. A repository of *.snt* files can be found over at [https://github.com/psgcabal/lsdjsynths](https://github.com/psgcabal/lsdjsynths).
 
-	lsdj-wavetable-import [project] [wavetable] [index]
+	lsdj-wavetable-import [destination] [wavetable] [index]
 
 	Options:
 	  -h [ --help ]         Help screen
@@ -65,6 +65,7 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 	  -o [ --output ] arg   The output .lsdsng to write to
 	  -i [ --index ]        The index should be interpreted as a wavetable index 
 	                        instead of synth
+	  -v [ --verbose ]      Verbose output
 
 # System Requirements
 
