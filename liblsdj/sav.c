@@ -208,6 +208,12 @@ void lsdj_sav_set_project(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* 
     sav->projects[index] = project;
 }
 
+void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error)
+{
+    lsdj_project_free(sav->projects[index]);
+    sav->projects[index] = lsdj_project_new(error);
+}
+
 lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char project)
 {
     return sav->projects[project];
