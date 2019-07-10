@@ -63,6 +63,8 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, ls
 // some magic numbers
 // Returns 0 if invalid, 1 if valid. Error contains information about why.
 int lsdj_is_likely_valid_sav(lsdj_vio_t* vio, lsdj_error_t** error);
+int lsdj_is_likely_valid_sav_file(const char* path, lsdj_error_t** error);
+int lsdj_is_likely_valid_sav_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
 // Serialize a sav
 void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error);

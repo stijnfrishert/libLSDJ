@@ -464,6 +464,57 @@ int lsdj_is_likely_valid_sav(lsdj_vio_t* vio, lsdj_error_t** error)
     return 1;
 }
 
+int lsdj_is_likely_valid_sav_file(const char* path, lsdj_error_t** error)
+{
+    if (path == NULL)
+    {
+        lsdj_error_new(error, "path is NULL");
+        return 0;
+    }
+    
+    FILE* file = fopen(path, "rb");
+    if (file == NULL)
+    {
+        char message[512];
+        snprintf(message, 512, "could not open %s for reading", path);
+        lsdj_error_new(error, message);
+        return 0;
+    }
+    
+    lsdj_vio_t vio;
+    vio.read = lsdj_fread;
+    vio.tell = lsdj_ftell;
+    vio.seek = lsdj_fseek;
+    vio.user_data = file;
+    
+    int result = lsdj_is_likely_valid_sav(&vio, error);
+    
+    fclose(file);
+    return result;
+}
+
+int lsdj_is_likely_valid_sav_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+{
+    if (data == NULL)
+    {
+        lsdj_error_new(error, "data is NULL");
+        return 0;
+    }
+    
+    lsdj_memory_data_t mem;
+    mem.begin = (unsigned char*)data;
+    mem.cur = mem.begin;
+    mem.size = size;
+    
+    lsdj_vio_t vio;
+    vio.read = lsdj_mread;
+    vio.tell = lsdj_mtell;
+    vio.seek = lsdj_mseek;
+    vio.user_data = &mem;
+    
+    return lsdj_is_likely_valid_sav(&vio, error);
+}
+
 void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     // Write the working project
