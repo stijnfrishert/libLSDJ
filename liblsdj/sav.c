@@ -433,7 +433,7 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, ls
     return lsdj_sav_read(&vio, error);
 }
 
-int lsdj_is_likely_valid_sav(lsdj_vio_t* vio, lsdj_error_t** error)
+int lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error)
 {
     // Check for incorrect input
     if (vio->read == NULL)
@@ -464,7 +464,7 @@ int lsdj_is_likely_valid_sav(lsdj_vio_t* vio, lsdj_error_t** error)
     return 1;
 }
 
-int lsdj_is_likely_valid_sav_file(const char* path, lsdj_error_t** error)
+int lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error)
 {
     if (path == NULL)
     {
@@ -487,13 +487,13 @@ int lsdj_is_likely_valid_sav_file(const char* path, lsdj_error_t** error)
     vio.seek = lsdj_fseek;
     vio.user_data = file;
     
-    int result = lsdj_is_likely_valid_sav(&vio, error);
+    int result = lsdj_sav_is_likely_valid(&vio, error);
     
     fclose(file);
     return result;
 }
 
-int lsdj_is_likely_valid_sav_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+int lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
 {
     if (data == NULL)
     {
@@ -512,7 +512,7 @@ int lsdj_is_likely_valid_sav_memory(const unsigned char* data, size_t size, lsdj
     vio.seek = lsdj_mseek;
     vio.user_data = &mem;
     
-    return lsdj_is_likely_valid_sav(&vio, error);
+    return lsdj_sav_is_likely_valid(&vio, error);
 }
 
 void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error)
