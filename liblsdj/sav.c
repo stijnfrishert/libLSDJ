@@ -276,13 +276,19 @@ lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error)
     // Check for incorrect input
     if (vio->read == NULL)
     {
-        lsdj_error_new(error, "read is NULL");
+        lsdj_error_new(error, "vio->read is NULL");
         return NULL;
     }
     
     if (vio->seek == NULL)
     {
-        lsdj_error_new(error, "seek is NULL");
+        lsdj_error_new(error, "vio->seek is NULL");
+        return NULL;
+    }
+    
+    if (vio->tell == NULL)
+    {
+        lsdj_error_new(error, "vio->tell is NULL");
         return NULL;
     }
     
@@ -425,6 +431,37 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, ls
     vio.user_data = &mem;
     
     return lsdj_sav_read(&vio, error);
+}
+
+int lsdj_is_likely_valid_sav(lsdj_vio_t* vio, lsdj_error_t** error)
+{
+    // Check for incorrect input
+    if (vio->read == NULL)
+    {
+        lsdj_error_new(error, "vio->read is NULL");
+        return 0;
+    }
+    
+    if (vio->seek == NULL)
+    {
+        lsdj_error_new(error, "vio->seek is NULL");
+        return 0;
+    }
+    
+    // Move to the initialization bytes
+    vio->seek(HEADER_START + 0x13E, SEEK_CUR, vio->user_data);
+    
+    // Ensure these bytes are 'jk', that's what LSDJ sets them to on RAM init
+    char buffer[2];
+    vio->read(buffer, sizeof(buffer), vio->user_data);
+    
+    if (buffer[0] != 'j' || buffer[1] != 'k')
+    {
+        lsdj_error_new(error, "Memory 0x813E isn't 'jk'");
+        return 0;
+    }
+    
+    return 1;
 }
 
 void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error)

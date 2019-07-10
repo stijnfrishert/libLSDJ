@@ -850,7 +850,7 @@ lsdj_song_t* lsdj_song_read(lsdj_vio_t* vio, lsdj_error_t** error)
     // Check for incorrect input
     if (vio->read == NULL)
     {
-        lsdj_error_new(error, "read is NULL");
+        lsdj_error_new(error, "vio->read is NULL");
         return NULL;
     }
     
@@ -862,7 +862,7 @@ lsdj_song_t* lsdj_song_read(lsdj_vio_t* vio, lsdj_error_t** error)
     
     if (vio->seek == NULL)
     {
-        lsdj_error_new(error, "seek is NULL");
+        lsdj_error_new(error, "vio->seek is NULL");
         return NULL;
     }
     

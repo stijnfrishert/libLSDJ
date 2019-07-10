@@ -518,10 +518,10 @@ void read_noise_instrument(lsdj_vio_t* vio, lsdj_instrument_t* instrument, lsdj_
 void lsdj_instrument_read(lsdj_vio_t* vio, unsigned char version, lsdj_instrument_t* instrument, lsdj_error_t** error)
 {
     if (vio->read == NULL)
-        return lsdj_error_new(error, "read is NULL");
+        return lsdj_error_new(error, "vio->read is NULL");
     
     if (vio->seek == NULL)
-        return lsdj_error_new(error, "seek is NULL");
+        return lsdj_error_new(error, "vio->seek is NULL");
     
     if (instrument == NULL)
         return lsdj_error_new(error, "instrument is NULL");
