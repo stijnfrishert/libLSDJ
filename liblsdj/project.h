@@ -63,6 +63,16 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
 lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error);
 lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
+// Find out whether given data is likely a valid lsdsng
+// Note: this is not a 100% guarantee that the data will load, we're just checking
+// some heuristics.
+// Returns 0 if invalid, 1 if valid. Error contains information about why.
+//
+// First version consumes the vio (doesn't seek() back to the beginning)
+int lsdj_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
+int lsdj_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error);
+int lsdj_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+    
 // Write a project to an lsdsng file
 // Returns the number of bytes written
 size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error);

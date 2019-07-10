@@ -179,6 +179,85 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, 
     return lsdj_project_read_lsdsng(&vio, error);
 }
 
+int lsdj_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
+{
+    // Check for incorrect input
+    if (vio->tell == NULL)
+    {
+        lsdj_error_new(error, "vio->tell is NULL");
+        return 0;
+    }
+    
+    if (vio->seek == NULL)
+    {
+        lsdj_error_new(error, "vio->seek is NULL");
+        return 0;
+    }
+    
+    const long begin = vio->tell(vio->user_data);
+    vio->seek(0, SEEK_END, vio->user_data);
+    
+    const long size = vio->tell(vio->user_data) - begin;
+    if ((size - LSDJ_PROJECT_NAME_LENGTH - 1) % 0x200 != 0)
+    {
+        lsdj_error_new(error, "data length does not correspond to that of a valid lsdsng");
+        return 0;
+    }
+    
+    return 1;
+}
+
+int lsdj_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error)
+{
+    if (path == NULL)
+    {
+        lsdj_error_new(error, "path is NULL");
+        return 0;
+    }
+    
+    FILE* file = fopen(path, "rb");
+    if (file == NULL)
+    {
+        char message[512];
+        snprintf(message, 512, "could not open %s for reading", path);
+        lsdj_error_new(error, message);
+        return 0;
+    }
+    
+    lsdj_vio_t vio;
+    vio.read = lsdj_fread;
+    vio.tell = lsdj_ftell;
+    vio.seek = lsdj_fseek;
+    vio.user_data = file;
+    
+    int result = lsdj_is_likely_valid_lsdsng(&vio, error);
+    
+    fclose(file);
+    return result;
+}
+
+int lsdj_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+{
+    if (data == NULL)
+    {
+        lsdj_error_new(error, "data is NULL");
+        return 0;
+    }
+    
+    lsdj_memory_data_t mem;
+    mem.begin = (unsigned char*)data;
+    mem.cur = mem.begin;
+    mem.size = size;
+    
+    lsdj_vio_t vio;
+    vio.read = lsdj_mread;
+    vio.tell = lsdj_mtell;
+    vio.seek = lsdj_mseek;
+    vio.user_data = &mem;
+    
+    return lsdj_is_likely_valid_lsdsng(&vio, error);
+}
+
 size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     size_t write_size = 0;
