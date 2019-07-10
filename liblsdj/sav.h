@@ -60,8 +60,10 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, ls
     
 // Find out whether given data is likely a valid save
 // Note: this is not a 100% guarantee that the save will load, we're just checking
-// some magic numbers
+// some magic numbers.
 // Returns 0 if invalid, 1 if valid. Error contains information about why.
+//
+// First version consumes the vio (doesn't seek() back to the beginning)
 int lsdj_is_likely_valid_sav(lsdj_vio_t* vio, lsdj_error_t** error);
 int lsdj_is_likely_valid_sav_file(const char* path, lsdj_error_t** error);
 int lsdj_is_likely_valid_sav_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
