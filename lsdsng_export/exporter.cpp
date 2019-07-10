@@ -193,7 +193,7 @@ namespace lsdj
         std::cout << "#   Name     ";
         if (versionStyle != VersionStyle::NONE)
             std::cout << "Ver    ";
-        std::cout << "Fmt" << std::endl;
+        std::cout << "Fmt    BPM" << std::endl;
         
         // If no specific indices were given, or -w was flagged (index == -1),
         // display the working memory song as well
@@ -279,7 +279,7 @@ namespace lsdj
             switch (versionStyle)
             {
                 case VersionStyle::NONE:
-                    std::cout << "\t\t";
+                    std::cout << "";
                     break;
                 case VersionStyle::HEX:
                     std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
@@ -292,8 +292,20 @@ namespace lsdj
             std::cout << "\t\t";
         }
         
-        // Display the format version of the song
-        std::cout << std::to_string(lsdj_song_get_format_version(song)) << std::endl;
+        // Retrieve the sav format version of the song and display it as well
+        const auto versionString = std::to_string(lsdj_song_get_format_version(song));
+        std::cout << versionString;
+        for (auto i = 0; i < 7 - versionString.length(); i++)
+            std::cout << ' ';
+        
+        // Display the bpm of the project
+        if (song)
+        {
+            int tempo = lsdj_song_get_tempo(song);
+            std::cout << tempo;
+        }
+        
+        std::cout << std::endl;
     }
 
     void Exporter::printProject(const lsdj_sav_t* sav, std::size_t index)
@@ -335,7 +347,7 @@ namespace lsdj
         for (auto i = 0; i < (9 - name.length()); ++i)
             std::cout << ' ';
         
-        // Dipslay the version number of the project
+        // Display the version number of the project
         std::cout << convertVersionToString(lsdj_project_get_version(project), false);
         switch (versionStyle)
         {
@@ -345,7 +357,19 @@ namespace lsdj
         }
         
         // Retrieve the sav format version of the song and display it as well
-        std::cout << std::to_string(lsdj_song_get_format_version(song)) << std::endl;
+        const auto versionString = std::to_string(lsdj_song_get_format_version(song));
+        std::cout << versionString;
+        for (auto i = 0; i < 7 - versionString.length(); i++)
+            std::cout << ' ';
+        
+        // Display the bpm of the project
+        if (song)
+        {
+            int tempo = lsdj_song_get_tempo(song);
+            std::cout << tempo;
+        }
+        
+        std::cout << std::endl;
     }
     
     std::string Exporter::constructName(const lsdj_project_t* project)
