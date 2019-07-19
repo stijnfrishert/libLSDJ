@@ -50,7 +50,7 @@
 
 void printHelp(const boost::program_options::options_description& desc)
 {
-    std::cout << "lsdj-wavetable-import [destination] [wavetable] [index]\n\n" << desc;
+    std::cout << "lsdj-wavetable-import source.lsdsng -w wavetables.snt [-s 0-F | -i 00-FF]\n\n" << desc;
 }
 
 unsigned char parseSynthIndex(const std::string& str)
@@ -62,38 +62,33 @@ unsigned char parseSynthIndex(const std::string& str)
         return static_cast<unsigned char>(std::stoul(str));
 }
 
-unsigned char parseIndex(const std::string& str, bool isWavetableIndex)
+unsigned char parseIndex(const std::string& str)
 {
-    if (isWavetableIndex)
-        return static_cast<unsigned char>(std::stoul(str, nullptr, 16));
-    else
-        return parseSynthIndex(str) * 16;
+    return static_cast<unsigned char>(std::stoul(str, nullptr, 16));
 }
 
 int main(int argc, char* argv[])
 {
     boost::program_options::options_description hidden{"Hidden"};
     hidden.add_options()
-        ("destination", "The .lsdsng project or .sav to which the wavetable should be applied")
-        ("wavetable", "The wavetable that is applied to the project")
-        ("synth", "The index of the synth which wavetables need to be changed");
+        ("input", "The .lsdsng project or .sav to which the wavetable should be applied");
     
     boost::program_options::options_description cmd{"Options"};
     cmd.add_options()
         ("help,h", "Help screen")
-        ("zero,0", "Pad the wavetable with empty frames if the file < 256 bytes")
-        ("force,f", "Force writing the frames, even though non-default data may be in them")
+        ("wavetable,w", boost::program_options::value<std::string>()->required(), "The .snt wavetable file to import")
+        ("index,i", "The wavetable index 00-FF where the wavetable data should be written")
+        ("synth,s", "The synth number 0-F where the wavetable data should be written")
+        ("zero,0", "Pad the synth with empty wavetables if the .snt file < 256 bytes")
+        ("force,f", "Force writing the wavetables, even though non-default data may be in them")
         ("output,o", boost::program_options::value<std::string>(), "The output .lsdsng to write to")
-        ("index,i", "The index should be interpreted as a wavetable index instead of synth")
         ("verbose,v", "Verbose output");
     
     boost::program_options::options_description options;
     options.add(cmd).add(hidden);
     
     boost::program_options::positional_options_description positionalOptions;
-    positionalOptions.add("destination", 1);
-    positionalOptions.add("wavetable", 1);
-    positionalOptions.add("synth", 1);
+    positionalOptions.add("input", 1);
     
     try
     {
@@ -108,13 +103,15 @@ int main(int argc, char* argv[])
         {
             printHelp(cmd);
             return 0;
-        } else if (vm.count("destination") && vm.count("wavetable") && vm.count("synth")) {
+        }
+        else if (vm.count("input") && vm.count("wavetable") && (vm.count("synth") || vm.count("index")))
+        {
             lsdj::WavetableImporter importer;
             
-            const auto destination = vm["destination"].as<std::string>();
+            const auto destination = vm["input"].as<std::string>();
             
             importer.outputName = vm.count("output") ? vm["output"].as<std::string>() : destination;
-            importer.wavetableIndex = parseIndex(vm["synth"].as<std::string>(), vm.count("index"));
+            importer.wavetableIndex = vm.count("synth") ? parseSynthIndex(vm["synth"].as<std::string>()) : parseIndex(vm["index"].as<std::string>());
             importer.zero = vm.count("zero");
             importer.force = vm.count("force");
             importer.verbose = vm.count("verbose");
