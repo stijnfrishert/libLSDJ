@@ -181,7 +181,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long* block1position, s
         return lsdj_error_new(error, "could not tell compression end");
     
     const long readSize = wend - wstart;
-    if (wend - wstart != LSDJ_SONG_DECOMPRESSED_SIZE)
+    if (readSize != LSDJ_SONG_DECOMPRESSED_SIZE)
     {
         char buffer[100];
         memset(buffer, '\0', sizeof(buffer));
@@ -241,7 +241,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
     for (const unsigned char* read = data; read < end; )
     {
         // Uncomment this to print the current read and write positions
-        long wcur = wvio->tell(wvio->user_data) - wstart;
+//        long wcur = wvio->tell(wvio->user_data) - wstart;
 //        printf("read: 0x%lx\twrite: 0x%lx\n", read - data, wcur);
         
         // Are we reading a default wave? If so, we can compress these!
