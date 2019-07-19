@@ -34,6 +34,7 @@
  */
 
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -541,6 +542,7 @@ void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
     
     unsigned char current_block = 1;
     memset(blocks, 0, sizeof(blocks));
+    
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
     {
         lsdj_project_t* project = sav->projects[i];
@@ -570,18 +572,12 @@ void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
             wvio.tell = lsdj_mtell;
             wvio.user_data = &mem;
             
-//            unsigned int written_block_count = lsdj_compress(song_data, &blocks[0][0], BLOCK_SIZE, current_block, BLOCK_COUNT);
             unsigned int written_block_count = lsdj_compress(song_data, BLOCK_SIZE, current_block, BLOCK_COUNT, &wvio, error);
             if (error && *error)
                 return;
             
             if (written_block_count == 0)
-            {
-                char message[45];
-                memset(message, 0, sizeof(message));
-                sprintf(message, "not enough space for compressing project %d", i);
-                return lsdj_error_new(error, message);
-            }
+                printf("not enough space for compressing %s\n", name);
             
             current_block += written_block_count;
             for (int j = 0; j < written_block_count; ++j)
