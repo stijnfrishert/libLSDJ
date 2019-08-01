@@ -50,7 +50,7 @@
 
 void printHelp(const boost::program_options::options_description& desc)
 {
-    std::cout << "lsdj-wavetable-import source.lsdsng -w wavetables.snt [-s 0-F | -i 00-FF]\n\n" << desc;
+    std::cout << "lsdj-wavetable-import source.lsdsng wavetables.snt --[synth 0-F | index 00-FF]\n\n" << desc;
 }
 
 unsigned char parseSynthIndex(const std::string& str)
@@ -71,12 +71,12 @@ int main(int argc, char* argv[])
 {
     boost::program_options::options_description hidden{"Hidden"};
     hidden.add_options()
-        ("input", "The .lsdsng project or .sav to which the wavetable should be applied");
+        ("input", "The .lsdsng project or .sav to which the wavetable should be applied")
+    ("wavetable,w", boost::program_options::value<std::string>(), "The .snt wavetable file to import");
     
     boost::program_options::options_description cmd{"Options"};
     cmd.add_options()
         ("help,h", "Help screen")
-        ("wavetable,w", boost::program_options::value<std::string>()->required(), "The .snt wavetable file to import")
         ("index,i", "The wavetable index 00-FF where the wavetable data should be written")
         ("synth,s", "The synth number 0-F where the wavetable data should be written")
         ("zero,0", "Pad the synth with empty wavetables if the .snt file < 256 bytes")
@@ -108,15 +108,15 @@ int main(int argc, char* argv[])
         {
             lsdj::WavetableImporter importer;
             
-            const auto destination = vm["input"].as<std::string>();
+            const auto input = vm["input"].as<std::string>();
             
-            importer.outputName = vm.count("output") ? vm["output"].as<std::string>() : destination;
+            importer.outputName = vm.count("output") ? vm["output"].as<std::string>() : input;
             importer.wavetableIndex = vm.count("synth") ? parseSynthIndex(vm["synth"].as<std::string>()) : parseIndex(vm["index"].as<std::string>());
             importer.zero = vm.count("zero");
             importer.force = vm.count("force");
             importer.verbose = vm.count("verbose");
             
-            return importer.import(destination, vm["wavetable"].as<std::string>()) ? 0 : 1;
+            return importer.import(input, vm["wavetable"].as<std::string>()) ? 0 : 1;
         } else {
             printHelp(cmd);
             return 0;

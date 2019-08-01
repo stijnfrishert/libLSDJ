@@ -45,9 +45,9 @@
 
 namespace lsdj
 {
-    bool WavetableImporter::import(const std::string& destination, const std::string& wavetableName)
+    bool WavetableImporter::import(const std::string& input, const std::string& wavetableName)
     {
-        const auto path = boost::filesystem::absolute(destination);
+        const auto path = boost::filesystem::absolute(input);
         if (!boost::filesystem::exists(path))
         {
             std::cerr << path.filename().string() << " does not exist" << std::endl;
