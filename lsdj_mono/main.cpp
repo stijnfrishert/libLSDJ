@@ -41,6 +41,13 @@
 #include "../common/common.hpp"
 #include "../liblsdj/sav.h"
 
+void printHelp(const boost::program_options::options_description& desc)
+{
+    std::cout << "lsdsng-mono mymusic.sav|mymusic.lsdsng\n\n"
+              << "Version: " << lsdj::VERSION << "\n\n"
+              << desc;
+}
+
 bool verbose = false;
 bool convertInstruments = false;
 bool convertTables = false;
@@ -241,14 +248,20 @@ int process(const std::vector<std::string>& inputs)
 
 int main(int argc, char* argv[])
 {
-    boost::program_options::options_description desc{"Options"};
-    desc.add_options()
+    boost::program_options::options_description hidden{"Hidden"};
+    hidden.add_options()
+        ("file", boost::program_options::value<std::vector<std::string>>(), ".sav or .lsdng file(s), 0 or more");
+    
+    boost::program_options::options_description cmd{"Options"};
+    cmd.add_options()
         ("help,h", "Help screen")
-        ("file", boost::program_options::value<std::vector<std::string>>(), ".sav or .lsdng file(s), 0 or more")
         ("verbose,v", "Verbose output during import")
         ("instrument,i", "Only adjust instruments")
         ("table,t", "Only adjust tables")
         ("phrase,p", "Only adjust phrases");
+    
+    boost::program_options::options_description options;
+    options.add(cmd).add(hidden);
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("file", -1);
@@ -257,14 +270,14 @@ int main(int argc, char* argv[])
     {
         boost::program_options::variables_map vm;
         boost::program_options::command_line_parser parser(argc, argv);
-        parser = parser.options(desc);
+        parser = parser.options(options);
         parser = parser.positional(positionalOptions);
         boost::program_options::store(parser.run(), vm);
         boost::program_options::notify(vm);
         
         if (vm.count("help"))
         {
-            std::cout << desc << std::endl;
+            printHelp(cmd);
             return 0;
         } else if (vm.count("file")) {
             verbose = vm.count("verbose");
@@ -276,7 +289,7 @@ int main(int argc, char* argv[])
             
             return process(vm["file"].as<std::vector<std::string>>());
         } else {
-            std::cout << desc << std::endl;
+            printHelp(cmd);
             return 0;
         }
     } catch (const boost::program_options::error& e) {

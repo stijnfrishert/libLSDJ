@@ -43,6 +43,8 @@
 
 namespace lsdj
 {
+    const auto VERSION = "1.2.3";
+    
     int handle_error(lsdj_error_t* error);
     bool compareCaseInsensitive(std::string str1, std::string str2);
     std::string constructProjectName(const lsdj_project_t* project, bool underscore);

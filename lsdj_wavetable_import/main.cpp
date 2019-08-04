@@ -50,7 +50,9 @@
 
 void printHelp(const boost::program_options::options_description& desc)
 {
-    std::cout << "lsdj-wavetable-import source.lsdsng wavetables.snt --[synth 0-F | index 00-FF]\n\n" << desc;
+    std::cout << "lsdj-wavetable-import source.lsdsng wavetables.snt --[synth 0-F | index 00-FF]\n\n"
+              << "Version: " << lsdj::VERSION << "\n\n"
+              << desc;
 }
 
 unsigned char parseSynthIndex(const std::string& str)

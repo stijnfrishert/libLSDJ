@@ -41,8 +41,16 @@
 #include <sstream>
 #include <vector>
 
+#include "../common/common.hpp"
 #include "../liblsdj/sav.h"
 #include "exporter.hpp"
+
+void printHelp(const boost::program_options::options_description& desc)
+{
+    std::cout << "lsdsng-export mymusic.sav\n\n"
+              << "Version: " << lsdj::VERSION << "\n\n"
+              << desc;
+}
 
 int main(int argc, char* argv[])
 {
@@ -85,7 +93,7 @@ int main(int argc, char* argv[])
         // Show help if requested
         if (vm.count("help"))
         {
-            std::cout << cmd << std::endl;
+            printHelp(cmd);
             return 0;
         // Do we have an input file?
         } else if (vm.count("file")) {
@@ -120,7 +128,7 @@ int main(int argc, char* argv[])
             else
                 return exporter.exportProjects(path, vm["output"].as<std::string>());
         } else {
-            std::cout << cmd << std::endl;
+            printHelp(cmd);
             return 0;
         }
     } catch (const boost::program_options::error& e) {

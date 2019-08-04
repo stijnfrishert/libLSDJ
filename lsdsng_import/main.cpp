@@ -37,7 +37,15 @@
 
 #include <iostream>
 
+#include "../common/common.hpp"
 #include "importer.hpp"
+
+void printHelp(const boost::program_options::options_description& desc)
+{
+    std::cout << "lsdsng-import -o output.sav song1.lsgsng song2.lsdsng...\n\n"
+              << "Version: " << lsdj::VERSION << "\n\n"
+              << desc;
+}
 
 std::string generateOutputFilename(const std::vector<std::string>& inputs)
 {
@@ -83,7 +91,7 @@ int main(int argc, char* argv[])
         
         if (vm.count("help"))
         {
-            std::cout << cmd << std::endl;
+            printHelp(cmd);
             return 0;
         } else if (vm.count("file")) {
             lsdj::Importer importer;
@@ -100,7 +108,7 @@ int main(int argc, char* argv[])
             
             return importer.importSongs(vm.count("sav") ? vm["sav"].as<std::string>().c_str() : nullptr);
         } else {
-            std::cout << cmd << std::endl;
+            printHelp(cmd);
             return 0;
         }
     } catch (const boost::program_options::error& e) {
