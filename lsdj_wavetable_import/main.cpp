@@ -71,31 +71,31 @@ int main(int argc, char* argv[])
 {
     boost::program_options::options_description hidden{"Hidden"};
     hidden.add_options()
-        ("input", "The .lsdsng project or .sav to which the wavetable should be applied")
-    ("wavetable,w", boost::program_options::value<std::string>(), "The .snt wavetable file to import");
+        ("input", boost::program_options::value<std::string>(), "The .lsdsng project or .sav to which the wavetable should be applied")
+        ("wavetable", boost::program_options::value<std::string>(), "The .snt wavetable file to import");
     
     boost::program_options::options_description cmd{"Options"};
     cmd.add_options()
         ("help,h", "Help screen")
-        ("index,i", "The wavetable index 00-FF where the wavetable data should be written")
-        ("synth,s", "The synth number 0-F where the wavetable data should be written")
+        ("index,i", boost::program_options::value<std::string>(), "The wavetable index 00-FF where the wavetable data should be written")
+        ("synth,s", boost::program_options::value<std::string>(), "The synth number 0-F where the wavetable data should be written")
         ("zero,0", "Pad the synth with empty wavetables if the .snt file < 256 bytes")
         ("force,f", "Force writing the wavetables, even though non-default data may be in them")
         ("output,o", boost::program_options::value<std::string>(), "The output .lsdsng to write to")
         ("verbose,v", "Verbose output");
     
     boost::program_options::options_description options;
-    options.add(cmd).add(hidden);
+        options.add(cmd).add(hidden);
     
     boost::program_options::positional_options_description positionalOptions;
     positionalOptions.add("input", 1);
+    positionalOptions.add("wavetable", 1);
     
     try
     {
         boost::program_options::variables_map vm;
         boost::program_options::command_line_parser parser(argc, argv);
-        parser = parser.options(options);
-        parser = parser.positional(positionalOptions);
+        parser.options(options).positional(positionalOptions);
         boost::program_options::store(parser.run(), vm);
         boost::program_options::notify(vm);
         
