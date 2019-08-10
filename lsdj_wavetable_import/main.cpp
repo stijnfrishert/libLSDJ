@@ -46,6 +46,7 @@
 
 #include "../common/common.hpp"
 #include "../liblsdj/project.h"
+#include "../liblsdj/sav.h"
 #include "wavetable_importer.hpp"
 
 void printHelp(const boost::program_options::options_description& desc)
@@ -73,8 +74,7 @@ int main(int argc, char* argv[])
 {
     boost::program_options::options_description hidden{"Hidden"};
     hidden.add_options()
-        ("input", boost::program_options::value<std::string>(), "The .lsdsng project or .sav to which the wavetable should be applied")
-        ("wavetable", boost::program_options::value<std::string>(), "The .snt wavetable file to import");
+        ("input", boost::program_options::value<std::vector<std::string>>(), "A .lsdsng project, .sav or wavetable (.snt)");
     
     boost::program_options::options_description cmd{"Options"};
     cmd.add_options()
@@ -90,8 +90,7 @@ int main(int argc, char* argv[])
         options.add(cmd).add(hidden);
     
     boost::program_options::positional_options_description positionalOptions;
-    positionalOptions.add("input", 1);
-    positionalOptions.add("wavetable", 1);
+    positionalOptions.add("input", 2);
     
     try
     {
@@ -106,19 +105,48 @@ int main(int argc, char* argv[])
             printHelp(cmd);
             return 0;
         }
-        else if (vm.count("input") && vm.count("wavetable") && (vm.count("synth") || vm.count("index")))
+        else if (vm.count("input") == 1 && (vm.count("synth") || vm.count("index")))
         {
             lsdj::WavetableImporter importer;
             
-            const auto input = vm["input"].as<std::string>();
+            const auto inputs = vm["input"].as<std::vector<std::string>>();
             
-            importer.outputName = vm.count("output") ? vm["output"].as<std::string>() : input;
+            std::string source;
+            std::string wavetable;
+            
+            lsdj_error_t* error = nullptr;
+            if (lsdj_sav_is_likely_valid_file(inputs[0].c_str(), &error) ||
+                lsdj_project_is_likely_valid_lsdsng_file(inputs[0].c_str(), &error))
+            {
+                source = inputs[0];
+                wavetable = inputs[1];
+            }
+            else if (lsdj_sav_is_likely_valid_file(inputs[1].c_str(), &error) ||
+                     lsdj_project_is_likely_valid_lsdsng_file(inputs[1].c_str(), &error))
+            {
+                source = inputs[1];
+                wavetable = inputs[0];
+            }
+            else
+            {
+                std::cerr << "Neither of the inputs is likely a valid .lsdsng or .sav" << std::endl;
+                return 1;
+            }
+            
+            if (error)
+            {
+                std::cerr << lsdj_error_get_c_str(error) << std::endl;
+                lsdj_error_free(error);
+                return 1;
+            }
+            
+            importer.outputName = vm.count("output") ? vm["output"].as<std::string>() : source;
             importer.wavetableIndex = vm.count("synth") ? parseSynthIndex(vm["synth"].as<std::string>()) : parseIndex(vm["index"].as<std::string>());
             importer.zero = vm.count("zero");
             importer.force = vm.count("force");
             importer.verbose = vm.count("verbose");
             
-            return importer.import(input, vm["wavetable"].as<std::string>()) ? 0 : 1;
+            return importer.import(source, wavetable) ? 0 : 1;
         } else {
             printHelp(cmd);
             return 0;
