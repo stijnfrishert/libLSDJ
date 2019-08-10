@@ -133,13 +133,6 @@ int main(int argc, char* argv[])
                 return 1;
             }
             
-            if (error)
-            {
-                std::cerr << lsdj_error_get_c_str(error) << std::endl;
-                lsdj_error_free(error);
-                return 1;
-            }
-            
             importer.outputName = vm.count("output") ? vm["output"].as<std::string>() : source;
             importer.wavetableIndex = vm.count("synth") ? parseSynthIndex(vm["synth"].as<std::string>()) : parseIndex(vm["index"].as<std::string>());
             importer.zero = vm.count("zero");
