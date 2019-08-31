@@ -192,7 +192,11 @@ namespace lsdj
         if (!force)
         {
             if (verbose)
+            {
                 std::cout << "Comparing frames to ensure no overwriting" << std::endl;
+                std::cout << "Going to write into frames 0x" << std::hex << static_cast<int>(wavetableIndex)
+                          << " to 0x" << static_cast<int>(wavetableIndex + actualFrameCount) << std::endl;
+            }
             
             for (auto frame = 0; frame < actualFrameCount; frame++)
             {

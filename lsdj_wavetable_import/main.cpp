@@ -58,11 +58,7 @@ void printHelp(const boost::program_options::options_description& desc)
 
 unsigned char parseSynthIndex(const std::string& str)
 {
-    assert(!str.empty());
-    if (str.size() == 1)
-        return static_cast<unsigned char>(std::stoul(str, nullptr, 16));
-    else
-        return static_cast<unsigned char>(std::stoul(str));
+    return static_cast<unsigned char>(std::stoul(str, nullptr, 16)) * 16;
 }
 
 unsigned char parseIndex(const std::string& str)
