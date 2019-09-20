@@ -10,10 +10,12 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 
 *lsdsng-export* is a command-line tool for exporting songs from a .sav to .lsdsng, and querying sav formats about their song content.
 
-    Options:
-      -h [ --help ]            Help screen
-      --file arg               Input save file, can be a nameless option
-      --noversion              Don't add version numbers to the filename
+	lsdsng-export mymusic.sav
+	
+	Options:
+	  -h [ --help ]            Help screen
+	  --file arg               Input save file, can be a nameless option
+	  --noversion              Don't add version numbers to the filename
 	  -f [ --folder ]          Put every lsdsng in its own folder
 	  -p [ --print ]           Print a list of all songs in the sav
 	  -d [ --decimal ]         Use decimal notation for the version number, instead
@@ -31,6 +33,8 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 
 *lsdsng-import* is a command-line tool for importing one or more songs from .lsdsng into a .sav file.
 
+	lsdsng-import -o output.sav song1.lsgsng song2.lsdsng...
+	
 	Options:
 	  -h [ --help ]         Help screen
 	  --file arg            .lsdsng file(s), 0 or more
@@ -42,6 +46,8 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 
 *lsdj-mono* is a command-line tool that transforms any .sav, .lsdsngs or folder containing such files to mono. In essence, it changes all `OL_` and `O_R` commands to `OLR` (leaving `O__` untouched), and sets all instruments to play `LR` as well.
 
+	lsdsng-mono mymusic.sav|mymusic.lsdsng
+	
 	Options:
 	  -h [ --help ]         Help screen
 	  --file arg            .sav or .lsdng file(s), 0 or more
@@ -54,17 +60,19 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 
 *lsdj-wavetable-import* is a command-line tool that imports *.snt* files (directly containing bytes that represent wavetable data) into your *.lsdsng* files. A repository of *.snt* files can be found over at [https://github.com/psgcabal/lsdjsynths](https://github.com/psgcabal/lsdjsynths).
 
-	lsdj-wavetable-import [destination] [wavetable] [index]
-
+	lsdj-wavetable-import source.lsdsng wavetables.snt --[synth 0-F | index 00-FF]
+		
 	Options:
 	  -h [ --help ]         Help screen
-	  -0 [ --zero ]         Pad the wavetable with empty frames if the file < 256 
-	                        bytes
-	  -f [ --force ]        Force writing the frames, even though non-default data 
-	                        may be in them
+	  -i [ --index ] arg    The wavetable index 00-FF where the wavetable data 
+	                        should be written
+	  -s [ --synth ] arg    The synth number 0-F where the wavetable data should be
+	                        written
+	  -0 [ --zero ]         Pad the synth with empty wavetables if the .snt file < 
+	                        256 bytes
+	  -f [ --force ]        Force writing the wavetables, even though non-default 
+	                        data may be in them
 	  -o [ --output ] arg   The output .lsdsng to write to
-	  -i [ --index ]        The index should be interpreted as a wavetable index 
-	                        instead of synth
 	  -v [ --verbose ]      Verbose output
 
 # System Requirements
@@ -93,4 +101,4 @@ Special thanks for Defense Mechanism (urbster1) for thinking along and helping o
 
 # Appreciation
 
-LibLSDJ is open source and freely available to anyone. If you'd like to show your appreciation and help me further developer it, a [donation](https://bit.ly/2RZCAi0) goes a long way.
+LibLSDJ is open source and freely available to anyone. If you'd like to show your appreciation and help me further developer it, a [donation](https://bit.ly/2RZCAi0) goes a long way. Or hey, buy one of my [albums](https://4ntler.bandcamp.com)!
