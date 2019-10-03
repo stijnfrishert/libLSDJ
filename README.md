@@ -4,6 +4,8 @@
 
 In this light *liblsdj* is being developed, a cross-platform and fast C utility library for interacting with the LSDJ save format (.sav), song files (.lsdsng) and more. The end goal is to deliver *liblsdj* with a suite of tools for working with everything LSDJ. Currently four such tools are included: *lsdsng-export*, *lsdsng-import*, *lsdj-mono* and *lsdj-wavetable-import*.
 
+LibLSDJ is open source and freely available to anyone. If you'd like to show your appreciation, please consider buying one of my [albums](https://4ntler.bandcamp.com) or donate money through [PayPal](https://paypal.me/4ntler).
+
 # Tools
 
 ## lsdsng-export
@@ -98,7 +100,3 @@ Developers that would like to help out are warmly invited to do so. This project
 ---
 
 Special thanks for Defense Mechanism (urbster1) for thinking along and helping out where needed.
-
-# Appreciation
-
-LibLSDJ is open source and freely available to anyone. If you'd like to show your appreciation and help me further developer it, a [donation](https://bit.ly/2RZCAi0) goes a long way. Or hey, buy one of my [albums](https://4ntler.bandcamp.com)!

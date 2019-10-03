@@ -45,7 +45,9 @@ void printHelp(const boost::program_options::options_description& desc)
 {
     std::cout << "lsdsng-mono mymusic.sav|mymusic.lsdsng\n\n"
               << "Version: " << lsdj::VERSION << "\n\n"
-              << desc;
+              << desc << "\n\n";
+
+    std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";
 }
 
 bool verbose = false;

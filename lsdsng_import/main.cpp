@@ -44,7 +44,9 @@ void printHelp(const boost::program_options::options_description& desc)
 {
     std::cout << "lsdsng-import -o output.sav song1.lsgsng song2.lsdsng...\n\n"
               << "Version: " << lsdj::VERSION << "\n\n"
-              << desc;
+              << desc << "\n";
+
+    std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";
 }
 
 std::string generateOutputFilename(const std::vector<std::string>& inputs)
