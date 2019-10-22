@@ -3,9 +3,9 @@
 #include <boost/filesystem.hpp>
 #include <iostream>
 
-#include "../common/common.hpp"
 #include "../liblsdj/error.h"
 #include "../liblsdj/sav.h"
+#include "common.hpp"
 
 namespace lsdj
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "song_processor.hpp"
+#include "../common/song_processor.hpp"
 
 namespace lsdj
 {
