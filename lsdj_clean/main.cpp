@@ -39,11 +39,11 @@
 #include <boost/program_options.hpp>
 
 #include "../common/common.hpp"
-#include "mono_processor.hpp"
+#include "clean_processor.hpp"
 
 void printHelp(const boost::program_options::options_description& desc)
 {
-    std::cout << "lsdj-mono mymusic.sav|mymusic.lsdsng ...\n\n"
+    std::cout << "lsdj-clean mymusic.sav|mymusic.lsdsng ...\n\n"
               << "Version: " << lsdj::VERSION << "\n\n"
               << desc << "\n\n";
 
@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
             return 0;
         } else if (vm.count("file")) {
             
-            lsdj::MonoProcessor processor;
+            lsdj::CleanProcessor processor;
             
             processor.verbose = vm.count("verbose");
             processor.processInstruments = vm.count("instrument");
@@ -114,5 +114,5 @@ int main(int argc, char* argv[])
         std::cerr << "unknown error" << std::endl;
     }
 
-	return 0;
+    return 0;
 }
