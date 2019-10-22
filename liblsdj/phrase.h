@@ -40,6 +40,8 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 #include "command.h"
 
 // The default constant lenght of a phrase
@@ -62,6 +64,9 @@ lsdj_phrase_t* lsdj_phrase_copy(const lsdj_phrase_t* phrase);
     
 // Clear all phrase data to factory settings
 void lsdj_phrase_clear(lsdj_phrase_t* phrase);
+
+// Check to see if two phrases contain the same content
+bool lsdj_phrase_equals(const lsdj_phrase_t* lhs, const lsdj_phrase_t* rhs);
     
 #ifdef __cplusplus
 }

@@ -16,7 +16,7 @@ set(SOURCES
 add_executable(lsdj-clean ${SOURCES})
 source_group(\\ FILES ${SOURCES})
 
-target_compile_features(lsdj-clean PUBLIC cxx_std_14)
+target_compile_features(lsdj-clean PUBLIC cxx_std_17)
 target_include_directories(lsdj-clean PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(lsdj-clean liblsdj ${Boost_LIBRARIES})
 

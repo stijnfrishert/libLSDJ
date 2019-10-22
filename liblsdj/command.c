@@ -40,3 +40,8 @@ void lsdj_command_clear(lsdj_command_t* command)
     command->command = 0;
     command->value = 0;
 }
+
+bool lsdj_command_equals(const lsdj_command_t* lhs, const lsdj_command_t* rhs)
+{
+    return lhs->command == rhs->command && lhs->value == rhs->value;
+}

@@ -53,3 +53,24 @@ void lsdj_phrase_clear(lsdj_phrase_t* phrase)
     for (int i = 0; i < LSDJ_PHRASE_LENGTH; ++i)
         lsdj_command_clear(&phrase->commands[i]);
 }
+
+bool lsdj_phrase_equals(const lsdj_phrase_t* lhs, const lsdj_phrase_t* rhs)
+{
+    // Compare the notes and instruments by memory compare
+    if (memcmp(lhs->notes, rhs->notes, sizeof(unsigned char) * LSDJ_PHRASE_LENGTH) != 0 ||
+        memcmp(lhs->instruments, rhs->instruments, sizeof(unsigned char) * LSDJ_PHRASE_LENGTH) != 0)
+    {
+        return false;
+    }
+    
+    // Compare the commands through the command interface
+    for (int i = 0; i < LSDJ_PHRASE_LENGTH; i++)
+    {
+        if (!lsdj_command_equals(&lhs->commands[i], &rhs->commands[i]))
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}

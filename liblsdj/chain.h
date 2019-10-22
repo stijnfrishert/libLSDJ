@@ -44,6 +44,7 @@ extern "C" {
 
 // The length of a chain
 #define LSDJ_CHAIN_LENGTH (16)
+#define LSDJ_CHAIN_NO_PHRASE (0xFF)
     
 // Structure representing a chain
 typedef struct

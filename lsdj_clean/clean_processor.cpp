@@ -2,92 +2,64 @@
 
 namespace lsdj
 {
-    void convertInstrument(lsdj_instrument_t* instrument)
-    {
-        if (instrument != nullptr && lsdj_instrument_get_panning(instrument) != LSDJ_PAN_NONE)
-            lsdj_instrument_set_panning(instrument, LSDJ_PAN_LEFT_RIGHT);
-    }
-
-    void convertCommand(lsdj_command_t* command)
-    {
-        if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
-        {
-            command->value = LSDJ_PAN_LEFT_RIGHT;
-        }
-    }
-
-    void convertTable(lsdj_table_t* table)
-    {
-        if (table == nullptr)
-            return;
-        
-        for (int i = 0; i < LSDJ_TABLE_LENGTH; ++i)
-        {
-            convertCommand(lsdj_table_get_command1(table, i));
-            convertCommand(lsdj_table_get_command2(table, i));
-        }
-    }
-
-    void convertPhrase(lsdj_phrase_t* phrase)
-    {
-        if (phrase == nullptr)
-            return;
-        
-        for (int i = 0; i < LSDJ_PHRASE_LENGTH; ++i)
-            convertCommand(&phrase->commands[i]);
-    }
-
-    [[nodiscard]] bool alreadyEndsWithMono(const boost::filesystem::path& path)
-    {
-        const auto stem = path.stem().string();
-        return stem.size() >= 5 && stem.substr(stem.size() - 5) == ".MONO";
-    }
-
-    [[nodiscard]] boost::filesystem::path addMonoSuffix(const boost::filesystem::path& path)
-    {
-        return path.parent_path() / (path.stem().string() + ".MONO" + path.extension().string());
-    }
-
-    bool CleanProcessor::shouldProcessSav(const boost::filesystem::path& path) const
-    {
-        return alreadyEndsWithMono(path);
-    }
-
-    bool CleanProcessor::shouldProcessLsdsng(const boost::filesystem::path& path) const
-    {
-        return alreadyEndsWithMono(path);
-    }
-
-    boost::filesystem::path CleanProcessor::constructSavDestinationPath(const boost::filesystem::path& path)
-    {
-        return addMonoSuffix(path);
-    }
-
-    boost::filesystem::path CleanProcessor::constructLsdsngDestinationPath(const boost::filesystem::path& path)
-    {
-        return addMonoSuffix(path);
-    }
-
     bool CleanProcessor::processSong(lsdj_song_t* song)
     {
-        if (processInstruments)
-        {
-            for (int i = 0; i < LSDJ_INSTRUMENT_COUNT; ++i)
-                convertInstrument(lsdj_song_get_instrument(song, i));
-        }
-
-        if (processTables)
-        {
-            for (int i = 0; i < LSDJ_TABLE_COUNT; ++i)
-                convertTable(lsdj_song_get_table(song, i));
-        }
-
-        if (processPhrases)
-        {
-            for (int i = 0; i < LSDJ_PHRASE_COUNT; ++i)
-                convertPhrase(lsdj_song_get_phrase(song, i));
-        }
+        deduplicatePhrases(song);
         
         return true;
+    }
+
+    void CleanProcessor::deduplicatePhrases(lsdj_song_t* song)
+    {
+        // For every phrase number...
+        for (int p1 = 0; p1 < LSDJ_PHRASE_COUNT; p1 += 1)
+        {
+            // Check if it's in use
+            lsdj_phrase_t* phrase1 = lsdj_song_get_phrase(song, p1);
+            if (!phrase1)
+                continue;
+            
+            // Go through phrases higher than this one and see if it's a duplicate
+            for (int p2 = p1 + 1; p2 < LSDJ_PHRASE_COUNT; p2 += 1)
+            {
+                lsdj_phrase_t* phrase2 = lsdj_song_get_phrase(song, p2);
+                if (!phrase2)
+                    continue;
+                
+                if (lsdj_phrase_equals(phrase1, phrase2))
+                {
+                    replacePhrase(song, p2, p1);
+                }
+            }
+        }
+    }
+
+    void CleanProcessor::replacePhrase(lsdj_song_t* song, int index, int replacement)
+    {
+        for (int r = 0; r < LSDJ_ROW_COUNT; r += 1)
+        {
+            lsdj_row_t* row = lsdj_song_get_row(song, r);
+            
+            if (lsdj_chain_t* chain = lsdj_song_get_chain(song, row->pulse1); chain)
+                replacePhrase(chain, index, replacement);
+            
+            if (lsdj_chain_t* chain = lsdj_song_get_chain(song, row->pulse2); chain)
+                replacePhrase(chain, index, replacement);
+            
+            if (lsdj_chain_t* chain = lsdj_song_get_chain(song, row->wave); chain)
+                replacePhrase(chain, index, replacement);
+            
+            if (lsdj_chain_t* chain = lsdj_song_get_chain(song, row->noise); chain)
+                replacePhrase(chain, index, replacement);
+        }
+    }
+
+    void CleanProcessor::replacePhrase(lsdj_chain_t* chain, int index, int replacement)
+    {
+        for (int p = 0; p < LSDJ_CHAIN_LENGTH; p += 1)
+        {
+            if (chain->phrases[p] == index)
+                chain->phrases[p] = replacement;
+        }
     }
 }
