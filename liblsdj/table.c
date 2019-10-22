@@ -123,3 +123,25 @@ lsdj_command_t* lsdj_table_get_command2(lsdj_table_t* table, size_t index)
 {
     return &table->commands2[index];
 }
+
+bool lsdj_table_equals(const lsdj_table_t* lhs, const lsdj_table_t* rhs)
+{
+    // Compare the notes and instruments by memory compare
+    if (memcmp(lhs->volumes, rhs->volumes, sizeof(unsigned char) * LSDJ_TABLE_LENGTH) != 0 ||
+        memcmp(lhs->transpositions, rhs->transpositions, sizeof(unsigned char) * LSDJ_TABLE_LENGTH) != 0)
+    {
+        return false;
+    }
+    
+    // Compare the commands through the command interface
+    for (int i = 0; i < LSDJ_TABLE_LENGTH; i++)
+    {
+        if (!lsdj_command_equals(&lhs->commands1[i], &rhs->commands1[i]) ||
+            !lsdj_command_equals(&lhs->commands2[i], &rhs->commands2[i]))
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}

@@ -40,6 +40,8 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 #include "command.h"
 
 // The default constant length of a table
@@ -64,6 +66,9 @@ unsigned char lsdj_table_get_transposition(const lsdj_table_t* table, size_t ind
 
 lsdj_command_t* lsdj_table_get_command1(lsdj_table_t* table, size_t index);
 lsdj_command_t* lsdj_table_get_command2(lsdj_table_t* table, size_t index);
+
+// Check to see if two tables contain the same content
+bool lsdj_table_equals(const lsdj_table_t* lhs, const lsdj_table_t* rhs);
     
 #ifdef __cplusplus
 }
