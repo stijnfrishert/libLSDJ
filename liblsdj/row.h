@@ -56,6 +56,8 @@ typedef union
     
 // Clear all row data to factory settings
 void lsdj_row_clear(lsdj_row_t* row);
+
+void lsdj_row_replace_chain(lsdj_row_t* row, unsigned char chain, unsigned char replacement);
     
 #ifdef __cplusplus
 }

@@ -63,6 +63,9 @@ void lsdj_chain_free(lsdj_chain_t* chain);
 // Clear chain data to factory settings
 void lsdj_chain_clear(lsdj_chain_t* chain);
 
+// Check to see if two chains contain the same content
+bool lsdj_chain_equals(const lsdj_chain_t* lhs, const lsdj_chain_t* rhs);
+
 // Replace a phrase within a chain with another
 void lsdj_chain_replace_phrase(lsdj_chain_t* chain, unsigned char phrase, unsigned char replacement);
     

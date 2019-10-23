@@ -63,6 +63,18 @@ void lsdj_chain_clear(lsdj_chain_t* chain)
     memset(chain->transpositions, 0, LSDJ_CHAIN_LENGTH);
 }
 
+bool lsdj_chain_equals(const lsdj_chain_t* lhs, const lsdj_chain_t* rhs)
+{
+    // Compare the notes and instruments by memory compare
+    if (memcmp(lhs->phrases, rhs->phrases, sizeof(unsigned char) * LSDJ_CHAIN_LENGTH) != 0 ||
+        memcmp(lhs->transpositions, rhs->transpositions, sizeof(unsigned char) * LSDJ_CHAIN_LENGTH) != 0)
+    {
+        return false;
+    }
+    
+    return true;
+}
+
 void lsdj_chain_replace_phrase(lsdj_chain_t* chain, unsigned char phrase, unsigned char replacement)
 {
     for (int p = 0; p < LSDJ_CHAIN_LENGTH; p += 1)

@@ -10,7 +10,10 @@ namespace lsdj
             lsdj_song_deduplicate_tables(&song);
         
         if (processPhrases)
+        {
             lsdj_song_deduplicate_phrases(&song);
+            lsdj_song_deduplicate_chains(&song);
+        }
         
         return true;
     }
