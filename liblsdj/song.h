@@ -110,6 +110,9 @@ unsigned char lsdj_song_get_bookmark(lsdj_song_t* song, lsdj_channel_t channel, 
 
 // Replace a phrase within a song with another
 void lsdj_song_replace_phrase(lsdj_song_t* song, unsigned char phrase, unsigned char replacement);
+
+// Replace a table within a song value with another
+void lsdj_song_replace_table(lsdj_song_t* song, unsigned char table, unsigned char replacement);
     
 #ifdef __cplusplus
 }

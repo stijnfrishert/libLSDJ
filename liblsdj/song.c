@@ -1113,3 +1113,33 @@ void lsdj_song_replace_phrase(lsdj_song_t* song, unsigned char phrase, unsigned 
             lsdj_chain_replace_phrase(chain, phrase, replacement);
     }
 }
+
+void lsdj_song_replace_table(lsdj_song_t* song, unsigned char table, unsigned char replacement)
+{
+    // Replace the table in tables
+    for (size_t i = 0; i < LSDJ_TABLE_COUNT; i += 1)
+    {
+        lsdj_table_t* ptr = lsdj_song_get_table(song, i);
+        
+        if (ptr)
+            lsdj_table_replace_command_value(ptr, LSDJ_COMMAND_A, table, replacement);
+    }
+    
+    // Replace the table in instruments
+    for (size_t i = 0; i < LSDJ_INSTRUMENT_COUNT; i += 1)
+    {
+        lsdj_instrument_t* instrument = lsdj_song_get_instrument(song, i);
+        
+        if (instrument)
+            lsdj_instrument_replace_table(instrument, table, replacement);
+    }
+    
+    // Replace the table in phrases
+    for (size_t p = 0; p < LSDJ_PHRASE_COUNT; p += 1)
+    {
+        lsdj_phrase_t* phrase = lsdj_song_get_phrase(song, p);
+        
+        if (phrase)
+            lsdj_phrase_replace_command_value(phrase, LSDJ_COMMAND_A, table, replacement);
+    }
+}
