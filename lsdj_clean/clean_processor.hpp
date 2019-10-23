@@ -16,7 +16,5 @@ namespace lsdj
         bool processSong(lsdj_song_t& song) final;
         
         void deduplicateTables(lsdj_song_t& song);
-        
-        void deduplicatePhrases(lsdj_song_t& song);
     };
 }

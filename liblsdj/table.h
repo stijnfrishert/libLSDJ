@@ -54,7 +54,7 @@ lsdj_table_t* lsdj_copy_table(const lsdj_table_t* table);
 void lsdj_table_free(lsdj_table_t* table);
     
 // Clear all table data to factory settings
-void lsdj_clear_table(lsdj_table_t* table);
+void lsdj_table_clear(lsdj_table_t* table);
 
 void lsdj_table_set_volume(lsdj_table_t* table, size_t index, unsigned char volume);
 void lsdj_table_set_volumes(lsdj_table_t* table, unsigned char* volumes);

@@ -96,11 +96,19 @@ unsigned char lsdj_song_get_drum_max(const lsdj_song_t* song);
 
 lsdj_row_t* lsdj_song_get_row(lsdj_song_t* song, size_t index);
 lsdj_chain_t* lsdj_song_get_chain(lsdj_song_t* song, size_t index);
+
 lsdj_phrase_t* lsdj_song_get_phrase(lsdj_song_t* song, size_t index);
+void lsdj_song_erase_phrase(lsdj_song_t* song, size_t index);
+void lsdj_song_deduplicate_phrases(lsdj_song_t* song);
+
 lsdj_instrument_t* lsdj_song_get_instrument(lsdj_song_t* song, size_t index);
 lsdj_synth_t* lsdj_song_get_synth(lsdj_song_t* song, size_t index);
 lsdj_wave_t* lsdj_song_get_wave(lsdj_song_t* song, size_t index);
+
 lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index);
+void lsdj_song_erase_table(lsdj_song_t* song, size_t index);
+void lsdj_song_deduplicate_tables(lsdj_song_t* song);
+
 lsdj_groove_t* lsdj_song_get_groove(lsdj_song_t* song, size_t index);
 lsdj_word_t* lsdj_song_get_word(lsdj_song_t* song, size_t index);
 void lsdj_song_set_word_name(lsdj_song_t* song, size_t index, const char* data, size_t size);

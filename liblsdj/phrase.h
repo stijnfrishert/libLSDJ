@@ -59,8 +59,9 @@ typedef struct
     lsdj_command_t commands[LSDJ_PHRASE_LENGTH];
 } lsdj_phrase_t;
 
-// Copy a phrase
+lsdj_phrase_t* lsdj_phrase_new();
 lsdj_phrase_t* lsdj_phrase_copy(const lsdj_phrase_t* phrase);
+void lsdj_phrase_free(lsdj_phrase_t* phrase);
     
 // Clear all phrase data to factory settings
 void lsdj_phrase_clear(lsdj_phrase_t* phrase);

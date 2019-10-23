@@ -56,7 +56,7 @@ typedef struct lsdj_table_t
 lsdj_table_t* lsdj_table_new()
 {
     lsdj_table_t* table = (lsdj_table_t*)malloc(sizeof(lsdj_table_t));
-    lsdj_clear_table(table);
+    lsdj_table_clear(table);
     return table;
 }
 
@@ -72,7 +72,7 @@ void lsdj_table_free(lsdj_table_t* table)
     free(table);
 }
 
-void lsdj_clear_table(lsdj_table_t* table)
+void lsdj_table_clear(lsdj_table_t* table)
 {
     memset(table->volumes, 0, LSDJ_TABLE_LENGTH);
     memset(table->transpositions, 0, LSDJ_TABLE_LENGTH);
