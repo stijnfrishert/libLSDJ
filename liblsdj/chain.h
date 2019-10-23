@@ -61,6 +61,9 @@ lsdj_chain_t* lsdj_chain_copy(const lsdj_chain_t* chain);
     
 // Clear chain data to factory settings
 void lsdj_chain_clear(lsdj_chain_t* chain);
+
+// Replace a phrase within a chain with another
+void lsdj_chain_replace_phrase(lsdj_chain_t* chain, unsigned char phrase, unsigned char replacement);
     
 #ifdef __cplusplus
 }

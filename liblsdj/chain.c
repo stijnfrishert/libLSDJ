@@ -50,3 +50,12 @@ void lsdj_chain_clear(lsdj_chain_t* chain)
     memset(chain->phrases, LSDJ_CHAIN_NO_PHRASE, LSDJ_CHAIN_LENGTH);
     memset(chain->transpositions, 0, LSDJ_CHAIN_LENGTH);
 }
+
+void lsdj_chain_replace_phrase(lsdj_chain_t* chain, unsigned char phrase, unsigned char replacement)
+{
+    for (int p = 0; p < LSDJ_CHAIN_LENGTH; p += 1)
+    {
+        if (chain->phrases[p] == phrase)
+            chain->phrases[p] = replacement;
+    }
+}

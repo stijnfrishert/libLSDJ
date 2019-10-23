@@ -80,6 +80,9 @@ void lsdj_command_clear(lsdj_command_t* command);
 
 // Check to see if two commands contain the same content
 bool lsdj_command_equals(const lsdj_command_t* lhs, const lsdj_command_t* rhs);
+
+// Replace a specfic command value with another
+void lsdj_command_replace_value(lsdj_command_t* cmd, unsigned char command, unsigned char value, unsigned char replacement);
     
 #ifdef __cplusplus
 }

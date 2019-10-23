@@ -67,6 +67,9 @@ void lsdj_phrase_clear(lsdj_phrase_t* phrase);
 
 // Check to see if two phrases contain the same content
 bool lsdj_phrase_equals(const lsdj_phrase_t* lhs, const lsdj_phrase_t* rhs);
+
+// Replace a specfic command value with another
+void lsdj_phrase_replace_command_value(lsdj_phrase_t* phrase, unsigned char command, unsigned char value, unsigned char replacement);
     
 #ifdef __cplusplus
 }

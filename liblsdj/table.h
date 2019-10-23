@@ -69,6 +69,11 @@ lsdj_command_t* lsdj_table_get_command2(lsdj_table_t* table, size_t index);
 
 // Check to see if two tables contain the same content
 bool lsdj_table_equals(const lsdj_table_t* lhs, const lsdj_table_t* rhs);
+
+// Replace a specfic command value with another
+void lsdj_table_replace_command1_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement);
+void lsdj_table_replace_command2_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement);
+void lsdj_table_replace_command_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement);
     
 #ifdef __cplusplus
 }

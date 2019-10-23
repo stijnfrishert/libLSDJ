@@ -74,3 +74,11 @@ bool lsdj_phrase_equals(const lsdj_phrase_t* lhs, const lsdj_phrase_t* rhs)
     
     return true;
 }
+
+void lsdj_phrase_replace_command_value(lsdj_phrase_t* phrase, unsigned char command, unsigned char value, unsigned char replacement)
+{
+    for (int i  = 0; i < LSDJ_PHRASE_LENGTH; i++)
+    {
+        lsdj_command_replace_value(&phrase->commands[i], command, value, replacement);
+    }
+}

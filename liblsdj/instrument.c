@@ -898,3 +898,9 @@ unsigned char lsdj_instrument_get_table(const lsdj_instrument_t* instrument)
 {
     return instrument->table;
 }
+
+void lsdj_instrument_replace_table(lsdj_instrument_t* instrument, unsigned char value, unsigned char replacement)
+{
+    if (instrument->table == value)
+        instrument->table = replacement;
+}

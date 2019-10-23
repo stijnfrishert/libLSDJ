@@ -92,6 +92,9 @@ lsdj_panning lsdj_instrument_get_panning(const lsdj_instrument_t* instrument);
 
 void lsdj_instrument_set_table(lsdj_instrument_t* instrument, unsigned char table);
 unsigned char lsdj_instrument_get_table(const lsdj_instrument_t* instrument);
+
+// Replace the table with an instrument with another
+void lsdj_instrument_replace_table(lsdj_instrument_t* instrument, unsigned char value, unsigned char replacement);
     
 #ifdef __cplusplus
 }

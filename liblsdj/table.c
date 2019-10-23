@@ -145,3 +145,25 @@ bool lsdj_table_equals(const lsdj_table_t* lhs, const lsdj_table_t* rhs)
     
     return true;
 }
+
+void lsdj_table_replace_command1_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement)
+{
+    for (int i = 0; i < LSDJ_TABLE_LENGTH; i += 1)
+    {
+        lsdj_command_replace_value(&table->commands1[i], command, value, replacement);
+    }
+}
+
+void lsdj_table_replace_command2_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement)
+{
+    for (int i = 0; i < LSDJ_TABLE_LENGTH; i += 1)
+    {
+        lsdj_command_replace_value(&table->commands2[i], command, value, replacement);
+    }
+}
+
+void lsdj_table_replace_command_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement)
+{
+    lsdj_table_replace_command1_value(table, command, value, replacement);
+    lsdj_table_replace_command2_value(table, command, value, replacement);
+}

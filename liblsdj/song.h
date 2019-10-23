@@ -107,6 +107,9 @@ void lsdj_song_set_word_name(lsdj_song_t* song, size_t index, const char* data, 
 void lsdj_song_get_word_name(lsdj_song_t* song, size_t index, char* data, size_t size);
 void lsdj_song_set_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position, unsigned char bookmark);
 unsigned char lsdj_song_get_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position);
+
+// Replace a phrase within a song with another
+void lsdj_song_replace_phrase(lsdj_song_t* song, unsigned char phrase, unsigned char replacement);
     
 #ifdef __cplusplus
 }

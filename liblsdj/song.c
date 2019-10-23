@@ -1102,3 +1102,14 @@ unsigned char lsdj_song_get_bookmark(lsdj_song_t* song, lsdj_channel_t channel, 
 {
     return song->bookmarks.channels[channel][position];
 }
+
+void lsdj_song_replace_phrase(lsdj_song_t* song, unsigned char phrase, unsigned char replacement)
+{
+    for (int c = 0; c < LSDJ_CHAIN_COUNT; c += 1)
+    {
+        lsdj_chain_t* chain = song->chains[c];
+        
+        if (chain)
+            lsdj_chain_replace_phrase(chain, phrase, replacement);
+    }
+}

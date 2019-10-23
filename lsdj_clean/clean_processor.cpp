@@ -38,12 +38,21 @@ namespace lsdj
 
     void CleanProcessor::replaceTable(lsdj_song_t& song, int table, int replacement)
     {
+        // Replace the table in tables
+        for (int i = 0; i < LSDJ_TABLE_COUNT; i += 1)
+        {
+            if (lsdj_table_t* ptr = lsdj_song_get_table(&song, i); ptr)
+            {
+                lsdj_table_replace_command_value(ptr, LSDJ_COMMAND_A, table, replacement);
+            }
+        }
+        
         // Replace the table in instruments
         for (int i = 0; i < LSDJ_INSTRUMENT_COUNT; i += 1)
         {
             if (lsdj_instrument_t* instrument = lsdj_song_get_instrument(&song, i); instrument)
             {
-                replaceTable(*instrument, table, replacement);
+                lsdj_instrument_replace_table(instrument, table, replacement);
             }
         }
         
@@ -52,31 +61,9 @@ namespace lsdj
         {
             if (lsdj_phrase_t* phrase = lsdj_song_get_phrase(&song, p); phrase)
             {
-                replaceTable(*phrase, table, replacement);
+                lsdj_phrase_replace_command_value(phrase, LSDJ_COMMAND_A, table, replacement);
             }
         }
-    }
-
-    void CleanProcessor::replaceTable(lsdj_instrument_t& instrument, int table, int replacement)
-    {
-        assert(table != LSDJ_INSTRUMENT_NO_TABLE);
-        
-        if (lsdj_instrument_get_table(&instrument) == table)
-            lsdj_instrument_set_table(&instrument, replacement);
-    }
-
-    void CleanProcessor::replaceTable(lsdj_phrase_t& phrase, int table, int replacement)
-    {
-        for (int i  = 0; i < LSDJ_PHRASE_LENGTH; i++)
-        {
-            replaceTable(phrase.commands[i], table, replacement);
-        }
-    }
-
-    void CleanProcessor::replaceTable(lsdj_command_t& command, int table, int replacement)
-    {
-        if (command.command == LSDJ_COMMAND_A && command.value == table)
-            command.value = replacement;
     }
 
     void CleanProcessor::deduplicatePhrases(lsdj_song_t& song)
@@ -93,30 +80,10 @@ namespace lsdj
                     if (lsdj_phrase_t* phrase2 = lsdj_song_get_phrase(&song, p2);
                         phrase2 && lsdj_phrase_equals(phrase1, phrase2))
                     {
-                        replacePhrase(song, p2, p1);
+                        lsdj_song_replace_phrase(&song, p2, p1);
                     }
                 }
             }
-        }
-    }
-
-    void CleanProcessor::replacePhrase(lsdj_song_t& song, int phrase, int replacement)
-    {
-        for (int c = 0; c < LSDJ_CHAIN_COUNT; c += 1)
-        {
-            if (lsdj_chain_t* chain = lsdj_song_get_chain(&song, c); chain)
-                replacePhrase(*chain, phrase, replacement);
-        }
-    }
-
-    void CleanProcessor::replacePhrase(lsdj_chain_t& chain, int phrase, int replacement)
-    {
-        assert(phrase != LSDJ_CHAIN_NO_PHRASE);
-        
-        for (int p = 0; p < LSDJ_CHAIN_LENGTH; p += 1)
-        {
-            if (chain.phrases[p] == phrase)
-                chain.phrases[p] = replacement;
         }
     }
 }
