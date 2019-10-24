@@ -8,8 +8,9 @@ namespace lsdj
         public SongProcessor
     {
     public:
-        bool processInstruments = false;
         bool processTables = false;
+        bool processInstruments = false;
+        bool processChains = false;
         bool processPhrases = false;
         
     private:

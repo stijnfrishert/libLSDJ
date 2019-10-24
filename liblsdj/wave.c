@@ -41,3 +41,13 @@ void lsdj_wave_clear(lsdj_wave_t* wave)
 {
     memcpy(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH);
 }
+
+bool lsdj_wave_equals(const lsdj_wave_t* lhs, const lsdj_wave_t* rhs)
+{
+    return memcmp(lhs, rhs, sizeof(lsdj_wave_t)) == 0 ? true : false;
+}
+
+bool lsdj_wave_is_default(const lsdj_wave_t* wave)
+{
+    return memcmp(wave, LSDJ_DEFAULT_WAVE, sizeof(lsdj_wave_t)) == 0 ? true : false;
+}

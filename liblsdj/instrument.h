@@ -40,11 +40,9 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 #include "error.h"
-#include "instrument_kit.h"
-#include "instrument_noise.h"
-#include "instrument_pulse.h"
-#include "instrument_wave.h"
 #include "panning.h"
 #include "vio.h"
 
@@ -95,6 +93,7 @@ unsigned char lsdj_instrument_get_table(const lsdj_instrument_t* instrument);
 
 // Replace the table with an instrument with another
 void lsdj_instrument_replace_table(lsdj_instrument_t* instrument, unsigned char value, unsigned char replacement);
+void lsdj_instrument_replace_synth(lsdj_instrument_t* instrument, unsigned char synth, unsigned char replacement);
     
 #ifdef __cplusplus
 }

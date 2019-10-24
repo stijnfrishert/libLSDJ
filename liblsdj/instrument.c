@@ -38,6 +38,10 @@
 #include <string.h>
 
 #include "instrument.h"
+#include "instrument_kit.h"
+#include "instrument_noise.h"
+#include "instrument_pulse.h"
+#include "instrument_wave.h"
 
 // Structure representing one instrument
 typedef struct lsdj_instrument_t
@@ -903,4 +907,10 @@ void lsdj_instrument_replace_table(lsdj_instrument_t* instrument, unsigned char 
 {
     if (instrument->table == value)
         instrument->table = replacement;
+}
+
+void lsdj_instrument_replace_synth(lsdj_instrument_t* instrument, unsigned char synth, unsigned char replacement)
+{
+    if (instrument->type == LSDJ_INSTR_WAVE && instrument->wave.synth == synth)
+        instrument->wave.synth = replacement;
 }

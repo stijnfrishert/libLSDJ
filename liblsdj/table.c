@@ -127,8 +127,8 @@ lsdj_command_t* lsdj_table_get_command2(lsdj_table_t* table, size_t index)
 bool lsdj_table_equals(const lsdj_table_t* lhs, const lsdj_table_t* rhs)
 {
     // Compare the notes and instruments by memory compare
-    if (memcmp(lhs->volumes, rhs->volumes, sizeof(unsigned char) * LSDJ_TABLE_LENGTH) != 0 ||
-        memcmp(lhs->transpositions, rhs->transpositions, sizeof(unsigned char) * LSDJ_TABLE_LENGTH) != 0)
+    if (memcmp(lhs->volumes, rhs->volumes, sizeof(lhs->volumes)) != 0 ||
+        memcmp(lhs->transpositions, rhs->transpositions, sizeof(lhs->transpositions)) != 0)
     {
         return false;
     }

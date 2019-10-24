@@ -40,6 +40,8 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 #include "command.h"
 
 // The default length of wave data
@@ -54,6 +56,9 @@ typedef struct
     
 // Clear all wave data to factory settings
 void lsdj_wave_clear(lsdj_wave_t* wave);
+
+bool lsdj_wave_equals(const lsdj_wave_t* lhs, const lsdj_wave_t* rhs);
+bool lsdj_wave_is_default(const lsdj_wave_t* wave);
     
 #ifdef __cplusplus
 }

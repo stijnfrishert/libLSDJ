@@ -40,6 +40,8 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 #define LSDJ_SYNTH_WAVEFORM_SAWTOOTH (0)
 #define LSDJ_SYNTH_WAVEFORM_SQUARE (1)
 #define LSDJ_SYNTH_WAVEFORM_TRIANGLE (2)
@@ -87,6 +89,10 @@ typedef struct
 
 // Clear all soft synth data to factory settings
 void lsdj_synth_clear(lsdj_synth_t* synth);
+
+// Check if two synths are equal
+// Will result in false if either of these has its wavetable overwritten
+bool lsdj_synth_equals(const lsdj_synth_t* lhs, const lsdj_synth_t* rhs);
     
 #ifdef __cplusplus
 }

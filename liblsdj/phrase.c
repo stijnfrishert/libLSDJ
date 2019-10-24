@@ -69,8 +69,8 @@ void lsdj_phrase_clear(lsdj_phrase_t* phrase)
 bool lsdj_phrase_equals(const lsdj_phrase_t* lhs, const lsdj_phrase_t* rhs)
 {
     // Compare the notes and instruments by memory compare
-    if (memcmp(lhs->notes, rhs->notes, sizeof(unsigned char) * LSDJ_PHRASE_LENGTH) != 0 ||
-        memcmp(lhs->instruments, rhs->instruments, sizeof(unsigned char) * LSDJ_PHRASE_LENGTH) != 0)
+    if (memcmp(lhs->notes, rhs->notes, sizeof(lhs->notes)) != 0 ||
+        memcmp(lhs->instruments, rhs->instruments, sizeof(lhs->instruments)) != 0)
     {
         return false;
     }

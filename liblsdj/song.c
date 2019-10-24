@@ -33,6 +33,7 @@
  
  */
 
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -1070,7 +1071,7 @@ void lsdj_song_deduplicate_chains(lsdj_song_t* song)
             {
                 // Replace the phrase number in the song and erase the phrase
                 lsdj_song_replace_chain(song, c2, c1);
-                lsdj_song_erase_chain(song, c1);
+                lsdj_song_erase_chain(song, c2);
             }
         }
     }
@@ -1114,7 +1115,7 @@ void lsdj_song_deduplicate_phrases(lsdj_song_t* song)
             {
                 // Replace the phrase number in the song and erase the phrase
                 lsdj_song_replace_phrase(song, p2, p1);
-                lsdj_song_erase_phrase(song, p1);
+                lsdj_song_erase_phrase(song, p2);
             }
         }
     }
