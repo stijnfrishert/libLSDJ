@@ -33,6 +33,7 @@
  
  */
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -835,14 +836,14 @@ void write_bank3(const lsdj_song_t* song, lsdj_vio_t* vio)
     vio->write(&song->formatVersion, 1, vio->user_data);
 }
 
-int check_rb(lsdj_vio_t* vio, long position)
+bool check_rb(lsdj_vio_t* vio, long position)
 {
     char data[2];
     
     vio->seek(position, SEEK_SET, vio->user_data);
     vio->read(data, 2, vio->user_data);
     
-    return (data[0] == 'r' && data[1] == 'b') ? 0 : 1;
+    return data[0] == 'r' && data[1] == 'b';
 }
 
 lsdj_song_t* lsdj_song_read(lsdj_vio_t* vio, lsdj_error_t** error)
@@ -868,10 +869,12 @@ lsdj_song_t* lsdj_song_read(lsdj_vio_t* vio, lsdj_error_t** error)
     
     const long begin = vio->tell(vio->user_data);
     
-    // Check if the 'rb' flags have been set correctly
-    if (check_rb(vio, begin + 0x1E78) != 0) { lsdj_error_new(error, "memory flag 'rb' not found at 0x1E78"); return NULL; }
-    if (check_rb(vio, begin + 0x3E80) != 0) { lsdj_error_new(error, "memory flag 'rb' not found at 0x3E80"); return NULL; }
-    if (check_rb(vio, begin + 0x7FF0) != 0) { lsdj_error_new(error, "memory flag 'rb' not found at 0x7FF0"); return NULL; }
+    // Check if any of the 'rb' flags have been set correctly
+    if (!check_rb(vio, begin + 0x1E78) && !check_rb(vio, begin + 0x3E80) && !check_rb(vio, begin + 0x7FF0))
+    {
+        lsdj_error_new(error, "memory flag 'rb' not found at 0x1E78, 0x3E80 or 0x7FF0 (song local)");
+        return NULL;
+    }
     
     // We passed the 'rb' check, and can create a song now for reading
     lsdj_song_t* song = lsdj_song_alloc(error);
