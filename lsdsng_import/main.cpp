@@ -33,14 +33,14 @@
  
  */
 
-#include <boost/program_options.hpp>
+#include <popl/popl.hpp>
 
 #include <iostream>
 
 #include "../common/common.hpp"
 #include "importer.hpp"
 
-void printHelp(const boost::program_options::options_description& desc)
+void printHelp(const popl::OptionParser& desc)
 {
     std::cout << "lsdsng-import -o output.sav song1.lsgsng song2.lsdsng...\n\n"
               << "Version: " << lsdj::VERSION << "\n\n"
@@ -65,57 +65,40 @@ std::string generateOutputFilename(const std::vector<std::string>& inputs)
 
 int main(int argc, char* argv[])
 {
-    boost::program_options::options_description hidden{"Hidden"};
-    hidden.add_options()
-        ("file", boost::program_options::value<std::vector<std::string>>(), ".lsdsng file(s), 0 or more");
-    
-    boost::program_options::options_description cmd{"Options"};
-    cmd.add_options()
-        ("help,h", "Help screen")
-        ("output,o", boost::program_options::value<std::string>(), "The output file (.sav)")
-        ("sav,s", boost::program_options::value<std::string>(), "A sav file to append all .lsdsng's to")
-        ("verbose,v", "Verbose output during import");
-    
-    boost::program_options::options_description options;
-    options.add(cmd).add(hidden);
-    
-    boost::program_options::positional_options_description positionalOptions;
-    positionalOptions.add("file", -1);
+    popl::OptionParser options("Options");
+    auto help = options.add<popl::Switch>("h", "help", "Show the help screen");
+    auto output = options.add<popl::Value<std::string>>("o", "output", "The output file (.sav)");
+    auto sav = options.add<popl::Value<std::string>>("s", "sav", "A sav file to append all .lsdsng's to");
+    auto verbose = options.add<popl::Switch>("v", "verbose", "Verbose output during import");
     
     try
     {
-        boost::program_options::variables_map vm;
-        boost::program_options::command_line_parser parser(argc, argv);
-        parser = parser.options(options);
-        parser = parser.positional(positionalOptions);
-        boost::program_options::store(parser.run(), vm);
-        boost::program_options::notify(vm);
+        options.parse(argc, argv);
         
-        if (vm.count("help"))
+        const auto lsdsngs = options.non_option_args();
+        
+        if (help->is_set())
         {
-            printHelp(cmd);
+            printHelp(options);
             return 0;
-        } else if (vm.count("file")) {
+        } else if (lsdsngs.size() > 0) {
             lsdj::Importer importer;
             
-            importer.inputs = vm["file"].as<std::vector<std::string>>();
-            importer.verbose = vm.count("verbose");
+            importer.inputs = lsdsngs;
+            importer.verbose = verbose->is_set();
             
-            if (vm.count("output"))
-                importer.outputFile = vm["output"].as<std::string>();
-            else if (vm.count("sav"))
-                importer.outputFile = ghc::filesystem::absolute(vm["sav"].as<std::string>()).stem().filename().string() + ".sav";
+            if (output->is_set())
+                importer.outputFile = output->value();
+            else if (sav->is_set())
+                importer.outputFile = ghc::filesystem::absolute(sav->value()).stem().filename().string() + ".sav";
             else
                 importer.outputFile = generateOutputFilename(importer.inputs);
             
-            return importer.importSongs(vm.count("sav") ? vm["sav"].as<std::string>().c_str() : nullptr);
+            return importer.importSongs(sav->is_set() ? sav->value().c_str() : nullptr);
         } else {
-            printHelp(cmd);
+            printHelp(options);
             return 0;
         }
-    } catch (const boost::program_options::error& e) {
-        std::cerr << e.what() << std::endl;
-        return 1;
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
     } catch (...) {
