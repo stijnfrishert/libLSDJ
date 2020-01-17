@@ -40,11 +40,11 @@
 #include "../common/common.hpp"
 #include "importer.hpp"
 
-void printHelp(const popl::OptionParser& desc)
+void printHelp(const popl::OptionParser& options)
 {
     std::cout << "lsdsng-import -o output.sav song1.lsgsng song2.lsdsng...\n\n"
               << "Version: " << lsdj::VERSION << "\n\n"
-              << desc << "\n";
+              << options << "\n";
 
     std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";
 }
@@ -67,9 +67,9 @@ int main(int argc, char* argv[])
 {
     popl::OptionParser options("Options");
     auto help = options.add<popl::Switch>("h", "help", "Show the help screen");
+    auto verbose = options.add<popl::Switch>("v", "verbose", "Verbose output during import");
     auto output = options.add<popl::Value<std::string>>("o", "output", "The output file (.sav)");
     auto sav = options.add<popl::Value<std::string>>("s", "sav", "A sav file to append all .lsdsng's to");
-    auto verbose = options.add<popl::Switch>("v", "verbose", "Verbose output during import");
     
     try
     {
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
         {
             printHelp(options);
             return 0;
-        } else if (lsdsngs.size() > 0) {
+        } else if (!lsdsngs.empty()) {
             lsdj::Importer importer;
             
             importer.inputs = lsdsngs;

@@ -42,18 +42,18 @@
 #include <string>
 
 #include <ghc/filesystem.hpp>
-#include <boost/program_options.hpp>
+#include <popl/popl.hpp>
 
 #include "../common/common.hpp"
 #include "../liblsdj/project.h"
 #include "../liblsdj/sav.h"
 #include "wavetable_importer.hpp"
 
-void printHelp(const boost::program_options::options_description& desc)
+void printHelp(const popl::OptionParser& options)
 {
     std::cout << "lsdj-wavetable-import source.lsdsng wavetables.snt --[synth 0-F | index 00-FF]\n\n"
               << "Version: " << lsdj::VERSION << "\n\n"
-              << desc << "\n";
+              << options << "\n";
 
     std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";
 }
@@ -70,45 +70,30 @@ unsigned char parseIndex(const std::string& str)
 
 int main(int argc, char* argv[])
 {
-    boost::program_options::options_description hidden{"Hidden"};
-    hidden.add_options()
-        ("input", boost::program_options::value<std::vector<std::string>>(), "A .lsdsng project, .sav or wavetable (.snt)");
-    
-    boost::program_options::options_description cmd{"Options"};
-    cmd.add_options()
-        ("help,h", "Help screen")
-        ("index,i", boost::program_options::value<std::string>(), "The wavetable index 00-FF where the wavetable data should be written")
-        ("synth,s", boost::program_options::value<std::string>(), "The synth number 0-F where the wavetable data should be written")
-        ("zero,0", "Pad the synth with empty wavetables if the .snt file < 256 bytes")
-        ("force,f", "Force writing the wavetables, even though non-default data may be in them")
-        ("output,o", boost::program_options::value<std::string>(), "The output .lsdsng to write to")
-        ("verbose,v", "Verbose output");
-    
-    boost::program_options::options_description options;
-        options.add(cmd).add(hidden);
-    
-    boost::program_options::positional_options_description positionalOptions;
-    positionalOptions.add("input", 2);
+    popl::OptionParser options("Options");
+    auto help = options.add<popl::Switch>("h", "help", "Show the help screen");
+    auto verbose = options.add<popl::Switch>("v", "verbose", "Verbose output during import");
+    auto index = options.add<popl::Value<std::string>>("i", "index", "The wavetable index 00-FF where the wavetable data should be written");
+    auto synth = options.add<popl::Value<std::string>>("s", "synth", "The synth number 0-F where the wavetable data should be written");
+    auto zero = options.add<popl::Switch>("0", "zero", "Pad the synth with empty wavetables if the .snt file < 256 bytes");
+    auto force = options.add<popl::Switch>("f", "force", "Force writing the wavetables, even though non-default data may be in them");
+    auto output = options.add<popl::Value<std::string>>("o", "output", "The output .lsdsng to write to");
     
     try
     {
-        boost::program_options::variables_map vm;
-        boost::program_options::command_line_parser parser(argc, argv);
-        parser.options(options).positional(positionalOptions);
-        boost::program_options::store(parser.run(), vm);
-        boost::program_options::notify(vm);
+        options.parse(argc, argv);
         
-        if (vm.count("help"))
+        const auto inputs = options.non_option_args();
+        
+        if (help->is_set())
         {
-            printHelp(cmd);
+            printHelp(options);
             return 0;
         }
-        else if (vm.count("input") == 1 && (vm.count("synth") || vm.count("index")))
+        else if (inputs.size() == 2 && (synth->is_set() || index->is_set()))
         {
             lsdj::WavetableImporter importer;
-            
-            const auto inputs = vm["input"].as<std::vector<std::string>>();
-            
+                        
             std::string source;
             std::string wavetable;
             
@@ -131,20 +116,17 @@ int main(int argc, char* argv[])
                 return 1;
             }
             
-            importer.outputName = vm.count("output") ? vm["output"].as<std::string>() : source;
-            importer.wavetableIndex = vm.count("synth") ? parseSynthIndex(vm["synth"].as<std::string>()) : parseIndex(vm["index"].as<std::string>());
-            importer.zero = vm.count("zero");
-            importer.force = vm.count("force");
-            importer.verbose = vm.count("verbose");
+            importer.outputName = output->is_set() ? output->value() : source;
+            importer.wavetableIndex = synth->is_set() ? parseSynthIndex(synth->value()) : parseIndex(index->value());
+            importer.zero = zero->is_set();
+            importer.force = force->is_set();
+            importer.verbose = verbose->is_set();
             
             return importer.import(source, wavetable) ? 0 : 1;
         } else {
-            printHelp(cmd);
+            printHelp(options);
             return 0;
         }
-    } catch (const boost::program_options::error& e) {
-        std::cerr << e.what() << std::endl;
-        return 1;
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
     } catch (...) {

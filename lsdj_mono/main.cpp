@@ -36,65 +36,51 @@
 #include <iostream>
 
 #include <ghc/filesystem.hpp>
-#include <boost/program_options.hpp>
+#include <popl/popl.hpp>
 
 #include "../common/common.hpp"
 #include "mono_processor.hpp"
 
-void printHelp(const boost::program_options::options_description& desc)
+void printHelp(const popl::OptionParser& options)
 {
     std::cout << "lsdj-mono mymusic.sav|mymusic.lsdsng ...\n\n"
               << "Version: " << lsdj::VERSION << "\n\n"
-              << desc << "\n\n";
+              << options << "\n\n";
 
     std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";
 }
 
 int main(int argc, char* argv[])
 {
-    boost::program_options::options_description hidden{"Hidden"};
-    hidden.add_options()
-        ("file", boost::program_options::value<std::vector<std::string>>(), ".sav or .lsdng file(s), 0 or more");
-    
-    boost::program_options::options_description cmd{"Options"};
-    cmd.add_options()
-        ("help,h", "Help screen")
-        ("verbose,v", "Verbose output during processing")
-        ("instrument,i", "Only adjust instruments")
-        ("table,t", "Only adjust tables")
-        ("phrase,p", "Only adjust phrases");
-    
-    boost::program_options::options_description options;
-    options.add(cmd).add(hidden);
-    
-    boost::program_options::positional_options_description positionalOptions;
-    positionalOptions.add("file", -1);
+    popl::OptionParser options("Options");
+    auto help = options.add<popl::Switch>("h", "help", "Show the help screen");
+    auto verbose = options.add<popl::Switch>("v", "verbose", "Verbose output during import");
+    auto instrument = options.add<popl::Switch>("i", "instrument", "Only adjust instruments");
+    auto table = options.add<popl::Switch>("t", "table", "Only adjust tables");
+    auto phrase = options.add<popl::Switch>("p", "phrase", "Only adjust phrases");
     
     try
     {
-        boost::program_options::variables_map vm;
-        boost::program_options::command_line_parser parser(argc, argv);
-        parser = parser.options(options);
-        parser = parser.positional(positionalOptions);
-        boost::program_options::store(parser.run(), vm);
-        boost::program_options::notify(vm);
+        options.parse(argc, argv);
         
-        if (vm.count("help"))
+        const auto inputs = options.non_option_args();
+        
+        if (help->is_set())
         {
-            printHelp(cmd);
+            printHelp(options);
             return 0;
-        } else if (vm.count("file")) {
+        } else if (!inputs.empty()) {
             
             lsdj::MonoProcessor processor;
             
-            processor.verbose = vm.count("verbose");
-            processor.processInstruments = vm.count("instrument");
-            processor.processPhrases = vm.count("phrase");
-            processor.processTables = vm.count("table");
+            processor.verbose = verbose->is_set();
+            processor.processInstruments = instrument->is_set();
+            processor.processPhrases = phrase->is_set();
+            processor.processTables = table->is_set();
             if (!processor.processInstruments && !processor.processPhrases && !processor.processTables)
                 processor.processInstruments = processor.processPhrases = processor.processTables = true;
             
-            for (auto& input : vm["file"].as<std::vector<std::string>>())
+            for (auto& input : inputs)
             {
                 if (!processor.process(ghc::filesystem::absolute(input)))
                     return 1;
@@ -102,12 +88,9 @@ int main(int argc, char* argv[])
             
             return 0;
         } else {
-            printHelp(cmd);
+            printHelp(options);
             return 0;
         }
-    } catch (const boost::program_options::error& e) {
-        std::cerr << e.what() << std::endl;
-        return 1;
     } catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
     } catch (...) {
