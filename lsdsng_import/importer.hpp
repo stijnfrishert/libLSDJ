@@ -36,7 +36,7 @@
 #ifndef LSDJ_IMPORTER_HPP
 #define LSDJ_IMPORTER_HPP
 
-#include <boost/filesystem.hpp>
+#include <ghc/filesystem.hpp>
 #include <string>
 #include <vector>
 
@@ -57,11 +57,11 @@ namespace lsdj
         
     private:
         void importSong(const std::string& path, lsdj_sav_t* sav, unsigned char index, unsigned char active, lsdj_error_t** error);
-        void importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<boost::filesystem::path>& paths, lsdj_error_t** error);
+        void importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<ghc::filesystem::path>& paths, lsdj_error_t** error);
         
     private:
         //! The path that refers to the working memory song
-        boost::filesystem::path workingMemoryPath;
+        ghc::filesystem::path workingMemoryPath;
     };
 }
 

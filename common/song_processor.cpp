@@ -1,6 +1,6 @@
 #include "song_processor.hpp"
 
-#include <boost/filesystem.hpp>
+#include <ghc/filesystem.hpp>
 #include <iostream>
 
 #include "../liblsdj/error.h"
@@ -9,12 +9,12 @@
 
 namespace lsdj
 {
-    bool SongProcessor::process(const boost::filesystem::path& path)
+    bool SongProcessor::process(const ghc::filesystem::path& path)
     {        
         if (isHiddenFile(path.filename().string()))
             return true;
         
-        if (boost::filesystem::is_directory(path))
+        if (ghc::filesystem::is_directory(path))
         {
             if (processDirectory(path) != 0)
                 return false;
@@ -33,12 +33,12 @@ namespace lsdj
         return true;
     }
 
-    bool SongProcessor::processDirectory(const boost::filesystem::path& path)
+    bool SongProcessor::processDirectory(const ghc::filesystem::path& path)
     {
         if (verbose)
             std::cout << "Processing folder '" << path.string() << "'" << std::endl;
         
-        for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
+        for (auto it = ghc::filesystem::directory_iterator(path); it != ghc::filesystem::directory_iterator(); ++it)
         {
             if (process(it->path()) != 0)
                 return false;
@@ -47,7 +47,7 @@ namespace lsdj
         return true;
     }
 
-    bool SongProcessor::processSav(const boost::filesystem::path& path)
+    bool SongProcessor::processSav(const ghc::filesystem::path& path)
     {
         if (!shouldProcessSav(path))
             return true;
@@ -94,7 +94,7 @@ namespace lsdj
         return true;
     }
 
-    bool SongProcessor::processLsdsng(const boost::filesystem::path& path)
+    bool SongProcessor::processLsdsng(const ghc::filesystem::path& path)
     {
         if (!shouldProcessLsdsng(path))
             return true;

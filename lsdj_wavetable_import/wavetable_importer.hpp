@@ -36,7 +36,7 @@
 #ifndef LSDJ_WAVETABLE_IMPORTER_HPP
 #define LSDJ_WAVETABLE_IMPORTER_HPP
 
-#include <boost/filesystem.hpp>
+#include <ghc/filesystem.hpp>
 #include <string>
 #include <vector>
 
@@ -59,8 +59,8 @@ namespace lsdj
         bool verbose = false;
         
     private:
-        bool importToSav(const boost::filesystem::path& path, const std::string& wavetableName);
-        bool importToLsdsng(const boost::filesystem::path& path, const std::string& wavetableName);
+        bool importToSav(const ghc::filesystem::path& path, const std::string& wavetableName);
+        bool importToLsdsng(const ghc::filesystem::path& path, const std::string& wavetableName);
         std::pair<bool, unsigned int> importToSong(lsdj_song_t* song, const std::string& wavetableName);
     };
 }

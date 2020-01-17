@@ -33,8 +33,8 @@
  
  */
 
-#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <ghc/filesystem.hpp>
 
 #include <iomanip>
 #include <iostream>
@@ -100,8 +100,8 @@ int main(int argc, char* argv[])
         // Do we have an input file?
         } else if (vm.count("file")) {
             // What is the path of the input file, and does it exist on disk?
-            const auto path = boost::filesystem::absolute(vm["file"].as<std::string>());
-            if (!boost::filesystem::exists(path))
+            const auto path = ghc::filesystem::absolute(vm["file"].as<std::string>());
+            if (!ghc::filesystem::exists(path))
             {
                 std::cerr << "Path '" << path.string() << "' does not exist" << std::endl;
                 return 1;

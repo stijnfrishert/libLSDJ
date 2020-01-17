@@ -41,7 +41,7 @@
 #include <iostream>
 #include <string>
 
-#include <boost/filesystem.hpp>
+#include <ghc/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include "../common/common.hpp"

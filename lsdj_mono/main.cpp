@@ -35,7 +35,7 @@
 
 #include <iostream>
 
-#include <boost/filesystem.hpp>
+#include <ghc/filesystem.hpp>
 #include <boost/program_options.hpp>
 
 #include "../common/common.hpp"
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
             
             for (auto& input : vm["file"].as<std::vector<std::string>>())
             {
-                if (!processor.process(boost::filesystem::absolute(input)))
+                if (!processor.process(ghc::filesystem::absolute(input)))
                     return 1;
             }
             

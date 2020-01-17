@@ -47,24 +47,24 @@ namespace lsdj
 {
     // Scan a path, see whether it's either an .lsdsng or a folder containing .lsdsng's
     // Returns the path to the .WM (working memory) file, or {} is there was none
-    boost::filesystem::path scanPath(const boost::filesystem::path& path, std::vector<boost::filesystem::path>& paths)
+    ghc::filesystem::path scanPath(const ghc::filesystem::path& path, std::vector<ghc::filesystem::path>& paths)
     {
         if (isHiddenFile(path.filename().string()))
             return {};
         
-        if (boost::filesystem::is_regular_file(path))
+        if (ghc::filesystem::is_regular_file(path))
         {
             paths.emplace_back(path);
             return {};
         }
-        else if (boost::filesystem::is_directory(path))
+        else if (ghc::filesystem::is_directory(path))
         {
-            boost::filesystem::path workingMemoryPath;
-            std::vector<boost::filesystem::path> contents;
-            for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
+            ghc::filesystem::path workingMemoryPath;
+            std::vector<ghc::filesystem::path> contents;
+            for (auto it = ghc::filesystem::directory_iterator(path); it != ghc::filesystem::directory_iterator(); ++it)
             {
                 const auto path = it->path();
-                if (isHiddenFile(path.filename().string()) || !boost::filesystem::is_regular_file(path) || path.extension() != ".lsdsng")
+                if (isHiddenFile(path.filename().string()) || !ghc::filesystem::is_regular_file(path) || path.extension() != ".lsdsng")
                     continue;
                 
                 const auto str = path.stem().string();
@@ -91,7 +91,7 @@ namespace lsdj
     {
         // Try to load the provided destination sav, or create a new one
         lsdj_error_t* error = nullptr;
-        lsdj_sav_t* sav = savName ? lsdj_sav_read_from_file(boost::filesystem::absolute(savName).string().c_str(), &error) : lsdj_sav_new(&error);
+        lsdj_sav_t* sav = savName ? lsdj_sav_read_from_file(ghc::filesystem::absolute(savName).string().c_str(), &error) : lsdj_sav_new(&error);
         if (error)
             return handle_error(error);
         
@@ -109,10 +109,10 @@ namespace lsdj
             std::cout << "Read " << savName << ", containing " << std::to_string(index) << " saves" << std::endl;
         
         // Go through all input files and recursively find all .lsdsngs's (and the working memory file)
-        std::vector<boost::filesystem::path> paths;
+        std::vector<ghc::filesystem::path> paths;
         for (auto& input : inputs)
         {
-            const auto wm = scanPath(boost::filesystem::absolute(input), paths);
+            const auto wm = scanPath(ghc::filesystem::absolute(input), paths);
             if (!wm.empty())
             {
                 if (!workingMemoryPath.empty())
@@ -168,7 +168,7 @@ namespace lsdj
             outputFile = "out.sav";
         
         // Write the sav to file
-        lsdj_sav_write_to_file(sav, boost::filesystem::absolute(outputFile).string().c_str(), &error);
+        lsdj_sav_write_to_file(sav, ghc::filesystem::absolute(outputFile).string().c_str(), &error);
         if (error)
         {
             lsdj_sav_free(sav);
@@ -203,7 +203,7 @@ namespace lsdj
         }
     }
     
-    void Importer::importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<boost::filesystem::path>& paths, lsdj_error_t** error)
+    void Importer::importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<ghc::filesystem::path>& paths, lsdj_error_t** error)
     {
         lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(workingMemoryPath.string().c_str(), error);
         if (*error != nullptr)

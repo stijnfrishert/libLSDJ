@@ -55,8 +55,8 @@ std::string generateOutputFilename(const std::vector<std::string>& inputs)
     // we take that folder name as output. In case of multiple folders,
     if (inputs.size() == 1)
     {
-        const auto path = boost::filesystem::absolute(inputs.front()).remove_trailing_separator();
-        if (boost::filesystem::is_directory(path))
+        const auto path = ghc::filesystem::absolute(inputs.front());
+        if (ghc::filesystem::is_directory(path))
             return path.stem().filename().string() + ".sav";
     }
     
@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
             if (vm.count("output"))
                 importer.outputFile = vm["output"].as<std::string>();
             else if (vm.count("sav"))
-                importer.outputFile = boost::filesystem::absolute(vm["sav"].as<std::string>()).stem().filename().string() + ".sav";
+                importer.outputFile = ghc::filesystem::absolute(vm["sav"].as<std::string>()).stem().filename().string() + ".sav";
             else
                 importer.outputFile = generateOutputFilename(importer.inputs);
             
