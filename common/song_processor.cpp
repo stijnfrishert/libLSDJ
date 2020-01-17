@@ -63,7 +63,7 @@ namespace lsdj
         if (verbose)
             std::cout << "Processing sav '" + path.string() + "'" << std::endl;
         
-        processSong(lsdj_sav_get_working_memory_song(sav));
+        processSong(*lsdj_sav_get_working_memory_song(sav));
         
         for (int i = 0; i < lsdj_sav_get_project_count(sav); ++i)
         {
@@ -75,7 +75,7 @@ namespace lsdj
             if (song == nullptr)
                 continue;
             
-            if (!processSong(song))
+            if (!processSong(*song))
             {
                 lsdj_sav_free(sav);
                 return false;
@@ -114,7 +114,7 @@ namespace lsdj
         if (song == nullptr)
             return true;
         
-        if (!processSong(song))
+        if (!processSong(*song))
         {
             lsdj_project_free(project);
             return false;

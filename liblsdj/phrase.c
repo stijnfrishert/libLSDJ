@@ -38,11 +38,23 @@
 
 #include "phrase.h"
 
+lsdj_phrase_t* lsdj_phrase_new()
+{
+    lsdj_phrase_t* phrase = (lsdj_phrase_t*)malloc(sizeof(lsdj_phrase_t));
+    lsdj_phrase_clear(phrase);
+    return phrase;
+}
+
 lsdj_phrase_t* lsdj_phrase_copy(const lsdj_phrase_t* phrase)
 {
     lsdj_phrase_t* newPhrase = malloc(sizeof(lsdj_phrase_t));
     memcpy(newPhrase, phrase, sizeof(lsdj_phrase_t));
     return newPhrase;
+}
+
+void lsdj_phrase_free(lsdj_phrase_t* phrase)
+{
+    free(phrase);
 }
 
 void lsdj_phrase_clear(lsdj_phrase_t* phrase)
@@ -52,4 +64,33 @@ void lsdj_phrase_clear(lsdj_phrase_t* phrase)
     
     for (int i = 0; i < LSDJ_PHRASE_LENGTH; ++i)
         lsdj_command_clear(&phrase->commands[i]);
+}
+
+bool lsdj_phrase_equals(const lsdj_phrase_t* lhs, const lsdj_phrase_t* rhs)
+{
+    // Compare the notes and instruments by memory compare
+    if (memcmp(lhs->notes, rhs->notes, sizeof(lhs->notes)) != 0 ||
+        memcmp(lhs->instruments, rhs->instruments, sizeof(lhs->instruments)) != 0)
+    {
+        return false;
+    }
+    
+    // Compare the commands through the command interface
+    for (int i = 0; i < LSDJ_PHRASE_LENGTH; i++)
+    {
+        if (!lsdj_command_equals(&lhs->commands[i], &rhs->commands[i]))
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+void lsdj_phrase_replace_command_value(lsdj_phrase_t* phrase, unsigned char command, unsigned char value, unsigned char replacement)
+{
+    for (int i  = 0; i < LSDJ_PHRASE_LENGTH; i++)
+    {
+        lsdj_command_replace_value(&phrase->commands[i], command, value, replacement);
+    }
 }

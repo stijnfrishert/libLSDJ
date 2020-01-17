@@ -38,6 +38,10 @@
 #include <string.h>
 
 #include "instrument.h"
+#include "instrument_kit.h"
+#include "instrument_noise.h"
+#include "instrument_pulse.h"
+#include "instrument_wave.h"
 
 // Structure representing one instrument
 typedef struct lsdj_instrument_t
@@ -48,7 +52,7 @@ typedef struct lsdj_instrument_t
     
     union { unsigned char envelope; unsigned char volume; };
     lsdj_panning panning;
-    unsigned char table; // 0x20 or higher = LSDJ_NO_TABLE
+    unsigned char table; // 0x20 or higher = LSDJ_INSTRUMENT_NO_TABLE
     unsigned char automate;
     
     union
@@ -90,7 +94,7 @@ void lsdj_instrument_clear_as_pulse(lsdj_instrument_t* instrument)
     instrument->type = LSDJ_INSTR_PULSE;
     instrument->envelope = 0xA8;
     instrument->panning = LSDJ_PAN_LEFT_RIGHT;
-    instrument->table = LSDJ_NO_TABLE;
+    instrument->table = LSDJ_INSTRUMENT_NO_TABLE;
     instrument->automate = 0;
     
     instrument->pulse.pulseWidth = LSDJ_PULSE_WAVE_PW_125;
@@ -110,7 +114,7 @@ void lsdj_instrument_clear_as_wave(lsdj_instrument_t* instrument)
     instrument->type = LSDJ_INSTR_WAVE;
     instrument->volume = 3;
     instrument->panning = LSDJ_PAN_LEFT_RIGHT;
-    instrument->table = LSDJ_NO_TABLE;
+    instrument->table = LSDJ_INSTRUMENT_NO_TABLE;
     instrument->automate = 0;
     
     instrument->wave.plvibSpeed = LSDJ_PLVIB_FAST;
@@ -130,7 +134,7 @@ void lsdj_instrument_clear_as_kit(lsdj_instrument_t* instrument)
     instrument->type = LSDJ_INSTR_KIT;
     instrument->volume = 3;
     instrument->panning = LSDJ_PAN_LEFT_RIGHT;
-    instrument->table = LSDJ_NO_TABLE;
+    instrument->table = LSDJ_INSTRUMENT_NO_TABLE;
     instrument->automate = 0;
     
     instrument->kit.kit1 = 0;
@@ -155,7 +159,7 @@ void lsdj_instrument_clear_as_noise(lsdj_instrument_t* instrument)
     instrument->type = LSDJ_INSTR_NOISE;
     instrument->envelope = 0xA8;
     instrument->panning = LSDJ_PAN_LEFT_RIGHT;
-    instrument->table = LSDJ_NO_TABLE;
+    instrument->table = LSDJ_INSTRUMENT_NO_TABLE;
     instrument->automate = 0;
     
     instrument->noise.length = LSDJ_INSTRUMENT_UNLIMITED_LENGTH;
@@ -178,7 +182,7 @@ unsigned char parseTable(unsigned char byte)
     if (byte & 0x20)
         return byte & 0x1F;
     else
-        return LSDJ_NO_TABLE;
+        return LSDJ_INSTRUMENT_NO_TABLE;
 }
 
 lsdj_panning parsePanning(unsigned char byte)
@@ -563,7 +567,7 @@ unsigned char createLengthByte(unsigned char length)
 
 unsigned char createTableByte(unsigned char table)
 {
-    if (table >= LSDJ_NO_TABLE)
+    if (table >= LSDJ_INSTRUMENT_NO_TABLE)
         return 0;
     else
         return (table & 0x1F) | 0x20;
@@ -887,4 +891,26 @@ void lsdj_instrument_set_panning(lsdj_instrument_t* instrument, lsdj_panning pan
 lsdj_panning lsdj_instrument_get_panning(const lsdj_instrument_t* instrument)
 {
     return instrument->panning;
+}
+
+void lsdj_instrument_set_table(lsdj_instrument_t* instrument, unsigned char table)
+{
+    instrument->table = table;
+}
+
+unsigned char lsdj_instrument_get_table(const lsdj_instrument_t* instrument)
+{
+    return instrument->table;
+}
+
+void lsdj_instrument_replace_table(lsdj_instrument_t* instrument, unsigned char value, unsigned char replacement)
+{
+    if (instrument->table == value)
+        instrument->table = replacement;
+}
+
+void lsdj_instrument_replace_synth(lsdj_instrument_t* instrument, unsigned char synth, unsigned char replacement)
+{
+    if (instrument->type == LSDJ_INSTR_WAVE && instrument->wave.synth == synth)
+        instrument->wave.synth = replacement;
 }

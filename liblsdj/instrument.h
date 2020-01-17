@@ -40,11 +40,9 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 #include "error.h"
-#include "instrument_kit.h"
-#include "instrument_noise.h"
-#include "instrument_pulse.h"
-#include "instrument_wave.h"
 #include "panning.h"
 #include "vio.h"
 
@@ -62,7 +60,7 @@ typedef enum
     LSDJ_INSTR_NOISE
 } instrument_type;
 
-#define LSDJ_NO_TABLE (0x20)
+#define LSDJ_INSTRUMENT_NO_TABLE (0x20)
 #define LSDJ_INSTRUMENT_UNLIMITED_LENGTH (0x40)
 #define LSDJ_KIT_LENGTH_AUTO (0x0)
 
@@ -89,6 +87,13 @@ void lsdj_instrument_get_name(const lsdj_instrument_t* instrument, char* data, s
 
 void lsdj_instrument_set_panning(lsdj_instrument_t* instrument, lsdj_panning panning);
 lsdj_panning lsdj_instrument_get_panning(const lsdj_instrument_t* instrument);
+
+void lsdj_instrument_set_table(lsdj_instrument_t* instrument, unsigned char table);
+unsigned char lsdj_instrument_get_table(const lsdj_instrument_t* instrument);
+
+// Replace the table with an instrument with another
+void lsdj_instrument_replace_table(lsdj_instrument_t* instrument, unsigned char value, unsigned char replacement);
+void lsdj_instrument_replace_synth(lsdj_instrument_t* instrument, unsigned char synth, unsigned char replacement);
     
 #ifdef __cplusplus
 }

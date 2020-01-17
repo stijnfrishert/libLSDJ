@@ -95,18 +95,33 @@ void lsdj_song_set_drum_max(lsdj_song_t* song, unsigned char drumMax);
 unsigned char lsdj_song_get_drum_max(const lsdj_song_t* song);
 
 lsdj_row_t* lsdj_song_get_row(lsdj_song_t* song, size_t index);
+
 lsdj_chain_t* lsdj_song_get_chain(lsdj_song_t* song, size_t index);
+void lsdj_song_erase_chain(lsdj_song_t* song, size_t index);
+void lsdj_song_deduplicate_chains(lsdj_song_t* song);
+void lsdj_song_replace_chain(lsdj_song_t* song, unsigned char chain, unsigned char replacement);
+
 lsdj_phrase_t* lsdj_song_get_phrase(lsdj_song_t* song, size_t index);
+void lsdj_song_erase_phrase(lsdj_song_t* song, size_t index);
+void lsdj_song_deduplicate_phrases(lsdj_song_t* song);
+void lsdj_song_replace_phrase(lsdj_song_t* song, unsigned char phrase, unsigned char replacement);
+
 lsdj_instrument_t* lsdj_song_get_instrument(lsdj_song_t* song, size_t index);
 lsdj_synth_t* lsdj_song_get_synth(lsdj_song_t* song, size_t index);
 lsdj_wave_t* lsdj_song_get_wave(lsdj_song_t* song, size_t index);
+
 lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index);
+void lsdj_song_erase_table(lsdj_song_t* song, size_t index);
+void lsdj_song_deduplicate_tables(lsdj_song_t* song);
+void lsdj_song_replace_table(lsdj_song_t* song, unsigned char table, unsigned char replacement);
+
 lsdj_groove_t* lsdj_song_get_groove(lsdj_song_t* song, size_t index);
 lsdj_word_t* lsdj_song_get_word(lsdj_song_t* song, size_t index);
 void lsdj_song_set_word_name(lsdj_song_t* song, size_t index, const char* data, size_t size);
 void lsdj_song_get_word_name(lsdj_song_t* song, size_t index, char* data, size_t size);
 void lsdj_song_set_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position, unsigned char bookmark);
 unsigned char lsdj_song_get_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position);
+
     
 #ifdef __cplusplus
 }

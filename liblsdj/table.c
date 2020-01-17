@@ -56,7 +56,7 @@ typedef struct lsdj_table_t
 lsdj_table_t* lsdj_table_new()
 {
     lsdj_table_t* table = (lsdj_table_t*)malloc(sizeof(lsdj_table_t));
-    lsdj_clear_table(table);
+    lsdj_table_clear(table);
     return table;
 }
 
@@ -72,7 +72,7 @@ void lsdj_table_free(lsdj_table_t* table)
     free(table);
 }
 
-void lsdj_clear_table(lsdj_table_t* table)
+void lsdj_table_clear(lsdj_table_t* table)
 {
     memset(table->volumes, 0, LSDJ_TABLE_LENGTH);
     memset(table->transpositions, 0, LSDJ_TABLE_LENGTH);
@@ -122,4 +122,48 @@ lsdj_command_t* lsdj_table_get_command1(lsdj_table_t* table, size_t index)
 lsdj_command_t* lsdj_table_get_command2(lsdj_table_t* table, size_t index)
 {
     return &table->commands2[index];
+}
+
+bool lsdj_table_equals(const lsdj_table_t* lhs, const lsdj_table_t* rhs)
+{
+    // Compare the notes and instruments by memory compare
+    if (memcmp(lhs->volumes, rhs->volumes, sizeof(lhs->volumes)) != 0 ||
+        memcmp(lhs->transpositions, rhs->transpositions, sizeof(lhs->transpositions)) != 0)
+    {
+        return false;
+    }
+    
+    // Compare the commands through the command interface
+    for (int i = 0; i < LSDJ_TABLE_LENGTH; i++)
+    {
+        if (!lsdj_command_equals(&lhs->commands1[i], &rhs->commands1[i]) ||
+            !lsdj_command_equals(&lhs->commands2[i], &rhs->commands2[i]))
+        {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+void lsdj_table_replace_command1_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement)
+{
+    for (int i = 0; i < LSDJ_TABLE_LENGTH; i += 1)
+    {
+        lsdj_command_replace_value(&table->commands1[i], command, value, replacement);
+    }
+}
+
+void lsdj_table_replace_command2_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement)
+{
+    for (int i = 0; i < LSDJ_TABLE_LENGTH; i += 1)
+    {
+        lsdj_command_replace_value(&table->commands2[i], command, value, replacement);
+    }
+}
+
+void lsdj_table_replace_command_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement)
+{
+    lsdj_table_replace_command1_value(table, command, value, replacement);
+    lsdj_table_replace_command2_value(table, command, value, replacement);
 }

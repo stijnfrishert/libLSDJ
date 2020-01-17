@@ -60,3 +60,13 @@ void lsdj_synth_clear(lsdj_synth_t* synth)
     
     synth->overwritten = 0;
 }
+
+bool lsdj_synth_equals(const lsdj_synth_t* lhs, const lsdj_synth_t* rhs)
+{
+    if (lhs->overwritten == 1 || rhs->overwritten == 1)
+    {
+        return false;
+    } else {
+        return memcmp(lhs, rhs, sizeof(lsdj_synth_t)) == 0 ? true : false;
+    }
+}

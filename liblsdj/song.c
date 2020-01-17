@@ -33,7 +33,7 @@
  
  */
 
-#include <stdbool.h>
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -283,13 +283,13 @@ void lsdj_song_free(lsdj_song_t* song)
     for (int i = 0; i < LSDJ_CHAIN_COUNT; ++i)
     {
         if (song->chains[i])
-            free(song->chains[i]);
+            lsdj_chain_free(song->chains[i]);
     }
     
     for (int i = 0; i < LSDJ_PHRASE_COUNT; ++i)
     {
         if (song->phrases[i])
-            free(song->phrases[i]);
+            lsdj_phrase_free(song->phrases[i]);
     }
     
     for (int i = 0; i < LSDJ_INSTRUMENT_COUNT; ++i)
@@ -914,13 +914,13 @@ lsdj_song_t* lsdj_song_read(lsdj_vio_t* vio, lsdj_error_t** error)
     for (int i = 0; i < LSDJ_CHAIN_COUNT; ++i)
     {
         if ((chainAllocTable[i / 8] >> (i % 8)) & 1)
-            song->chains[i] = (lsdj_chain_t*)malloc(sizeof(lsdj_chain_t));
+            song->chains[i] = lsdj_chain_new();
     }
     
     for (int i = 0; i < LSDJ_PHRASE_COUNT; ++i)
     {
         if ((phraseAllocTable[i / 8] >> (i % 8)) & 1)
-            song->phrases[i] = (lsdj_phrase_t*)malloc(sizeof(lsdj_phrase_t));
+            song->phrases[i] = lsdj_phrase_new();
     }
     
     // Read the banks
@@ -1048,9 +1048,90 @@ lsdj_chain_t* lsdj_song_get_chain(lsdj_song_t* song, size_t index)
     return song->chains[index];
 }
 
+void lsdj_song_erase_chain(lsdj_song_t* song, size_t index)
+{
+    lsdj_chain_free(song->chains[index]);
+    song->chains[index] = NULL;
+}
+
+void lsdj_song_deduplicate_chains(lsdj_song_t* song)
+{
+    // For every chain number...
+    for (unsigned char c1 = 0; c1 < LSDJ_CHAIN_COUNT; c1 += 1)
+    {
+        // Check if it's in use
+        lsdj_chain_t* chain1 = lsdj_song_get_chain(song, c1);
+        if (!chain1)
+            continue;
+        
+        // Go through chain1s higher than this one and see if it's a duplicate
+        for (unsigned char c2 = c1 + 1; c2 < LSDJ_CHAIN_COUNT; c2 += 1)
+        {
+            lsdj_chain_t* chain2 = lsdj_song_get_chain(song, c2);
+            
+            if (chain2 && lsdj_chain_equals(chain1, chain2))
+            {
+                // Replace the phrase number in the song and erase the phrase
+                lsdj_song_replace_chain(song, c2, c1);
+                lsdj_song_erase_chain(song, c2);
+            }
+        }
+    }
+}
+
+void lsdj_song_replace_chain(lsdj_song_t* song, unsigned char chain, unsigned char replacement)
+{
+    for (int r = 0; r < LSDJ_ROW_COUNT; r += 1)
+    {
+        lsdj_row_replace_chain(&song->rows[r], chain, replacement);
+    }
+}
+
 lsdj_phrase_t* lsdj_song_get_phrase(lsdj_song_t* song, size_t index)
 {
     return song->phrases[index];
+}
+
+void lsdj_song_erase_phrase(lsdj_song_t* song, size_t index)
+{
+    lsdj_phrase_free(song->phrases[index]);
+    song->phrases[index] = NULL;
+}
+
+void lsdj_song_deduplicate_phrases(lsdj_song_t* song)
+{
+    // For every phrase number...
+    for (unsigned char p1 = 0; p1 < LSDJ_PHRASE_COUNT; p1 += 1)
+    {
+        // Check if it's in use
+        lsdj_phrase_t* phrase1 = lsdj_song_get_phrase(song, p1);
+        if (!phrase1)
+            continue;
+        
+        // Go through phrases higher than this one and see if it's a duplicate
+        for (unsigned char p2 = p1 + 1; p2 < LSDJ_PHRASE_COUNT; p2 += 1)
+        {
+            lsdj_phrase_t* phrase2 = lsdj_song_get_phrase(song, p2);
+            
+            if (phrase2 && lsdj_phrase_equals(phrase1, phrase2))
+            {
+                // Replace the phrase number in the song and erase the phrase
+                lsdj_song_replace_phrase(song, p2, p1);
+                lsdj_song_erase_phrase(song, p2);
+            }
+        }
+    }
+}
+
+void lsdj_song_replace_phrase(lsdj_song_t* song, unsigned char phrase, unsigned char replacement)
+{
+    for (int c = 0; c < LSDJ_CHAIN_COUNT; c += 1)
+    {
+        lsdj_chain_t* chain = song->chains[c];
+        
+        if (chain)
+            lsdj_chain_replace_phrase(chain, phrase, replacement);
+    }
 }
 
 lsdj_instrument_t* lsdj_song_get_instrument(lsdj_song_t* song, size_t index)
@@ -1071,6 +1152,66 @@ lsdj_wave_t* lsdj_song_get_wave(lsdj_song_t* song, size_t index)
 lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index)
 {
     return song->tables[index];
+}
+
+void lsdj_song_erase_table(lsdj_song_t* song, size_t index)
+{
+    lsdj_table_free(song->tables[index]);
+    song->tables[index] = NULL;
+}
+
+void lsdj_song_deduplicate_tables(lsdj_song_t* song)
+{
+    // For every table number...
+    for (unsigned char t1 = 0; t1 < LSDJ_TABLE_COUNT; t1 += 1)
+    {
+        // Check if it's in use
+        lsdj_table_t* table1 = lsdj_song_get_table(song, t1);
+        if (!table1)
+            continue;
+        
+        // Go through tables higher in number than this one and see if it's a duplicate
+        for (unsigned char t2 = t1 + 1; t2 < LSDJ_TABLE_COUNT; t2 += 1)
+        {
+            lsdj_table_t* table2 = lsdj_song_get_table(song, t2);
+            
+            if (table2 && lsdj_table_equals(table1, table2))
+            {
+                lsdj_song_replace_table(song, t2, t1);
+                lsdj_song_erase_table(song, t2);
+            }
+        }
+    }
+}
+
+void lsdj_song_replace_table(lsdj_song_t* song, unsigned char table, unsigned char replacement)
+{
+    // Replace the table in tables first
+    for (size_t i = 0; i < LSDJ_TABLE_COUNT; i += 1)
+    {
+        lsdj_table_t* ptr = lsdj_song_get_table(song, i);
+        
+        if (ptr)
+            lsdj_table_replace_command_value(ptr, LSDJ_COMMAND_A, table, replacement);
+    }
+    
+    // Replace the table in instruments
+    for (size_t i = 0; i < LSDJ_INSTRUMENT_COUNT; i += 1)
+    {
+        lsdj_instrument_t* instrument = lsdj_song_get_instrument(song, i);
+        
+        if (instrument)
+            lsdj_instrument_replace_table(instrument, table, replacement);
+    }
+    
+    // Replace the table in phrases
+    for (size_t p = 0; p < LSDJ_PHRASE_COUNT; p += 1)
+    {
+        lsdj_phrase_t* phrase = lsdj_song_get_phrase(song, p);
+        
+        if (phrase)
+            lsdj_phrase_replace_command_value(phrase, LSDJ_COMMAND_A, table, replacement);
+    }
 }
 
 lsdj_groove_t* lsdj_song_get_groove(lsdj_song_t* song, size_t index)

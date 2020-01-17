@@ -40,6 +40,8 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 #include "command.h"
 
 // The default constant lenght of a phrase
@@ -57,11 +59,18 @@ typedef struct
     lsdj_command_t commands[LSDJ_PHRASE_LENGTH];
 } lsdj_phrase_t;
 
-// Copy a phrase
+lsdj_phrase_t* lsdj_phrase_new();
 lsdj_phrase_t* lsdj_phrase_copy(const lsdj_phrase_t* phrase);
+void lsdj_phrase_free(lsdj_phrase_t* phrase);
     
 // Clear all phrase data to factory settings
 void lsdj_phrase_clear(lsdj_phrase_t* phrase);
+
+// Check to see if two phrases contain the same content
+bool lsdj_phrase_equals(const lsdj_phrase_t* lhs, const lsdj_phrase_t* rhs);
+
+// Replace a specfic command value with another
+void lsdj_phrase_replace_command_value(lsdj_phrase_t* phrase, unsigned char command, unsigned char value, unsigned char replacement);
     
 #ifdef __cplusplus
 }

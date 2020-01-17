@@ -68,24 +68,24 @@ namespace lsdj
         return addMonoSuffix(path);
     }
 
-    bool MonoProcessor::processSong(lsdj_song_t* song)
+    bool MonoProcessor::processSong(lsdj_song_t& song)
     {
         if (processInstruments)
         {
             for (int i = 0; i < LSDJ_INSTRUMENT_COUNT; ++i)
-                convertInstrument(lsdj_song_get_instrument(song, i));
+                convertInstrument(lsdj_song_get_instrument(&song, i));
         }
 
         if (processTables)
         {
             for (int i = 0; i < LSDJ_TABLE_COUNT; ++i)
-                convertTable(lsdj_song_get_table(song, i));
+                convertTable(lsdj_song_get_table(&song, i));
         }
 
         if (processPhrases)
         {
             for (int i = 0; i < LSDJ_PHRASE_COUNT; ++i)
-                convertPhrase(lsdj_song_get_phrase(song, i));
+                convertPhrase(lsdj_song_get_phrase(&song, i));
         }
         
         return true;

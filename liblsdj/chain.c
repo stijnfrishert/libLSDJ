@@ -38,6 +38,13 @@
 
 #include "chain.h"
 
+lsdj_chain_t* lsdj_chain_new()
+{
+    lsdj_chain_t* chain = (lsdj_chain_t*)malloc(sizeof(lsdj_chain_t));
+    lsdj_chain_clear(chain);
+    return chain;
+}
+
 lsdj_chain_t* lsdj_chain_copy(const lsdj_chain_t* chain)
 {
     lsdj_chain_t* newChain = malloc(sizeof(lsdj_chain_t));
@@ -45,8 +52,27 @@ lsdj_chain_t* lsdj_chain_copy(const lsdj_chain_t* chain)
     return newChain;
 }
 
+void lsdj_chain_free(lsdj_chain_t* chain)
+{
+    free(chain);
+}
+
 void lsdj_chain_clear(lsdj_chain_t* chain)
 {
-    memset(chain->phrases, 0xFF, LSDJ_CHAIN_LENGTH);
+    memset(chain->phrases, LSDJ_CHAIN_NO_PHRASE, LSDJ_CHAIN_LENGTH);
     memset(chain->transpositions, 0, LSDJ_CHAIN_LENGTH);
+}
+
+bool lsdj_chain_equals(const lsdj_chain_t* lhs, const lsdj_chain_t* rhs)
+{
+    return memcmp(lhs, rhs, sizeof(lsdj_chain_t)) == 0 ? true : false;
+}
+
+void lsdj_chain_replace_phrase(lsdj_chain_t* chain, unsigned char phrase, unsigned char replacement)
+{
+    for (int p = 0; p < LSDJ_CHAIN_LENGTH; p += 1)
+    {
+        if (chain->phrases[p] == phrase)
+            chain->phrases[p] = replacement;
+    }
 }

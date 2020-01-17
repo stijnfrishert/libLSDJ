@@ -27,6 +27,6 @@ namespace lsdj
         [[nodiscard]] virtual boost::filesystem::path constructSavDestinationPath(const boost::filesystem::path& path) { return path; }
         [[nodiscard]] virtual boost::filesystem::path constructLsdsngDestinationPath(const boost::filesystem::path& path) { return path; }
         
-        virtual bool processSong(lsdj_song_t* song) = 0;
+        virtual bool processSong(lsdj_song_t& song) = 0;
     };
 }

@@ -42,3 +42,18 @@ void lsdj_row_clear(lsdj_row_t* row)
     row->wave = 0xFF;
     row->noise = 0xFF;
 }
+
+void lsdj_row_replace_chain(lsdj_row_t* row, unsigned char chain, unsigned char replacement)
+{
+    if (row->pulse1 == chain)
+        row->pulse1 = replacement;
+    
+    if (row->pulse2 == chain)
+        row->pulse2 = replacement;
+    
+    if (row->wave == chain)
+        row->wave = replacement;
+    
+    if (row->noise == chain)
+        row->noise = replacement;
+}
