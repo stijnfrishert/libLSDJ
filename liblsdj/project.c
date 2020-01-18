@@ -34,6 +34,7 @@
  */
 
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -315,7 +316,7 @@ size_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const ch
     if (file == NULL)
     {
         char message[512];
-        snprintf(message, 512, "could not open %s for writing", path);
+        snprintf(message, 512, "could not open %s for writing\n%s", path, strerror(errno));
         lsdj_error_new(error, message);
         return 0;
     }

@@ -144,6 +144,7 @@ namespace lsdj
         stream << ".lsdsng";
         path /= stream.str();
         
+        ghc::filesystem::create_directories(path.parent_path());
         lsdj_project_write_lsdsng_to_file(project, path.string().c_str(), error);
         if (*error != nullptr)
             return;
