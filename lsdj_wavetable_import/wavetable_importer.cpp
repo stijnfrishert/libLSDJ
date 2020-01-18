@@ -47,8 +47,8 @@ namespace lsdj
 {
     bool WavetableImporter::import(const std::string& input, const std::string& wavetableName)
     {
-        const auto path = boost::filesystem::absolute(input);
-        if (!boost::filesystem::exists(path))
+        const auto path = ghc::filesystem::absolute(input);
+        if (!ghc::filesystem::exists(path))
         {
             std::cerr << path.filename().string() << " does not exist" << std::endl;
             return false;
@@ -65,7 +65,7 @@ namespace lsdj
         }
     }
     
-    bool WavetableImporter::importToSav(const boost::filesystem::path& path, const std::string& wavetableName)
+    bool WavetableImporter::importToSav(const ghc::filesystem::path& path, const std::string& wavetableName)
     {
         // Load the sav
         lsdj_error_t* error = nullptr;
@@ -96,7 +96,7 @@ namespace lsdj
         const auto frameCount = result.second;
         
         // Write the sav back to file
-        const auto outputPath = boost::filesystem::absolute(outputName);
+        const auto outputPath = ghc::filesystem::absolute(outputName);
         lsdj_sav_write_to_file(sav, outputPath.string().c_str(), &error);
         if (error != nullptr)
         {
@@ -109,7 +109,7 @@ namespace lsdj
         return true;
     }
     
-    bool WavetableImporter::importToLsdsng(const boost::filesystem::path& path, const std::string& wavetableName)
+    bool WavetableImporter::importToLsdsng(const ghc::filesystem::path& path, const std::string& wavetableName)
     {
         // Load the project
         lsdj_error_t* error = nullptr;
@@ -135,7 +135,7 @@ namespace lsdj
         const auto frameCount = result.second;
         
         // Write the project back to file
-        const auto outputPath = boost::filesystem::absolute(outputName);
+        const auto outputPath = ghc::filesystem::absolute(outputName);
         lsdj_project_write_lsdsng_to_file(project, outputPath.string().c_str(), &error);
         if (error != nullptr)
         {
@@ -151,15 +151,15 @@ namespace lsdj
     std::pair<bool, unsigned int> WavetableImporter::importToSong(lsdj_song_t* song, const std::string& wavetableName)
     {
         // Find the wavetable file
-        const auto wavetablePath = boost::filesystem::absolute(wavetableName);
-        if (!boost::filesystem::exists(wavetablePath))
+        const auto wavetablePath = ghc::filesystem::absolute(wavetableName);
+        if (!ghc::filesystem::exists(wavetablePath))
         {
             std::cerr << wavetablePath.filename().string() << " does not exist" << std::endl;
             return {false, 0};
         }
         
         // Make sure the wavetable is the correct size
-        const auto wavetableSize = boost::filesystem::file_size(wavetablePath);
+        const auto wavetableSize = ghc::filesystem::file_size(wavetablePath);
         if (wavetableSize % 16 != 0)
         {
             std::cerr << "The wavetable file size is not a multiple of 16 bytes" << std::endl;

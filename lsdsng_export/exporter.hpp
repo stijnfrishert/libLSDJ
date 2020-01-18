@@ -36,7 +36,7 @@
 #ifndef LSDJ_EXPORTER_HPP
 #define LSDJ_EXPORTER_HPP
 
-#include <boost/filesystem/path.hpp>
+#include <ghc/filesystem.hpp>
 
 #include "../liblsdj/error.h"
 #include "../liblsdj/project.h"
@@ -55,9 +55,9 @@ namespace lsdj
         };
         
     public:
-        int exportProjects(const boost::filesystem::path& path, const std::string& output);
-        void exportProject(const lsdj_project_t* project, boost::filesystem::path folder, bool workingMemory, lsdj_error_t** error);
-        int print(const boost::filesystem::path& path);
+        int exportProjects(const ghc::filesystem::path& path, const std::string& output);
+        void exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory, lsdj_error_t** error);
+        int print(const ghc::filesystem::path& path);
         
     public:
         // The version exporting style
@@ -71,8 +71,8 @@ namespace lsdj
         std::vector<std::string> names;
         
     private:
-        int printFolder(const boost::filesystem::path& path);
-        int printSav(const boost::filesystem::path& path);
+        int printFolder(const ghc::filesystem::path& path);
+        int printSav(const ghc::filesystem::path& path);
         
     private:
         // Converts a project version to a string representation using the current VersionStyle

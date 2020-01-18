@@ -37,14 +37,12 @@
 #include <iostream>
 #include <sstream>
 
-#include <boost/filesystem.hpp>
-
 #include "../common/common.hpp"
 #include "exporter.hpp"
 
 namespace lsdj
 {
-    int Exporter::exportProjects(const boost::filesystem::path& path, const std::string& output)
+    int Exporter::exportProjects(const ghc::filesystem::path& path, const std::string& output)
     {
         // Load in the save file
         lsdj_error_t* error = nullptr;
@@ -55,7 +53,7 @@ namespace lsdj
         if (verbose)
             std::cout << "Read '" << path.string() << "'" << std::endl;
         
-        const auto outputFolder = boost::filesystem::absolute(output);
+        const auto outputFolder = ghc::filesystem::absolute(output);
         
         // If no specific indices were given, or -w was flagged (index == -1),
         // display the working memory song as well
@@ -118,7 +116,7 @@ namespace lsdj
         return 0;
     }
     
-    void Exporter::exportProject(const lsdj_project_t* project, boost::filesystem::path folder, bool workingMemory, lsdj_error_t** error)
+    void Exporter::exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory, lsdj_error_t** error)
     {
         // See if there's actually a song here. If not, this is an (EMPTY) project among
         // existing projects, which is a thing that can happen in older versions of LSDJ
@@ -131,11 +129,11 @@ namespace lsdj
         if (name.empty())
             name = "(EMPTY)";
         
-        boost::filesystem::path path = folder;
+        ghc::filesystem::path path = folder;
         
         if (putInFolder)
             path /= name;
-        boost::filesystem::create_directories(folder);
+        ghc::filesystem::create_directories(folder);
         
         std::stringstream stream;
         stream << name << convertVersionToString(lsdj_project_get_version(project), true);
@@ -153,21 +151,21 @@ namespace lsdj
         // Let the user know if verbose output has been toggled on
         if (verbose)
         {
-            std::cout << "Exported " << boost::filesystem::relative(path, folder).string() << std::endl;
+            std::cout << "Exported " << ghc::filesystem::relative(path, folder).string() << std::endl;
         }
     }
     
-    int Exporter::print(const boost::filesystem::path& path)
+    int Exporter::print(const ghc::filesystem::path& path)
     {
-        if (boost::filesystem::is_directory(path))
+        if (ghc::filesystem::is_directory(path))
             return printFolder(path);
         else
             return printSav(path);
     }
     
-    int Exporter::printFolder(const boost::filesystem::path& path)
+    int Exporter::printFolder(const ghc::filesystem::path& path)
     {
-        for (auto it = boost::filesystem::directory_iterator(path); it != boost::filesystem::directory_iterator(); ++it)
+        for (auto it = ghc::filesystem::directory_iterator(path); it != ghc::filesystem::directory_iterator(); ++it)
         {
             const auto path = it->path();
             if (isHiddenFile(path.filename().string()) || path.extension() != ".sav")
@@ -181,7 +179,7 @@ namespace lsdj
         return 0;
     }
     
-    int Exporter::printSav(const boost::filesystem::path& path)
+    int Exporter::printSav(const ghc::filesystem::path& path)
     {
         // Try and read the sav
         lsdj_error_t* error = nullptr;
