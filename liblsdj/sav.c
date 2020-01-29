@@ -44,7 +44,7 @@
 #include "song_buffer.h"
 
 #define LSDJ_SAV_PROJECT_COUNT 32
-#define HEADER_START LSDJ_SONG_BUFFER_BYTES_COUNT
+#define HEADER_START LSDJ_SONG_BUFFER_BYTE_COUNT
 
 // Representation of an entire LSDJ save file
 struct lsdj_sav_t

@@ -6,7 +6,7 @@ using namespace Catch;
 
 SCENARIO( "Song Buffer", "[song_buffer]" )
 {
-	REQUIRE(LSDJ_SONG_BUFFER_BYTES_COUNT == 0x8000);
+	REQUIRE(LSDJ_SONG_BUFFER_BYTE_COUNT == 0x8000);
 
 	GIVEN( "A song buffer is created" )
 	{

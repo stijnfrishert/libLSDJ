@@ -55,13 +55,13 @@ extern "C" {
 #define LSDJ_PROJECT_NAME_LENGTH (8)
 
 //! The maximum size of an lsdsng is a version byte +  project name + full song
-#define LSDSNG_MAX_SIZE (1 + LSDJ_PROJECT_NAME_LENGTH + LSDJ_SONG_BUFFER_BYTES_COUNT)
+#define LSDSNG_MAX_SIZE (1 + LSDJ_PROJECT_NAME_LENGTH + LSDJ_SONG_BUFFER_BYTE_COUNT)
 
 //! Representation of a project within an LSDJ sav file, or an imported .lsdsng
 typedef struct lsdj_project_t lsdj_project_t;
 
 //! Create a new project
-/*! Creates a new project with an empty name, version #0 and empty (factory) song to go
+/*! Creates a new project with an empty name, version #0 and zeroed out song
     @note Every call must be paired with an lsdj_project_free()
     @param error If passed a pointer will be filled with sensible data in case of an error */
 lsdj_project_t* lsdj_project_new(lsdj_error_t** error);
@@ -70,39 +70,55 @@ lsdj_project_t* lsdj_project_new(lsdj_error_t** error);
 /*! Call this when you no longer need a project.
     @note Every call must be paired with an lsdj_project_new() */
 void lsdj_project_free(lsdj_project_t* project);
-    
-// Deserialize a project from LSDSNG
-lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
-lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error);
-lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
-    
-// Find out whether given data is likely a valid lsdsng
-// Note: this is not a 100% guarantee that the data will load, we're just checking
-// some heuristics.
-// Returns 0 if invalid, 1 if valid. Error contains information about why.
-//
-// First version consumes the vio (doesn't seek() back to the beginning)
-int lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
-int lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error);
-int lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
-    
-// Write a project to an lsdsng file
-// Returns the number of bytes written
-size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error);
-size_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error);
-size_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t size, lsdj_error_t** error);
 
-// Change data in a project
+//! Change the name of a project
+/*! @param data A pointer to char data
+	@param size The length of the name sent in (maximum LSDJ_PROJECT_NAME_LENGTH) */
 void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size);
-void lsdj_project_get_name(const lsdj_project_t* project, char* data, size_t size);
+
+//! Retrieve the name of this project
+/*! @param data A pointer to char data of at least LSDJ_PROJECT_NAME_LENGTH long */
+void lsdj_project_get_name(const lsdj_project_t* project, char* data);
+
+//! Retrieve the length of a project's name
+/*! This won't ever be larger than LSDJ_PROJECT_NAME_LENGTH */
+size_t lsdj_project_get_name_length(const lsdj_project_t* project);
+
+//! Change the version number of a project
+/*! @note This has nothing to do with your LSDj or format version, it's just a project version */
 void lsdj_project_set_version(lsdj_project_t* project, unsigned char version);
+
+//! Retrieve the version number of the project
+/*! @note This has nothing to do with your LSDj or format version, it's just a project version */
 unsigned char lsdj_project_get_version(const lsdj_project_t* project);
 
 // Copy a full song's byte data into the project
-void lsdj_project_set_song_memory(lsdj_project_t* project, const lsdj_song_buffer_t* song);
+void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* song);
 
-// Extract the byte data of this songs project
-const lsdj_song_buffer_t* lsdj_project_get_song_memory(const lsdj_project_t* project);
+//! Retrieve the song buffer for this project
+/*! Song buffers contain the actual song data for a project. */
+const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* project);
+
+// // Deserialize a project from LSDSNG
+// lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
+// lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error);
+// lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+    
+// // Find out whether given data is likely a valid lsdsng
+// // Note: this is not a 100% guarantee that the data will load, we're just checking
+// // some heuristics.
+// // Returns 0 if invalid, 1 if valid. Error contains information about why.
+// //
+// // First version consumes the vio (doesn't seek() back to the beginning)
+// int lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
+// int lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error);
+// int lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+    
+// // Write a project to an lsdsng file
+// // Returns the number of bytes written
+// size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error);
+// size_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error);
+// size_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t size, lsdj_error_t** error);
     
 #ifdef __cplusplus
 }

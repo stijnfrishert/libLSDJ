@@ -10,6 +10,7 @@ TEST_CASE( "Error creation and querying", "[error]" )
 	{
 		auto error = lsdj_error_new("Hello");
 
+		REQUIRE(error != nullptr);
 		REQUIRE( lsdj_error_get_description_length(error) == 5 );
 		REQUIRE_THAT( lsdj_error_get_description(error), Equals("Hello") );
 

@@ -87,6 +87,45 @@ void lsdj_project_free(lsdj_project_t* project)
     free(project);
 }
 
+void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size)
+{
+    //! @todo: Should I sanitize this name into something LSDj accepts?
+    strncpy(project->name, data, size < LSDJ_PROJECT_NAME_LENGTH ? size : LSDJ_PROJECT_NAME_LENGTH);
+}
+
+void lsdj_project_get_name(const lsdj_project_t* project, char* data)
+{
+    const size_t len = strnlen(project->name, LSDJ_PROJECT_NAME_LENGTH);
+    strncpy(data, project->name, len);
+    for (size_t i = len; i < LSDJ_PROJECT_NAME_LENGTH; i += 1)
+        data[i] = '\0';
+}
+
+size_t lsdj_project_get_name_length(const lsdj_project_t* project)
+{
+    return strnlen(project->name, LSDJ_PROJECT_NAME_LENGTH);
+}
+
+void lsdj_project_set_version(lsdj_project_t* project, unsigned char version)
+{
+    project->version = version;
+}
+
+unsigned char lsdj_project_get_version(const lsdj_project_t* project)
+{
+    return project->version;
+}
+
+void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* song)
+{
+    memcpy(&project->song, song, sizeof(lsdj_song_buffer_t));
+}
+
+const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* project)
+{
+    return &project->song;
+}
+
 // lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
 // {
 //     lsdj_project_t* project = alloc_project(error);
@@ -342,37 +381,4 @@ void lsdj_project_free(lsdj_project_t* project)
 //     vio.user_data = &mem;
     
 //     return lsdj_project_write_lsdsng(project, &vio, error);
-// }
-
-// void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size)
-// {
-//     strncpy(project->name, data, size < LSDJ_PROJECT_NAME_LENGTH ? size : LSDJ_PROJECT_NAME_LENGTH);
-// }
-
-// void lsdj_project_get_name(const lsdj_project_t* project, char* data, size_t size)
-// {
-//     const size_t len = strnlen(project->name, LSDJ_PROJECT_NAME_LENGTH);
-//     strncpy(data, project->name, len);
-//     for (size_t i = len; i < LSDJ_PROJECT_NAME_LENGTH; i += 1)
-//         data[i] = '\0';
-// }
-
-// void lsdj_project_set_version(lsdj_project_t* project, unsigned char version)
-// {
-//     project->version = version;
-// }
-
-// unsigned char lsdj_project_get_version(const lsdj_project_t* project)
-// {
-//     return project->version;
-// }
-
-// void lsdj_project_set_song_memory(lsdj_project_t* project, const lsdj_song_buffer_t* song)
-// {
-//     memcpy(&project->song, song, sizeof(lsdj_song_buffer_t));
-// }
-
-// const lsdj_song_buffer_t* lsdj_project_get_song_memory(const lsdj_project_t* project)
-// {
-//     return &project->song;
 // }

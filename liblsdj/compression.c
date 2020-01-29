@@ -182,7 +182,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long* block1position, s
         return lsdj_error_new(error, "could not tell compression end");
     
     const long readSize = wend - wstart;
-    if (readSize != LSDJ_SONG_BUFFER_BYTES_COUNT)
+    if (readSize != LSDJ_SONG_BUFFER_BYTE_COUNT)
     {
         char buffer[100];
         memset(buffer, '\0', sizeof(buffer));
@@ -238,7 +238,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         return 0;
     }
     
-    const unsigned char* end = data + LSDJ_SONG_BUFFER_BYTES_COUNT;
+    const unsigned char* end = data + LSDJ_SONG_BUFFER_BYTE_COUNT;
     for (const unsigned char* read = data; read < end; )
     {
         // Uncomment this to print the current read and write positions

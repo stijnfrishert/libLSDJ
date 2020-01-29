@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 add_executable(test
 	main.cpp
 	error.cpp
-	# project.cpp
+	project.cpp
 	song_buffer.cpp
 	vio.cpp
 	)

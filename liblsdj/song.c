@@ -977,7 +977,7 @@ void lsdj_song_write_to_memory(const lsdj_song_t* song, unsigned char* data, siz
     if (data == NULL)
         return lsdj_error_new(error, "data is NULL");
     
-    if (size < LSDJ_SONG_BUFFER_BYTES_COUNT)
+    if (size < LSDJ_SONG_BUFFER_BYTE_COUNT)
         return lsdj_error_new(error, "memory is not big enough to store song");
     
     lsdj_memory_access_state_t mem;

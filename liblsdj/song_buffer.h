@@ -53,12 +53,12 @@ extern "C" {
 #include "error.h"
 
 //! The size of a decompressed song in memory
-#define LSDJ_SONG_BUFFER_BYTES_COUNT (0x8000)
+#define LSDJ_SONG_BUFFER_BYTE_COUNT (0x8000)
 
 //! A structure that can hold one entire decompressed song in memory
 typedef struct
 {
-	unsigned char bytes[LSDJ_SONG_BUFFER_BYTES_COUNT];
+	unsigned char bytes[LSDJ_SONG_BUFFER_BYTE_COUNT];
 } lsdj_song_buffer_t;
     
 #ifdef __cplusplus
