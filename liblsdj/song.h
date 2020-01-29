@@ -51,7 +51,6 @@ extern "C" {
 #include "wave.h"
 #include "word.h"
 
-#define LSDJ_SONG_DECOMPRESSED_SIZE (0x8000)
 #define LSDJ_ROW_COUNT (256)
 #define LSDJ_CHAIN_COUNT (128)
 #define LSDJ_PHRASE_COUNT (0xFF)

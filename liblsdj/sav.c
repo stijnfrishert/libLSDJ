@@ -33,16 +33,18 @@
  
  */
 
+#include "sav.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "compression.h"
-#include "sav.h"
+#include "song_memory.h"
 
 #define LSDJ_SAV_PROJECT_COUNT 32
-#define HEADER_START LSDJ_SONG_DECOMPRESSED_SIZE
+#define HEADER_START LSDJ_SONG_MEMORY_SIZE
 
 // Representation of an entire LSDJ save file
 struct lsdj_sav_t
@@ -239,13 +241,13 @@ void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_err
         if (lsdj_project_get_song(project) != NULL)
             continue;
         
-        unsigned char data[LSDJ_SONG_DECOMPRESSED_SIZE];
-        memset(data, 0x00, sizeof(data));
+        lsdj_song_memory_t data;
+        memset(data.bytes, 0x00, sizeof(data));
         
         vio->seek(HEADER_START + (i + 1) * BLOCK_SIZE, SEEK_SET, vio->user_data);
                 
         lsdj_memory_data_t mem;
-        mem.cur = mem.begin = data;
+        mem.cur = mem.begin = data.bytes;
         mem.size = sizeof(data);
         
         long block1position = HEADER_START + BLOCK_SIZE;
@@ -260,7 +262,7 @@ void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_err
             return;
         
         // Read the song from memory
-        lsdj_song_t* song = lsdj_song_read_from_memory(data, sizeof(data), error);
+        lsdj_song_t* song = lsdj_song_read_from_memory(data.bytes, sizeof(data.bytes), error);
         if (error && *error)
         {
             lsdj_song_free(song);
@@ -360,8 +362,8 @@ lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error)
     }
     
     vio->seek(begin, SEEK_SET, vio->user_data);
-    unsigned char song_data[LSDJ_SONG_DECOMPRESSED_SIZE];
-    if (vio->read(song_data, sizeof(song_data), vio->user_data) != sizeof(song_data))
+    lsdj_song_memory_t song_data;
+    if (vio->read(song_data.bytes, sizeof(song_data.bytes), vio->user_data) != sizeof(song_data.bytes))
     {
         lsdj_sav_free(sav);
         lsdj_error_new(error, "could not read compressed song data");
@@ -375,7 +377,7 @@ lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error)
         return NULL;
     }
     
-    sav->song = lsdj_song_read_from_memory(song_data, sizeof(song_data), error);
+    sav->song = lsdj_song_read_from_memory(song_data.bytes, sizeof(song_data.bytes), error);
     
     vio->seek(end, SEEK_SET, vio->user_data);
     
@@ -518,9 +520,9 @@ int lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj
 void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error)
 {
     // Write the working project
-    unsigned char song_data[LSDJ_SONG_DECOMPRESSED_SIZE];
-    lsdj_song_write_to_memory(sav->song, song_data, LSDJ_SONG_DECOMPRESSED_SIZE, error);
-    if (vio->write(song_data, sizeof(song_data), vio->user_data) != sizeof(song_data))
+    lsdj_song_memory_t song_data;
+    lsdj_song_write_to_memory(sav->song, song_data.bytes, sizeof(song_data.bytes), error);
+    if (vio->write(song_data.bytes, sizeof(song_data.bytes), vio->user_data) != sizeof(song_data.bytes))
         return lsdj_error_new(error, "could not write compressed song data");
 
     // Create the header for writing
@@ -558,8 +560,8 @@ void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
         if (song)
         {
             // Compress the song to memory
-            unsigned char song_data[LSDJ_SONG_DECOMPRESSED_SIZE];
-            lsdj_song_write_to_memory(song, song_data, LSDJ_SONG_DECOMPRESSED_SIZE, error);
+            lsdj_song_memory_t song_data;
+            lsdj_song_write_to_memory(song, song_data.bytes, sizeof(song_data.bytes), error);
             
             lsdj_memory_data_t mem;
             mem.cur = mem.begin = blocks[current_block - 1];
@@ -571,7 +573,7 @@ void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error
             wvio.tell = lsdj_mtell;
             wvio.user_data = &mem;
             
-            unsigned int written_block_count = lsdj_compress(song_data, BLOCK_SIZE, current_block, BLOCK_COUNT, &wvio, error);
+            unsigned int written_block_count = lsdj_compress(song_data.bytes, BLOCK_SIZE, current_block, BLOCK_COUNT, &wvio, error);
             if (error && *error)
                 return;
             

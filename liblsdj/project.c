@@ -33,6 +33,8 @@
  
  */
 
+#include "project.h"
+
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -40,7 +42,7 @@
 #include <string.h>
 
 #include "compression.h"
-#include "project.h"
+#include "song_memory.h"
 
 struct lsdj_project_t
 {
@@ -104,11 +106,11 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     }
 
     // Decompress the data
-    unsigned char decompressed[LSDJ_SONG_DECOMPRESSED_SIZE];
-    memset(decompressed, 0, sizeof(decompressed));
+    lsdj_song_memory_t decompressed;
+    memset(&decompressed, 0, sizeof(decompressed));
     
     lsdj_memory_data_t mem;
-    mem.begin = mem.cur = decompressed;
+    mem.begin = mem.cur = decompressed.bytes;
     mem.size = sizeof(decompressed);
     
     lsdj_vio_t wvio;
@@ -123,7 +125,7 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     
     // Read in the song
     if (project->song == NULL)
-        project->song = lsdj_song_read_from_memory(decompressed, sizeof(decompressed), error);
+        project->song = lsdj_song_read_from_memory(decompressed.bytes, sizeof(decompressed.bytes), error);
     
     return project;
 }
@@ -284,14 +286,14 @@ size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio,
     write_size += 1;
     
     // Write the song to memory
-    unsigned char decompressed[LSDJ_SONG_DECOMPRESSED_SIZE];
-    memset(decompressed, 0x34, LSDJ_SONG_DECOMPRESSED_SIZE);
-    lsdj_song_write_to_memory(project->song, decompressed, LSDJ_SONG_DECOMPRESSED_SIZE, error);
+    lsdj_song_memory_t decompressed;
+    memset(&decompressed, 0x34, sizeof(decompressed));
+    lsdj_song_write_to_memory(project->song, decompressed.bytes, sizeof(decompressed.bytes), error);
     if (error && *error)
         return write_size;
     
     // Compress the song
-    const size_t block_count = lsdj_compress(decompressed, BLOCK_SIZE, 1, BLOCK_COUNT, vio, error);
+    const size_t block_count = lsdj_compress(decompressed.bytes, BLOCK_SIZE, 1, BLOCK_COUNT, vio, error);
     write_size += block_count * BLOCK_SIZE;
 
     assert(write_size <= LSDSNG_MAX_SIZE);

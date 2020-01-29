@@ -33,10 +33,10 @@
  
  */
 
+#include "phrase.h"
+
 #include <stdlib.h>
 #include <string.h>
-
-#include "phrase.h"
 
 lsdj_phrase_t* lsdj_phrase_new()
 {

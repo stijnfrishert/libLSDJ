@@ -33,9 +33,9 @@
  
  */
 
-#include <string.h>
-
 #include "groove.h"
+
+#include <string.h>
 
 static const unsigned char DEFAULT_GROOVE[LSDJ_GROOVE_LENGTH] = { 0x06, 0x06, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 

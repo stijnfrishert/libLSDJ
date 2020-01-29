@@ -33,9 +33,9 @@
  
  */
 
-#include <string.h>
-
 #include "synth.h"
+
+#include <string.h>
 
 void lsdj_synth_clear(lsdj_synth_t* synth)
 {

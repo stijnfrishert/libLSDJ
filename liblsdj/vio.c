@@ -33,10 +33,10 @@
  
  */
 
+#include "vio.h"
+
 #include <assert.h>
 #include <string.h>
-
-#include "vio.h"
 
 size_t lsdj_fread(void* ptr, size_t size, void* user_data)
 {

@@ -33,6 +33,7 @@
  
  */
 
+#include "song.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -43,7 +44,7 @@
 #include "instrument.h"
 #include "phrase.h"
 #include "row.h"
-#include "song.h"
+#include "song_memory.h"
 #include "synth.h"
 #include "table.h"
 #include "vio.h"
@@ -976,7 +977,7 @@ void lsdj_song_write_to_memory(const lsdj_song_t* song, unsigned char* data, siz
     if (data == NULL)
         return lsdj_error_new(error, "data is NULL");
     
-    if (size < LSDJ_SONG_DECOMPRESSED_SIZE)
+    if (size < LSDJ_SONG_MEMORY_SIZE)
         return lsdj_error_new(error, "memory is not big enough to store song");
     
     lsdj_memory_data_t mem;

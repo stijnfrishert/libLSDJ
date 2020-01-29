@@ -33,9 +33,9 @@
  
  */
 
-#include <string.h>
-
 #include "word.h"
+
+#include <string.h>
 
 void lsdj_word_clear(lsdj_word_t* word)
 {

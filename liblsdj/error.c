@@ -33,10 +33,10 @@
  
  */
 
+#include "error.h"
+
 #include <stdlib.h>
 #include <string.h>
-
-#include "error.h"
 
 struct lsdj_error_t
 {

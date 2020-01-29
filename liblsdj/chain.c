@@ -33,10 +33,10 @@
  
  */
 
+#include "chain.h"
+
 #include <stdlib.h>
 #include <string.h>
-
-#include "chain.h"
 
 lsdj_chain_t* lsdj_chain_new()
 {

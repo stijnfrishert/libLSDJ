@@ -33,11 +33,12 @@
  
  */
 
+#include "instrument.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "instrument.h"
 #include "instrument_kit.h"
 #include "instrument_noise.h"
 #include "instrument_pulse.h"

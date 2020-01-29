@@ -49,7 +49,7 @@ extern "C" {
 // The length of project names
 #define LSDJ_PROJECT_NAME_LENGTH (8)
 
-#define LSDSNG_MAX_SIZE (LSDJ_SONG_DECOMPRESSED_SIZE + LSDJ_PROJECT_NAME_LENGTH + 1)
+#define LSDSNG_MAX_SIZE (LSDJ_SONG_MEMORY_SIZE + LSDJ_PROJECT_NAME_LENGTH + 1)
 
 // Representation of a project within an LSDJ sav file
 typedef struct lsdj_project_t lsdj_project_t;
