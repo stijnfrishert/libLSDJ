@@ -50,11 +50,17 @@
 extern "C" {
 #endif	/* __cplusplus */
 
+#include <stdbool.h>
+
 #include "error.h"
 #include "project.h"
 #include "song_buffer.h"
 #include "vio.h"
-    
+
+//! The amount of project slots in an LSDj sav state
+#define LSDJ_SAV_PROJECT_COUNT (32)
+
+//! A value that means none of the sav project slots is active
 #define LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX (0xFF)
     
 //! A structure representing a full LSDj sav state
@@ -79,13 +85,18 @@ void lsdj_sav_free(lsdj_sav_t* sav);
 
 //! Change the working memory song buffer
 /*! @param songBuffer the song buffer that is copied into the working memory bytes */
-void lsdj_sav_set_working_memory_song_buffer(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer);
+void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer);
     
 //! Retrieve the working memory song buffer from a sav
-const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song_buffer(const lsdj_sav_t* sav);
+const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav);
     
 // // Change the working memory song by copying from one of the projects
 // void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
+
+//! Copy the song buffer from a given project into the working memory
+/*! This effectively loads a project, and sets the current index to reflect that
+	@return false if the index is out of bounds, or the slot is empty */
+bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
     
 //! Change which project slot is referenced by the working memory song
 /*! Indices start at 0.
@@ -100,9 +111,6 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
 // // Create a project that contains the working memory song
 // lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error);
     
-// // Retrieve the amount of projects in the sav (should always be 32)
-// unsigned int lsdj_sav_get_project_count(const lsdj_sav_t* sav);
-    
 // // Change one of the projects in the sav
 // // The sav takes ownership of the given project, so make sure you copy it first if need be!
 // void lsdj_sav_set_project(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project, lsdj_error_t** error);
@@ -110,8 +118,10 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
 // // Erase one of the projects in the sav
 // void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
     
-// // Retrieve one of the projects
-// lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char project);
+//! Retrieve one of the projects
+/*! The index should be < LSDJ_SAV_PROJECT_COUNT
+	@return NULL if the project slot is empty */
+const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char index);
 
 
 // --- I/O --- //

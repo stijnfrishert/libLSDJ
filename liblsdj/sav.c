@@ -43,7 +43,6 @@
 #include "compression.h"
 #include "song_buffer.h"
 
-#define LSDJ_SAV_PROJECT_COUNT 32
 #define HEADER_START LSDJ_SONG_BUFFER_BYTE_COUNT
 
 //! Representation of an entire LSDj save state
@@ -52,13 +51,13 @@ struct lsdj_sav_t
     //! The song in active working memory
     lsdj_song_buffer_t workingMemorySongBuffer;
 
-    //! The project slots
-    /*! If one of these is NULL, it means the slot isn't used by the sav */
-    lsdj_project_t* projects[LSDJ_SAV_PROJECT_COUNT];
-    
     //! Index of the project that is currently being edited
     /*! Indices start at 0, a value of LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX means there is no active project */
     unsigned char activeProjectIndex;
+
+    //! The project slots
+    /*! If one of these is NULL, it means the slot isn't used by the sav */
+    lsdj_project_t* projects[LSDJ_SAV_PROJECT_COUNT];
     
     //! Reserved empty memory
     unsigned char reserved8120[30];
@@ -122,27 +121,39 @@ void lsdj_sav_free(lsdj_sav_t* sav)
     }
 }
 
-void lsdj_sav_set_working_memory_song_buffer(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer)
+void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer)
 {
     memcpy(&sav->workingMemorySongBuffer, &songBuffer, sizeof(songBuffer));
 }
 
-const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song_buffer(const lsdj_sav_t* sav)
+const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav)
 {
     return &sav->workingMemorySongBuffer;
 }
 
-// void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error)
-// {
-//     lsdj_project_t* project = sav->projects[index];
-//     if (project == NULL)
-//         return lsdj_error_new(error, "no active project at given index");
+bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error)
+{
+    if (index >= LSDJ_SAV_PROJECT_COUNT)
+    {
+        lsdj_error_optional_new(error, "The index is out of bounds");
+        return false;
+    }
 
-//     lsdj_song_buffer_t* song = lsdj_project_get_song_memory(project);
-//     assert(song != NULL);
+    const lsdj_project_t* project = lsdj_sav_get_project(sav, index);
+    if (project == NULL)
+    {
+        lsdj_error_optional_new(error, "no active project at given index");
+        return false;
+    }
+
+    const lsdj_song_buffer_t* song = lsdj_project_get_song_buffer(project);
+    assert(song != NULL);
     
-//     lsdj_sav_set_working_memory_song_memory(sav, song, index);
-// }
+    lsdj_sav_set_working_memory_song(sav, song);
+    lsdj_sav_set_active_project_index(sav, index);
+
+    return true;
+}
 
 void lsdj_sav_set_active_project_index(lsdj_sav_t* sav, unsigned char index)
 {
@@ -182,11 +193,6 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
 //     return newProject;
 // }
 
-// unsigned int lsdj_sav_get_project_count(const lsdj_sav_t* sav)
-// {
-//     return LSDJ_SAV_PROJECT_COUNT;
-// }
-
 // void lsdj_sav_set_project(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project, lsdj_error_t** error)
 // {
 //     if (project == NULL)
@@ -202,10 +208,10 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
 //     sav->projects[index] = lsdj_project_new(error);
 // }
 
-// lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char project)
-// {
-//     return sav->projects[project];
-// }
+const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char index)
+{
+    return sav->projects[index];
+}
 
 // // Read compressed project data from memory sav file
 // void read_compressed_blocks(lsdj_vio_t* vio, lsdj_project_t** projects, lsdj_error_t** error)
