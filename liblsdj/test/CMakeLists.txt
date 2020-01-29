@@ -4,6 +4,7 @@ add_executable(test
 	main.cpp
 	error.cpp
 	project.cpp
+	sav.cpp
 	song_buffer.cpp
 	vio.cpp
 	)

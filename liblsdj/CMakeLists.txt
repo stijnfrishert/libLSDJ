@@ -41,7 +41,7 @@ set(SOURCES
 	# phrase.c
 	project.c
 	# row.c
-	# sav.c
+	sav.c
 	# song.c
 	# synth.c
 	# table.c

@@ -36,6 +36,16 @@
 #ifndef LSDJ_SAV_H
 #define LSDJ_SAV_H
 
+/*! lsdj_sav_t is the root structure of an LSDj save file. In essence, it
+	represents a working memory song and projects slots (which contain songs
+	themselves).
+
+	The songs in an lsdj_sav_t are stored in their uncompressed, raw byte state.
+	This means that you'll need to parse them using song functions yourself,
+	but if you just want to move projects around you can do that in their raw
+	buffer state (and saves you a lot of parsing); it's is also more future proof
+	than always parsing every song. */
+
 #ifdef __cplusplus
 extern "C" {
 #endif	/* __cplusplus */
@@ -45,66 +55,87 @@ extern "C" {
 #include "song_buffer.h"
 #include "vio.h"
     
-#define LSDJ_NO_ACTIVE_PROJECT (0xFF)
+#define LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX (0xFF)
     
+//! A structure representing a full LSDj sav state
 typedef struct lsdj_sav_t lsdj_sav_t;
 
-// Create/free saves
-lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error);
-void lsdj_sav_free(lsdj_sav_t* sav);
-    
-// Deserialize a sav
-lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error);
-lsdj_sav_t* lsdj_sav_read_from_file(const char* path, lsdj_error_t** error);
-lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
-    
-// Find out whether given data is likely a valid save
-// Note: this is not a 100% guarantee that the data will load, we're just checking
-// some magic numbers.
-// Returns 0 if invalid, 1 if valid. Error contains information about why.
-//
-// First version consumes the vio (doesn't seek() back to the beginning)
-int lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error);
-int lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error);
-int lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
-    
-// Serialize a sav
-void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error);
-void lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
-void lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error);
-    
-// Set the working memory song of a sav
-// The sav takes ownership of the given song, so make sure you copy it first if need be!
-void lsdj_sav_set_working_memory_song_memory(lsdj_sav_t* sav, const lsdj_song_buffer_t* song, unsigned char activeProject);
-    
-// Retrieve the working memory song from a sav
-const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song_memory(const lsdj_sav_t* sav);
-    
-// Change the working memory song by copying from one of the projects
-void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
-    
-// Change which song is referenced by the working memory song
-void lsdj_sav_set_active_project(lsdj_sav_t* sav, unsigned char index);
-    
-// Retrieve the index of the project the working memory song represents
-// If the working memory doesn't represent any project, this is LSDJ_NO_ACTIVE_PROJECT
-unsigned char lsdj_sav_get_active_project(const lsdj_sav_t* sav);
-    
-// Create a project that contains the working memory song
-lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error);
-    
-// Retrieve the amount of projects in the sav (should always be 32)
-unsigned int lsdj_sav_get_project_count(const lsdj_sav_t* sav);
-    
-// Change one of the projects in the sav
-// The sav takes ownership of the given project, so make sure you copy it first if need be!
-void lsdj_sav_set_project(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project, lsdj_error_t** error);
 
-// Erase one of the projects in the sav
-void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
+// --- ALLOCATION --- //
+
+//! Create a new lsdj_sav_t
+/*! The working memory song buffer is zeroed out, and the sav contains no
+	songs in the project slots.
+
+	@note every lsdj_sav_new() must be paired with an lsdj_sav_free() */
+lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error);
+
+//! Frees a sav from memory
+/*! Call this when you no longer need a sav. */
+void lsdj_sav_free(lsdj_sav_t* sav);
+
+
+// --- CHANGING DATA --- //
+
+// // Set the working memory song of a sav
+// // The sav takes ownership of the given song, so make sure you copy it first if need be!
+// void lsdj_sav_set_working_memory_song_memory(lsdj_sav_t* sav, const lsdj_song_buffer_t* song, unsigned char activeProjectIndex);
     
-// Retrieve one of the projects
-lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char project);
+// // Retrieve the working memory song from a sav
+// const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song_memory(const lsdj_sav_t* sav);
+    
+// // Change the working memory song by copying from one of the projects
+// void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
+    
+//! Change which project slot is referenced by the working memory song
+/*! Indices start at 0.
+	Use LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX if none of the project slots should be the active one. */
+void lsdj_sav_set_active_project_index(lsdj_sav_t* sav, unsigned char index);
+    
+//! Retrieve the index of the project slot the working memory song represents
+/*! Indices start at 0.
+	If the working memory doesn't represent any project, this is LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX */
+unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
+    
+// // Create a project that contains the working memory song
+// lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error);
+    
+// // Retrieve the amount of projects in the sav (should always be 32)
+// unsigned int lsdj_sav_get_project_count(const lsdj_sav_t* sav);
+    
+// // Change one of the projects in the sav
+// // The sav takes ownership of the given project, so make sure you copy it first if need be!
+// void lsdj_sav_set_project(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project, lsdj_error_t** error);
+
+// // Erase one of the projects in the sav
+// void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
+    
+// // Retrieve one of the projects
+// lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char project);
+
+
+// --- I/O --- //
+
+// // Deserialize a sav
+// lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error);
+// lsdj_sav_t* lsdj_sav_read_from_file(const char* path, lsdj_error_t** error);
+// lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+    
+// // Find out whether given data is likely a valid save
+// // Note: this is not a 100% guarantee that the data will load, we're just checking
+// // some magic numbers.
+// // Returns 0 if invalid, 1 if valid. Error contains information about why.
+// //
+// // First version consumes the vio (doesn't seek() back to the beginning)
+// int lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error);
+// int lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error);
+// int lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+    
+// // Serialize a sav
+// void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error);
+// void lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
+// void lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error);
+   
 
 #ifdef __cplusplus
 }

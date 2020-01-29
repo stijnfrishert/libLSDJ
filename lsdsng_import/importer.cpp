@@ -195,7 +195,7 @@ namespace lsdj
         if (verbose)
             std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
         
-        if (index == 0 && active == LSDJ_NO_ACTIVE_PROJECT && workingMemoryPath.empty())
+        if (index == 0 && active == LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX && workingMemoryPath.empty())
         {
             lsdj_sav_set_working_memory_song_from_project(sav, index, error);
             if (*error != nullptr)
@@ -213,7 +213,7 @@ namespace lsdj
         if (*error != nullptr)
             return lsdj_project_free(project);
         
-        int active = LSDJ_NO_ACTIVE_PROJECT;
+        int active = LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX;
         const auto str = workingMemoryPath.stem().string();
         const auto stem = str.substr(0, str.size() - 3);
         for (int i = 0; i != paths.size(); ++i)

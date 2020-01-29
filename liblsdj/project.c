@@ -54,7 +54,7 @@ struct lsdj_project_t
     
     //! The song buffer belonging to this project
     /*! Uncompressed, but you'll need to call a parsing function to get a sensible lsdj_song_t structured object. */
-    lsdj_song_buffer_t song;
+    lsdj_song_buffer_t songBuffer;
 };
 
 lsdj_project_t* alloc_project(lsdj_error_t** error)
@@ -77,7 +77,7 @@ lsdj_project_t* lsdj_project_new(lsdj_error_t** error)
     
     memset(project->name, '\0', sizeof(project->name));
     project->version = 0;
-    memset(&project->song, 0, sizeof(project->song));
+    memset(&project->songBuffer, 0, sizeof(project->songBuffer));
     
     return project;
 }
@@ -116,14 +116,14 @@ unsigned char lsdj_project_get_version(const lsdj_project_t* project)
     return project->version;
 }
 
-void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* song)
+void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* songBuffer)
 {
-    memcpy(&project->song, song, sizeof(lsdj_song_buffer_t));
+    memcpy(&project->songBuffer, songBuffer, sizeof(lsdj_song_buffer_t));
 }
 
 const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* project)
 {
-    return &project->song;
+    return &project->songBuffer;
 }
 
 // lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)

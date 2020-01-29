@@ -60,16 +60,20 @@ extern "C" {
 //! Representation of a project within an LSDJ sav file, or an imported .lsdsng
 typedef struct lsdj_project_t lsdj_project_t;
 
+
+// --- Allocation --- //
+
 //! Create a new project
 /*! Creates a new project with an empty name, version #0 and zeroed out song
-    @note Every call must be paired with an lsdj_project_free()
-    @param error If passed a pointer will be filled with sensible data in case of an error */
+    @note Every call must be paired with an lsdj_project_free() */
 lsdj_project_t* lsdj_project_new(lsdj_error_t** error);
 
 //! Frees a project from memory
-/*! Call this when you no longer need a project.
-    @note Every call must be paired with an lsdj_project_new() */
+/*! Call this when you no longer need a project. */
 void lsdj_project_free(lsdj_project_t* project);
+
+
+// --- Changing data --- //
 
 //! Change the name of a project
 /*! @param data A pointer to char data
@@ -93,11 +97,14 @@ void lsdj_project_set_version(lsdj_project_t* project, unsigned char version);
 unsigned char lsdj_project_get_version(const lsdj_project_t* project);
 
 // Copy a full song's byte data into the project
-void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* song);
+void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* songBuffer);
 
 //! Retrieve the song buffer for this project
 /*! Song buffers contain the actual song data for a project. */
 const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* project);
+
+
+// --- I/O --- //
 
 // // Deserialize a project from LSDSNG
 // lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);

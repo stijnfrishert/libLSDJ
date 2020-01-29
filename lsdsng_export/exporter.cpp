@@ -256,7 +256,7 @@ namespace lsdj
         
         // If the working memory song represent one of the projects, display that name
         const auto active = lsdj_sav_get_active_project(sav);
-        if (active != LSDJ_NO_ACTIVE_PROJECT)
+        if (active != LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX)
         {
             lsdj_project_t* project = lsdj_sav_get_project(sav, active);
             
