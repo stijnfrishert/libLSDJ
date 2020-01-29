@@ -36,23 +36,46 @@
 #ifndef LSDJ_ERROR_H
 #define LSDJ_ERROR_H
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// Structure containing specific error details
+//! Structure containing specific error details
+/*! Whenever other functions in LibLSDj fail, they put their error state in one
+	these structs. To catch errors, be sure create an lsdj_error_t*, and pass
+	its address to the function.
+
+	In case of an error your pointer will be filled. You can read it out, and
+	its also your responsibility to call lsdj_error_free. */
 typedef struct lsdj_error_t lsdj_error_t;
+
+//! Create an error with a specific error message
+/*! Commonly you wouldn't call this function yourself, but receive the error
+	from another function that wants to express error state.
+
+	The error copies the message, so make sure it's null-terminated
+
+    @note Every call to lsdj_error_new() should be paired with one to lsdj_error_free()
+
+    @return NULL if creating the error failed */
+lsdj_error_t* lsdj_error_new(const char* message);
     
-// Create an error with a given message
-/*! Every call to lsdj_error_new() should be paired with one to lsdj_error_free() */
-void lsdj_error_new(lsdj_error_t** error, const char* message);
-    
-// Free error data returned from an lsdj function call
-/*! Every call to lsdj_error_new() should be paired with one to lsdj_error_free() */
+//! Free error data
+/*! Other functions in LibLSDJ often accept an lsdj_error_t** parameter.
+	They fill it to express an error happened, in which case it is your responsibility
+	to free the error with lsdj_error_free().
+
+	@note Every call to lsdj_error_new() should be paired with one to lsdj_error_free() */
 void lsdj_error_free(lsdj_error_t* error);
+
+//! Retrieve the length of the string description of an error
+/*! This does not include any null-termination characters at the end */
+size_t lsdj_error_get_description_length(lsdj_error_t* error);
     
-// Retrieve a string description of an error
-const char* lsdj_error_get_c_str(lsdj_error_t* error);
+//! Retrieve a string description of an error
+const char* lsdj_error_get_description(lsdj_error_t* error);
     
 #ifdef __cplusplus
 }

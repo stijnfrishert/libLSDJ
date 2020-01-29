@@ -39,7 +39,7 @@
 #include <string.h>
 
 #include "instrument.h"
-#include "song_memory.h"
+#include "song_buffer.h"
 #include "wave.h"
 
 #define RUN_LENGTH_ENCODING_BYTE 0xC0
@@ -182,7 +182,7 @@ void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long* block1position, s
         return lsdj_error_new(error, "could not tell compression end");
     
     const long readSize = wend - wstart;
-    if (readSize != LSDJ_SONG_MEMORY_SIZE)
+    if (readSize != LSDJ_SONG_BUFFER_BYTES_COUNT)
     {
         char buffer[100];
         memset(buffer, '\0', sizeof(buffer));
@@ -238,7 +238,7 @@ unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, un
         return 0;
     }
     
-    const unsigned char* end = data + LSDJ_SONG_MEMORY_SIZE;
+    const unsigned char* end = data + LSDJ_SONG_BUFFER_BYTES_COUNT;
     for (const unsigned char* read = data; read < end; )
     {
         // Uncomment this to print the current read and write positions

@@ -41,17 +41,32 @@
 struct lsdj_error_t
 {
     char* message;
+    size_t length;
 };
 
-void lsdj_error_new(lsdj_error_t** error, const char* message)
+lsdj_error_t* lsdj_error_new(const char* message)
 {
+    // Allocate the error itself
+    lsdj_error_t* error = (lsdj_error_t*)malloc(sizeof(lsdj_error_t));
     if (error == NULL)
-        return;
-    
-    *error = (lsdj_error_t*)malloc(sizeof(lsdj_error_t));
-    size_t length = strlen(message) + 1; // Add one for the null-termination
-    (*error)->message = malloc(length * sizeof(char));
-    strncpy((*error)->message, message, length);
+        return NULL;
+
+    // Compute the length of the message to be copied
+    // Add one for the null-termination
+    error->length = strlen(message) + 1;
+
+    // Allocate space for the message
+    error->message = malloc(error->length * sizeof(char));
+    if (error->message == NULL)
+    {
+        free(error);
+        return NULL;
+    }
+
+    // Copy the string over
+    strncpy(error->message, message, error->length);
+
+    return error;
 }
 
 void lsdj_error_free(lsdj_error_t* error)
@@ -62,16 +77,20 @@ void lsdj_error_free(lsdj_error_t* error)
         {
             free(error->message);
             error->message = NULL;
+            error->length = 0;
         }
         
         free(error);
     }
 }
 
-const char* lsdj_error_get_c_str(lsdj_error_t* error)
+size_t lsdj_error_get_description_length(lsdj_error_t* error)
 {
-    if (error == NULL)
-        return NULL;
-    else
-        return error->message;
+    // Subtract 1 for the null-termination
+    return error->length - 1;
+}
+
+const char* lsdj_error_get_description(lsdj_error_t* error)
+{
+    return error->message;
 }

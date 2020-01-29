@@ -41,6 +41,7 @@ extern "C" {
 #endif
 
 #include "chain.h"
+#include "error.h"
 #include "groove.h"
 #include "instrument.h"
 #include "phrase.h"

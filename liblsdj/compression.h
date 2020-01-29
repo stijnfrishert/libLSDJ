@@ -41,7 +41,7 @@ extern "C" {
 #endif
 
 #include "error.h"
-#include "song_memory.h"
+#include "song_buffer.h"
 #include "vio.h"
 
 #define BLOCK_SIZE (0x200)

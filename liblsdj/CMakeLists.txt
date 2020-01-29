@@ -24,7 +24,7 @@ set(HEADERS
 	row.h
 	sav.h
 	song.h
-	song_memory.h
+	song_buffer.h
 	synth.h
 	table.h
 	vio.h
@@ -32,27 +32,31 @@ set(HEADERS
 	word.h)
 
 set(SOURCES
-	chain.c
-	command.c
-	compression.c
+	# chain.c
+	# command.c
+	# compression.c
 	error.c
-	groove.c
-	instrument.c
-	phrase.c
-	project.c
-	row.c
-	sav.c
-	song.c
-	synth.c
-	table.c
+	# groove.c
+	# instrument.c
+	# phrase.c
+	# project.c
+	# row.c
+	# sav.c
+	# song.c
+	# synth.c
+	# table.c
 	vio.c
-	wave.c
-	word.c)
+	# wave.c
+	# word.c
+	)
 
 # Create the library target
 add_library(liblsdj STATIC ${HEADERS} ${SOURCES})
 set_target_properties(liblsdj PROPERTIES OUTPUT_NAME lsdj)
 source_group(\\ FILES ${HEADERS} ${SOURCES})
+target_include_directories(liblsdj INTERFACE ".")
 
 install(TARGETS liblsdj DESTINATION lib)
 install(FILES {HEADERS} DESTINATION include/lsdj)
+
+add_subdirectory(test)

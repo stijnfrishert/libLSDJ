@@ -36,6 +36,11 @@
 #ifndef LSDJ_PROJECT_H
 #define LSDJ_PROJECT_H
 
+/* Projects are basically song buffers with a name and a version. They are
+   used to represent the song slots in a save file (which you can load from
+   LSDJ's load/sav/erase screen), as well as loaded in .lsdsng's, because
+   they too contain a project name and version. */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -43,19 +48,27 @@ extern "C" {
 #include <stddef.h>
 
 #include "error.h"
-#include "song.h"
+#include "song_buffer.h"
 #include "vio.h"
 
-// The length of project names
+//! The length of project names
 #define LSDJ_PROJECT_NAME_LENGTH (8)
 
-#define LSDSNG_MAX_SIZE (LSDJ_SONG_MEMORY_SIZE + LSDJ_PROJECT_NAME_LENGTH + 1)
+//! The maximum size of an lsdsng is a version byte +  project name + full song
+#define LSDSNG_MAX_SIZE (1 + LSDJ_PROJECT_NAME_LENGTH + LSDJ_SONG_BUFFER_BYTES_COUNT)
 
-// Representation of a project within an LSDJ sav file
+//! Representation of a project within an LSDJ sav file, or an imported .lsdsng
 typedef struct lsdj_project_t lsdj_project_t;
 
-// Create/free projects
+//! Create a new project
+/*! Creates a new project with an empty name, version #0 and empty (factory) song to go
+    @note Every call must be paired with an lsdj_project_free()
+    @param error If passed a pointer will be filled with sensible data in case of an error */
 lsdj_project_t* lsdj_project_new(lsdj_error_t** error);
+
+//! Frees a project from memory
+/*! Call this when you no longer need a project.
+    @note Every call must be paired with an lsdj_project_new() */
 void lsdj_project_free(lsdj_project_t* project);
     
 // Deserialize a project from LSDSNG
@@ -84,8 +97,12 @@ void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t siz
 void lsdj_project_get_name(const lsdj_project_t* project, char* data, size_t size);
 void lsdj_project_set_version(lsdj_project_t* project, unsigned char version);
 unsigned char lsdj_project_get_version(const lsdj_project_t* project);
-void lsdj_project_set_song(lsdj_project_t* project, lsdj_song_t* song);
-lsdj_song_t* lsdj_project_get_song(const lsdj_project_t* project);
+
+// Copy a full song's byte data into the project
+void lsdj_project_set_song_memory(lsdj_project_t* project, const lsdj_song_buffer_t* song);
+
+// Extract the byte data of this songs project
+const lsdj_song_buffer_t* lsdj_project_get_song_memory(const lsdj_project_t* project);
     
 #ifdef __cplusplus
 }

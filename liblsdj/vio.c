@@ -60,7 +60,7 @@ long lsdj_fseek(long offset, int whence, void* user_data)
 
 size_t lsdj_mread(void* ptr, size_t size, void* user_data)
 {
-    lsdj_memory_data_t* mem = (lsdj_memory_data_t*)user_data;
+    lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)user_data;
     
     const size_t available = mem->size - (size_t)(mem->cur - mem->begin);
     const size_t minSize = size < available ? size : available;
@@ -74,7 +74,7 @@ size_t lsdj_mread(void* ptr, size_t size, void* user_data)
 
 size_t lsdj_mwrite(const void* ptr, size_t size, void* user_data)
 {
-    lsdj_memory_data_t* mem = (lsdj_memory_data_t*)user_data;
+    lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)user_data;
     
     const size_t available = mem->size - (size_t)(mem->cur - mem->begin);
     const size_t minSize = size < available ? size : available;
@@ -88,7 +88,7 @@ size_t lsdj_mwrite(const void* ptr, size_t size, void* user_data)
 
 long lsdj_mtell(void* user_data)
 {
-    const lsdj_memory_data_t* mem = (const lsdj_memory_data_t*)user_data;
+    const lsdj_memory_access_state_t* mem = (const lsdj_memory_access_state_t*)user_data;
     
     long pos = mem->cur - mem->begin;
     if (pos < 0 || pos > mem->size)
@@ -99,7 +99,7 @@ long lsdj_mtell(void* user_data)
 
 long lsdj_mseek(long offset, int whence, void* user_data)
 {
-    lsdj_memory_data_t* mem = (lsdj_memory_data_t*)user_data;
+    lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)user_data;
     
     switch (whence)
     {

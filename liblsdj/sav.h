@@ -42,7 +42,7 @@ extern "C" {
 
 #include "error.h"
 #include "project.h"
-#include "song.h"
+#include "song_buffer.h"
 #include "vio.h"
     
 #define LSDJ_NO_ACTIVE_PROJECT (0xFF)
@@ -75,10 +75,10 @@ void lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t
     
 // Set the working memory song of a sav
 // The sav takes ownership of the given song, so make sure you copy it first if need be!
-void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, lsdj_song_t* song, unsigned char activeProject);
+void lsdj_sav_set_working_memory_song_memory(lsdj_sav_t* sav, const lsdj_song_buffer_t* song, unsigned char activeProject);
     
 // Retrieve the working memory song from a sav
-lsdj_song_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav);
+const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song_memory(const lsdj_sav_t* sav);
     
 // Change the working memory song by copying from one of the projects
 void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);

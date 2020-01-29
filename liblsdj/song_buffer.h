@@ -33,21 +33,33 @@
  
  */
 
-#ifndef LSDJ_SONG_MEMORY_H
-#define LSDJ_SONG_MEMORY_H
+#ifndef LSDJ_SONG_BUFFER_H
+#define LSDJ_SONG_BUFFER_H
+
+/* Song buffers are the representation of an LSDJ song uncompressed in memory.
+   It hasn't been parsed yet into meaningful data. This is raw song data, and
+   for example how the song in working memory within your LSDJ sav is repre-
+   sented.
+
+   From here, you can either compress song buffers into memory blocks, which is
+   how all other projects in LSDJ are represented. You can also go the other
+   way around, and parse them into an lsdj_song_t structure, providing you with
+   detailed information about elements within your song. */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// The size of a decompressed song in memory
-#define LSDJ_SONG_MEMORY_SIZE (0x8000)
+#include "error.h"
 
-// A structure that can hold one entire decompressed song in memory
+//! The size of a decompressed song in memory
+#define LSDJ_SONG_BUFFER_BYTES_COUNT (0x8000)
+
+//! A structure that can hold one entire decompressed song in memory
 typedef struct
 {
-	unsigned char bytes[LSDJ_SONG_MEMORY_SIZE];
-} lsdj_song_memory_t;
+	unsigned char bytes[LSDJ_SONG_BUFFER_BYTES_COUNT];
+} lsdj_song_buffer_t;
     
 #ifdef __cplusplus
 }
