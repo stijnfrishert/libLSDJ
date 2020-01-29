@@ -122,16 +122,15 @@ void lsdj_sav_free(lsdj_sav_t* sav)
     }
 }
 
-// void lsdj_sav_set_working_memory_song_memory(lsdj_sav_t* sav, const lsdj_song_buffer_t* song, unsigned char activeProjectIndex)
-// {
-//     memcpy(&sav->workingMemorySong, &song, sizeof(lsdj_song_buffer_t));
-//     sav->activeProjectIndex = activeProjectIndex;
-// }
+void lsdj_sav_set_working_memory_song_buffer(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer)
+{
+    memcpy(&sav->workingMemorySongBuffer, &songBuffer, sizeof(songBuffer));
+}
 
-// const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song_memory(const lsdj_sav_t* sav)
-// {
-//     return sav->workingMemorySong;
-// }
+const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song_buffer(const lsdj_sav_t* sav)
+{
+    return &sav->workingMemorySongBuffer;
+}
 
 // void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error)
 // {

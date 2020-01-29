@@ -77,12 +77,12 @@ void lsdj_sav_free(lsdj_sav_t* sav);
 
 // --- CHANGING DATA --- //
 
-// // Set the working memory song of a sav
-// // The sav takes ownership of the given song, so make sure you copy it first if need be!
-// void lsdj_sav_set_working_memory_song_memory(lsdj_sav_t* sav, const lsdj_song_buffer_t* song, unsigned char activeProjectIndex);
+//! Change the working memory song buffer
+/*! @param songBuffer the song buffer that is copied into the working memory bytes */
+void lsdj_sav_set_working_memory_song_buffer(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer);
     
-// // Retrieve the working memory song from a sav
-// const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song_memory(const lsdj_sav_t* sav);
+//! Retrieve the working memory song buffer from a sav
+const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song_buffer(const lsdj_sav_t* sav);
     
 // // Change the working memory song by copying from one of the projects
 // void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
