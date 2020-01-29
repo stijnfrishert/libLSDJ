@@ -39,7 +39,7 @@ set(SOURCES
 	# groove.c
 	# instrument.c
 	# phrase.c
-	# project.c
+	project.c
 	# row.c
 	# sav.c
 	# song.c

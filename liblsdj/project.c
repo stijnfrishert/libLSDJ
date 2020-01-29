@@ -62,7 +62,7 @@ lsdj_project_t* alloc_project(lsdj_error_t** error)
     lsdj_project_t* project = (lsdj_project_t*)calloc(sizeof(lsdj_project_t), 1);
     if (project == NULL)
     {
-        lsdj_error_new(error, "could not allocate project");
+        lsdj_error_optional_new(error, "could not allocate project");
         return NULL;
     }
     

@@ -10,7 +10,7 @@ SCENARIO( "Virtual Memory I/O", "[vio]" )
 {
 	std::array<unsigned char, 5> memory = { 'H', 'e', 'l', 'l', 'o' };
 
-	GIVEN( "A read state at the first byte" )
+	GIVEN( "A read state at the first byte of some memory" )
 	{
 		lsdj_memory_access_state_t state;
 		state.begin = memory.data();
@@ -19,13 +19,13 @@ SCENARIO( "Virtual Memory I/O", "[vio]" )
 
 		REQUIRE( lsdj_mtell(static_cast<void*>(&state)) == 0 );
 
-		WHEN( "Reading the buffer" )
+		WHEN( "Reading a part of the buffer" )
 		{
 			std::array<unsigned char, 4> output = { '\0', '\0', '\0', '\0' };
 
 			lsdj_mread(output.data(), output.size(), static_cast<void*>(&state));
 
-			THEN( "The same should come out" )
+			THEN( "The same data should come out" )
 			{
 				REQUIRE( std::memcmp(output.data(), "Hell", 4) == 0 );
 			}
@@ -37,7 +37,7 @@ SCENARIO( "Virtual Memory I/O", "[vio]" )
 
 			lsdj_mwrite(sample.data(), sample.size(), static_cast<void*>(&state));
 
-			THEN( "Data should have been written ")
+			THEN( "Data is written at the correct position")
 			{
 				REQUIRE( std::memcmp(memory.data(), "Yoyoo", 5) == 0 );
 			}
@@ -65,13 +65,6 @@ SCENARIO( "Virtual Memory I/O", "[vio]" )
 
 		WHEN( "Seeking a new position from the end" )
 		{
-			lsdj_mseek(2, SEEK_END, static_cast<void*>(&state));
-
-			THEN( "We should end up at the correct offset ")
-			{
-				REQUIRE( state.cur - state.begin >= memory.size() );
-			}
-
 			lsdj_mseek(-2, SEEK_END, static_cast<void*>(&state));
 
 			THEN( "We should end up at the correct offset ")

@@ -69,6 +69,12 @@ lsdj_error_t* lsdj_error_new(const char* message)
     return error;
 }
 
+void lsdj_error_optional_new(lsdj_error_t** error, const char* message)
+{
+    if (error)
+        *error = lsdj_error_new(message);
+}
+
 void lsdj_error_free(lsdj_error_t* error)
 {
     if (error)

@@ -51,7 +51,7 @@ extern "C" {
 	its also your responsibility to call lsdj_error_free. */
 typedef struct lsdj_error_t lsdj_error_t;
 
-//! Create an error with a specific error message
+//! Create an error with a specific message
 /*! Commonly you wouldn't call this function yourself, but receive the error
 	from another function that wants to express error state.
 
@@ -61,6 +61,18 @@ typedef struct lsdj_error_t lsdj_error_t;
 
     @return NULL if creating the error failed */
 lsdj_error_t* lsdj_error_new(const char* message);
+
+//! Create an error with a specific message
+/*! If the passed in pointer refers to a valid lsdj_error_t*, lsdj_error_new()
+	is called and te result put in there.
+
+	If this function is called with a null ptr, nothing happens. This may seem re-
+	dundant, but this provides a nice convenience where functions can just pass
+	their lsdj_error_t** to this function and return without worrying.
+
+	@see lsdj_error_new
+	@param error A pointer to an lsdj_error_t* to be filled */
+void lsdj_error_optional_new(lsdj_error_t** error, const char* message);
     
 //! Free error data
 /*! Other functions in LibLSDJ often accept an lsdj_error_t** parameter.
