@@ -40,21 +40,31 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
+
 #include "error.h"
-#include "song_buffer.h"
 #include "vio.h"
 
+//! The block size used for the (de)crompression algorithm
 #define BLOCK_SIZE (0x200)
+
+//! The maximum amount of blocks stored in a sav
 #define BLOCK_COUNT (191)
 
-// Decompress blocks to a song buffer
-void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, long* firstBlockOffset, size_t blockSize, lsdj_error_t** error);
-void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long* firstBlockOffset, size_t blockSize, lsdj_error_t** error);
+//! Decompress memory blocks according to the LSDJ compression spec
+/*! This algorithm is used to store songs in the project slots in a sav,
+	as well as in an .lsdsng file.
 
-// Compress a song buffer to a set of blocks
-/*! Returns the amount of blocks written */
-unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_t* wvio, lsdj_error_t** error);
-unsigned int lsdj_compress_to_file(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, const char* path, lsdj_error_t** error);
+	@param followBlockSwitches Set this to true if block switches should be followed (the default), and false if block switches (0xE0, ID) should be ignored (in the case of reading lsdsng)
+
+	Ssee https://littlesounddj.fandom.com/wiki/File_Management_Structure for more info */
+void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, lsdj_error_t** error);
+// void lsdj_decompress_from_file(const char* path, lsdj_vio_t* wvio, long* firstBlockPosition, size_t blockSize, lsdj_error_t** error);
+
+// // Compress a song buffer to a set of blocks
+// /*! Returns the amount of blocks written */
+// unsigned int lsdj_compress(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, lsdj_vio_t* wvio, lsdj_error_t** error);
+// unsigned int lsdj_compress_to_file(const unsigned char* data, unsigned int blockSize, unsigned char startBlock, unsigned int blockCount, const char* path, lsdj_error_t** error);
     
 #ifdef __cplusplus
 }

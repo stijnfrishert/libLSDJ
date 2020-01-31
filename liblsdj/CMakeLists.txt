@@ -34,7 +34,7 @@ set(HEADERS
 set(SOURCES
 	# chain.c
 	# command.c
-	# compression.c
+	compression.c
 	error.c
 	# groove.c
 	# instrument.c

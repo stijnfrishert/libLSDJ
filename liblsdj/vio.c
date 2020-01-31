@@ -38,6 +38,9 @@
 #include <assert.h>
 #include <string.h>
 
+
+// --- File --- //
+
 size_t lsdj_fread(void* ptr, size_t size, void* user_data)
 {
     return fread(ptr, size, 1, (FILE*)user_data) * size;
@@ -57,6 +60,22 @@ long lsdj_fseek(long offset, int whence, void* user_data)
 {
     return fseek((FILE*)user_data, offset, whence);
 }
+
+lsdj_vio_t lsdj_create_file_vio(FILE* file)
+{
+    lsdj_vio_t vio;
+
+    vio.read = lsdj_fread;
+    vio.write = lsdj_fwrite;
+    vio.tell = lsdj_ftell;
+    vio.seek = lsdj_fseek;
+    vio.user_data = (void*)file;
+
+    return vio;
+}
+
+
+// --- Memory --- //
 
 size_t lsdj_mread(void* ptr, size_t size, void* user_data)
 {
@@ -116,3 +135,17 @@ long lsdj_mseek(long offset, int whence, void* user_data)
     
     return 0;
 }
+
+lsdj_vio_t lsdj_create_memory_vio(lsdj_memory_access_state_t* state)
+{
+    lsdj_vio_t vio;
+
+    vio.read = lsdj_mread;
+    vio.write = lsdj_mwrite;
+    vio.tell = lsdj_mtell;
+    vio.seek = lsdj_mseek;
+    vio.user_data = (void*)state;
+
+    return vio;
+}
+

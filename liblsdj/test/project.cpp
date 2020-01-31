@@ -3,10 +3,11 @@
 #include <algorithm>
 #include <array>
 #include <catch2/catch.hpp>
+#include <fstream>
 
 using namespace Catch;
 
-SCENARIO( "Project", "[project]" )
+SCENARIO( "Project creation and querying", "[project]" )
 {
 	REQUIRE(LSDJ_SONG_BUFFER_BYTE_COUNT == 0x8000);
 
@@ -113,6 +114,23 @@ SCENARIO( "Project", "[project]" )
 				REQUIRE(memcmp(buffer.bytes, bufferCopy->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0);
 			}
 		}
+
+		lsdj_project_free(project);
+	}
+}
+
+TEST_CASE( ".lsdsng save/load", "[project]" )
+{
+	SECTION( "Reading reading an .lsdsng from file" )
+	{
+		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr);
+		REQUIRE(project != nullptr);
+
+		std::ifstream stream(RESOURCES_FOLDER "raw/happy_birthday.raw");
+		lsdj_song_buffer_t songBuffer;
+		stream.read(reinterpret_cast<char*>(songBuffer.bytes), LSDJ_SONG_BUFFER_BYTE_COUNT);
+
+		REQUIRE(memcmp(songBuffer.bytes, lsdj_project_get_song_buffer(project)->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0);
 
 		lsdj_project_free(project);
 	}

@@ -155,93 +155,83 @@ const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* pro
 
 // --- I/O --- //
 
-// lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
-// {
-//     lsdj_project_t* project = alloc_project(error);
+lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
+{
+    lsdj_project_t* project = alloc_project(error);
+    if (error && *error)
+        return NULL;
     
-//     if (vio->read(project->name, LSDJ_PROJECT_NAME_LENGTH, vio->user_data) != LSDJ_PROJECT_NAME_LENGTH)
-//     {
-//         lsdj_error_new(error, "could not read project name");
-//         lsdj_project_free(project);
-//         return NULL;
-//     }
+    if (rvio->read(project->name, LSDJ_PROJECT_NAME_LENGTH, rvio->user_data) != LSDJ_PROJECT_NAME_LENGTH)
+    {
+        lsdj_error_optional_new(error, "could not read project name");
+        lsdj_project_free(project);
+        return NULL;
+    }
     
-//     if (vio->read(&project->version, 1, vio->user_data) != 1)
-//     {
-//         lsdj_error_new(error, "could not read project version");
-//         lsdj_project_free(project);
-//         return NULL;
-//     }
+    if (rvio->read(&project->version, 1, rvio->user_data) != 1)
+    {
+        lsdj_error_optional_new(error, "could not read project version");
+        lsdj_project_free(project);
+        return NULL;
+    }
 
-//     // Decompress the song data
-//     lsdj_memory_access_state_t mem;
-//     mem.begin = mem.cur = project->song.bytes;
-//     mem.size = sizeof(project->song.bytes);
+    // Decompress the song data
+    lsdj_song_buffer_t songBuffer;
+    lsdj_memory_access_state_t reader;
+    reader.begin = reader.cur = songBuffer.bytes;
+    reader.size = sizeof(songBuffer.bytes);
     
-//     lsdj_vio_t wvio;
-//     wvio.write = lsdj_mwrite;
-//     wvio.tell = lsdj_mtell;
-//     wvio.seek = lsdj_mseek;
-//     wvio.user_data = &mem;
+    lsdj_vio_t wvio = lsdj_create_memory_vio(&reader);
     
-//     lsdj_decompress(vio, &wvio, NULL, BLOCK_SIZE, error);
-//     if (error && *error)
-//         return NULL;
+    lsdj_decompress(rvio, &wvio, false, error);
+    if (error && *error)
+        return NULL;
     
-//     return project;
-// }
+    return project;
+}
 
-// lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error)
-// {
-//     if (path == NULL)
-//     {
-//         lsdj_error_new(error, "path is NULL");
-//         return NULL;
-//     }
+lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error)
+{
+    if (path == NULL)
+    {
+        lsdj_error_optional_new(error, "path is NULL");
+        return NULL;
+    }
     
-//     FILE* file = fopen(path, "rb");
-//     if (file == NULL)
-//     {
-//         char message[512];
-//         snprintf(message, 512, "could not open %s for reading", path);
-//         lsdj_error_new(error, message);
-//         return NULL;
-//     }
-    
-//     lsdj_vio_t vio;
-//     vio.read = lsdj_fread;
-//     vio.tell = lsdj_ftell;
-//     vio.seek = lsdj_fseek;
-//     vio.user_data = file;
-    
-//     lsdj_project_t* project = lsdj_project_read_lsdsng(&vio, error);
-    
-//     fclose(file);
-    
-//     return project;
-// }
+    FILE* file = fopen(path, "rb");
+    if (file == NULL)
+    {
+        char message[512];
+        snprintf(message, 512, "could not open %s for reading", path);
+        lsdj_error_optional_new(error, message);
+        return NULL;
+    }
 
-// lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
-// {
-//     if (data == NULL)
-//     {
-//         lsdj_error_new(error, "data is NULL");
-//         return NULL;
-//     }
+    lsdj_vio_t rvio = lsdj_create_file_vio(file);
     
-//     lsdj_memory_access_state_t mem;
-//     mem.begin = (unsigned char*)data;
-//     mem.cur = mem.begin;
-//     mem.size = size;
+    lsdj_project_t* project = lsdj_project_read_lsdsng(&rvio, error);
     
-//     lsdj_vio_t vio;
-//     vio.read = lsdj_mread;
-//     vio.tell = lsdj_mtell;
-//     vio.seek = lsdj_mseek;
-//     vio.user_data = &mem;
+    fclose(file);
     
-//     return lsdj_project_read_lsdsng(&vio, error);
-// }
+    return project;
+}
+
+lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+{
+    if (data == NULL)
+    {
+        lsdj_error_optional_new(error, "data is NULL");
+        return NULL;
+    }
+    
+    lsdj_memory_access_state_t state;
+    state.begin = state.cur = (unsigned char*)data;
+    state.size = size;
+
+    lsdj_vio_t rvio = lsdj_create_memory_vio(&state);
+    
+    return lsdj_project_read_lsdsng(&rvio, error);
+}
 
 // int lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
 // {

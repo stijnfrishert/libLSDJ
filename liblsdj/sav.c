@@ -43,8 +43,6 @@
 #include "compression.h"
 #include "song_buffer.h"
 
-#define HEADER_START LSDJ_SONG_BUFFER_BYTE_COUNT
-
 //! Representation of an entire LSDj save state
 struct lsdj_sav_t
 {
@@ -287,20 +285,20 @@ const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char 
 //         lsdj_song_buffer_t data;
 //         memset(data.bytes, 0x00, sizeof(data));
         
-//         vio->seek(HEADER_START + (i + 1) * BLOCK_SIZE, SEEK_SET, vio->user_data);
+//         vio->seek(LSDJ_SAV_HEADER_POSITION + (i + 1) * BLOCK_SIZE, SEEK_SET, vio->user_data);
                 
 //         lsdj_memory_access_state_t mem;
 //         mem.cur = mem.begin = data.bytes;
 //         mem.size = sizeof(data);
         
-//         long block1position = HEADER_START + BLOCK_SIZE;
+//         long firstBlockPosition = LSDJ_SAV_HEADER_POSITION + BLOCK_SIZE;
         
 //         lsdj_vio_t wvio;
 //         wvio.write = lsdj_mwrite;
 //         wvio.tell = lsdj_mtell;
 //         wvio.seek = lsdj_mseek;
 //         wvio.user_data = &mem;
-//         lsdj_decompress(vio, &wvio, &block1position, BLOCK_SIZE, error);
+//         lsdj_decompress(vio, &wvio, &firstBlockPosition, BLOCK_SIZE, error);
 //         if (error && *error)
 //             return;
         
@@ -349,7 +347,7 @@ const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char 
 //         lsdj_sav_free(sav);
 //         return NULL;
 //     }
-//     vio->seek(begin + HEADER_START, SEEK_SET, vio->user_data);
+//     vio->seek(begin + LSDJ_SAV_HEADER_POSITION, SEEK_SET, vio->user_data);
     
 //     // Read the header block, before we start processing each song
 // 	header_t header;
@@ -494,7 +492,7 @@ const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char 
 //     }
     
 //     // Move to the initialization bytes
-//     vio->seek(HEADER_START + 0x13E, SEEK_CUR, vio->user_data);
+//     vio->seek(LSDJ_SAV_HEADER_POSITION + 0x13E, SEEK_CUR, vio->user_data);
     
 //     // Ensure these bytes are 'jk', that's what LSDJ sets them to on RAM init
 //     char buffer[2];

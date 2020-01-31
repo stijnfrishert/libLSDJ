@@ -62,6 +62,9 @@ extern "C" {
 
 //! A value that means none of the sav project slots is active
 #define LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX (0xFF)
+
+//! The place in sav memory where the header starts 
+#define LSDJ_SAV_HEADER_POSITION LSDJ_SONG_BUFFER_BYTE_COUNT
     
 //! A structure representing a full LSDj sav state
 typedef struct lsdj_sav_t lsdj_sav_t;

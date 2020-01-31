@@ -103,7 +103,7 @@ unsigned char lsdj_project_get_version(const lsdj_project_t* project);
 
 //! Copy a full song's byte data into the project
 /*! A song buffer's data is copied into the project.
-	This leaves the original song buffer intract */
+	This leaves the original song buffer intact */
 void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* songBuffer);
 
 //! Retrieve the song buffer for this project
@@ -113,10 +113,20 @@ const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* pro
 
 // --- I/O --- //
 
-// // Deserialize a project from LSDSNG
-// lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
-// lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error);
-// lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+//! Read an LSDJ Project from an .lsdsng byte stream
+/*! This function uses liblsdj's virtual I/O system. There are other convenience functions to
+	directly read from memory or file.
+
+	@return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
+lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error);
+
+//! Read an LSDJ Project from an .lsdsng file
+/*! @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
+lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error);
+
+//! Read an LSDJ Project from an .lsdsng in memory
+/*! @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
+lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
 // // Find out whether given data is likely a valid lsdsng
 // // Note: this is not a 100% guarantee that the data will load, we're just checking
