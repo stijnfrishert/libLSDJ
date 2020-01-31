@@ -127,12 +127,22 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 	SECTION( "Reading reading an .lsdsng from file" )
 	{
 		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr);
-		REQUIRE(project != nullptr);
+		REQUIRE( project != nullptr );
+
+		std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
+		lsdj_project_get_name(project, name.data());
+		REQUIRE( memcmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
+
+		REQUIRE( lsdj_project_get_version(project) == 2 );
+
+		// auto buffer = lsdj_project_get_song_buffer(project);
+		// std::ofstream stream("/Users/stijn/Desktop/hb.song");
+		// stream.write(reinterpret_cast<const char*>(buffer->bytes), LSDJ_SONG_BUFFER_BYTE_COUNT);
 
 		auto raw = readFileContents(RESOURCES_FOLDER "raw/happy_birthday.raw");
 		assert(raw.size() == LSDJ_SONG_BUFFER_BYTE_COUNT);
 
-		REQUIRE(memcmp(raw.data(), lsdj_project_get_song_buffer(project)->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0);
+		REQUIRE( memcmp(raw.data(), lsdj_project_get_song_buffer(project)->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0 );
 
 		lsdj_project_free(project);
 	}
