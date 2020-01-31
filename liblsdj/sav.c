@@ -72,6 +72,9 @@ typedef struct
 	unsigned char active_project;
 } header_t;
 
+
+// --- Allocation --- //
+
 //! Allocate a sav in memory
 lsdj_sav_t* lsdj_sav_alloc(lsdj_error_t** error)
 {
@@ -90,13 +93,16 @@ lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error)
     // Allocate memory for a new sav
     lsdj_sav_t* sav = lsdj_sav_alloc(error);
     if (sav == NULL)
+    {
+        lsdj_error_optional_new(error, "could not allocate memory for sav");
         return NULL;
+    }
 
     // Clear the working memory song buffer
     memset(&sav->workingMemorySongBuffer, 0, sizeof(sav->workingMemorySongBuffer));
     
     // Clear the projects
-    for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
+    for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; i++)
     {
         sav->projects[i] = NULL;
     }
@@ -105,6 +111,40 @@ lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error)
     sav->activeProjectIndex = LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX;
     
     return sav;
+}
+
+lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, lsdj_error_t** error)
+{
+    // Allocate memory for a new sav
+    lsdj_sav_t* copy = lsdj_sav_alloc(error);
+    if (copy == NULL)
+    {
+        lsdj_error_optional_new(error, "could not allocate memory for sav");
+        return NULL;
+    }
+
+    memcpy(&copy->workingMemorySongBuffer, &sav->workingMemorySongBuffer, sizeof(sav->workingMemorySongBuffer));
+    copy->activeProjectIndex = sav->activeProjectIndex;
+    memcpy(copy->reserved8120, sav->reserved8120, sizeof(sav->reserved8120));
+
+    for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; i++)
+    {
+        if (sav->projects[i] != NULL)
+            copy->projects[i] = lsdj_project_copy(sav->projects[i], error);
+        else
+            copy->projects[i] = NULL;
+    }
+
+    // If something went wrong, free any copied over projects
+    if (error && *error)
+    {
+        for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; i++)
+            lsdj_project_free(copy->projects[i]);
+
+        return NULL;
+    }
+
+    return copy;
 }
 
 void lsdj_sav_free(lsdj_sav_t* sav)
@@ -121,14 +161,12 @@ void lsdj_sav_free(lsdj_sav_t* sav)
     }
 }
 
+
+// --- Changing Data --- //
+
 void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer)
 {
     memcpy(&sav->workingMemorySongBuffer, &songBuffer, sizeof(songBuffer));
-}
-
-const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav)
-{
-    return &sav->workingMemorySongBuffer;
 }
 
 bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error)
@@ -153,6 +191,11 @@ bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned cha
     lsdj_sav_set_active_project_index(sav, index);
 
     return true;
+}
+
+const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav)
+{
+    return &sav->workingMemorySongBuffer;
 }
 
 void lsdj_sav_set_active_project_index(lsdj_sav_t* sav, unsigned char index)
@@ -193,20 +236,28 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
 //     return newProject;
 // }
 
-// void lsdj_sav_set_project(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project, lsdj_error_t** error)
-// {
-//     if (project == NULL)
-//         return lsdj_error_new(error, "project is NULL");
-    
-//     lsdj_project_free(sav->projects[index]);
-//     sav->projects[index] = project;
-// }
+void lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, lsdj_error_t** error)
+{
+    lsdj_project_t* slot = sav->projects[index];
+    if (slot)
+        lsdj_project_free(slot);
 
-// void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error)
-// {
-//     lsdj_project_free(sav->projects[index]);
-//     sav->projects[index] = lsdj_project_new(error);
-// }
+    sav->projects[index] = lsdj_project_copy(project, error);
+}
+
+void lsdj_sav_set_project_move(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project)
+{
+    lsdj_project_t* slot = sav->projects[index];
+    if (slot)
+        lsdj_project_free(slot);
+
+    sav->projects[index] = project;
+}
+
+void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index)
+{
+    lsdj_sav_set_project_move(sav, index, NULL);
+}
 
 const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char index)
 {

@@ -89,6 +89,31 @@ SCENARIO( "Project", "[project]" )
 			}
 		}
 
+		WHEN( "Copying a project" )
+		{
+			lsdj_project_set_name(project, "MYSONG", 6);
+			lsdj_project_set_version(project, 16);
+
+			lsdj_song_buffer_t buffer;
+			std::fill_n(buffer.bytes, LSDJ_SONG_BUFFER_BYTE_COUNT, 40);
+			lsdj_project_set_song_buffer(project, &buffer);
+
+			auto copy = lsdj_project_copy(project, nullptr);
+			REQUIRE(copy != nullptr);
+				
+			THEN( "The data should remain intact" )
+			{
+				std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
+				lsdj_project_get_name(copy, name.data());
+
+				REQUIRE_THAT(name.data(), Equals("MYSONG"));
+				REQUIRE(lsdj_project_get_version(copy) == 16);
+
+				auto bufferCopy = lsdj_project_get_song_buffer(project);
+				REQUIRE(memcmp(buffer.bytes, bufferCopy->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0);
+			}
+		}
+
 		lsdj_project_free(project);
 	}
 }

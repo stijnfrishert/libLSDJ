@@ -69,12 +69,16 @@ typedef struct lsdj_sav_t lsdj_sav_t;
 
 // --- ALLOCATION --- //
 
-//! Create a new lsdj_sav_t
+//! Create a new save
 /*! The working memory song buffer is zeroed out, and the sav contains no
 	songs in the project slots.
-
-	@note every lsdj_sav_new() must be paired with an lsdj_sav_free() */
+	@note Every call must be paired with an lsdj_sav_free() */
 lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error);
+
+//! Copy a save into a new save
+/*! Creates a new save and copies the data into it
+	@note Every call must be paired with an lsdj_sav_free() */
+lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, lsdj_error_t** error);
 
 //! Frees a sav from memory
 /*! Call this when you no longer need a sav. */
@@ -84,19 +88,16 @@ void lsdj_sav_free(lsdj_sav_t* sav);
 // --- CHANGING DATA --- //
 
 //! Change the working memory song buffer
-/*! @param songBuffer the song buffer that is copied into the working memory bytes */
+/*! The song buffer's data is copied into the sav. This leaves the original intact */
 void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer);
-    
-//! Retrieve the working memory song buffer from a sav
-const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav);
-    
-// // Change the working memory song by copying from one of the projects
-// void lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
 
 //! Copy the song buffer from a given project into the working memory
 /*! This effectively loads a project, and sets the current index to reflect that
 	@return false if the index is out of bounds, or the slot is empty */
 bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
+    
+//! Retrieve the working memory song buffer from a sav
+const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav);
     
 //! Change which project slot is referenced by the working memory song
 /*! Indices start at 0.
@@ -110,13 +111,21 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
     
 // // Create a project that contains the working memory song
 // lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error);
-    
-// // Change one of the projects in the sav
-// // The sav takes ownership of the given project, so make sure you copy it first if need be!
-// void lsdj_sav_set_project(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project, lsdj_error_t** error);
 
-// // Erase one of the projects in the sav
-// void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
+//! Copy a project into one of the project slots
+/*! This copies data from the parameter project into the sav, without taking over ownership
+	of the original project parameter.
+	@param project The project to move, or NULL is the slot should be freed up */
+void lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, lsdj_error_t** error);
+    
+//! Move a project into one of the project slots
+/*! This moves the parameter project into the sav, taking over ownership. You don't have
+	to call lsdj_project_free() afterwards anymore.
+	@param project The project to move, or NULL is the slot should be freed up */
+void lsdj_sav_set_project_move(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project);
+
+//! Free up one of the project slots in a sav
+void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index);
     
 //! Retrieve one of the projects
 /*! The index should be < LSDJ_SAV_PROJECT_COUNT

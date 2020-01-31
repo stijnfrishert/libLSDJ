@@ -68,6 +68,11 @@ typedef struct lsdj_project_t lsdj_project_t;
     @note Every call must be paired with an lsdj_project_free() */
 lsdj_project_t* lsdj_project_new(lsdj_error_t** error);
 
+//! Copy a project into a new project
+/*! Creates a new project and copies the data into it.
+	@note Every call must be paired with an lsdj_project_free() */
+lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, lsdj_error_t** error);
+
 //! Frees a project from memory
 /*! Call this when you no longer need a project. */
 void lsdj_project_free(lsdj_project_t* project);
@@ -96,7 +101,9 @@ void lsdj_project_set_version(lsdj_project_t* project, unsigned char version);
 /*! @note This has nothing to do with your LSDj or format version, it's just a project version */
 unsigned char lsdj_project_get_version(const lsdj_project_t* project);
 
-// Copy a full song's byte data into the project
+//! Copy a full song's byte data into the project
+/*! A song buffer's data is copied into the project.
+	This leaves the original song buffer intract */
 void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* songBuffer);
 
 //! Retrieve the song buffer for this project
