@@ -2,8 +2,11 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <catch2/catch.hpp>
 #include <fstream>
+
+#include "file.hpp"
 
 using namespace Catch;
 
@@ -126,11 +129,10 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr);
 		REQUIRE(project != nullptr);
 
-		std::ifstream stream(RESOURCES_FOLDER "raw/happy_birthday.raw");
-		lsdj_song_buffer_t songBuffer;
-		stream.read(reinterpret_cast<char*>(songBuffer.bytes), LSDJ_SONG_BUFFER_BYTE_COUNT);
+		auto raw = readFileContents(RESOURCES_FOLDER "raw/happy_birthday.raw");
+		assert(raw.size() == LSDJ_SONG_BUFFER_BYTE_COUNT);
 
-		REQUIRE(memcmp(songBuffer.bytes, lsdj_project_get_song_buffer(project)->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0);
+		REQUIRE(memcmp(raw.data(), lsdj_project_get_song_buffer(project)->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0);
 
 		lsdj_project_free(project);
 	}
