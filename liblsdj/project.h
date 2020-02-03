@@ -113,7 +113,7 @@ const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* pro
 
 // --- I/O --- //
 
-//! Read an LSDJ Project from an .lsdsng byte stream
+//! Read an LSDJ Project from an .lsdsng I/O streeam
 /*! This function uses liblsdj's virtual I/O system. There are other convenience functions to
 	directly read from memory or file.
 
@@ -138,11 +138,21 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, 
 // int lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error);
 // int lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
-// // Write a project to an lsdsng file
-// // Returns the number of bytes written
-// size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error);
-// size_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error);
-// size_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t size, lsdj_error_t** error);
+//! Write an lsdj project to an .lsdsng I/O stream
+/*! This function uses liblsdj's virtual I/O system. There are other convenience functions to
+	directly write to memory or file.
+
+	@return The number of bytes written to the stream */
+size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error);
+
+//! Write an lsdj project to an .lsdsng I/O stream
+/*! @return The number of bytes written to the stream */
+size_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error);
+
+//! Write an lsdj project to an .lsdsng I/O stream
+/*! @param Pointer to the write buffer, should be at least LSDSNG_MAX_SIZE in size
+	@return The number of bytes written to the stream */
+size_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, lsdj_error_t** error);
     
 #ifdef __cplusplus
 }

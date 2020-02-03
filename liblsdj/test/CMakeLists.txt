@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
-add_executable(test
+set(SOURCES
 	error.cpp
 	file.cpp
 	file.hpp
@@ -10,6 +10,10 @@ add_executable(test
 	song_buffer.cpp
 	vio.cpp
 	)
+
+add_executable(test ${SOURCES})
+
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCES})
 
 target_compile_definitions(test PRIVATE RESOURCES_FOLDER="${CMAKE_SOURCE_DIR}/resources/")
 

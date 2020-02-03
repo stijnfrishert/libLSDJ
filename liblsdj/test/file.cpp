@@ -1,10 +1,14 @@
 #include "file.hpp"
 
 #include <fstream>
+#include <stdexcept>
 
 std::vector<std::uint8_t> readFileContents(std::string_view path)
 {
-	std::ifstream stream(RESOURCES_FOLDER "raw/happy_birthday.raw", std::ios::binary);
+	std::ifstream stream(path.data(), std::ios::binary);
+    if (!stream.is_open())
+        throw std::runtime_error("Could not open file for reading");
+    
 	stream.unsetf(std::ios::skipws);
 
     // Get the size
