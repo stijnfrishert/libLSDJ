@@ -6,6 +6,7 @@
 #include <catch2/catch.hpp>
 #include <fstream>
 
+#include <compression.h>
 #include "file.hpp"
 
 using namespace Catch;
@@ -181,27 +182,41 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 		lsdj_project_free(project);
 	}
 
-//	SECTION( "Writing an .lsdsng to memory")
-//	{
-//        // Create the project
-//		auto project = lsdj_project_new(nullptr);
-//		REQUIRE( project != nullptr );
-//
-//        lsdj_project_set_name(project, "HAPPY BD", 8);
-//        lsdj_project_set_version(project, 4);
-//        
-//        lsdj_song_buffer_t songBuffer;
-//        std::copy_n(raw.data(), raw.size(), songBuffer.bytes);
-//        lsdj_project_set_song_buffer(project, &songBuffer);
-//        
-//        // Write it to memory
-//        std::array<unsigned char, LSDSNG_MAX_SIZE> data;
-//        data.fill(0);
-////        auto writeCount = lsdj_project_write_lsdsng_to_memory(project, data.data(), nullptr);
-//        auto writeCount = lsdj_project_write_lsdsng_to_file(project, "/Users/stijn/Desktop/hbd.lsdsng", nullptr);
-//        
-//        REQUIRE( memcmp(lsdsng.data(), data.data(), writeCount) == 0 );
-//
-//		lsdj_project_free(project);
-//	}
+	SECTION( "Writing an .lsdsng to memory")
+	{
+        // Create the project
+		auto project = lsdj_project_new(nullptr);
+		REQUIRE( project != nullptr );
+
+        lsdj_project_set_name(project, "HAPPY BD", 8);
+        lsdj_project_set_version(project, 4);
+        
+        lsdj_song_buffer_t songBuffer;
+        std::copy_n(raw.data(), raw.size(), songBuffer.bytes);
+        lsdj_project_set_song_buffer(project, &songBuffer);
+        
+        // Compress it to memory
+        std::array<unsigned char, LSDSNG_MAX_SIZE> data;
+        data.fill(0);
+        auto writeCount = lsdj_project_write_lsdsng_to_memory(project, data.data(), nullptr);
+        
+        // Because liblsdj's compression algorithm is actually a more efficient fit than
+        // the one in LSDJ itself, we can't compare with the .lsdsng sample file. So:
+        // Decompress (the other test makes sure it's correct) back and compare against
+        // the raw
+        
+        auto lsdsng = lsdj_project_read_lsdsng_from_memory(data.data(), writeCount * BLOCK_SIZE, nullptr);
+        
+        std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
+        lsdj_project_get_name(lsdsng, name.data());
+        REQUIRE( memcmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
+        
+        REQUIRE(lsdj_project_get_version(lsdsng) == 4);
+        REQUIRE( memcmp(raw.data(), lsdj_project_get_song_buffer(lsdsng)->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0 );
+        
+        // Clean up
+        lsdj_project_free(lsdsng);
+
+		lsdj_project_free(project);
+	}
 }
