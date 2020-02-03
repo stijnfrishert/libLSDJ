@@ -45,6 +45,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "error.h"
@@ -128,15 +129,15 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_
 /*! @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
 lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
-// // Find out whether given data is likely a valid lsdsng
-// // Note: this is not a 100% guarantee that the data will load, we're just checking
-// // some heuristics.
-// // Returns 0 if invalid, 1 if valid. Error contains information about why.
-// //
-// // First version consumes the vio (doesn't seek() back to the beginning)
-// int lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
-// int lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error);
-// int lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+//! Find out whether given data is likely a valid lsdsng
+/*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
+bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
+
+//! Find out whether a file is likely a valid lsdsng
+bool lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error);
+
+//! Find out whether a memory address likely contains a valid lsdsng
+bool lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
 //! Write an lsdj project to an .lsdsng I/O stream
 /*! This function uses liblsdj's virtual I/O system. There are other convenience functions to
@@ -150,7 +151,7 @@ size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio,
 size_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error);
 
 //! Write an lsdj project to an .lsdsng I/O stream
-/*! @param Pointer to the write buffer, should be at least LSDSNG_MAX_SIZE in size
+/*! @param data Pointer to the write buffer, should be at least LSDSNG_MAX_SIZE in size
 	@return The number of bytes written to the stream */
 size_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, lsdj_error_t** error);
     

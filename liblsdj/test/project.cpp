@@ -219,4 +219,13 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 
 		lsdj_project_free(project);
 	}
+
+	SECTION( "Checking lsdsng likelihood" )
+	{
+		REQUIRE( lsdj_project_is_likely_valid_lsdsng_memory(lsdsng.data(), lsdsng.size(), nullptr) == true );
+        REQUIRE( lsdj_project_is_likely_valid_lsdsng_memory(raw.data(), raw.size(), nullptr) == false );
+        
+        REQUIRE( lsdj_project_is_likely_valid_lsdsng_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr) == true );
+        REQUIRE( lsdj_project_is_likely_valid_lsdsng_file(RESOURCES_FOLDER "raw/happy_birthday.raw", nullptr) == false );
+	}
 }
