@@ -161,9 +161,35 @@ TEST_CASE( ".sav save/load", "[sav]" )
 	const auto raw = readFileContents(RESOURCES_FOLDER "raw/happy_birthday.raw");
     assert(raw.size() == LSDJ_SONG_BUFFER_BYTE_COUNT);
 
+    const auto save = readFileContents(RESOURCES_FOLDER "sav/happy_birthday.sav");
+    assert(save.size() == 131072);
+
 	SECTION( "Reading a .sav from file" )
 	{
 		auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/happy_birthday.sav", nullptr);
+		REQUIRE( sav != nullptr );
+
+		auto wm = lsdj_sav_get_working_memory_song(sav);
+		REQUIRE( memcmp(wm->bytes, raw.data(), LSDJ_SONG_BUFFER_BYTE_COUNT) == 0 );
+
+		REQUIRE( lsdj_sav_get_active_project_index(sav) == LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX );
+
+		auto project = lsdj_sav_get_project(sav, 0);
+		REQUIRE( project != nullptr );
+
+		std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
+		lsdj_project_get_name(project, name.data());
+		REQUIRE( strncmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
+
+		REQUIRE( lsdj_project_get_version(project) == 4 );
+
+		auto song_buffer = lsdj_project_get_song_buffer(project);
+		REQUIRE( memcmp(song_buffer->bytes, raw.data(), raw.size()) == 0 );
+	}
+
+	SECTION( "Reading a .sav from memory" )
+	{
+		auto sav = lsdj_sav_read_from_memory(save.data(), save.size(), nullptr);
 		REQUIRE( sav != nullptr );
 
 		auto wm = lsdj_sav_get_working_memory_song(sav);
