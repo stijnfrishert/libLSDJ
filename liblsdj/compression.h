@@ -58,7 +58,7 @@ extern "C" {
 	@param followBlockSwitches Set this to true if block switches should be followed (the default), and false if block switches (0xE0, ID) should be ignored (in the case of reading lsdsng)
 
 	See https://littlesounddj.fandom.com/wiki/File_Management_Structure for more info */
-void lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, lsdj_error_t** error);
+bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, lsdj_error_t** error);
 
 //! Compress memory blocks according to the LSDJ compression spec
 /*! This algorithm is used to store songs in the project slots in a sav,

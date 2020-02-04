@@ -177,14 +177,13 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
 
     // Decompress the song data
     lsdj_song_buffer_t songBuffer;
-    lsdj_memory_access_state_t reader;
-    reader.begin = reader.cur = songBuffer.bytes;
-    reader.size = sizeof(songBuffer.bytes);
+    lsdj_memory_access_state_t state;
+    state.begin = state.cur = songBuffer.bytes;
+    state.size = sizeof(songBuffer.bytes);
     
-    lsdj_vio_t wvio = lsdj_create_memory_vio(&reader);
+    lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
     
-    lsdj_decompress(rvio, &wvio, false, error);
-    if (error && *error)
+    if (lsdj_decompress(rvio, &wvio, false, error) == false)
         return NULL;
     
     lsdj_project_set_song_buffer(project, &songBuffer);

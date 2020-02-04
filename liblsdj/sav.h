@@ -138,10 +138,14 @@ const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char 
 
 // --- I/O --- //
 
-// // Deserialize a sav
-// lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error);
-// lsdj_sav_t* lsdj_sav_read_from_file(const char* path, lsdj_error_t** error);
-// lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+//! Read an LSDj sav from virtual I/O
+lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error);
+
+//! Read an LSDj sav from file
+lsdj_sav_t* lsdj_sav_read_from_file(const char* path, lsdj_error_t** error);
+
+//! Read an LSDj sav from memory
+lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
 // // Find out whether given data is likely a valid save
 // // Note: this is not a 100% guarantee that the data will load, we're just checking

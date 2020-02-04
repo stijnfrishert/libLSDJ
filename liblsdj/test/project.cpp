@@ -126,6 +126,7 @@ SCENARIO( "Project creation and querying", "[project]" )
 TEST_CASE( ".lsdsng save/load", "[project]" )
 {
     const auto lsdsng = readFileContents(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng");
+    assert(lsdsng.size() == 3081);
     
     const auto raw = readFileContents(RESOURCES_FOLDER "raw/happy_birthday.raw");
     assert(raw.size() == LSDJ_SONG_BUFFER_BYTE_COUNT);
