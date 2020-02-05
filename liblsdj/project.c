@@ -158,7 +158,7 @@ const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* pro
 lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
 {
     lsdj_project_t* project = alloc_project(error);
-    if (error && *error)
+    if (project == NULL)
         return NULL;
     
     if (rvio->read(project->name, LSDJ_PROJECT_NAME_LENGTH, rvio->user_data) != LSDJ_PROJECT_NAME_LENGTH)
@@ -183,7 +183,7 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
     
     lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
     
-    if (lsdj_decompress(rvio, &wvio, false, error) == false)
+    if (!lsdj_decompress(rvio, &wvio, false, error))
         return NULL;
     
     lsdj_project_set_song_buffer(project, &songBuffer);
@@ -339,8 +339,9 @@ size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio
     
     // Compress and write the song buffer
     const lsdj_song_buffer_t* songBuffer = lsdj_project_get_song_buffer(project);
-    const unsigned int block_count = lsdj_compress(songBuffer->bytes, 1, wvio, error);
-    write_size += block_count * LSDJ_BLOCK_SIZE;
+    size_t compression_size = 0;
+    lsdj_compress(songBuffer->bytes, 1, wvio, &compression_size, error);
+    write_size += compression_size;
 
     // Return the amount of bytes written
     assert(write_size <= LSDSNG_MAX_SIZE);

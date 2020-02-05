@@ -69,9 +69,10 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
     @param data The data that will be compressed into blocks
     @param blockOffset The offset to the block jump ids that will be written
     @param wvio The virtual I/O to be written to. Make sure you have at least about data size / LSDJ_BLOCK_SIZE space.
+    @param writeCount If given, the amount of bytes written is stored here after return
  
-    @return The amount of memory blocks written */
-unsigned int lsdj_compress(const unsigned char* data, unsigned int blockOffset, lsdj_vio_t* wvio, lsdj_error_t** error);
+    @return True on success, false if something failed */
+bool lsdj_compress(const unsigned char* data, unsigned int blockOffset, lsdj_vio_t* wvio, size_t* writeCount, lsdj_error_t** error);
     
 #ifdef __cplusplus
 }

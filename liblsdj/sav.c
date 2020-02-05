@@ -129,16 +129,26 @@ lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, lsdj_error_t** error)
     copy->active_project_index = sav->active_project_index;
     memcpy(copy->reserved8120, sav->reserved8120, sizeof(sav->reserved8120));
 
+    bool copy_projects_succeeded = true;
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; i++)
     {
         if (sav->projects[i] != NULL)
+        {
             copy->projects[i] = lsdj_project_copy(sav->projects[i], error);
+            if (copy->projects[i] == NULL)
+            {
+                copy_projects_succeeded = false;
+                break;
+            }
+        }
         else
+        {
             copy->projects[i] = NULL;
+        }
     }
 
     // If something went wrong, free any copied over projects
-    if (error && *error)
+    if (!copy_projects_succeeded)
     {
         for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; i++)
             lsdj_project_free(copy->projects[i]);
@@ -537,21 +547,20 @@ size_t compress_blocks(unsigned char* blocks, lsdj_project_t* const* projects, u
     unsigned int current_block = 1;
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; i++)
     {
+        // See if there's a project in this slot
         lsdj_project_t* project = projects[i];
         if (project == NULL)
             continue;
         
+        // If so, compress
         const lsdj_song_buffer_t* song_buffer = lsdj_project_get_song_buffer(project);
-        
-        const unsigned written_block_count = lsdj_compress(song_buffer->bytes, current_block, &wvio, error);
-        write_count += written_block_count * LSDJ_BLOCK_SIZE;
-        
-        if (error && *error)
-        {
+        size_t count = 0;
+        bool result = lsdj_compress(song_buffer->bytes, current_block, &wvio, &count, error);
+        write_count += count;
+        if (!result)
             return write_count;
-        }
         
-        memset(block_alloc_table, i, written_block_count);
+        memset(block_alloc_table, i, count / LSDJ_BLOCK_SIZE);
     }
     
     return write_count;
