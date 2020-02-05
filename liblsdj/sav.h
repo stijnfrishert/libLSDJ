@@ -157,10 +157,17 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, ls
 // int lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error);
 // int lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
-// // Serialize a sav
-// void lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error);
-// void lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
-// void lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error);
+//! Write an LSDj sav to virtual I/O
+/*! @return The number of bytes written */
+size_t lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error);
+
+//! Write an LSDj sav to file
+/*! @return The number of bytes written */
+size_t lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
+
+//! Write an LSDj sav to memory
+/*! @return The number of bytes written */
+size_t lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error);
    
 
 #ifdef __cplusplus

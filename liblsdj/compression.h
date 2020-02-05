@@ -46,10 +46,10 @@ extern "C" {
 #include "vio.h"
 
 //! The block size used for the (de)crompression algorithm
-#define BLOCK_SIZE (0x200)
+#define LSDJ_BLOCK_SIZE (0x200)
 
 //! The maximum amount of blocks stored in a sav
-#define BLOCK_COUNT (191)
+#define LSDJ_BLOCK_COUNT (191)
 
 //! Decompress memory blocks according to the LSDJ compression spec
 /*! This algorithm is used to store songs in the project slots in a sav,
@@ -57,15 +57,18 @@ extern "C" {
 
 	@param followBlockSwitches Set this to true if block switches should be followed (the default), and false if block switches (0xE0, ID) should be ignored (in the case of reading lsdsng)
 
-	See https://littlesounddj.fandom.com/wiki/File_Management_Structure for more info */
+	See https://littlesounddj.fandom.com/wiki/File_Management_Structure for more info
+
+	@return true on success, false on failure */
 bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, lsdj_error_t** error);
 
 //! Compress memory blocks according to the LSDJ compression spec
 /*! This algorithm is used to store songs in the project slots in a sav,
     as well as in an .lsdsng file.
 
-    @param data The data that will be written
+    @param data The data that will be compressed into blocks
     @param blockOffset The offset to the block jump ids that will be written
+    @param wvio The virtual I/O to be written to. Make sure you have at least about data size / LSDJ_BLOCK_SIZE space.
  
     @return The amount of memory blocks written */
 unsigned int lsdj_compress(const unsigned char* data, unsigned int blockOffset, lsdj_vio_t* wvio, lsdj_error_t** error);

@@ -185,6 +185,8 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 		auto song_buffer = lsdj_project_get_song_buffer(project);
 		REQUIRE( memcmp(song_buffer->bytes, raw.data(), raw.size()) == 0 );
+
+		lsdj_sav_free(sav);
 	}
 
 	SECTION( "Reading a .sav from memory" )
@@ -192,9 +194,11 @@ TEST_CASE( ".sav save/load", "[sav]" )
 		auto sav = lsdj_sav_read_from_memory(save.data(), save.size(), nullptr);
 		REQUIRE( sav != nullptr );
 
+		// Working memory
 		auto wm = lsdj_sav_get_working_memory_song(sav);
 		REQUIRE( memcmp(wm->bytes, raw.data(), LSDJ_SONG_BUFFER_BYTE_COUNT) == 0 );
 
+		// Active project
 		REQUIRE( lsdj_sav_get_active_project_index(sav) == LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX );
 
 		auto project = lsdj_sav_get_project(sav, 0);
@@ -208,5 +212,58 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 		auto song_buffer = lsdj_project_get_song_buffer(project);
 		REQUIRE( memcmp(song_buffer->bytes, raw.data(), raw.size()) == 0 );
+
+		lsdj_sav_free(sav);
+	}
+
+	SECTION( "Writing a .sav to memory" )
+	{
+		auto sav = lsdj_sav_new(nullptr);
+		REQUIRE( sav != nullptr );
+
+		// Working memory
+		lsdj_song_buffer_t wm;
+		memcpy(wm.bytes, raw.data(), raw.size());
+		lsdj_sav_set_working_memory_song(sav, &wm);
+
+		// Active project
+		lsdj_sav_set_active_project_index(sav, LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX);
+
+		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr);
+		assert(project != nullptr);
+
+		lsdj_sav_set_project_move(sav, 0, project);
+
+		std::array<unsigned char, 131072> memory;
+		auto writeCount = lsdj_sav_write_to_memory(sav, memory.data(), memory.size(), nullptr);
+		REQUIRE( writeCount == 131072 );
+
+		lsdj_sav_free(sav);
+
+		auto compSav = lsdj_sav_read_from_memory(memory.data(), writeCount, nullptr);
+		REQUIRE( compSav != nullptr );
+        
+        // --- Comparison --- //
+        
+        // Working memory
+        auto compWm = lsdj_sav_get_working_memory_song(compSav);
+        REQUIRE( memcmp(compWm->bytes, raw.data(), LSDJ_SONG_BUFFER_BYTE_COUNT) == 0 );
+
+        // Active project
+        REQUIRE( lsdj_sav_get_active_project_index(compSav) == LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX );
+
+        auto compProject = lsdj_sav_get_project(compSav, 0);
+        REQUIRE( compProject != nullptr );
+
+        std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
+        lsdj_project_get_name(compProject, name.data());
+        REQUIRE( strncmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
+
+        REQUIRE( lsdj_project_get_version(compProject) == 4 );
+
+        auto song_buffer = lsdj_project_get_song_buffer(compProject);
+        REQUIRE( memcmp(song_buffer->bytes, raw.data(), raw.size()) == 0 );
+
+		lsdj_sav_free(compSav);
 	}
 }

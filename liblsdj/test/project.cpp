@@ -145,11 +145,6 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         // Version
 		REQUIRE( lsdj_project_get_version(project) == 4 );
 
-        // Song data
-		auto buffer = lsdj_project_get_song_buffer(project);
-		std::ofstream stream("/Users/stijn/Desktop/hb.song");
-		stream.write(reinterpret_cast<const char*>(buffer->bytes), LSDJ_SONG_BUFFER_BYTE_COUNT);
-
         // Read raw and compare
 		REQUIRE( memcmp(raw.data(), lsdj_project_get_song_buffer(project)->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0 );
 
@@ -170,11 +165,6 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 
         // Version
 		REQUIRE( lsdj_project_get_version(project) == 4 );
-
-        // Song data
-		auto buffer = lsdj_project_get_song_buffer(project);
-		std::ofstream stream("/Users/stijn/Desktop/hb.song");
-		stream.write(reinterpret_cast<const char*>(buffer->bytes), LSDJ_SONG_BUFFER_BYTE_COUNT);
 
         // Read raw and compare
 		REQUIRE( memcmp(raw.data(), lsdj_project_get_song_buffer(project)->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0 );
@@ -206,7 +196,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         // Decompress (the other test makes sure it's correct) back and compare against
         // the raw
         
-        auto lsdsng = lsdj_project_read_lsdsng_from_memory(data.data(), writeCount * BLOCK_SIZE, nullptr);
+        auto lsdsng = lsdj_project_read_lsdsng_from_memory(data.data(), writeCount * LSDJ_BLOCK_SIZE, nullptr);
         
         std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
         lsdj_project_get_name(lsdsng, name.data());

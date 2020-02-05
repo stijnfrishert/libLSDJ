@@ -266,7 +266,7 @@ bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     // Find out if the file size modulo's to the compression block size
     /*! @todo What if someone gives up a buffer bigger than the project size?
         Would still be correct, but not pass this heuristic */
-    if ((size - LSDJ_PROJECT_NAME_LENGTH - 1) % BLOCK_SIZE != 0)
+    if ((size - LSDJ_PROJECT_NAME_LENGTH - 1) % LSDJ_BLOCK_SIZE != 0)
     {
         lsdj_error_optional_new(error, "data length does not correspond to that of a valid lsdsng");
         return false;
@@ -340,7 +340,7 @@ size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio
     // Compress and write the song buffer
     const lsdj_song_buffer_t* songBuffer = lsdj_project_get_song_buffer(project);
     const unsigned int block_count = lsdj_compress(songBuffer->bytes, 1, wvio, error);
-    write_size += block_count * BLOCK_SIZE;
+    write_size += block_count * LSDJ_BLOCK_SIZE;
 
     // Return the amount of bytes written
     assert(write_size <= LSDSNG_MAX_SIZE);

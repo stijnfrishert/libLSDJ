@@ -130,9 +130,9 @@ void decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool follo
             break;
         default:
             if (followBlockSwitches)
-                *currentBlockPosition = LSDJ_SAV_HEADER_POSITION + BLOCK_SIZE + (long)((byte - 1) * BLOCK_SIZE);
+                *currentBlockPosition = LSDJ_SAV_HEADER_POSITION + LSDJ_BLOCK_SIZE + (long)((byte - 1) * LSDJ_BLOCK_SIZE);
             else
-                *currentBlockPosition += BLOCK_SIZE;
+                *currentBlockPosition += LSDJ_BLOCK_SIZE;
             
             if (rvio->seek(*currentBlockPosition, SEEK_SET, rvio->user_data) != 0)
                 return lsdj_error_optional_new(error, "could not seek to new block position");
@@ -216,7 +216,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
  {
      //! @todo This function needs to be refactored because it is w-a-y too huge
      
-     if (blockOffset == BLOCK_COUNT + 1)
+     if (blockOffset == LSDJ_BLOCK_COUNT + 1)
          return 0;
     
      unsigned char nextEvent[3] = { 0, 0, 0 };
@@ -328,7 +328,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
         
          // See if the event would still fit in this block
          // If not, move to a new block
-         if (currentBlockSize + eventSize + 2 >= BLOCK_SIZE)
+         if (currentBlockSize + eventSize + 2 >= LSDJ_BLOCK_SIZE)
          {
              // Write the "next block" command
              byte = SPECIAL_ACTION_BYTE;
@@ -346,11 +346,11 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
              }
             
              currentBlockSize += 2;
-             assert(currentBlockSize <= BLOCK_SIZE);
+             assert(currentBlockSize <= LSDJ_BLOCK_SIZE);
             
              // Fill the rest of the block with 0's
              byte = 0;
-             for (; currentBlockSize < BLOCK_SIZE; currentBlockSize++)
+             for (; currentBlockSize < LSDJ_BLOCK_SIZE; currentBlockSize++)
              {
                  if (wvio->write(&byte, 1, wvio->user_data) != 1)
                  {
@@ -360,7 +360,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
              }
             
              // Make sure we filled up the block entirely
-             if (currentBlockSize != BLOCK_SIZE)
+             if (currentBlockSize != LSDJ_BLOCK_SIZE)
              {
                  lsdj_error_optional_new(error, "block wasn't completely filled upon compression");
                  return 0;
@@ -372,7 +372,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
             
              // Have we reached the maximum block count?
              // If so, roll back
-             if (currentBlock == BLOCK_COUNT + 1)
+             if (currentBlock == LSDJ_BLOCK_COUNT + 1)
              {
                  long pos = wvio->tell(wvio->user_data);
                  if (wvio->seek(writeStart, SEEK_SET, wvio->user_data) != 0)
@@ -431,7 +431,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
      if (currentBlockSize > 0)
      {
          byte = 0;
-         for (currentBlockSize += 2; currentBlockSize < BLOCK_SIZE; currentBlockSize++)
+         for (currentBlockSize += 2; currentBlockSize < LSDJ_BLOCK_SIZE; currentBlockSize++)
          {
              if (wvio->write(&byte, 1, wvio->user_data) != 1)
              {
