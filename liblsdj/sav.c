@@ -307,7 +307,7 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
 
             lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
 
-            if (lsdj_decompress(rvio, &wvio, true, error) == false)
+            if (lsdj_decompress(rvio, &wvio, true, NULL, error) == false)
             {
                 lsdj_project_free(project);
                 return false;
@@ -555,7 +555,7 @@ size_t compress_blocks(unsigned char* blocks, lsdj_project_t* const* projects, u
         // If so, compress
         const lsdj_song_buffer_t* song_buffer = lsdj_project_get_song_buffer(project);
         size_t count = 0;
-        bool result = lsdj_compress(song_buffer->bytes, current_block, &wvio, &count, error);
+        bool result = lsdj_compress(song_buffer->bytes, &wvio, current_block, &count, error);
         write_count += count;
         if (!result)
             return write_count;

@@ -60,19 +60,21 @@ extern "C" {
 	See https://littlesounddj.fandom.com/wiki/File_Management_Structure for more info
 
 	@return true on success, false on failure */
-bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, lsdj_error_t** error);
+bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, size_t* writeCount, lsdj_error_t** error);
 
 //! Compress memory blocks according to the LSDJ compression spec
 /*! This algorithm is used to store songs in the project slots in a sav,
     as well as in an .lsdsng file.
 
     @param data The data that will be compressed into blocks
+    @param wvio The virtual I/O to be written to. Make sure you have at least about data size / LSDJ_BLOCK_SIZE space
     @param blockOffset The offset to the block jump ids that will be written
-    @param wvio The virtual I/O to be written to. Make sure you have at least about data size / LSDJ_BLOCK_SIZE space.
     @param writeCount If given, the amount of bytes written is stored here after return
  
-    @return True on success, false if something failed */
-bool lsdj_compress(const unsigned char* data, unsigned int blockOffset, lsdj_vio_t* wvio, size_t* writeCount, lsdj_error_t** error);
+    @return True on success, false if something failed
+
+    @todo Should the first argument be an lsdj_vio_t* rvio? */
+bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCount, lsdj_error_t** error);
     
 #ifdef __cplusplus
 }
