@@ -161,14 +161,14 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
     if (project == NULL)
         return NULL;
     
-    if (rvio->read(project->name, LSDJ_PROJECT_NAME_LENGTH, rvio->user_data) != LSDJ_PROJECT_NAME_LENGTH)
+    if (rvio->read(project->name, LSDJ_PROJECT_NAME_LENGTH, rvio->userData) != LSDJ_PROJECT_NAME_LENGTH)
     {
         lsdj_error_optional_new(error, "could not read project name");
         lsdj_project_free(project);
         return NULL;
     }
     
-    if (rvio->read(&project->version, 1, rvio->user_data) != 1)
+    if (rvio->read(&project->version, 1, rvio->userData) != 1)
     {
         lsdj_error_optional_new(error, "could not read project version");
         lsdj_project_free(project);
@@ -258,10 +258,10 @@ bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     /*! @todo See if the name is alphanumeric */
     
     // Find out about the file "size"
-    const long begin = vio->tell(vio->user_data);
-    vio->seek(0, SEEK_END, vio->user_data);
-    const long size = vio->tell(vio->user_data) - begin;
-    vio->seek(0, SEEK_SET, vio->user_data);
+    const long begin = vio->tell(vio->userData);
+    vio->seek(0, SEEK_END, vio->userData);
+    const long size = vio->tell(vio->userData) - begin;
+    vio->seek(0, SEEK_SET, vio->userData);
 
     // Find out if the file size modulo's to the compression block size
     /*! @todo What if someone gives up a buffer bigger than the project size?
@@ -319,33 +319,33 @@ bool lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_
 
 size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio, lsdj_error_t** error)
 {
-    size_t write_size = 0;
+    size_t writeSize = 0;
     
     // Write the name
-    write_size += wvio->write(project->name, LSDJ_PROJECT_NAME_LENGTH, wvio->user_data);
-    if (write_size != LSDJ_PROJECT_NAME_LENGTH)
+    writeSize += wvio->write(project->name, LSDJ_PROJECT_NAME_LENGTH, wvio->userData);
+    if (writeSize != LSDJ_PROJECT_NAME_LENGTH)
     {
         lsdj_error_optional_new(error, "could not write project name for lsdsng");
-        return write_size;
+        return writeSize;
     }
     
     // Write the version
-    if (wvio->write(&project->version, 1, wvio->user_data) != 1)
+    if (wvio->write(&project->version, 1, wvio->userData) != 1)
     {
         lsdj_error_optional_new(error, "could not write project version for lsdsng");
-        return write_size;
+        return writeSize;
     }
-    write_size += 1;
+    writeSize += 1;
     
     // Compress and write the song buffer
     const lsdj_song_buffer_t* songBuffer = lsdj_project_get_song_buffer(project);
-    size_t compression_size = 0;
-    lsdj_compress(songBuffer->bytes, wvio, 1, &compression_size, error);
-    write_size += compression_size;
+    size_t compressionSize = 0;
+    lsdj_compress(songBuffer->bytes, wvio, 1, &compressionSize, error);
+    writeSize += compressionSize;
 
     // Return the amount of bytes written
-    assert(write_size <= LSDSNG_MAX_SIZE);
-    return write_size;
+    assert(writeSize <= LSDSNG_MAX_SIZE);
+    return writeSize;
 }
 
  size_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error)
@@ -373,11 +373,11 @@ size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio
     
      lsdj_vio_t wvio = lsdj_create_file_vio(file);
     
-     const size_t write_size = lsdj_project_write_lsdsng(project, &wvio, error);
+     const size_t writeSize = lsdj_project_write_lsdsng(project, &wvio, error);
     
      fclose(file);
 
-     return write_size;
+     return writeSize;
  }
 
 size_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, lsdj_error_t** error)

@@ -51,16 +51,16 @@ extern "C" {
 #include <stdio.h>
 
 //! The signature of a virtual I/O read function
-typedef size_t (*lsdj_vio_read_t)(void* ptr, size_t size, void* user_data);
+typedef size_t (*lsdj_vio_read_t)(void* ptr, size_t size, void* userData);
 
 //! The signature of a virtual I/O write function
-typedef size_t (*lsdj_vio_write_t)(const void* ptr, size_t size, void* user_data);
+typedef size_t (*lsdj_vio_write_t)(const void* ptr, size_t size, void* userData);
 
 //! The signature of a virtual I/O tell function
-typedef long (*lsdj_vio_tell_t)(void* user_data);
+typedef long (*lsdj_vio_tell_t)(void* userData);
 
 //! The signature of a virtual I/O seek function
-typedef long (*lsdj_vio_seek_t)(long offset, int whence, void* user_data);
+typedef long (*lsdj_vio_seek_t)(long offset, int whence, void* userData);
 
 typedef struct
 {
@@ -77,23 +77,23 @@ typedef struct
     lsdj_vio_seek_t seek;
 
     //! Custom data necessary for the functions to do their work
-    void* user_data;
+    void* userData;
 } lsdj_vio_t;
 
 
 // --- File --- //
     
 //! Virtual I/O read function for file access
-size_t lsdj_fread(void* ptr, size_t size, void* user_data);
+size_t lsdj_fread(void* ptr, size_t size, void* userData);
 
 //! Virtual I/O write function for file access
-size_t lsdj_fwrite(const void* ptr, size_t size, void* user_data);
+size_t lsdj_fwrite(const void* ptr, size_t size, void* userData);
 
 //! Virtual I/O tell function for file access
-long lsdj_ftell(void* user_data);
+long lsdj_ftell(void* userData);
 
 //! Virtual I/O seek function for file access
-long lsdj_fseek(long offset, int whence, void* user_data);
+long lsdj_fseek(long offset, int whence, void* userData);
 
 //! Convenience function for filling a vio for file access
 lsdj_vio_t lsdj_create_file_vio(FILE* file);
@@ -112,16 +112,16 @@ typedef struct
 } lsdj_memory_access_state_t;
 
 //! Virtual I/O read function for memory access
-size_t lsdj_mread(void* ptr, size_t size, void* user_data);
+size_t lsdj_mread(void* ptr, size_t size, void* userData);
 
 //! Virtual I/O write function for memory access
-size_t lsdj_mwrite(const void* ptr, size_t size, void* user_data);
+size_t lsdj_mwrite(const void* ptr, size_t size, void* userData);
 
 //! Virtual I/O tell function for memory access
-long lsdj_mtell(void* user_data);
+long lsdj_mtell(void* userData);
 
 //! Virtual I/O seek function for memory access
-long lsdj_mseek(long offset, int whence, void* user_data);
+long lsdj_mseek(long offset, int whence, void* userData);
 
 //! Convenience function for filling a vio for memory access
 lsdj_vio_t lsdj_create_memory_vio(lsdj_memory_access_state_t* state);

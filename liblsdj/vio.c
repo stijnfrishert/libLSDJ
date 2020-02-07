@@ -41,24 +41,24 @@
 
 // --- File --- //
 
-size_t lsdj_fread(void* ptr, size_t size, void* user_data)
+size_t lsdj_fread(void* ptr, size_t size, void* userData)
 {
-    return fread(ptr, size, 1, (FILE*)user_data) * size;
+    return fread(ptr, size, 1, (FILE*)userData) * size;
 }
 
-size_t lsdj_fwrite(const void* ptr, size_t size, void* user_data)
+size_t lsdj_fwrite(const void* ptr, size_t size, void* userData)
 {
-    return fwrite(ptr, size, 1, (FILE*)user_data) * size;
+    return fwrite(ptr, size, 1, (FILE*)userData) * size;
 }
 
-long lsdj_ftell(void* user_data)
+long lsdj_ftell(void* userData)
 {
-    return ftell((FILE*)user_data);
+    return ftell((FILE*)userData);
 }
 
-long lsdj_fseek(long offset, int whence, void* user_data)
+long lsdj_fseek(long offset, int whence, void* userData)
 {
-    return fseek((FILE*)user_data, offset, whence);
+    return fseek((FILE*)userData, offset, whence);
 }
 
 lsdj_vio_t lsdj_create_file_vio(FILE* file)
@@ -69,7 +69,7 @@ lsdj_vio_t lsdj_create_file_vio(FILE* file)
     vio.write = lsdj_fwrite;
     vio.tell = lsdj_ftell;
     vio.seek = lsdj_fseek;
-    vio.user_data = (void*)file;
+    vio.userData = (void*)file;
 
     return vio;
 }
@@ -77,9 +77,9 @@ lsdj_vio_t lsdj_create_file_vio(FILE* file)
 
 // --- Memory --- //
 
-size_t lsdj_mread(void* ptr, size_t size, void* user_data)
+size_t lsdj_mread(void* ptr, size_t size, void* userData)
 {
-    lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)user_data;
+    lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)userData;
     
     assert(mem->cur <= mem->begin + mem->size);
     
@@ -93,9 +93,9 @@ size_t lsdj_mread(void* ptr, size_t size, void* user_data)
     return minSize;
 }
 
-size_t lsdj_mwrite(const void* ptr, size_t size, void* user_data)
+size_t lsdj_mwrite(const void* ptr, size_t size, void* userData)
 {
-    lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)user_data;
+    lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)userData;
     
     const size_t available = mem->size - (size_t)(mem->cur - mem->begin);
     const size_t minSize = size < available ? size : available;
@@ -107,9 +107,9 @@ size_t lsdj_mwrite(const void* ptr, size_t size, void* user_data)
     return minSize;
 }
 
-long lsdj_mtell(void* user_data)
+long lsdj_mtell(void* userData)
 {
-    const lsdj_memory_access_state_t* mem = (const lsdj_memory_access_state_t*)user_data;
+    const lsdj_memory_access_state_t* mem = (const lsdj_memory_access_state_t*)userData;
     
     long pos = mem->cur - mem->begin;
     if (pos < 0 || pos > mem->size)
@@ -118,9 +118,9 @@ long lsdj_mtell(void* user_data)
     return pos;
 }
 
-long lsdj_mseek(long offset, int whence, void* user_data)
+long lsdj_mseek(long offset, int whence, void* userData)
 {
-    lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)user_data;
+    lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)userData;
     
     unsigned char* cur = mem->cur;
     
@@ -149,7 +149,7 @@ lsdj_vio_t lsdj_create_memory_vio(lsdj_memory_access_state_t* state)
     vio.write = lsdj_mwrite;
     vio.tell = lsdj_mtell;
     vio.seek = lsdj_mseek;
-    vio.user_data = (void*)state;
+    vio.userData = (void*)state;
 
     return vio;
 }

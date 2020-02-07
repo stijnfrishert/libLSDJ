@@ -50,11 +50,11 @@
 struct lsdj_sav_t
 {
     //! The song in active working memory
-    lsdj_song_buffer_t working_memory_song_buffer;
+    lsdj_song_buffer_t workingMemorySongBuffer;
 
     //! Index of the project that is currently being edited
     /*! Indices start at 0, a value of LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX means there is no active project */
-    unsigned char active_project_index;
+    unsigned char activeProjectIndex;
 
     //! The project slots
     /*! If one of these is NULL, it means the slot isn't used by the sav */
@@ -66,12 +66,12 @@ struct lsdj_sav_t
 
 typedef struct
 {
-	char project_names[LSDJ_PROJECT_NAME_LENGTH][LSDJ_SAV_PROJECT_COUNT];
-	unsigned char project_versions[LSDJ_SAV_PROJECT_COUNT];
+	char projectNames[LSDJ_PROJECT_NAME_LENGTH][LSDJ_SAV_PROJECT_COUNT];
+	unsigned char projectVersions[LSDJ_SAV_PROJECT_COUNT];
 	unsigned char empty[30];
 	char init[2];
-	unsigned char active_project;
-    unsigned char block_allocation_table[LSDJ_BLOCK_COUNT];
+	unsigned char activeProject;
+    unsigned char blockAllocationTable[LSDJ_BLOCK_COUNT];
 } header_t;
 
 
@@ -101,7 +101,7 @@ lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error)
     }
 
     // Clear the working memory song buffer
-    memset(&sav->working_memory_song_buffer, 0, sizeof(sav->working_memory_song_buffer));
+    memset(&sav->workingMemorySongBuffer, 0, sizeof(sav->workingMemorySongBuffer));
     
     // Clear the projects
     for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; i++)
@@ -110,7 +110,7 @@ lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error)
     }
     
     // None of the project slots is active
-    sav->active_project_index = LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX;
+    sav->activeProjectIndex = LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX;
     
     return sav;
 }
@@ -125,8 +125,8 @@ lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, lsdj_error_t** error)
         return NULL;
     }
 
-    memcpy(&copy->working_memory_song_buffer, &sav->working_memory_song_buffer, sizeof(sav->working_memory_song_buffer));
-    copy->active_project_index = sav->active_project_index;
+    memcpy(&copy->workingMemorySongBuffer, &sav->workingMemorySongBuffer, sizeof(sav->workingMemorySongBuffer));
+    copy->activeProjectIndex = sav->activeProjectIndex;
     memcpy(copy->reserved8120, sav->reserved8120, sizeof(sav->reserved8120));
 
     bool copy_projects_succeeded = true;
@@ -178,7 +178,7 @@ void lsdj_sav_free(lsdj_sav_t* sav)
 
 void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer)
 {
-    memcpy(&sav->working_memory_song_buffer, songBuffer, sizeof(lsdj_song_buffer_t));
+    memcpy(&sav->workingMemorySongBuffer, songBuffer, sizeof(lsdj_song_buffer_t));
 }
 
 bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error)
@@ -207,17 +207,17 @@ bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned cha
 
 const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav)
 {
-    return &sav->working_memory_song_buffer;
+    return &sav->workingMemorySongBuffer;
 }
 
 void lsdj_sav_set_active_project_index(lsdj_sav_t* sav, unsigned char index)
 {
-    sav->active_project_index = index;
+    sav->activeProjectIndex = index;
 }
 
 unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
 {
-    return sav->active_project_index;
+    return sav->activeProjectIndex;
 }
 
 // lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error)
@@ -283,7 +283,7 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
     // Handle decompression
     for (int i = 0; i < LSDJ_BLOCK_COUNT; ++i)
     {
-        unsigned char p = header->block_allocation_table[i];
+        unsigned char p = header->blockAllocationTable[i];
         if (p == LSDJ_SAV_EMPTY_BLOCK_VALUE)
             continue;
 
@@ -297,13 +297,13 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
                 return false;
             }
 
-            lsdj_project_set_name(project, header->project_names[i], LSDJ_PROJECT_NAME_LENGTH);
-            lsdj_project_set_version(project, header->project_versions[i]);
+            lsdj_project_set_name(project, header->projectNames[i], LSDJ_PROJECT_NAME_LENGTH);
+            lsdj_project_set_version(project, header->projectVersions[i]);
 
-            lsdj_song_buffer_t song_buffer;
+            lsdj_song_buffer_t songBuffer;
             lsdj_memory_access_state_t state;
-            state.begin = state.cur = song_buffer.bytes;
-            state.size = sizeof(song_buffer.bytes);
+            state.begin = state.cur = songBuffer.bytes;
+            state.size = sizeof(songBuffer.bytes);
 
             lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
 
@@ -313,7 +313,7 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
                 return false;
             }
 
-            lsdj_project_set_song_buffer(project, &song_buffer);
+            lsdj_project_set_song_buffer(project, &songBuffer);
 
             projects[p] = project;
         }
@@ -348,12 +348,12 @@ lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* rvio, lsdj_error_t** error)
         return NULL;
 
     // Read the working memory song
-    rvio->read(sav->working_memory_song_buffer.bytes, sizeof(sav->working_memory_song_buffer.bytes), rvio->user_data);
+    rvio->read(sav->workingMemorySongBuffer.bytes, sizeof(sav->workingMemorySongBuffer.bytes), rvio->userData);
     
     // Read the header block, before we start processing each song
 	header_t header;
     assert(sizeof(header) == LSDJ_BLOCK_SIZE);
-	rvio->read(&header, sizeof(header), rvio->user_data);
+	rvio->read(&header, sizeof(header), rvio->userData);
     
     // Check the initialization characters. If they're not 'jk', we're
     // probably not dealing with an actual LSDJ sav format file.
@@ -365,7 +365,7 @@ lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* rvio, lsdj_error_t** error)
     }
 
     // Store the active project index
-    sav->active_project_index = header.active_project;
+    sav->activeProjectIndex = header.activeProject;
     
     // Store the reserved empty memory at 0x8120
     // Not sure what's really in there, but might as well keep it intact
@@ -377,35 +377,6 @@ lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* rvio, lsdj_error_t** error)
         lsdj_sav_free(sav);
         return NULL;
     }
-    
- //    // Read the working song
- //    const long end = rvio->tell(rvio->user_data);
- //    if (end == -1L)
- //    {
- //        lsdj_error_optional_new(error, "could not tell end of sav read");
- //        lsdj_sav_free(sav);
- //        return NULL;
- //    }
-    
- //    rvio->seek(begin, SEEK_SET, rvio->user_data);
- //    lsdj_song_buffer_t song_data;
- //    if (rvio->read(song_data.bytes, sizeof(song_data.bytes), rvio->user_data) != sizeof(song_data.bytes))
- //    {
- //        lsdj_sav_free(sav);
- //        lsdj_error_optional_new(error, "could not read compressed song data");
- //        return NULL;
- //    }
-    
- //    sav->song = lsdj_song_new(error);
- //    if (error && *error)
- //    {
- //        lsdj_sav_free(sav);
- //        return NULL;
- //    }
-    
- //    sav->song = lsdj_song_read_from_memory(song_data.bytes, sizeof(song_data.bytes), error);
-    
- //    rvio->seek(end, SEEK_SET, rvio->user_data);
     
     return sav;
 }
@@ -468,11 +439,11 @@ bool lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error)
     }
     
     // Move to the initialization bytes
-    vio->seek(LSDJ_SAV_HEADER_POSITION + 0x13E, SEEK_CUR, vio->user_data);
+    vio->seek(LSDJ_SAV_HEADER_POSITION + 0x13E, SEEK_CUR, vio->userData);
     
     // Ensure these bytes are 'jk', that's what LSDJ sets them to on RAM init
     char buffer[2];
-    vio->read(buffer, sizeof(buffer), vio->user_data);
+    vio->read(buffer, sizeof(buffer), vio->userData);
     
     if (buffer[0] != 'j' || buffer[1] != 'k')
     {
@@ -525,9 +496,9 @@ bool lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsd
     return lsdj_sav_is_likely_valid(&vio, error);
 }
 
-size_t compress_blocks(unsigned char* blocks, lsdj_project_t* const* projects, unsigned char* block_alloc_table, lsdj_error_t** error)
+size_t compress_blocks(unsigned char* blocks, lsdj_project_t* const* projects, unsigned char* blockAllocTable, lsdj_error_t** error)
 {
-    size_t write_count = 0;
+    size_t writeCount = 0;
     
     lsdj_memory_access_state_t state;
     state.cur = state.begin = blocks;
@@ -544,29 +515,29 @@ size_t compress_blocks(unsigned char* blocks, lsdj_project_t* const* projects, u
             continue;
         
         // If so, compress
-        const lsdj_song_buffer_t* song_buffer = lsdj_project_get_song_buffer(project);
+        const lsdj_song_buffer_t* songBuffer = lsdj_project_get_song_buffer(project);
         size_t count = 0;
-        bool result = lsdj_compress(song_buffer->bytes, &wvio, current_block, &count, error);
-        write_count += count;
+        bool result = lsdj_compress(songBuffer->bytes, &wvio, current_block, &count, error);
+        writeCount += count;
         if (!result)
-            return write_count;
+            return writeCount;
         
-        memset(block_alloc_table, i, count / LSDJ_BLOCK_SIZE);
+        memset(blockAllocTable, i, count / LSDJ_BLOCK_SIZE);
     }
     
-    return write_count;
+    return writeCount;
 }
 
 size_t lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error)
 {
-    size_t write_count = 0;
+    size_t writeCount = 0;
 
     // Write the working project
-    write_count += vio->write(sav->working_memory_song_buffer.bytes, LSDJ_SONG_BUFFER_BYTE_COUNT, vio->user_data);
-    if (write_count != LSDJ_SONG_BUFFER_BYTE_COUNT)
+    writeCount += vio->write(sav->workingMemorySongBuffer.bytes, LSDJ_SONG_BUFFER_BYTE_COUNT, vio->userData);
+    if (writeCount != LSDJ_SONG_BUFFER_BYTE_COUNT)
     {
         lsdj_error_optional_new(error, "could not write working memory song");
-        return write_count;
+        return writeCount;
     }
 
     // Create the header for writing
@@ -575,10 +546,10 @@ size_t lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** err
     memcpy(header.empty, sav->reserved8120, sizeof(sav->reserved8120));
     header.init[0] = 'j';
     header.init[1] = 'k';
-    header.active_project = sav->active_project_index;
+    header.activeProject = sav->activeProjectIndex;
     
     // Initialize the block alloc table completely empty (we'll fill this later)
-    memset(header.block_allocation_table, LSDJ_SAV_EMPTY_BLOCK_VALUE, sizeof(header.block_allocation_table));
+    memset(header.blockAllocationTable, LSDJ_SAV_EMPTY_BLOCK_VALUE, sizeof(header.blockAllocationTable));
     
     // Set the project names and versions
     for (size_t i = 0; i < LSDJ_SAV_PROJECT_COUNT; i++)
@@ -588,38 +559,38 @@ size_t lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** err
         {
             char name[LSDJ_PROJECT_NAME_LENGTH];
             lsdj_project_get_name(project, name);
-            memcpy(header.project_names[i], name, LSDJ_PROJECT_NAME_LENGTH);
+            memcpy(header.projectNames[i], name, LSDJ_PROJECT_NAME_LENGTH);
             
-            header.project_versions[i] = lsdj_project_get_version(project);
+            header.projectVersions[i] = lsdj_project_get_version(project);
         }
     }
     
     // Compress the projects into blocks
     unsigned char blocks[LSDJ_BLOCK_COUNT * LSDJ_BLOCK_SIZE];
     memset(blocks, 0, sizeof(blocks));
-    size_t compression_size = compress_blocks(blocks, sav->projects, header.block_allocation_table, error);
+    size_t compressionSize = compress_blocks(blocks, sav->projects, header.blockAllocationTable, error);
     
     // Write the header to output
-    const size_t header_write_count = vio->write(&header, sizeof(header), vio->user_data);
-    write_count += header_write_count;
-    if (header_write_count != sizeof(header))
+    const size_t headerWriteCount = vio->write(&header, sizeof(header), vio->userData);
+    writeCount += headerWriteCount;
+    if (headerWriteCount != sizeof(header))
     {
         lsdj_error_optional_new(error, "could not write header");
-        return write_count;
+        return writeCount;
     }
     
     // Write the blocks
-    const size_t blocks_write_count = vio->write(blocks, sizeof(blocks), vio->user_data);
-    write_count += blocks_write_count;
-    if (blocks_write_count != sizeof(blocks))
+    const size_t blocksWriteCount = vio->write(blocks, sizeof(blocks), vio->userData);
+    writeCount += blocksWriteCount;
+    if (blocksWriteCount != sizeof(blocks))
     {
         lsdj_error_optional_new(error, "could not write blocks");
-        return write_count;
+        return writeCount;
     }
     
-    assert(write_count == 131072);
+    assert(writeCount == 131072);
 
-    return write_count;
+    return writeCount;
 }
 
  size_t lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error)
@@ -646,10 +617,10 @@ size_t lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** err
      }
     
      lsdj_vio_t vio = lsdj_create_file_vio(file);
-     size_t write_count = lsdj_sav_write(sav, &vio, error);
+     size_t writeCount = lsdj_sav_write(sav, &vio, error);
      fclose(file);
      
-     return write_count;
+     return writeCount;
  }
 
 size_t lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error)

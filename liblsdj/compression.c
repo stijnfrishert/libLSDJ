@@ -55,7 +55,7 @@ static const unsigned char LSDJ_DEFAULT_INSTRUMENT_COMPRESSION[LSDJ_LSDJ_DEFAULT
 bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount, lsdj_error_t** error)
 {
     unsigned char byte;
-    if (rvio->read(&byte, 1, rvio->user_data) != 1)
+    if (rvio->read(&byte, 1, rvio->userData) != 1)
     {
         lsdj_error_optional_new(error, "could not read RLE byte");
         return false;
@@ -63,7 +63,7 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount,
     
     if (byte == RUN_LENGTH_ENCODING_BYTE)
     {
-        if (wvio->write(&byte, 1, wvio->user_data) != 1)
+        if (wvio->write(&byte, 1, wvio->userData) != 1)
         {
             lsdj_error_optional_new(error, "could not write RLE byte");
             return false;
@@ -73,7 +73,7 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount,
     else
     {
         unsigned char count = 0;
-        if (rvio->read(&count, 1, rvio->user_data) != 1)
+        if (rvio->read(&count, 1, rvio->userData) != 1)
         {
             lsdj_error_optional_new(error, "could not read RLE count byte");
             return false;
@@ -81,7 +81,7 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount,
         
         for (int i = 0; i < count; ++i)
         {
-            if (wvio->write(&byte, 1, wvio->user_data) != 1)
+            if (wvio->write(&byte, 1, wvio->userData) != 1)
             {
                 lsdj_error_optional_new(error, "could not write byte for RLE expansion");
                 return false;
@@ -96,7 +96,7 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount,
 bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount, lsdj_error_t** error)
 {
     unsigned char count = 0;
-    if (rvio->read(&count, 1, rvio->user_data) != 1)
+    if (rvio->read(&count, 1, rvio->userData) != 1)
     {
         lsdj_error_optional_new(error, "could not read default wave count byte");
         return false;
@@ -104,7 +104,7 @@ bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* wr
     
     for (int i = 0; i < count; ++i)
     {
-        size_t written_bytes_count = wvio->write(LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE), wvio->user_data);
+        size_t written_bytes_count = wvio->write(LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE), wvio->userData);
         if (writeCount) *writeCount += written_bytes_count;
         if (written_bytes_count != sizeof(LSDJ_DEFAULT_WAVE))
         {
@@ -119,7 +119,7 @@ bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* wr
 bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount, lsdj_error_t** error)
 {
     unsigned char count = 0;
-    if (rvio->read(&count, 1, rvio->user_data) != 1)
+    if (rvio->read(&count, 1, rvio->userData) != 1)
     {
         lsdj_error_optional_new(error, "could not read default instrument count byte");
         return false;
@@ -127,7 +127,7 @@ bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size
     
     for (int i = 0; i < count; ++i)
     {
-        size_t written_bytes_count = wvio->write(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), wvio->user_data);
+        size_t written_bytes_count = wvio->write(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), wvio->userData);
         if (writeCount) *writeCount += written_bytes_count;
         if (written_bytes_count != sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION))
         {
@@ -142,7 +142,7 @@ bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size
 bool decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool followBlockSwitches, lsdj_vio_t* wvio, bool* reading, size_t* writeCount, lsdj_error_t** error)
 {
     unsigned char byte = 0;
-    if (rvio->read(&byte, 1, rvio->user_data) != 1)
+    if (rvio->read(&byte, 1, rvio->userData) != 1)
     {
         lsdj_error_optional_new(error, "could not read SA byte");
         return false;
@@ -151,7 +151,7 @@ bool decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool follo
     switch (byte)
     {
         case SPECIAL_ACTION_BYTE:
-            if (wvio->write(&byte, 1, wvio->user_data) != 1)
+            if (wvio->write(&byte, 1, wvio->userData) != 1)
             {
                 lsdj_error_optional_new(error, "could not write SA byte");
                 return false;
@@ -175,7 +175,7 @@ bool decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool follo
             else
                 *currentBlockPosition += LSDJ_BLOCK_SIZE;
             
-            if (rvio->seek(*currentBlockPosition, SEEK_SET, rvio->user_data) != 0)
+            if (rvio->seek(*currentBlockPosition, SEEK_SET, rvio->userData) != 0)
             {
                 lsdj_error_optional_new(error, "could not seek to new block position");
                 return false;
@@ -193,7 +193,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
 
     // Store the position of the current block
     // (This will be updated through the decompression algorithm)
-    long currentBlockPosition = rvio->tell(rvio->user_data);
+    long currentBlockPosition = rvio->tell(rvio->userData);
     if (currentBlockPosition == -1L)
     {
         lsdj_error_optional_new(error, "could not tell current read block position");
@@ -201,7 +201,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
     }
 
     // Store our starting write position
-    const long writeStart = wvio->tell(wvio->user_data);
+    const long writeStart = wvio->tell(wvio->userData);
     
     unsigned char byte = 0;
     
@@ -209,11 +209,11 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
     while (reading == true)
     {
         // Uncomment this to see every read and corresponding write position
-//        const long rcur = rvio->tell(rvio->user_data) - 9;
-//        const long wcur = wvio->tell(wvio->user_data) - writeStart;
+//        const long rcur = rvio->tell(rvio->userData) - 9;
+//        const long wcur = wvio->tell(wvio->userData) - writeStart;
 //        printf("read: 0x%lx\twrite: 0x%lx\n", rcur, wcur);
         
-        if (rvio->read(&byte, 1, rvio->user_data) != 1)
+        if (rvio->read(&byte, 1, rvio->userData) != 1)
         {
             lsdj_error_optional_new(error, "could not read byte for decompression");
             return false;
@@ -230,7 +230,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
                     return false;
                 break;
             default:
-                if (wvio->write(&byte, 1, wvio->user_data) != 1)
+                if (wvio->write(&byte, 1, wvio->userData) != 1)
                 {
                     lsdj_error_optional_new(error, "could not write decompression byte");
                     return false;
@@ -240,7 +240,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
         }
     }
 
-    const long writeEnd = wvio->tell(wvio->user_data);
+    const long writeEnd = wvio->tell(wvio->userData);
     if (writeEnd == -1L)
     {
         lsdj_error_optional_new(error, "could not tell compression end");
@@ -278,7 +278,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
     
     unsigned char byte = 0;
     
-    long writeStart = wvio->tell(wvio->user_data);
+    long writeStart = wvio->tell(wvio->userData);
     if (writeStart == -1L)
     {
         lsdj_error_optional_new(error, "could not tell write position on compression");
@@ -289,7 +289,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
     for (const unsigned char* read = data; read < end; )
     {
         // Uncomment this to print the current read and write positions
-        // long wcur = wvio->tell(wvio->user_data) - writeStart;
+        // long wcur = wvio->tell(wvio->userData) - writeStart;
         // printf("read: 0x%lx\twrite: 0x%lx\n", read - data, wcur);
         
         // Are we reading a default wave? If so, we can compress these!
@@ -384,7 +384,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
         {
             // Write the "next block" command
             byte = SPECIAL_ACTION_BYTE;
-            if (wvio->write(&byte, 1, wvio->user_data) != 1)
+            if (wvio->write(&byte, 1, wvio->userData) != 1)
             {
                 lsdj_error_optional_new(error, "could not write SA byte for next block command");
                 return false;
@@ -392,7 +392,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
             if (writeCount) *writeCount += 1;
             
             byte = (unsigned char)(currentBlock + 1);
-            if (wvio->write(&byte, 1, wvio->user_data) != 1)
+            if (wvio->write(&byte, 1, wvio->userData) != 1)
             {
                 lsdj_error_optional_new(error, "could not write next block byte for compression");
                 return false;
@@ -406,7 +406,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
             byte = 0;
             for (; currentBlockSize < LSDJ_BLOCK_SIZE; currentBlockSize++)
             {
-                if (wvio->write(&byte, 1, wvio->user_data) != 1)
+                if (wvio->write(&byte, 1, wvio->userData) != 1)
                 {
                     lsdj_error_optional_new(error, "could not write 0 for block padding");
                     return false;
@@ -429,8 +429,8 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
             // If so, roll back
             if (currentBlock == LSDJ_BLOCK_COUNT + 1)
             {
-                long pos = wvio->tell(wvio->user_data);
-                if (wvio->seek(writeStart, SEEK_SET, wvio->user_data) != 0)
+                long pos = wvio->tell(wvio->userData);
+                if (wvio->seek(writeStart, SEEK_SET, wvio->userData) != 0)
                 {
                     lsdj_error_optional_new(error, "could not roll back after reaching max block count for compression");
                     return 0;
@@ -439,7 +439,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
                 byte = 0;
                 for (long i = 0; i < pos - writeStart; ++i)
                 {
-                    if (wvio->write(&byte, 1, wvio->user_data) != 1)
+                    if (wvio->write(&byte, 1, wvio->userData) != 1)
                     {
                         lsdj_error_optional_new(error, "could not fill rolled back data with 0 for compression");
                         return false;
@@ -447,7 +447,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
                     if (writeCount) *writeCount += 1;
                 }
                 
-                if (wvio->seek(writeStart, SEEK_SET, wvio->user_data) != 0)
+                if (wvio->seek(writeStart, SEEK_SET, wvio->userData) != 0)
                 {
                     lsdj_error_optional_new(error, "could not fill roll back to start for compression roll back");
                     return false;
@@ -459,7 +459,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
             // Don't "continue;" but fall through. We still need to write the event *in the next block*
         }
         
-        size_t count = wvio->write(nextEvent, eventSize, wvio->user_data);
+        size_t count = wvio->write(nextEvent, eventSize, wvio->userData);
         if (writeCount) *writeCount += count;
         if (count != eventSize)
         {
@@ -473,7 +473,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
     }
     
     byte = SPECIAL_ACTION_BYTE;
-    if (wvio->write(&byte, 1, wvio->user_data) != 1)
+    if (wvio->write(&byte, 1, wvio->userData) != 1)
     {
         lsdj_error_optional_new(error, "could not write SA for EOF for compression");
         return 0;
@@ -481,7 +481,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
     if (writeCount) *writeCount += 1;
     
     byte = END_OF_FILE_BYTE;
-    if (wvio->write(&byte, 1, wvio->user_data) != 1)
+    if (wvio->write(&byte, 1, wvio->userData) != 1)
     {
         lsdj_error_optional_new(error, "could not write EOF for compression");
         return false;
@@ -493,7 +493,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
         byte = 0;
         for (currentBlockSize += 2; currentBlockSize < LSDJ_BLOCK_SIZE; currentBlockSize++)
         {
-            if (wvio->write(&byte, 1, wvio->user_data) != 1)
+            if (wvio->write(&byte, 1, wvio->userData) != 1)
             {
                 lsdj_error_optional_new(error, "could not write 0 for block padding");
                 return false;
