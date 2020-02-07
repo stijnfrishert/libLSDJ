@@ -52,10 +52,10 @@
 
 static const unsigned char LSDJ_DEFAULT_INSTRUMENT_COMPRESSION[LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
 
-bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount, lsdj_error_t** error)
+bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
-    unsigned char byte;
-    if (rvio->read(&byte, 1, rvio->userData) != 1)
+    unsigned char byte = 0;
+    if (!lsdj_vio_read_byte(rvio, &byte, NULL))
     {
         lsdj_error_optional_new(error, "could not read RLE byte");
         return false;
@@ -63,17 +63,16 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount,
     
     if (byte == RUN_LENGTH_ENCODING_BYTE)
     {
-        if (wvio->write(&byte, 1, wvio->userData) != 1)
+        if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
         {
             lsdj_error_optional_new(error, "could not write RLE byte");
             return false;
         }
-        if (writeCount) *writeCount += 1;
     }
     else
     {
         unsigned char count = 0;
-        if (rvio->read(&count, 1, rvio->userData) != 1)
+        if (!lsdj_vio_read_byte(rvio, &count, NULL))
         {
             lsdj_error_optional_new(error, "could not read RLE count byte");
             return false;
@@ -81,22 +80,21 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount,
         
         for (int i = 0; i < count; ++i)
         {
-            if (wvio->write(&byte, 1, wvio->userData) != 1)
+            if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
             {
                 lsdj_error_optional_new(error, "could not write byte for RLE expansion");
                 return false;
             }
-            if (writeCount) *writeCount += 1;
         }
     }
 
     return true;
 }
 
-bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount, lsdj_error_t** error)
+bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
     unsigned char count = 0;
-    if (rvio->read(&count, 1, rvio->userData) != 1)
+    if (!lsdj_vio_read_byte(rvio, &count, NULL))
     {
         lsdj_error_optional_new(error, "could not read default wave count byte");
         return false;
@@ -104,9 +102,7 @@ bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* wr
     
     for (int i = 0; i < count; ++i)
     {
-        size_t written_bytes_count = wvio->write(LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE), wvio->userData);
-        if (writeCount) *writeCount += written_bytes_count;
-        if (written_bytes_count != sizeof(LSDJ_DEFAULT_WAVE))
+        if (!lsdj_vio_write(wvio, LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE), writeCounter))
         {
             lsdj_error_optional_new(error, "could not write default wave byte");
             return false;
@@ -116,10 +112,10 @@ bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* wr
     return true;
 }
 
-bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCount, lsdj_error_t** error)
+bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
     unsigned char count = 0;
-    if (rvio->read(&count, 1, rvio->userData) != 1)
+    if (!lsdj_vio_read_byte(rvio, &count, NULL))
     {
         lsdj_error_optional_new(error, "could not read default instrument count byte");
         return false;
@@ -127,9 +123,7 @@ bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size
     
     for (int i = 0; i < count; ++i)
     {
-        size_t written_bytes_count = wvio->write(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), wvio->userData);
-        if (writeCount) *writeCount += written_bytes_count;
-        if (written_bytes_count != sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION))
+        if (!lsdj_vio_write(wvio, LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), writeCounter))
         {
             lsdj_error_optional_new(error, "could not write default instrument byte");
             return false;
@@ -139,10 +133,10 @@ bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size
     return true;
 }
 
-bool decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool followBlockSwitches, lsdj_vio_t* wvio, bool* reading, size_t* writeCount, lsdj_error_t** error)
+bool decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool followBlockSwitches, lsdj_vio_t* wvio, bool* reading, size_t* writeCounter, lsdj_error_t** error)
 {
     unsigned char byte = 0;
-    if (rvio->read(&byte, 1, rvio->userData) != 1)
+    if (!lsdj_vio_read_byte(rvio, &byte, NULL))
     {
         lsdj_error_optional_new(error, "could not read SA byte");
         return false;
@@ -151,19 +145,18 @@ bool decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool follo
     switch (byte)
     {
         case SPECIAL_ACTION_BYTE:
-            if (wvio->write(&byte, 1, wvio->userData) != 1)
+            if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
             {
                 lsdj_error_optional_new(error, "could not write SA byte");
                 return false;
             }
-            if (writeCount) *writeCount += 1;
             break;
         case LSDJ_DEFAULT_WAVE_BYTE:
-            if (!decompress_default_wave_byte(rvio, wvio, writeCount, error))
+            if (!decompress_default_wave_byte(rvio, wvio, writeCounter, error))
                 return false;
             break;
         case LSDJ_DEFAULT_INSTRUMENT_BYTE:
-            if (!decompress_default_instrument_byte(rvio, wvio, writeCount, error))
+            if (!decompress_default_instrument_byte(rvio, wvio, writeCounter, error))
                 return false;
             break;
         case END_OF_FILE_BYTE:
@@ -186,11 +179,8 @@ bool decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool follo
     return true;
 }
 
-bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, size_t* writeCount, lsdj_error_t** error)
+bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, size_t* writeCounter, lsdj_error_t** error)
 {
-    if (writeCount)
-        *writeCount = 0;
-
     // Store the position of the current block
     // (This will be updated through the decompression algorithm)
     long currentBlockPosition = rvio->tell(rvio->userData);
@@ -213,7 +203,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
 //        const long wcur = wvio->tell(wvio->userData) - writeStart;
 //        printf("read: 0x%lx\twrite: 0x%lx\n", rcur, wcur);
         
-        if (rvio->read(&byte, 1, rvio->userData) != 1)
+        if (!lsdj_vio_read_byte(rvio, &byte, NULL))
         {
             lsdj_error_optional_new(error, "could not read byte for decompression");
             return false;
@@ -222,20 +212,19 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
         switch (byte)
         {
             case RUN_LENGTH_ENCODING_BYTE:
-                if (!decompress_rle_byte(rvio, wvio, writeCount, error))
+                if (!decompress_rle_byte(rvio, wvio, writeCounter, error))
                     return false;
                 break;
             case SPECIAL_ACTION_BYTE:
-                if (!decompress_sa_byte(rvio, &currentBlockPosition, followBlockSwitches, wvio, &reading, writeCount, error))
+                if (!decompress_sa_byte(rvio, &currentBlockPosition, followBlockSwitches, wvio, &reading, writeCounter, error))
                     return false;
                 break;
             default:
-                if (wvio->write(&byte, 1, wvio->userData) != 1)
+                if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
                 {
                     lsdj_error_optional_new(error, "could not write decompression byte");
                     return false;
                 }
-                if (writeCount) *writeCount += 1;
                 break;
         }
     }
