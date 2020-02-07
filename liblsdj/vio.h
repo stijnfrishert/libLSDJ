@@ -47,6 +47,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 
@@ -79,6 +80,16 @@ typedef struct
     //! Custom data necessary for the functions to do their work
     void* userData;
 } lsdj_vio_t;
+
+//! Write bytes to virtual I/O
+/*! @param count If given, the amount of bytes written is _added_ to this value
+    @return Whether the write was fully successful */
+bool lsdj_vio_write(lsdj_vio_t* vio, const void* ptr, size_t size, size_t* counter);
+
+//! Write a single byte to virtual I/O
+/*! @param count If given, the amount of bytes written is _added_ to this value
+    @return Whether the write was fully successful */
+bool lsdj_vio_write_byte(lsdj_vio_t* vio, unsigned char value, size_t* counter);
 
 
 // --- File --- //

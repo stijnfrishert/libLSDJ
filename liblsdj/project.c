@@ -317,81 +317,69 @@ bool lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_
     return lsdj_project_is_likely_valid_lsdsng(&rvio, error);
 }
 
-size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio, lsdj_error_t** error)
+bool lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
-    size_t writeSize = 0;
-    
     // Write the name
-    writeSize += wvio->write(project->name, LSDJ_PROJECT_NAME_LENGTH, wvio->userData);
-    if (writeSize != LSDJ_PROJECT_NAME_LENGTH)
+    if (!lsdj_vio_write(wvio, project->name, LSDJ_PROJECT_NAME_LENGTH, writeCounter))
     {
         lsdj_error_optional_new(error, "could not write project name for lsdsng");
-        return writeSize;
+        return false;
     }
     
     // Write the version
-    if (wvio->write(&project->version, 1, wvio->userData) != 1)
+    if (!lsdj_vio_write_byte(wvio, project->version, writeCounter))
     {
         lsdj_error_optional_new(error, "could not write project version for lsdsng");
-        return writeSize;
+        return false;
     }
-    writeSize += 1;
     
     // Compress and write the song buffer
     const lsdj_song_buffer_t* songBuffer = lsdj_project_get_song_buffer(project);
-    size_t compressionSize = 0;
-    lsdj_compress(songBuffer->bytes, wvio, 1, &compressionSize, error);
-    writeSize += compressionSize;
-
-    // Return the amount of bytes written
-    assert(writeSize <= LSDSNG_MAX_SIZE);
-    return writeSize;
+    return lsdj_compress(songBuffer->bytes, wvio, 1, writeCounter, error);
 }
 
- size_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error)
- {
-     if (path == NULL)
-     {
-         lsdj_error_optional_new(error, "path is NULL");
-         return 0;
-     }
+bool lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, size_t* writeCounter, lsdj_error_t** error)
+{
+    if (path == NULL)
+    {
+        lsdj_error_optional_new(error, "path is NULL");
+        return false;
+    }
     
-     if (project == NULL)
-     {
-         lsdj_error_optional_new(error, "project is NULL");
-         return 0;
-     }
-    
-     FILE* file = fopen(path, "wb");
-     if (file == NULL)
-     {
-         char message[512];
-         snprintf(message, 512, "could not open %s for writing\n%s", path, strerror(errno));
-         lsdj_error_optional_new(error, message);
-         return 0;
-     }
-    
-     lsdj_vio_t wvio = lsdj_create_file_vio(file);
-    
-     const size_t writeSize = lsdj_project_write_lsdsng(project, &wvio, error);
-    
-     fclose(file);
+    if (project == NULL)
+    {
+        lsdj_error_optional_new(error, "project is NULL");
+        return false;
+    }
 
-     return writeSize;
- }
+    FILE* file = fopen(path, "wb");
+    if (file == NULL)
+    {
+        char message[512];
+        snprintf(message, 512, "could not open %s for writing\n%s", path, strerror(errno));
+        lsdj_error_optional_new(error, message);
+        return false;
+    }
 
-size_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, lsdj_error_t** error)
+    lsdj_vio_t wvio = lsdj_create_file_vio(file);
+    const bool result = lsdj_project_write_lsdsng(project, &wvio, writeCounter, error);
+    fclose(file);
+
+    return result;
+}
+
+bool lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t* writeCounter, lsdj_error_t** error)
 {
     if (project == NULL)
     {
         lsdj_error_optional_new(error, "project is NULL");
-        return 0;
+        return false;
     }
     
     if (data == NULL)
     {
         lsdj_error_optional_new(error, "data is NULL");
-        return 0;
+        return false;
     }
     
     lsdj_memory_access_state_t state;
@@ -400,5 +388,5 @@ size_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsign
     
     lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
     
-    return lsdj_project_write_lsdsng(project, &wvio, error);
+    return lsdj_project_write_lsdsng(project, &wvio, writeCounter, error);
 }

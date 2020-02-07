@@ -189,7 +189,8 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         // Compress it to memory
         std::array<unsigned char, LSDSNG_MAX_SIZE> data;
         data.fill(0);
-        auto writeCount = lsdj_project_write_lsdsng_to_memory(project, data.data(), nullptr);
+        size_t writeCount = 0;
+        REQUIRE( lsdj_project_write_lsdsng_to_memory(project, data.data(), &writeCount, nullptr) == true );
         
         // Because liblsdj's compression algorithm is actually a more efficient fit than
         // the one in LSDJ itself, we can't compare with the .lsdsng sample file. So:

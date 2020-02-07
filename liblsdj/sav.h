@@ -65,6 +65,9 @@ extern "C" {
 
 //! The place in sav memory where the header starts 
 #define LSDJ_SAV_HEADER_POSITION LSDJ_SONG_BUFFER_BYTE_COUNT
+
+//! The size of a full sav file
+#define LSDJ_SAV_SIZE (0x20000)
     
 //! A structure representing a full LSDj sav state
 typedef struct lsdj_sav_t lsdj_sav_t;
@@ -159,17 +162,32 @@ bool lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error);
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
 bool lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
-//! Write an LSDj sav to virtual I/O
-/*! @return The number of bytes written */
-size_t lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** error);
+//! Write a sav to virtual I/O
+/*! @param sav The save to be written to stream
+    @param vio The virtual stream into which the sav is written
+    @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
+    @param error A description of the error that occured, if provided
 
-//! Write an LSDj sav to file
-/*! @return The number of bytes written */
-size_t lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error);
+    @return Whether the write was successful */
+bool lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, size_t* writeCounter, lsdj_error_t** error);
 
-//! Write an LSDj sav to memory
-/*! @return The number of bytes written */
-size_t lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error);
+//! Write a sav to file
+/*! @param sav The save to be written to memory
+    @param path The path to the file where the sav should be written on disk
+    @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
+    @param error A description of the error that occured, if provided
+
+    @return Whether the write was successful */
+bool lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, size_t* writeCounter, lsdj_error_t** error);
+
+//! Write a sav to memory
+/*! @param sav The save to be written to memory
+    @param data Pointer to the write buffer, should be at least LSDJ_SAV_SIZE in size
+    @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
+    @param error A description of the error that occured, if provided
+
+    @return Whether the write was successful */
+bool lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, size_t* writeCounter, lsdj_error_t** error);
    
 
 #ifdef __cplusplus

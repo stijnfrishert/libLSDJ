@@ -141,21 +141,35 @@ bool lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** e
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
 bool lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
-//! Write an lsdj project to an .lsdsng I/O stream
+//! Write a project to an .lsdsng I/O stream
 /*! This function uses liblsdj's virtual I/O system. There are other convenience functions to
 	directly write to memory or file.
+ 
+    @param project The project to be written to stream
+    @param vio The virtual stream into which the project is written
+    @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
+    @param error A description of the error that occured, if provided
 
-	@return The number of bytes written to the stream */
-size_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, lsdj_error_t** error);
+	@return Whether the write was successful */
+bool lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, size_t* writeCounter, lsdj_error_t** error);
 
-//! Write an lsdj project to an .lsdsng I/O stream
-/*! @return The number of bytes written to the stream */
-size_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, lsdj_error_t** error);
+//! Write a project to file
+/*! @param project The project to be written to file
+    @param path The path to the file where the lsdsng should be written on disk
+    @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
+    @param error A description of the error that occured, if provided
 
-//! Write an lsdj project to an .lsdsng I/O stream
-/*! @param data Pointer to the write buffer, should be at least LSDSNG_MAX_SIZE in size
-	@return The number of bytes written to the stream */
-size_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, lsdj_error_t** error);
+    @return Whether the write was successful */
+bool lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, size_t* writeCounter, lsdj_error_t** error);
+
+//! Write a project to a memory
+/*! @param project The project to be written to memory
+    @param data Pointer to the write buffer, should be at least LSDSNG_MAX_SIZE in size
+    @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
+    @param error A description of the error that occured, if provided
+
+    @return Whether the write was successful */
+bool lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t* writeCounter, lsdj_error_t** error);
     
 #ifdef __cplusplus
 }

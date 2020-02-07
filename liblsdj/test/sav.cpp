@@ -235,8 +235,9 @@ TEST_CASE( ".sav save/load", "[sav]" )
 		lsdj_sav_set_project_move(sav, 0, project);
 
 		std::array<unsigned char, 131072> memory;
-		auto writeCount = lsdj_sav_write_to_memory(sav, memory.data(), memory.size(), nullptr);
-		REQUIRE( writeCount == 131072 );
+        size_t writeCount = 0;
+		REQUIRE( lsdj_sav_write_to_memory(sav, memory.data(), memory.size(), &writeCount, nullptr) == true );
+		REQUIRE( writeCount == LSDJ_SAV_SIZE );
 
 		lsdj_sav_free(sav);
 

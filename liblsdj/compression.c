@@ -260,13 +260,10 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
     return true;
 }
 
-bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCount, lsdj_error_t** error)
+bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCounter, lsdj_error_t** error)
 {
     //! @todo This function needs to be refactored because it is w-a-y too huge
 
-    if (writeCount)
-        *writeCount = 0;
-     
     if (blockOffset == LSDJ_BLOCK_COUNT + 1)
         return false;
     
@@ -384,20 +381,18 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
         {
             // Write the "next block" command
             byte = SPECIAL_ACTION_BYTE;
-            if (wvio->write(&byte, 1, wvio->userData) != 1)
+            if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
             {
                 lsdj_error_optional_new(error, "could not write SA byte for next block command");
                 return false;
             }
-            if (writeCount) *writeCount += 1;
             
             byte = (unsigned char)(currentBlock + 1);
-            if (wvio->write(&byte, 1, wvio->userData) != 1)
+            if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
             {
                 lsdj_error_optional_new(error, "could not write next block byte for compression");
                 return false;
             }
-            if (writeCount) *writeCount += 1;
             
             currentBlockSize += 2;
             assert(currentBlockSize <= LSDJ_BLOCK_SIZE);
@@ -406,12 +401,11 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
             byte = 0;
             for (; currentBlockSize < LSDJ_BLOCK_SIZE; currentBlockSize++)
             {
-                if (wvio->write(&byte, 1, wvio->userData) != 1)
+                if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
                 {
                     lsdj_error_optional_new(error, "could not write 0 for block padding");
                     return false;
                 }
-                if (writeCount) *writeCount += 1;
             }
             
             // Make sure we filled up the block entirely
@@ -439,12 +433,11 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
                 byte = 0;
                 for (long i = 0; i < pos - writeStart; ++i)
                 {
-                    if (wvio->write(&byte, 1, wvio->userData) != 1)
+                    if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
                     {
                         lsdj_error_optional_new(error, "could not fill rolled back data with 0 for compression");
                         return false;
                     }
-                    if (writeCount) *writeCount += 1;
                 }
                 
                 if (wvio->seek(writeStart, SEEK_SET, wvio->userData) != 0)
@@ -459,9 +452,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
             // Don't "continue;" but fall through. We still need to write the event *in the next block*
         }
         
-        size_t count = wvio->write(nextEvent, eventSize, wvio->userData);
-        if (writeCount) *writeCount += count;
-        if (count != eventSize)
+        if (!lsdj_vio_write(wvio, nextEvent, eventSize, writeCounter))
         {
             lsdj_error_optional_new(error, "could not write event for compression");
             return false;
@@ -473,32 +464,30 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
     }
     
     byte = SPECIAL_ACTION_BYTE;
-    if (wvio->write(&byte, 1, wvio->userData) != 1)
+    if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
     {
         lsdj_error_optional_new(error, "could not write SA for EOF for compression");
         return 0;
     }
-    if (writeCount) *writeCount += 1;
     
     byte = END_OF_FILE_BYTE;
-    if (wvio->write(&byte, 1, wvio->userData) != 1)
+    if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
     {
         lsdj_error_optional_new(error, "could not write EOF for compression");
         return false;
     }
-    if (writeCount) *writeCount += 1;
     
+    // Pad 0's to the end of the block
     if (currentBlockSize > 0)
     {
         byte = 0;
         for (currentBlockSize += 2; currentBlockSize < LSDJ_BLOCK_SIZE; currentBlockSize++)
         {
-            if (wvio->write(&byte, 1, wvio->userData) != 1)
+            if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
             {
                 lsdj_error_optional_new(error, "could not write 0 for block padding");
                 return false;
             }
-            if (writeCount) *writeCount += 1;
         }
     }
     
