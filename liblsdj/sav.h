@@ -115,8 +115,11 @@ void lsdj_sav_set_active_project_index(lsdj_sav_t* sav, unsigned char index);
 	If the working memory doesn't represent any project, this is LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX */
 unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
     
-// // Create a project that contains the working memory song
-// lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error);
+//! Create a new project from the working memory song
+/*! Copies the working memory song into a new project. If the song represents a project in one of
+    the slots, its name and version are also copied over
+    @note Remember to call lsdj_project_free() after you're done with the result */
+lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error);
 
 //! Copy a project into one of the project slots
 /*! This copies data from the parameter project into the sav, without taking over ownership

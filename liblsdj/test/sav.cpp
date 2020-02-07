@@ -153,6 +153,50 @@ SCENARIO( "Saves", "[sav]" )
 				REQUIRE( lsdj_sav_get_project(sav, 9) == project );
 			}
 		}
+        
+        WHEN( "Creating a project from the working memory song with no active project" )
+        {
+            lsdj_sav_set_active_project_index(sav, LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX);
+            auto project = lsdj_project_new_from_working_memory_song(sav, nullptr);
+            auto wm = lsdj_sav_get_working_memory_song(sav);
+            
+            THEN( "It should contain the same data" )
+            {
+                REQUIRE( project != nullptr );
+                
+                std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
+                lsdj_project_get_name(project, name.data());
+                REQUIRE( strncmp(name.data(), "", LSDJ_PROJECT_NAME_LENGTH) == 0 );
+                
+                REQUIRE( lsdj_project_get_version(project) == 0 );
+                
+                auto songBuffer = lsdj_project_get_song_buffer(project);
+                REQUIRE( memcmp(songBuffer->bytes, wm->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0 );
+            }
+        }
+        
+        WHEN( "Creating a project from the working memory song with an active project" )
+        {
+            lsdj_sav_set_project_move(sav, 3, project);
+            lsdj_sav_set_active_project_index(sav, 3);
+            
+            auto project = lsdj_project_new_from_working_memory_song(sav, nullptr);
+            auto wm = lsdj_sav_get_working_memory_song(sav);
+            
+            THEN( "It should contain the same data" )
+            {
+                REQUIRE( project != nullptr );
+                
+                std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
+                lsdj_project_get_name(project, name.data());
+                REQUIRE( strncmp(name.data(), "MYSONG", LSDJ_PROJECT_NAME_LENGTH) == 0 );
+                
+                REQUIRE( lsdj_project_get_version(project) == 16 );
+                
+                auto songBuffer = lsdj_project_get_song_buffer(project);
+                REQUIRE( memcmp(songBuffer->bytes, wm->bytes, LSDJ_SONG_BUFFER_BYTE_COUNT) == 0 );
+            }
+        }
 	}
 }
 

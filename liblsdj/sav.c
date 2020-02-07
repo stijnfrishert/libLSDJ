@@ -220,33 +220,36 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
     return sav->activeProjectIndex;
 }
 
-// lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error)
-// {
-//     // Try and copy the song
-//     lsdj_song_buffer_t* song = lsdj_sav_get_working_memory_song_memory(sav);
+ lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error)
+ {
+     lsdj_project_t* newProject = lsdj_project_new(error);
+     if (newProject == NULL)
+     {
+         lsdj_error_optional_new(error, "could not allocate memory for project");
+         return NULL;
+     }
     
-//     lsdj_project_t* newProject = lsdj_project_new(error);
-//     if (error && *error)
-//         return NULL;
+     unsigned char active = sav->activeProjectIndex;
     
-//     unsigned char active = lsdj_sav_get_active_project(sav);
+     char name[9];
+     memset(name, '\0', 9);
+     unsigned char version = 0;
+     if (active != LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX)
+     {
+         const lsdj_project_t* oldProject = lsdj_sav_get_project(sav, active);
+         if (oldProject != NULL)
+         {
+             lsdj_project_get_name(oldProject, name);
+             version = lsdj_project_get_version(oldProject);
+         }
+     }
     
-//     char name[9];
-//     memset(name, '\0', 9);
-//     unsigned char version = 0;
-//     if (active != LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX)
-//     {
-//         lsdj_project_t* oldProject = lsdj_sav_get_project(sav, active);
-//         lsdj_project_get_name(oldProject, name, 8);
-//         version = lsdj_project_get_version(oldProject);
-//     }
+     lsdj_project_set_song_buffer(newProject, &sav->workingMemorySongBuffer);
+     lsdj_project_set_name(newProject, name, 8);
+     lsdj_project_set_version(newProject, version);
     
-//     lsdj_project_set_song(newProject, copy);
-//     lsdj_project_set_name(newProject, name, 8);
-//     lsdj_project_set_version(newProject, version);
-    
-//     return newProject;
-// }
+     return newProject;
+ }
 
 void lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, lsdj_error_t** error)
 {
