@@ -81,6 +81,16 @@ typedef struct
     void* userData;
 } lsdj_vio_t;
 
+//! Read bytes from virtual I/O
+/*! @param count If given, the amount of bytes read is _added_ to this value
+    @return Whether the read was fully successful */
+bool lsdj_vio_read(lsdj_vio_t* vio, void* ptr, size_t size, size_t* counter);
+
+//! Read a single byte from virtual I/O
+/*! @param count If given, the amount of bytes read is _added_ to this value
+    @return Whether the read was fully successful */
+bool lsdj_vio_read_byte(lsdj_vio_t* vio, unsigned char* value, size_t* counter);
+
 //! Write bytes to virtual I/O
 /*! @param count If given, the amount of bytes written is _added_ to this value
     @return Whether the write was fully successful */

@@ -38,6 +38,20 @@
 #include <assert.h>
 #include <string.h>
 
+bool lsdj_vio_read(lsdj_vio_t* vio, void* ptr, size_t size, size_t* counter)
+{
+    size_t count = vio->read(ptr, size, vio->userData);
+    if (counter)
+        *counter += count;
+    
+    return count == size;
+}
+
+bool lsdj_vio_read_byte(lsdj_vio_t* vio, unsigned char* value, size_t* counter)
+{
+    return lsdj_vio_read(vio, value, 1, counter);
+}
+
 bool lsdj_vio_write(lsdj_vio_t* vio, const void* ptr, size_t size, size_t* counter)
 {
     size_t count = vio->write(ptr, size, vio->userData);

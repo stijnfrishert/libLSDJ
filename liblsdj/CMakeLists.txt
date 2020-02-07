@@ -27,6 +27,7 @@ set(HEADERS
 	song_buffer.h
 	synth.h
 	table.h
+	version.h
 	vio.h
 	wave.h
 	word.h)
@@ -57,6 +58,6 @@ source_group(\\ FILES ${HEADERS} ${SOURCES})
 target_include_directories(liblsdj INTERFACE ".")
 
 install(TARGETS liblsdj DESTINATION lib)
-install(FILES {HEADERS} DESTINATION include/lsdj)
+install(FILES ${HEADERS} DESTINATION include/lsdj)
 
 add_subdirectory(test)

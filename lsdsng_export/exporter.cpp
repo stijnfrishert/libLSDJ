@@ -33,12 +33,14 @@
  
  */
 
+#include "exporter.hpp"
+
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 
 #include "../common/common.hpp"
-#include "exporter.hpp"
+#include "../liblsdj/sav.h"
 
 namespace lsdj
 {
@@ -75,16 +77,17 @@ namespace lsdj
         }
         
         // Go through every project
-        const auto count = lsdj_sav_get_project_count(sav);
-        for (int i = 0; i < count; ++i)
+        for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
         {
+            // Retrieve the project
+            const lsdj_project_t* project = lsdj_sav_get_project(sav, i);
+            if (project == NULL)
+                continue;
+            
             // See if we're using indices and this project hasn't been specified
             // If so, skip it and move on to the next one
             if (!indices.empty() && std::find(std::begin(indices), std::end(indices), i) == std::end(indices))
                 continue;
-            
-            // Retrieve the project
-            lsdj_project_t* project = lsdj_sav_get_project(sav, i);
             
             // See if we're using name-based specification and whether this project has been singled out
             // If not, skip it and move on to the next one
@@ -92,15 +95,11 @@ namespace lsdj
             {
                 char name[9];
                 std::fill_n(name, 9, '\0');
-                lsdj_project_get_name(project, name, sizeof(name));
+                lsdj_project_get_name(project, name);
                 const auto namestr = std::string(name);
                 if (std::find_if(std::begin(names), std::end(names), [&](const auto& x){ return compareCaseInsensitive(x, namestr); }) == std::end(names))
                     continue;
             }
-            
-            // Does this project contain a song? If not, it's empty
-            if (lsdj_project_get_song(project) == NULL)
-                continue;
             
             // Export the project
             exportProject(project, outputFolder, false, &error);
@@ -118,13 +117,6 @@ namespace lsdj
     
     void Exporter::exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory, lsdj_error_t** error)
     {
-        // See if there's actually a song here. If not, this is an (EMPTY) project among
-        // existing projects, which is a thing that can happen in older versions of LSDJ
-        // Since we're exporting, let's skip this project entirely
-        const auto song = lsdj_project_get_song(project);
-        if (!song)
-            return;
-        
         auto name = constructName(project);
         if (name.empty())
             name = "(EMPTY)";
@@ -145,9 +137,11 @@ namespace lsdj
         path /= stream.str();
         
         ghc::filesystem::create_directories(path.parent_path());
-        lsdj_project_write_lsdsng_to_file(project, path.string().c_str(), error);
-        if (*error != nullptr)
+        if (!lsdj_project_write_lsdsng_to_file(project, path.string().c_str(), nullptr, error))
+        {
+            std::cerr << "Failed writing " << name << " to file" << std::endl;
             return;
+        }
         
         // Let the user know if verbose output has been toggled on
         if (verbose)
@@ -202,16 +196,12 @@ namespace lsdj
         }
         
         // Find out what the last non-empty project is
-        const auto count = lsdj_sav_get_project_count(sav);
-        int lastNonEmptyProject = count - 1;
-        while (lastNonEmptyProject != 0)
+        int lastNonEmptyProject = LSDJ_SAV_PROJECT_COUNT - 1;
+        for ( ; lastNonEmptyProject != 0; lastNonEmptyProject -= 1)
         {
             const auto project = lsdj_sav_get_project(sav, lastNonEmptyProject);
-            const auto song = lsdj_project_get_song(project);
-            if (song)
+            if (project)
                 break;
-            
-            lastNonEmptyProject -= 1;
         }
         
         // Go through all compressed projects
@@ -255,10 +245,10 @@ namespace lsdj
         std::cout << "WM  ";
         
         // If the working memory song represent one of the projects, display that name
-        const auto active = lsdj_sav_get_active_project(sav);
+        const auto active = lsdj_sav_get_active_project_index(sav);
         if (active != LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX)
         {
-            lsdj_project_t* project = lsdj_sav_get_project(sav, active);
+            const lsdj_project_t* project = lsdj_sav_get_project(sav, active);
             
             const auto name = constructName(project);
             std::cout << name;
@@ -270,39 +260,39 @@ namespace lsdj
             std::cout << "         ";
         }
         
-        // Display whether the working memory song is "dirty"/edited, and display that
-        // as version number (it doesn't really have a version number otherwise)
-        const lsdj_song_t* song = lsdj_sav_get_working_memory_song(sav);
-        if (lsdj_song_get_file_changed_flag(song))
-        {
-            switch (versionStyle)
-            {
-                case VersionStyle::NONE:
-                    std::cout << "";
-                    break;
-                case VersionStyle::HEX:
-                    std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
-                    break;
-                case VersionStyle::DECIMAL:
-                    std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
-                    break;
-            }
-        } else {
-            std::cout << "\t\t";
-        }
+//        // Display whether the working memory song is "dirty"/edited, and display that
+//        // as version number (it doesn't really have a version number otherwise)
+//        const lsdj_song_buffer_t* workingMemorySongBuffer = lsdj_sav_get_working_memory_song(sav);
+//        if (lsdj_song_get_file_changed_flag(workingMemorySongBuffer))
+//        {
+//            switch (versionStyle)
+//            {
+//                case VersionStyle::NONE:
+//                    std::cout << "";
+//                    break;
+//                case VersionStyle::HEX:
+//                    std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
+//                    break;
+//                case VersionStyle::DECIMAL:
+//                    std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
+//                    break;
+//            }
+//        } else {
+//            std::cout << "\t\t";
+//        }
         
-        // Retrieve the sav format version of the song and display it as well
-        const auto versionString = std::to_string(lsdj_song_get_format_version(song));
-        std::cout << versionString;
-        for (auto i = 0; i < 7 - versionString.length(); i++)
-            std::cout << ' ';
+//        // Retrieve the sav format version of the song and display it as well
+//        const auto versionString = std::to_string(lsdj_song_get_format_version(song));
+//        std::cout << versionString;
+//        for (auto i = 0; i < 7 - versionString.length(); i++)
+//            std::cout << ' ';
         
-        // Display the bpm of the project
-        if (song)
-        {
-            int tempo = lsdj_song_get_tempo(song);
-            std::cout << tempo;
-        }
+//        // Display the bpm of the project
+//        if (song)
+//        {
+//            int tempo = lsdj_song_get_tempo(song);
+//            std::cout << tempo;
+//        }
         
         std::cout << std::endl;
     }
@@ -312,13 +302,22 @@ namespace lsdj
         // Retrieve the project
         const lsdj_project_t* project = lsdj_sav_get_project(sav, index);
         
+        // See if there's actually a song here. If not, this is an (EMPTY) project among
+        // existing projects, which is a thing that can happen in older versions of LSDJ
+        // Since we're printing, we should show the user this slot is effectively empty
+        if (!project)
+        {
+            std::cout << "(EMPTY)" << std::endl;
+            return;
+        }
+        
         // See if we're using name-based specification and whether this project has been singled out
         // If not, skip it and move on to the next one
         if (!names.empty())
         {
             char name[9];
             std::fill_n(name, 9, '\0');
-            lsdj_project_get_name(project, name, sizeof(name));
+            lsdj_project_get_name(project, name);
             const auto namestr = std::string(name);
             if (std::find_if(std::begin(names), std::end(names), [&](const auto& x){ return lsdj::compareCaseInsensitive(x, namestr); }) == std::end(names))
                 return;
@@ -328,16 +327,6 @@ namespace lsdj
         std::cout << std::to_string(index) << "  ";
         if (index < 10)
             std::cout << ' ';
-        
-        // See if there's actually a song here. If not, this is an (EMPTY) project among
-        // existing projects, which is a thing that can happen in older versions of LSDJ
-        // Since we're printing, we should show the user this slot is effectively empty
-        const lsdj_song_t* song = lsdj_project_get_song(project);
-        if (!song)
-        {
-            std::cout << "(EMPTY)" << std::endl;
-            return;
-        }
         
         // Display the name of the project
         const auto name = constructName(project);
@@ -355,18 +344,18 @@ namespace lsdj
             case VersionStyle::DECIMAL: std::cout << "\t"; break;
         }
         
-        // Retrieve the sav format version of the song and display it as well
-        const auto versionString = std::to_string(lsdj_song_get_format_version(song));
-        std::cout << versionString;
-        for (auto i = 0; i < 7 - versionString.length(); i++)
-            std::cout << ' ';
+//        // Retrieve the sav format version of the song and display it as well
+//        const auto versionString = std::to_string(lsdj_song_get_format_version(project));
+//        std::cout << versionString;
+//        for (auto i = 0; i < 7 - versionString.length(); i++)
+//            std::cout << ' ';
         
-        // Display the bpm of the project
-        if (song)
-        {
-            int tempo = lsdj_song_get_tempo(song);
-            std::cout << tempo;
-        }
+//        // Display the bpm of the project
+//        if (song)
+//        {
+//            int tempo = lsdj_song_get_tempo(song);
+//            std::cout << tempo;
+//        }
         
         std::cout << std::endl;
     }

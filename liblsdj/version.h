@@ -33,20 +33,24 @@
  
  */
 
-#ifndef LSDJ_COMMON_HPP
-#define LSDJ_COMMON_HPP
+#ifndef LSDJ_VERSION_H
+#define LSDJ_VERSION_H
 
-#include <string>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "../liblsdj/error.h"
-#include "../liblsdj/project.h"
+#define LSDJ_VERSION_MAJOR 2
+#define LSDJ_VERSION_MINOR 0
+#define LSDJ_VERSION_PATCH 0
 
-namespace lsdj
-{   
-    int handle_error(lsdj_error_t* error);
-    bool compareCaseInsensitive(std::string str1, std::string str2);
-    std::string constructProjectName(const lsdj_project_t* project, bool underscore);
-    bool isHiddenFile(const std::string& str);
+#define Q(x) #x
+#define QUOTE(x) Q(x)
+
+#define LSDJ_VERSION_STRING QUOTE(LSDJ_VERSION_MAJOR) "." QUOTE(LSDJ_VERSION_MINOR) "." QUOTE(LSDJ_VERSION_PATCH)
+    
+#ifdef __cplusplus
 }
+#endif
 
 #endif

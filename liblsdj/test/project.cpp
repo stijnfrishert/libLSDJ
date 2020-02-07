@@ -198,6 +198,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         // the raw
         
         auto lsdsng = lsdj_project_read_lsdsng_from_memory(data.data(), writeCount * LSDJ_BLOCK_SIZE, nullptr);
+        assert(lsdsng != nullptr);
         
         std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
         lsdj_project_get_name(lsdsng, name.data());
