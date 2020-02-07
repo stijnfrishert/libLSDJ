@@ -134,9 +134,11 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, 
 bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
 
 //! Find out whether a file is likely a valid lsdsng
+/*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
 bool lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error);
 
 //! Find out whether a memory address likely contains a valid lsdsng
+/*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
 bool lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
     
 //! Write an lsdj project to an .lsdsng I/O stream

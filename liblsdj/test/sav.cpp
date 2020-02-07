@@ -266,4 +266,18 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 		lsdj_sav_free(compSav);
 	}
+
+	SECTION( "Checking sav likelihood" )
+	{
+        const auto lsdsng = readFileContents(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng");
+        assert(lsdsng.size() == 3081);
+        
+		REQUIRE( lsdj_sav_is_likely_valid_memory(save.data(), save.size(), nullptr) == true );
+        REQUIRE( lsdj_sav_is_likely_valid_memory(lsdsng.data(), lsdsng.size(), nullptr) == false );
+        REQUIRE( lsdj_sav_is_likely_valid_memory(raw.data(), raw.size(), nullptr) == false );
+        
+        REQUIRE( lsdj_sav_is_likely_valid_file(RESOURCES_FOLDER "sav/happy_birthday.sav", nullptr) == true );
+        REQUIRE( lsdj_sav_is_likely_valid_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr) == false );
+        REQUIRE( lsdj_sav_is_likely_valid_file(RESOURCES_FOLDER "raw/happy_birthday.raw", nullptr) == false );
+	}
 }

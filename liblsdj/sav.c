@@ -452,87 +452,78 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, ls
     return lsdj_sav_read(&rvio, error);
 }
 
-// int lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error)
-// {
-//     // Check for incorrect input
-//     if (vio->read == NULL)
-//     {
-//         lsdj_error_optional_new(error, "vio->read is NULL");
-//         return 0;
-//     }
+bool lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error)
+{
+    // Check for incorrect input
+    if (vio->read == NULL)
+    {
+        lsdj_error_optional_new(error, "vio->read is NULL");
+        return false;
+    }
     
-//     if (vio->seek == NULL)
-//     {
-//         lsdj_error_optional_new(error, "vio->seek is NULL");
-//         return 0;
-//     }
+    if (vio->seek == NULL)
+    {
+        lsdj_error_optional_new(error, "vio->seek is NULL");
+        return false;
+    }
     
-//     // Move to the initialization bytes
-//     vio->seek(LSDJ_SAV_HEADER_POSITION + 0x13E, SEEK_CUR, vio->user_data);
+    // Move to the initialization bytes
+    vio->seek(LSDJ_SAV_HEADER_POSITION + 0x13E, SEEK_CUR, vio->user_data);
     
-//     // Ensure these bytes are 'jk', that's what LSDJ sets them to on RAM init
-//     char buffer[2];
-//     vio->read(buffer, sizeof(buffer), vio->user_data);
+    // Ensure these bytes are 'jk', that's what LSDJ sets them to on RAM init
+    char buffer[2];
+    vio->read(buffer, sizeof(buffer), vio->user_data);
     
-//     if (buffer[0] != 'j' || buffer[1] != 'k')
-//     {
-//         lsdj_error_optional_new(error, "Memory 0x813E isn't 'jk'");
-//         return 0;
-//     }
+    if (buffer[0] != 'j' || buffer[1] != 'k')
+    {
+        lsdj_error_optional_new(error, "Memory 0x813E isn't 'jk'");
+        return false;
+    }
     
-//     return 1;
-// }
+    return true;
+}
 
-// int lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error)
-// {
-//     if (path == NULL)
-//     {
-//         lsdj_error_optional_new(error, "path is NULL");
-//         return 0;
-//     }
+bool lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error)
+{
+    if (path == NULL)
+    {
+        lsdj_error_optional_new(error, "path is NULL");
+        return 0;
+    }
     
-//     FILE* file = fopen(path, "rb");
-//     if (file == NULL)
-//     {
-//         char message[512];
-//         snprintf(message, 512, "could not open %s for reading", path);
-//         lsdj_error_optional_new(error, message);
-//         return 0;
-//     }
+    FILE* file = fopen(path, "rb");
+    if (file == NULL)
+    {
+        char message[512];
+        snprintf(message, 512, "could not open %s for reading", path);
+        lsdj_error_optional_new(error, message);
+        return 0;
+    }
     
-//     lsdj_vio_t vio;
-//     vio.read = lsdj_fread;
-//     vio.tell = lsdj_ftell;
-//     vio.seek = lsdj_fseek;
-//     vio.user_data = file;
+    lsdj_vio_t vio = lsdj_create_file_vio(file);
     
-//     int result = lsdj_sav_is_likely_valid(&vio, error);
+    int result = lsdj_sav_is_likely_valid(&vio, error);
     
-//     fclose(file);
-//     return result;
-// }
+    fclose(file);
+    return result;
+}
 
-// int lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
-// {
-//     if (data == NULL)
-//     {
-//         lsdj_error_optional_new(error, "data is NULL");
-//         return 0;
-//     }
+bool lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+{
+    if (data == NULL)
+    {
+        lsdj_error_optional_new(error, "data is NULL");
+        return 0;
+    }
     
-//     lsdj_memory_access_state_t mem;
-//     mem.begin = (unsigned char*)data;
-//     mem.cur = mem.begin;
-//     mem.size = size;
+    lsdj_memory_access_state_t state;
+    state.begin = state.cur = (unsigned char*)data;
+    state.size = size;
     
-//     lsdj_vio_t vio;
-//     vio.read = lsdj_mread;
-//     vio.tell = lsdj_mtell;
-//     vio.seek = lsdj_mseek;
-//     vio.user_data = &mem;
+    lsdj_vio_t vio = lsdj_create_memory_vio(&state);
     
-//     return lsdj_sav_is_likely_valid(&vio, error);
-// }
+    return lsdj_sav_is_likely_valid(&vio, error);
+}
 
 size_t compress_blocks(unsigned char* blocks, lsdj_project_t* const* projects, unsigned char* block_alloc_table, lsdj_error_t** error)
 {
@@ -631,32 +622,35 @@ size_t lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, lsdj_error_t** err
     return write_count;
 }
 
-// void lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error)
-// {
-//     if (path == NULL)
-//         return lsdj_error_optional_new(error, "path is NULL");
+ size_t lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, lsdj_error_t** error)
+ {
+     if (path == NULL)
+     {
+         lsdj_error_optional_new(error, "path is NULL");
+         return 0;
+     }
     
-//     if (sav == NULL)
-//         return lsdj_error_optional_new(error, "sav is NULL");
+     if (sav == NULL)
+     {
+         lsdj_error_optional_new(error, "sav is NULL");
+         return 0;
+     }
     
-//     FILE* file = fopen(path, "wb");
-//     if (file == NULL)
-//     {
-//         char message[512];
-//         snprintf(message, 512, "could not open %s for writing", path);
-//         return lsdj_error_optional_new(error, message);
-//     }
+     FILE* file = fopen(path, "wb");
+     if (file == NULL)
+     {
+         char message[512];
+         snprintf(message, 512, "could not open %s for writing", path);
+         lsdj_error_optional_new(error, message);
+         return 0;
+     }
     
-//     lsdj_vio_t vio;
-//     vio.write = lsdj_fwrite;
-//     vio.tell = lsdj_ftell;
-//     vio.seek = lsdj_fseek;
-//     vio.user_data = file;
-    
-//     lsdj_sav_write(sav, &vio, error);
-    
-//     fclose(file);
-// }
+     lsdj_vio_t vio = lsdj_create_file_vio(file);
+     size_t write_count = lsdj_sav_write(sav, &vio, error);
+     fclose(file);
+     
+     return write_count;
+ }
 
 size_t lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, lsdj_error_t** error)
 {

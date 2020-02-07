@@ -81,6 +81,8 @@ size_t lsdj_mread(void* ptr, size_t size, void* user_data)
 {
     lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)user_data;
     
+    assert(mem->cur <= mem->begin + mem->size);
+    
     const size_t available = mem->size - (size_t)(mem->cur - mem->begin);
     const size_t minSize = size < available ? size : available;
     
@@ -120,6 +122,8 @@ long lsdj_mseek(long offset, int whence, void* user_data)
 {
     lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)user_data;
     
+    unsigned char* cur = mem->cur;
+    
     switch (whence)
     {
         case SEEK_SET: mem->cur = mem->begin + offset; break;
@@ -130,6 +134,7 @@ long lsdj_mseek(long offset, int whence, void* user_data)
     if (mem->cur < mem->begin ||
         mem->cur > mem->begin + mem->size)
     {
+        mem->cur = cur;
         return 1;
     }
     

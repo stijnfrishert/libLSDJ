@@ -213,10 +213,15 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 
 	SECTION( "Checking lsdsng likelihood" )
 	{
+        const auto save = readFileContents(RESOURCES_FOLDER "sav/happy_birthday.sav");
+        assert(save.size() == 131072);
+        
 		REQUIRE( lsdj_project_is_likely_valid_lsdsng_memory(lsdsng.data(), lsdsng.size(), nullptr) == true );
         REQUIRE( lsdj_project_is_likely_valid_lsdsng_memory(raw.data(), raw.size(), nullptr) == false );
+        REQUIRE( lsdj_project_is_likely_valid_lsdsng_memory(save.data(), save.size(), nullptr) == false );
         
         REQUIRE( lsdj_project_is_likely_valid_lsdsng_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr) == true );
         REQUIRE( lsdj_project_is_likely_valid_lsdsng_file(RESOURCES_FOLDER "raw/happy_birthday.raw", nullptr) == false );
+        REQUIRE( lsdj_project_is_likely_valid_lsdsng_file(RESOURCES_FOLDER "sav/happy_birthday.sav", nullptr) == false );
 	}
 }
