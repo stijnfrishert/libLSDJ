@@ -210,7 +210,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 	SECTION( "Reading a .sav from file" )
 	{
-		auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/happy_birthday.sav", nullptr);
+		auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", nullptr);
 		REQUIRE( sav != nullptr );
 
 		auto wm = lsdj_sav_get_working_memory_song(sav);
