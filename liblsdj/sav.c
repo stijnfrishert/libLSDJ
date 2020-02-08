@@ -66,7 +66,7 @@ struct lsdj_sav_t
 
 typedef struct
 {
-	char projectNames[LSDJ_PROJECT_NAME_LENGTH][LSDJ_SAV_PROJECT_COUNT];
+	char projectNames[LSDJ_SAV_PROJECT_COUNT][LSDJ_PROJECT_NAME_LENGTH];
 	unsigned char projectVersions[LSDJ_SAV_PROJECT_COUNT];
 	unsigned char empty[30];
 	char init[2];

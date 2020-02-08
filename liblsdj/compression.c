@@ -214,9 +214,9 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
     do
     {
         // Uncomment this to see every read and corresponding write position
-        const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
-        const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
-        printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
+//        const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
+//        const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
+//        printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
         
         if (!lsdj_decompress_block(rvio, readCounter,
                                    wvio, writeCounter,
