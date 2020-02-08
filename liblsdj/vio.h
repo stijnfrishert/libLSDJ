@@ -71,10 +71,10 @@ typedef struct
     //! This function is called to write data
     lsdj_vio_write_t write;
 
-    //! This function is called to retrieve the current reading position
+    //! This function is called to retrieve the current stream position
     lsdj_vio_tell_t tell;
 
-    //! This function is called to change the current reading position
+    //! This function is called to change the current stream position
     lsdj_vio_seek_t seek;
 
     //! Custom data necessary for the functions to do their work
@@ -82,24 +82,36 @@ typedef struct
 } lsdj_vio_t;
 
 //! Read bytes from virtual I/O
-/*! @param count If given, the amount of bytes read is _added_ to this value
+/*! @param counter If given, the amount of bytes read is _added_ to this value
     @return Whether the read was fully successful */
 bool lsdj_vio_read(lsdj_vio_t* vio, void* ptr, size_t size, size_t* counter);
 
 //! Read a single byte from virtual I/O
-/*! @param count If given, the amount of bytes read is _added_ to this value
+/*! @param counter If given, the amount of bytes read is _added_ to this value
     @return Whether the read was fully successful */
 bool lsdj_vio_read_byte(lsdj_vio_t* vio, unsigned char* value, size_t* counter);
 
 //! Write bytes to virtual I/O
-/*! @param count If given, the amount of bytes written is _added_ to this value
+/*! @param counter If given, the amount of bytes written is _added_ to this value
     @return Whether the write was fully successful */
 bool lsdj_vio_write(lsdj_vio_t* vio, const void* ptr, size_t size, size_t* counter);
 
 //! Write a single byte to virtual I/O
-/*! @param count If given, the amount of bytes written is _added_ to this value
+/*! @param counter If given, the amount of bytes written is _added_ to this value
     @return Whether the write was fully successful */
 bool lsdj_vio_write_byte(lsdj_vio_t* vio, unsigned char value, size_t* counter);
+
+//! Write a series of bytes repeatedly to a stream
+/*! @param count The amount of times the contents of ptr should be written
+    @param counter If given, the amount of bytes written is _added_ to this value
+    @return Whether the write was fully successful */
+bool lsdj_vio_write_repeat(lsdj_vio_t* vio, const void* ptr, size_t size, size_t count, size_t* counter);
+
+//! Retrieve the current position in the stream
+long lsdj_vio_tell(lsdj_vio_t* vio);
+
+//! Retrieve the current position in the stream
+bool lsdj_vio_seek(lsdj_vio_t* vio, long offset, int whence);
 
 
 // --- File --- //

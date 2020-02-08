@@ -53,14 +53,51 @@ extern "C" {
 
 //! Decompress memory blocks according to the LSDJ compression spec
 /*! This algorithm is used to store songs in the project slots in a sav,
-	as well as in an .lsdsng file.
+    as well as in an .lsdsng file.
 
-	@param followBlockSwitches Set this to true if block switches should be followed (the default), and false if block switches (0xE0, ID) should be ignored (in the case of reading lsdsng)
+    See https://littlesounddj.fandom.com/wiki/File_Management_Structure for more info
 
-	See https://littlesounddj.fandom.com/wiki/File_Management_Structure for more info
+    @param rvio The stream to read compressed bytes from
+    @param readCounter The amount of bytes read is _added_ to this value
+    @param wvio The stream to write decompressed bytes to
+    @param writeCounter The amount of bytes written is _added_ to this value
+    @param firstBlockPosition The position in rvio at which the very first block starts
+    @param followBlockJumps If true, new block positions are read and jumped to relative to firstBlockPosition. Otherwise, the algo just moves to the next block
+    @param error In case of an error, this pointer is filled with more information
 
-	@return true on success, false on failure */
-bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, size_t* writeCount, lsdj_error_t** error);
+    @return true on success, false on failure */
+bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
+                     lsdj_vio_t* wvio, size_t* writeCounter,
+                     long firstBlockPosition,
+                     bool followBlockJumps,
+                     lsdj_error_t** error);
+
+
+
+
+//! Decompress a single step in the LSDj compression algorithm
+/*! Reads one byte and then performs a decompression based on the value
+
+    @note You probably don't need this, but rather lsdj_decompress()
+
+    See https://littlesounddj.fandom.com/wiki/File_Management_Structure for more info
+
+    @param rvio The stream to read compressed bytes from
+    @param readCounter The amount of bytes read is _added_ to this value
+    @param wvio The stream to write decompressed bytes to
+    @param writeCounter The amount of bytes written is _added_ to this value
+    @param firstBlockPosition The position in rvio at which the very first block starts
+    @param followBlockJumps If true, new block positions are read and jumped to relative to firstBlockPosition. Otherwise, the algo just moves to the next block
+    @param reading If provided, set to false if an end-of-stream has been encountered
+    @param error In case of an error, this pointer is filled with more information
+
+    @return true on success, false on failure */
+bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
+                          lsdj_vio_t* wvio, size_t* writeCounter,
+                          long firstBlockPosition,
+                          bool followBlockJumps,
+                          bool* reading,
+                          lsdj_error_t** error);
 
 //! Compress memory blocks according to the LSDJ compression spec
 /*! This algorithm is used to store songs in the project slots in a sav,

@@ -52,10 +52,10 @@
 
 static const unsigned char LSDJ_DEFAULT_INSTRUMENT_COMPRESSION[LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
 
-bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
+bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
     unsigned char byte = 0;
-    if (!lsdj_vio_read_byte(rvio, &byte, NULL))
+    if (!lsdj_vio_read_byte(rvio, &byte, readCounter))
     {
         lsdj_error_optional_new(error, "could not read RLE byte");
         return false;
@@ -72,19 +72,16 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCounte
     else
     {
         unsigned char count = 0;
-        if (!lsdj_vio_read_byte(rvio, &count, NULL))
+        if (!lsdj_vio_read_byte(rvio, &count, readCounter))
         {
             lsdj_error_optional_new(error, "could not read RLE count byte");
             return false;
         }
         
-        for (int i = 0; i < count; ++i)
+        if (!lsdj_vio_write_repeat(wvio, &byte, 1, count, writeCounter))
         {
-            if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
-            {
-                lsdj_error_optional_new(error, "could not write byte for RLE expansion");
-                return false;
-            }
+            lsdj_error_optional_new(error, "could not write byte for RLE expansion");
+            return false;
         }
     }
 
@@ -100,13 +97,10 @@ bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* wr
         return false;
     }
     
-    for (int i = 0; i < count; ++i)
+    if (!lsdj_vio_write_repeat(wvio, LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE), count, writeCounter))
     {
-        if (!lsdj_vio_write(wvio, LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE), writeCounter))
-        {
-            lsdj_error_optional_new(error, "could not write default wave byte");
-            return false;
-        }
+        lsdj_error_optional_new(error, "could not write default wave byte");
+        return false;
     }
 
     return true;
@@ -121,22 +115,19 @@ bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size
         return false;
     }
     
-    for (int i = 0; i < count; ++i)
+    if (!lsdj_vio_write_repeat(wvio, LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), count, writeCounter))
     {
-        if (!lsdj_vio_write(wvio, LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), writeCounter))
-        {
-            lsdj_error_optional_new(error, "could not write default instrument byte");
-            return false;
-        }
+        lsdj_error_optional_new(error, "could not write default instrument byte");
+        return false;
     }
 
     return true;
 }
 
-bool decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool followBlockSwitches, lsdj_vio_t* wvio, bool* reading, size_t* writeCounter, lsdj_error_t** error)
+bool decompress_sa_byte(lsdj_vio_t* rvio, size_t* readCounter, long firstBlockPosition, bool followBlockJumps, lsdj_vio_t* wvio, size_t* writeCounter, bool* reading, lsdj_error_t** error)
 {
     unsigned char byte = 0;
-    if (!lsdj_vio_read_byte(rvio, &byte, NULL))
+    if (!lsdj_vio_read_byte(rvio, &byte, readCounter))
     {
         lsdj_error_optional_new(error, "could not read SA byte");
         return false;
@@ -150,48 +141,50 @@ bool decompress_sa_byte(lsdj_vio_t* rvio, long* currentBlockPosition, bool follo
                 lsdj_error_optional_new(error, "could not write SA byte");
                 return false;
             }
-            break;
+            return true;
         case LSDJ_DEFAULT_WAVE_BYTE:
-            if (!decompress_default_wave_byte(rvio, wvio, writeCounter, error))
-                return false;
-            break;
+            return decompress_default_wave_byte(rvio, wvio, writeCounter, error);
         case LSDJ_DEFAULT_INSTRUMENT_BYTE:
-            if (!decompress_default_instrument_byte(rvio, wvio, writeCounter, error))
-                return false;
-            break;
+            return decompress_default_instrument_byte(rvio, wvio, writeCounter, error);
         case END_OF_FILE_BYTE:
             *reading = false;
-            break;
+            return true;
         default:
-            if (followBlockSwitches)
-                *currentBlockPosition = LSDJ_SAV_HEADER_POSITION + LSDJ_BLOCK_SIZE + (long)((byte - 1) * LSDJ_BLOCK_SIZE);
-            else
-                *currentBlockPosition += LSDJ_BLOCK_SIZE;
-            
-            if (rvio->seek(*currentBlockPosition, SEEK_SET, rvio->userData) != 0)
+        {
+            if (followBlockJumps)
             {
-                lsdj_error_optional_new(error, "could not seek to new block position");
-                return false;
+                const long newPosition = firstBlockPosition + (long)((byte - 1) * LSDJ_BLOCK_SIZE);
+                if (!lsdj_vio_seek(rvio, newPosition, SEEK_SET))
+                {
+                    lsdj_error_optional_new(error, "could not jump to new block position");
+                    return false;
+                }
+            } else {
+                const long position = lsdj_vio_tell(rvio) - firstBlockPosition;
+                const long offset = LSDJ_BLOCK_SIZE - (position % LSDJ_BLOCK_SIZE);
+                if (!lsdj_vio_seek(rvio, offset, SEEK_CUR))
+                {
+                    lsdj_error_optional_new(error, "could not jump to new block position");
+                    return false;
+                }
             }
-            break;
+            
+            assert((lsdj_vio_tell(rvio) - firstBlockPosition) % LSDJ_BLOCK_SIZE == 0);
+            
+            return true;
+        }
     }
-
-    return true;
 }
 
-bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitches, size_t* writeCounter, lsdj_error_t** error)
+bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
+                     lsdj_vio_t* wvio, size_t* writeCounter,
+                     long firstBlockPosition,
+                     bool followBlockJumps,
+                     lsdj_error_t** error)
 {
-    // Store the position of the current block
-    // (This will be updated through the decompression algorithm)
-    long currentBlockPosition = rvio->tell(rvio->userData);
-    if (currentBlockPosition == -1L)
-    {
-        lsdj_error_optional_new(error, "could not tell current read block position");
-        return false;
-    }
-
     // Store our starting write position
-    const long writeStart = wvio->tell(wvio->userData);
+    const long readStart = lsdj_vio_tell(rvio);
+    const long writeStart = lsdj_vio_tell(wvio);
     
     unsigned char byte = 0;
     
@@ -199,33 +192,17 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
     while (reading == true)
     {
         // Uncomment this to see every read and corresponding write position
-//        const long rcur = rvio->tell(rvio->userData) - 9;
-//        const long wcur = wvio->tell(wvio->userData) - writeStart;
-//        printf("read: 0x%lx\twrite: 0x%lx\n", rcur, wcur);
+        const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
+        const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
+        printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
         
-        if (!lsdj_vio_read_byte(rvio, &byte, NULL))
-        {
-            lsdj_error_optional_new(error, "could not read byte for decompression");
+        if (!lsdj_decompress_step(rvio, readCounter,
+                                  wvio, writeCounter,
+                                  firstBlockPosition,
+                                  followBlockJumps,
+                                  &reading,
+                                  error)) {
             return false;
-        }
-        
-        switch (byte)
-        {
-            case RUN_LENGTH_ENCODING_BYTE:
-                if (!decompress_rle_byte(rvio, wvio, writeCounter, error))
-                    return false;
-                break;
-            case SPECIAL_ACTION_BYTE:
-                if (!decompress_sa_byte(rvio, &currentBlockPosition, followBlockSwitches, wvio, &reading, writeCounter, error))
-                    return false;
-                break;
-            default:
-                if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
-                {
-                    lsdj_error_optional_new(error, "could not write decompression byte");
-                    return false;
-                }
-                break;
         }
     }
 
@@ -247,6 +224,40 @@ bool lsdj_decompress(lsdj_vio_t* rvio, lsdj_vio_t* wvio, bool followBlockSwitche
     }
 
     return true;
+}
+
+bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
+                          lsdj_vio_t* wvio, size_t* writeCounter,
+                          long firstBlockPosition,
+                          bool followBlockJumps,
+                          bool* reading,
+                          lsdj_error_t** error)
+{
+    unsigned char byte = 0;
+    
+    if (!lsdj_vio_read_byte(rvio, &byte, readCounter))
+    {
+        lsdj_error_optional_new(error, "could not read byte for decompression step");
+        return false;
+    }
+    
+    switch (byte)
+    {
+        case RUN_LENGTH_ENCODING_BYTE:
+            return decompress_rle_byte(rvio, readCounter, wvio, writeCounter, error);
+            
+        case SPECIAL_ACTION_BYTE:
+            return decompress_sa_byte(rvio, readCounter, firstBlockPosition, followBlockJumps, wvio, writeCounter, reading, error);
+            
+        default:
+            if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
+            {
+                lsdj_error_optional_new(error, "could not write decompression byte");
+                return false;
+            } else {
+                return true;
+            }
+    }
 }
 
 bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCounter, lsdj_error_t** error)
@@ -420,13 +431,10 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
                 }
                 
                 byte = 0;
-                for (long i = 0; i < pos - writeStart; ++i)
+                if (!lsdj_vio_write_repeat(wvio, &byte, 1, (size_t)(pos - writeStart), writeCounter))
                 {
-                    if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
-                    {
-                        lsdj_error_optional_new(error, "could not fill rolled back data with 0 for compression");
-                        return false;
-                    }
+                    lsdj_error_optional_new(error, "could not fill rolled back data with 0 for compression");
+                    return false;
                 }
                 
                 if (wvio->seek(writeStart, SEEK_SET, wvio->userData) != 0)

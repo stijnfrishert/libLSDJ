@@ -40,6 +40,7 @@
 
 bool lsdj_vio_read(lsdj_vio_t* vio, void* ptr, size_t size, size_t* counter)
 {
+    assert(vio);
     size_t count = vio->read(ptr, size, vio->userData);
     if (counter)
         *counter += count;
@@ -54,6 +55,7 @@ bool lsdj_vio_read_byte(lsdj_vio_t* vio, unsigned char* value, size_t* counter)
 
 bool lsdj_vio_write(lsdj_vio_t* vio, const void* ptr, size_t size, size_t* counter)
 {
+    assert(vio);
     size_t count = vio->write(ptr, size, vio->userData);
     if (counter)
         *counter += count;
@@ -64,6 +66,29 @@ bool lsdj_vio_write(lsdj_vio_t* vio, const void* ptr, size_t size, size_t* count
 bool lsdj_vio_write_byte(lsdj_vio_t* vio, unsigned char value, size_t* counter)
 {
     return lsdj_vio_write(vio, &value, 1, counter);
+}
+
+bool lsdj_vio_write_repeat(lsdj_vio_t* vio, const void* ptr, size_t size, size_t count, size_t* counter)
+{
+    for (size_t i = 0; i < count; i += 1)
+    {
+        if (!lsdj_vio_write(vio, ptr, size, counter))
+            return false;
+    }
+
+    return true;
+}
+
+long lsdj_vio_tell(lsdj_vio_t* vio)
+{
+    assert(vio);
+    return vio->tell(vio->userData);
+}
+
+bool lsdj_vio_seek(lsdj_vio_t* vio, long offset, int whence)
+{
+    assert(vio);
+    return vio->seek(offset, whence, vio->userData) == 0;
 }
 
 

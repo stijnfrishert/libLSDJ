@@ -281,7 +281,9 @@ const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char 
 
 // Read compressed project data from memory sav file
 bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** projects, lsdj_error_t** error)
-{    
+{
+    const long firstBlockPosition = lsdj_vio_tell(rvio);
+    
     // Pointers for storing decompressed song data
     // Handle decompression
     for (int i = 0; i < LSDJ_BLOCK_COUNT; ++i)
@@ -310,7 +312,8 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
 
             lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
 
-            if (lsdj_decompress(rvio, &wvio, true, NULL, error) == false)
+            size_t readCounter = 0;
+            if (lsdj_decompress(rvio, &readCounter, &wvio, NULL, firstBlockPosition, true, error) == false)
             {
                 lsdj_project_free(project);
                 return false;

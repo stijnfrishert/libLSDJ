@@ -5,7 +5,7 @@ project(lsdj)
 
 add_subdirectory(dependency/Catch2)
 add_subdirectory(liblsdj)
-# add_subdirectory(lsdsng_export)
+add_subdirectory(lsdsng_export)
 # add_subdirectory(lsdsng_import)
 # # add_subdirectory(lsdj_clean)
 # add_subdirectory(lsdj_mono)

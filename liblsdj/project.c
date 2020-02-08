@@ -183,7 +183,7 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
     
     lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
     
-    if (!lsdj_decompress(rvio, &wvio, false, NULL, error))
+    if (!lsdj_decompress(rvio, NULL, &wvio, NULL, lsdj_vio_tell(rvio), false, error))
         return NULL;
     
     lsdj_project_set_song_buffer(project, &songBuffer);
