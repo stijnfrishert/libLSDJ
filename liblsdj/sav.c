@@ -299,6 +299,17 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
             for (int j = 0; j < i; j += 1)
                 assert(header->blockAllocationTable[j] != p);
 #endif
+            
+            // Move to the first block of this project
+            // We do this, because reading the last project might have moved rvio all
+            // arouned the block space, and we gotta be sure we're at the right starting
+            // position.
+            if (!lsdj_vio_seek(rvio, firstBlockPosition + i * LSDJ_BLOCK_SIZE, SEEK_SET))
+            {
+                lsdj_error_optional_new(error, "could not change to first block of project");
+                return false;
+            }
+            
             lsdj_project_t* project = lsdj_project_new(error);
             if (project == NULL)
             {
