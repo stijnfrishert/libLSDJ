@@ -302,8 +302,8 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
                 return false;
             }
 
-            lsdj_project_set_name(project, header->projectNames[i], LSDJ_PROJECT_NAME_LENGTH);
-            lsdj_project_set_version(project, header->projectVersions[i]);
+            lsdj_project_set_name(project, header->projectNames[p], LSDJ_PROJECT_NAME_LENGTH);
+            lsdj_project_set_version(project, header->projectVersions[p]);
 
             lsdj_song_buffer_t songBuffer;
             lsdj_memory_access_state_t state;
@@ -313,11 +313,14 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
             lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
 
             size_t readCounter = 0;
-            if (lsdj_decompress(rvio, &readCounter, &wvio, NULL, firstBlockPosition, true, error) == false)
+            size_t writeCounter = 0;
+            if (lsdj_decompress(rvio, &readCounter, &wvio, &writeCounter, firstBlockPosition, true, error) == false)
             {
                 lsdj_project_free(project);
                 return false;
             }
+            
+            assert(writeCounter == LSDJ_SONG_BUFFER_BYTE_COUNT);
 
             lsdj_project_set_song_buffer(project, &songBuffer);
 

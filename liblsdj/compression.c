@@ -124,6 +124,19 @@ bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size
     return true;
 }
 
+bool move_to_next_block_alignment(lsdj_vio_t* rvio, long firstBlockPosition, lsdj_error_t** error)
+{
+    const long position = lsdj_vio_tell(rvio) - firstBlockPosition;
+    const long offset = LSDJ_BLOCK_SIZE - (position % LSDJ_BLOCK_SIZE);
+    if (!lsdj_vio_seek(rvio, offset, SEEK_CUR))
+    {
+        lsdj_error_optional_new(error, "could not jump to block alignment");
+        return false;
+    }
+    
+    return true;
+}
+
 bool decompress_sa_byte(lsdj_vio_t* rvio, size_t* readCounter, long firstBlockPosition, bool followBlockJumps, lsdj_vio_t* wvio, size_t* writeCounter, bool* reading, lsdj_error_t** error)
 {
     unsigned char byte = 0;
@@ -148,9 +161,8 @@ bool decompress_sa_byte(lsdj_vio_t* rvio, size_t* readCounter, long firstBlockPo
             return decompress_default_instrument_byte(rvio, wvio, writeCounter, error);
         case END_OF_FILE_BYTE:
             *reading = false;
-            return true;
+            return move_to_next_block_alignment(rvio, firstBlockPosition, error);
         default:
-        {
             if (followBlockJumps)
             {
                 const long newPosition = firstBlockPosition + (long)((byte - 1) * LSDJ_BLOCK_SIZE);
@@ -160,19 +172,13 @@ bool decompress_sa_byte(lsdj_vio_t* rvio, size_t* readCounter, long firstBlockPo
                     return false;
                 }
             } else {
-                const long position = lsdj_vio_tell(rvio) - firstBlockPosition;
-                const long offset = LSDJ_BLOCK_SIZE - (position % LSDJ_BLOCK_SIZE);
-                if (!lsdj_vio_seek(rvio, offset, SEEK_CUR))
-                {
-                    lsdj_error_optional_new(error, "could not jump to new block position");
+                if (!move_to_next_block_alignment(rvio, firstBlockPosition, error))
                     return false;
-                }
             }
             
             assert((lsdj_vio_tell(rvio) - firstBlockPosition) % LSDJ_BLOCK_SIZE == 0);
             
             return true;
-        }
     }
 }
 
@@ -192,9 +198,9 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
     while (reading == true)
     {
         // Uncomment this to see every read and corresponding write position
-//        const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
-//        const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
-//        printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
+        const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
+        const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
+        printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
         
         if (!lsdj_decompress_step(rvio, readCounter,
                                   wvio, writeCounter,
@@ -205,6 +211,8 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
             return false;
         }
     }
+    
+    assert((lsdj_vio_tell(rvio) - firstBlockPosition) % LSDJ_BLOCK_SIZE == 0);
 
     const long writeEnd = lsdj_vio_tell(wvio);
     if (writeEnd == -1L)
