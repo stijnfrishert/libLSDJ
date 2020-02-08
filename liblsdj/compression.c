@@ -192,9 +192,9 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
     while (reading == true)
     {
         // Uncomment this to see every read and corresponding write position
-        const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
-        const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
-        printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
+//        const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
+//        const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
+//        printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
         
         if (!lsdj_decompress_step(rvio, readCounter,
                                   wvio, writeCounter,
@@ -206,7 +206,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
         }
     }
 
-    const long writeEnd = wvio->tell(wvio->userData);
+    const long writeEnd = lsdj_vio_tell(wvio);
     if (writeEnd == -1L)
     {
         lsdj_error_optional_new(error, "could not tell compression end");
@@ -275,7 +275,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
     
     unsigned char byte = 0;
     
-    long writeStart = wvio->tell(wvio->userData);
+    long writeStart = lsdj_vio_tell(wvio);
     if (writeStart == -1L)
     {
         lsdj_error_optional_new(error, "could not tell write position on compression");
@@ -286,7 +286,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
     for (const unsigned char* read = data; read < end; )
     {
         // Uncomment this to print the current read and write positions
-        // long wcur = wvio->tell(wvio->userData) - writeStart;
+        // long wcur = lsdj_vio_tell(wvio) - writeStart;
         // printf("read: 0x%lx\twrite: 0x%lx\n", read - data, wcur);
         
         // Are we reading a default wave? If so, we can compress these!
@@ -423,8 +423,8 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
             // If so, roll back
             if (currentBlock == LSDJ_BLOCK_COUNT + 1)
             {
-                long pos = wvio->tell(wvio->userData);
-                if (wvio->seek(writeStart, SEEK_SET, wvio->userData) != 0)
+                long pos = lsdj_vio_tell(wvio);
+                if (!lsdj_vio_seek(wvio, writeStart, SEEK_SET))
                 {
                     lsdj_error_optional_new(error, "could not roll back after reaching max block count for compression");
                     return 0;
@@ -437,7 +437,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
                     return false;
                 }
                 
-                if (wvio->seek(writeStart, SEEK_SET, wvio->userData) != 0)
+                if (!lsdj_vio_seek(wvio, writeStart, SEEK_SET))
                 {
                     lsdj_error_optional_new(error, "could not fill roll back to start for compression roll back");
                     return false;

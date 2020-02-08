@@ -161,14 +161,14 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
     if (project == NULL)
         return NULL;
     
-    if (rvio->read(project->name, LSDJ_PROJECT_NAME_LENGTH, rvio->userData) != LSDJ_PROJECT_NAME_LENGTH)
+    if (!lsdj_vio_read(rvio, project->name, LSDJ_PROJECT_NAME_LENGTH, NULL))
     {
         lsdj_error_optional_new(error, "could not read project name");
         lsdj_project_free(project);
         return NULL;
     }
     
-    if (rvio->read(&project->version, 1, rvio->userData) != 1)
+    if (!lsdj_vio_read_byte(rvio, &project->version, NULL))
     {
         lsdj_error_optional_new(error, "could not read project version");
         lsdj_project_free(project);
@@ -236,32 +236,22 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, 
 
 bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
 {
-    // Check for incorrect input
-    if (vio->tell == NULL)
-    {
-        lsdj_error_optional_new(error, "vio->tell is NULL");
-        return false;
-    }
-    
-    if (vio->seek == NULL)
-    {
-        lsdj_error_optional_new(error, "vio->seek is NULL");
-        return false;
-    }
-
-    if (vio->tell == NULL)
-    {
-        lsdj_error_optional_new(error, "vio->tell is NULL");
-        return false;
-    }
-
     /*! @todo See if the name is alphanumeric */
     
     // Find out about the file "size"
-    const long begin = vio->tell(vio->userData);
-    vio->seek(0, SEEK_END, vio->userData);
-    const long size = vio->tell(vio->userData) - begin;
-    vio->seek(0, SEEK_SET, vio->userData);
+    const long begin = lsdj_vio_tell(vio);
+    if (!lsdj_vio_seek(vio, 0, SEEK_END))
+    {
+        lsdj_error_optional_new(error, "Could not move to the end of the lsdsng");
+        return false;
+    }
+    
+    const long size = lsdj_vio_tell(vio) - begin;
+    if (!lsdj_vio_seek(vio, 0, SEEK_SET))
+    {
+        lsdj_error_optional_new(error, "Could not move to the beginning of the lsdsng");
+        return false;
+    }
 
     // Find out if the file size modulo's to the compression block size
     /*! @todo What if someone gives up a buffer bigger than the project size?

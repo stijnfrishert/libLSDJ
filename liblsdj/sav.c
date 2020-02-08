@@ -330,36 +330,27 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
 
 lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* rvio, lsdj_error_t** error)
 {
-    // Check for incorrect input
-    if (rvio->read == NULL)
-    {
-        lsdj_error_optional_new(error, "vio->read is NULL");
-        return NULL;
-    }
-    
-    if (rvio->seek == NULL)
-    {
-        lsdj_error_optional_new(error, "vio->seek is NULL");
-        return NULL;
-    }
-    
-    if (rvio->tell == NULL)
-    {
-        lsdj_error_optional_new(error, "vio->tell is NULL");
-        return NULL;
-    }
-    
     lsdj_sav_t* sav = lsdj_sav_alloc(error);
     if (sav == NULL)
         return NULL;
 
     // Read the working memory song
-    rvio->read(sav->workingMemorySongBuffer.bytes, sizeof(sav->workingMemorySongBuffer.bytes), rvio->userData);
+    if (!lsdj_vio_read(rvio, sav->workingMemorySongBuffer.bytes, LSDJ_SONG_BUFFER_BYTE_COUNT, NULL))
+    {
+        lsdj_error_optional_new(error, "could not read working memory song from sav");
+        lsdj_sav_free(sav);
+        return false;
+    }
     
     // Read the header block, before we start processing each song
-	header_t header;
-    assert(sizeof(header) == LSDJ_BLOCK_SIZE);
-	rvio->read(&header, sizeof(header), rvio->userData);
+    assert(sizeof(header_t) == LSDJ_BLOCK_SIZE);
+    header_t header;
+    if (!lsdj_vio_read(rvio, &header, sizeof(header), NULL))
+	{
+        lsdj_error_optional_new(error, "could not read header from sav");
+        lsdj_sav_free(sav);
+        return false;
+    }
     
     // Check the initialization characters. If they're not 'jk', we're
     // probably not dealing with an actual LSDJ sav format file.
@@ -431,25 +422,20 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, ls
 
 bool lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error)
 {
-    // Check for incorrect input
-    if (vio->read == NULL)
-    {
-        lsdj_error_optional_new(error, "vio->read is NULL");
-        return false;
-    }
-    
-    if (vio->seek == NULL)
-    {
-        lsdj_error_optional_new(error, "vio->seek is NULL");
-        return false;
-    }
-    
     // Move to the initialization bytes
-    vio->seek(LSDJ_SAV_HEADER_POSITION + 0x13E, SEEK_CUR, vio->userData);
+    if (!lsdj_vio_seek(vio, LSDJ_SAV_HEADER_POSITION + 0x13E, SEEK_CUR))
+    {
+        lsdj_error_optional_new(error, "could not seek to 'jk' flag");
+        return false;
+    }
     
     // Ensure these bytes are 'jk', that's what LSDJ sets them to on RAM init
     char buffer[2];
-    vio->read(buffer, sizeof(buffer), vio->userData);
+    if (!lsdj_vio_read(vio, buffer, sizeof(buffer), NULL))
+    {
+        lsdj_error_optional_new(error, "could not read bytes for 'jk' check");
+        return false;
+    }
     
     if (buffer[0] != 'j' || buffer[1] != 'k')
     {
