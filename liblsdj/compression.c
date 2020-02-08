@@ -44,16 +44,32 @@
 #include "song_buffer.h"
 #include "wave.h"
 
-#define RUN_LENGTH_ENCODING_BYTE 0xC0
-#define SPECIAL_ACTION_BYTE 0xE0
-#define END_OF_FILE_BYTE 0xFF
-#define LSDJ_DEFAULT_WAVE_BYTE 0xF0
-#define LSDJ_DEFAULT_INSTRUMENT_BYTE 0xF1
+#define RUN_LENGTH_ENCODING_BYTE (0xC0)
+#define SPECIAL_ACTION_BYTE (0xE0)
+#define LSDJ_DEFAULT_WAVE_BYTE (0xF0)
+#define LSDJ_DEFAULT_INSTRUMENT_BYTE (0xF1)
 
 static const unsigned char LSDJ_DEFAULT_INSTRUMENT_COMPRESSION[LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
 
+bool move_to_next_block_alignment(lsdj_vio_t* rvio, long firstBlockPosition, lsdj_error_t** error)
+{
+    const long position = lsdj_vio_tell(rvio) - firstBlockPosition;
+    const long remainder = position % LSDJ_BLOCK_SIZE;
+    const long offset = LSDJ_BLOCK_SIZE - remainder;
+    if (!lsdj_vio_seek(rvio, offset, SEEK_CUR))
+    {
+        lsdj_error_optional_new(error, "could not jump to block alignment");
+        return false;
+    }
+    
+    assert((lsdj_vio_tell(rvio) - firstBlockPosition) % LSDJ_BLOCK_SIZE == 0);
+    
+    return true;
+}
+
 bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
+    // Read the second byte of an RLE section
     unsigned char byte = 0;
     if (!lsdj_vio_read_byte(rvio, &byte, readCounter))
     {
@@ -61,6 +77,8 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio
         return false;
     }
     
+    // If the second byte is *also* an RLE byte, we just need to output
+    // one of these and stop the run-length decoding
     if (byte == RUN_LENGTH_ENCODING_BYTE)
     {
         if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
@@ -69,8 +87,11 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio
             return false;
         }
     }
+    
+    // Otherwise, we're actually doing run-length decoding
     else
     {
+        // Read the length of the string of identical bytes
         unsigned char count = 0;
         if (!lsdj_vio_read_byte(rvio, &count, readCounter))
         {
@@ -78,6 +99,7 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio
             return false;
         }
         
+        // Write them to output
         if (!lsdj_vio_write_repeat(wvio, &byte, 1, count, writeCounter))
         {
             lsdj_error_optional_new(error, "could not write byte for RLE expansion");
@@ -90,6 +112,7 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio
 
 bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
+    // Read the amount of times we need to stamp the default wave
     unsigned char count = 0;
     if (!lsdj_vio_read_byte(rvio, &count, NULL))
     {
@@ -97,6 +120,7 @@ bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* wr
         return false;
     }
     
+    // Write the default wave bytes to stream
     if (!lsdj_vio_write_repeat(wvio, LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE), count, writeCounter))
     {
         lsdj_error_optional_new(error, "could not write default wave byte");
@@ -108,6 +132,7 @@ bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* wr
 
 bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
+    // Read the amount of times we need to stamp the default instrument
     unsigned char count = 0;
     if (!lsdj_vio_read_byte(rvio, &count, NULL))
     {
@@ -115,6 +140,7 @@ bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size
         return false;
     }
     
+    // Write the default wave bytes to instrument
     if (!lsdj_vio_write_repeat(wvio, LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), count, writeCounter))
     {
         lsdj_error_optional_new(error, "could not write default instrument byte");
@@ -124,21 +150,16 @@ bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size
     return true;
 }
 
-bool move_to_next_block_alignment(lsdj_vio_t* rvio, long firstBlockPosition, lsdj_error_t** error)
+bool decompress_sa_byte(lsdj_vio_t* rvio, size_t* readCounter,
+                        lsdj_vio_t* wvio, size_t* writeCounter,
+                        unsigned short* nextBlockIndex,
+                        lsdj_error_t** error)
 {
-    const long position = lsdj_vio_tell(rvio) - firstBlockPosition;
-    const long offset = LSDJ_BLOCK_SIZE - (position % LSDJ_BLOCK_SIZE);
-    if (!lsdj_vio_seek(rvio, offset, SEEK_CUR))
-    {
-        lsdj_error_optional_new(error, "could not jump to block alignment");
-        return false;
-    }
+    // First, set the next block index to be absent
+    // We'll fill this if we actually find one
+    *nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
     
-    return true;
-}
-
-bool decompress_sa_byte(lsdj_vio_t* rvio, size_t* readCounter, long firstBlockPosition, bool followBlockJumps, lsdj_vio_t* wvio, size_t* writeCounter, bool* reading, lsdj_error_t** error)
-{
+    // Read the first byte
     unsigned char byte = 0;
     if (!lsdj_vio_read_byte(rvio, &byte, readCounter))
     {
@@ -148,36 +169,30 @@ bool decompress_sa_byte(lsdj_vio_t* rvio, size_t* readCounter, long firstBlockPo
     
     switch (byte)
     {
+        // If the first byte is actually another SA byte, we just output that
+        // and be done with it
         case SPECIAL_ACTION_BYTE:
             if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
             {
                 lsdj_error_optional_new(error, "could not write SA byte");
                 return false;
+            } else {
+                return true;
             }
-            return true;
+            
+        // If we read a default wave byte, we delegate to that function
         case LSDJ_DEFAULT_WAVE_BYTE:
             return decompress_default_wave_byte(rvio, wvio, writeCounter, error);
+            
+        // If we read a default instrument byte, we delegate to that function
         case LSDJ_DEFAULT_INSTRUMENT_BYTE:
             return decompress_default_instrument_byte(rvio, wvio, writeCounter, error);
-        case END_OF_FILE_BYTE:
-            *reading = false;
-            return move_to_next_block_alignment(rvio, firstBlockPosition, error);
+            
+        // Otherwise, this is either a block jump, or an end-of-stream
+        // In both cases, we write the value to the next block index and let the callee
+        // handle this appropriately
         default:
-            if (followBlockJumps)
-            {
-                const long newPosition = firstBlockPosition + (long)((byte - 1) * LSDJ_BLOCK_SIZE);
-                if (!lsdj_vio_seek(rvio, newPosition, SEEK_SET))
-                {
-                    lsdj_error_optional_new(error, "could not jump to new block position");
-                    return false;
-                }
-            } else {
-                if (!move_to_next_block_alignment(rvio, firstBlockPosition, error))
-                    return false;
-            }
-            
-            assert((lsdj_vio_tell(rvio) - firstBlockPosition) % LSDJ_BLOCK_SIZE == 0);
-            
+            *nextBlockIndex = byte;
             return true;
     }
 }
@@ -194,23 +209,37 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
     
     unsigned char byte = 0;
     
-    bool reading = true;
-    while (reading == true)
+    // Keep on decompressing blocks until we've reached an end-of-stream
+    unsigned short nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
+    do
     {
         // Uncomment this to see every read and corresponding write position
         const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
         const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
         printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
         
-        if (!lsdj_decompress_step(rvio, readCounter,
-                                  wvio, writeCounter,
-                                  firstBlockPosition,
-                                  followBlockJumps,
-                                  &reading,
-                                  error)) {
+        if (!lsdj_decompress_block(rvio, readCounter,
+                                   wvio, writeCounter,
+                                   &nextBlockIndex,
+                                   error))
+        {
             return false;
         }
-    }
+        
+        assert(nextBlockIndex != LSDJ_NO_NEXT_BLOCK_INDEX);
+        if (nextBlockIndex != LSDJ_END_OF_FILE_BLOCK_INDEX)
+        {
+            if (followBlockJumps)
+            {
+                const unsigned char index = (unsigned char)(nextBlockIndex) - 1;
+                if (!lsdj_vio_seek(rvio, firstBlockPosition + (index * LSDJ_BLOCK_SIZE), SEEK_SET))
+                {
+                    lsdj_error_optional_new(error, "could not move to next block");
+                    return false;
+                }
+            }
+        }
+    } while (nextBlockIndex != LSDJ_END_OF_FILE_BLOCK_INDEX);
     
     assert((lsdj_vio_tell(rvio) - firstBlockPosition) % LSDJ_BLOCK_SIZE == 0);
 
@@ -234,15 +263,54 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
     return true;
 }
 
+bool lsdj_decompress_block(lsdj_vio_t* rvio, size_t* readCounter,
+                           lsdj_vio_t* wvio, size_t* writeCounter,
+                           unsigned short* nextBlockIndex,
+                           lsdj_error_t** error)
+{
+    // First, set the next block index to be absent
+    // We'll fill this if we actually find one
+    *nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
+    
+    // Store the start of this block, so that we can move to the end
+    // of it afterwards
+    const long start = lsdj_vio_tell(rvio);
+    
+    // Keep decompressing steps until we run into a block jump or
+    // end-of-stream
+    do
+    {
+        // Read the next step
+        if (!lsdj_decompress_step(rvio, readCounter,
+                                  wvio, writeCounter,
+                                  nextBlockIndex,
+                                  error))
+        {
+            return false;
+        }
+    } while (*nextBlockIndex == LSDJ_NO_NEXT_BLOCK_INDEX);
+    
+    // Move to the end of this block to keep everything sane
+    if (!lsdj_vio_seek(rvio, start + LSDJ_BLOCK_SIZE, SEEK_SET))
+    {
+        lsdj_error_optional_new(error, "could not seek to the end of a block");
+        return false;
+    }
+    
+    return true;
+}
+
 bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
                           lsdj_vio_t* wvio, size_t* writeCounter,
-                          long firstBlockPosition,
-                          bool followBlockJumps,
-                          bool* reading,
+                          unsigned short* nextBlockIndex,
                           lsdj_error_t** error)
 {
-    unsigned char byte = 0;
+    // First, set the next block index to be absent
+    // We'll fill this if we actually find one
+    *nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
     
+    // Read the byte that declares what step this is
+    unsigned char byte = 0;
     if (!lsdj_vio_read_byte(rvio, &byte, readCounter))
     {
         lsdj_error_optional_new(error, "could not read byte for decompression step");
@@ -251,20 +319,23 @@ bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
     
     switch (byte)
     {
+        // In the case of an RLE byte, delegate to that function
         case RUN_LENGTH_ENCODING_BYTE:
             return decompress_rle_byte(rvio, readCounter, wvio, writeCounter, error);
             
+        // In the case of an SA byte, delegate to that function
         case SPECIAL_ACTION_BYTE:
-            return decompress_sa_byte(rvio, readCounter, firstBlockPosition, followBlockJumps, wvio, writeCounter, reading, error);
-            
+            return decompress_sa_byte(rvio, readCounter, wvio, writeCounter, nextBlockIndex, error);
+        
+        // Otherwise, just write the same byte to the output stream
         default:
             if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
             {
                 lsdj_error_optional_new(error, "could not write decompression byte");
                 return false;
-            } else {
-                return true;
             }
+            
+            return true;
     }
 }
 
@@ -475,7 +546,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
         return 0;
     }
     
-    byte = END_OF_FILE_BYTE;
+    byte = LSDJ_END_OF_FILE_BLOCK_INDEX;
     if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
     {
         lsdj_error_optional_new(error, "could not write EOF for compression");

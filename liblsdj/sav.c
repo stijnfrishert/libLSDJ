@@ -286,7 +286,7 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
     
     // Pointers for storing decompressed song data
     // Handle decompression
-    for (int i = 0; i < LSDJ_BLOCK_COUNT; ++i)
+    for (int i = 0; i < LSDJ_BLOCK_COUNT; i += 1)
     {
         unsigned char p = header->blockAllocationTable[i];
         if (p == LSDJ_SAV_EMPTY_BLOCK_VALUE)
@@ -295,6 +295,10 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
         // Create the project if this is the first block we come across
         if (projects[p] == NULL)
         {
+#ifdef DEBUG
+            for (int j = 0; j < i; j += 1)
+                assert(header->blockAllocationTable[j] != p);
+#endif
             lsdj_project_t* project = lsdj_project_new(error);
             if (project == NULL)
             {
