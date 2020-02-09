@@ -27,14 +27,14 @@
 //   32 3E82-3EA1: phrase allocation table (bit per phrase, 1 if alloced, 0 else)
 //   16 3EA2-3EB1: chain allocation table (bit per chain, 1 if alloced, 0 else)
 //  256 3EB2-3FB1: softsynth params (16 parameter blocks of 16 bytes each)
-//    1 3FB2-3FB2: clock, hours
-//    1 3FB3-3FB3: clock, minutes
+   1 3FB2-3FB2: clock, hours
+   1 3FB3-3FB3: clock, minutes
 //    1 3FB4-3FB4: tempo
 //    1 3FB5-3FB5: tune setting
-//    1 3FB6-3FB6: total clock, days
-//    1 3FB7-3FB7: total clock, hours
-//    1 3FB8-3FB8: total clock, minutes
-//    1 3FB9-3FB9: total clock, checksum (days+hours+minutes)
+   1 3FB6-3FB6: total clock, days
+   1 3FB7-3FB7: total clock, hours
+   1 3FB8-3FB8: total clock, minutes
+   1 3FB9-3FB9: total clock, checksum (days+hours+minutes)
 //    1 3FBA-3FBA: key delay
 //    1 3FBB-3FBB: key repeat
 //    1 3FBC-3FBC: font

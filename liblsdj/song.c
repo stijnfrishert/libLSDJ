@@ -40,6 +40,14 @@
 #define CHAIN_ASSIGNMENTS_OFFSET (0x1290)
 #define CHAIN_ASSIGNMENTS_LENGTH (1024)
 
+#define WORK_HOURS_OFFSET (0x3FB2)
+#define WORK_MINUTES_OFFSET (0x3FB3)
+
+#define TOTAL_DAYS_OFFSET (0x3FB6)
+#define TOTAL_HOURS_OFFSET (0x3FB7)
+#define TOTAL_MINUTES_OFFSET (0x3FB8)
+#define TOTAL_TIME_CHECKSUM_OFFSET (0x3FB9)
+
 #define FORMAT_VERSION_OFFSET (0x7FFF)
 
 void lsdj_song_set_format_version(lsdj_song_t* song, uint8_t version)
@@ -50,6 +58,56 @@ void lsdj_song_set_format_version(lsdj_song_t* song, uint8_t version)
 uint8_t lsdj_song_get_format_version(const lsdj_song_t* song)
 {
     return song->bytes[FORMAT_VERSION_OFFSET];
+}
+
+void lsdj_song_set_total_days(lsdj_song_t* song, uint8_t days)
+{
+	song->bytes[TOTAL_DAYS_OFFSET] = days;
+}
+
+uint8_t lsdj_song_get_total_days(const lsdj_song_t* song)
+{
+	return song->bytes[TOTAL_DAYS_OFFSET];
+}
+
+void lsdj_song_set_total_hours(lsdj_song_t* song, uint8_t hours)
+{
+	song->bytes[TOTAL_HOURS_OFFSET] = hours;
+}
+
+uint8_t lsdj_song_get_total_hours(const lsdj_song_t* song)
+{
+	return song->bytes[TOTAL_HOURS_OFFSET];
+}
+
+void lsdj_song_set_total_minutes(lsdj_song_t* song, uint8_t minutes)
+{
+	song->bytes[TOTAL_MINUTES_OFFSET] = minutes;
+}
+
+uint8_t lsdj_song_get_total_minutes(const lsdj_song_t* song)
+{
+	return song->bytes[TOTAL_MINUTES_OFFSET];
+}
+
+void lsdj_song_set_work_hours(lsdj_song_t* song, uint8_t hours)
+{
+	song->bytes[WORK_HOURS_OFFSET] = hours;
+}
+
+uint8_t lsdj_song_get_work_hours(const lsdj_song_t* song)
+{
+	return song->bytes[WORK_HOURS_OFFSET];
+}
+
+void lsdj_song_set_work_minutes(lsdj_song_t* song, uint8_t minutes)
+{
+	song->bytes[WORK_MINUTES_OFFSET] = minutes;
+}
+
+uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song)
+{
+	return song->bytes[WORK_MINUTES_OFFSET];
 }
 
 void lsdj_song_set_chain_assignment(lsdj_song_t* song, uint8_t row, lsdj_channel channel, uint8_t chain)

@@ -50,6 +50,7 @@
 extern "C" {
 #endif
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "channel.h"
@@ -81,6 +82,36 @@ void lsdj_song_set_format_version(lsdj_song_t* song, uint8_t version);
 	nor the version of LSDj itself. This relates to the internal format version
 	that is increased everytime the song format changes. */
 uint8_t lsdj_song_get_format_version(const lsdj_song_t* song);
+
+//! Retrieve the total work time days stored in the song
+void lsdj_song_set_total_days(lsdj_song_t* song, uint8_t days);
+
+//! Retrieve the total work time days stored in the song
+uint8_t lsdj_song_get_total_days(const lsdj_song_t* song);
+
+//! Retrieve the total work time hours stored in the song
+void lsdj_song_set_total_hours(lsdj_song_t* song, uint8_t hours);
+
+//! Retrieve the total work time hours stored in the song
+uint8_t lsdj_song_get_total_hours(const lsdj_song_t* song);
+
+//! Retrieve the total work time minutes stored in the song
+void lsdj_song_set_total_minutes(lsdj_song_t* song, uint8_t minutes);
+
+//! Retrieve the total work time minutes stored in the song
+uint8_t lsdj_song_get_total_minutes(const lsdj_song_t* song);
+
+//! Retrieve the work time hours stored in the song
+void lsdj_song_set_work_hours(lsdj_song_t* song, uint8_t hours);
+
+//! Retrieve the work time hours stored in the song
+uint8_t lsdj_song_get_work_hours(const lsdj_song_t* song);
+
+//! Retrieve the work time minutes stored in the song
+void lsdj_song_set_work_minutes(lsdj_song_t* song, uint8_t minutes);
+
+//! Retrieve the work time minutes stored in the song
+uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song);
 
 //! Change the chain assigned to a row + channel slot
 /*! @param chain The chain number to assign, or LSDJ_NO_CHAIN to set it to empty */

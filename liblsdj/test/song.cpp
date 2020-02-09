@@ -22,6 +22,13 @@ SCENARIO( "Song", "[song]" )
 		assert(song != nullptr);
 
 		REQUIRE( lsdj_song_get_format_version(song) == 7 );
+
+		REQUIRE( lsdj_song_get_total_days(song) == 0);
+		REQUIRE( lsdj_song_get_total_hours(song) == 18);
+		REQUIRE( lsdj_song_get_total_minutes(song) == 10);
+
+		// --- Rows --- //
+
 		REQUIRE( lsdj_song_get_chain_assignment(song, 0, LSDJ_CHANNEL_PULSE1) == 1 );
 		REQUIRE( lsdj_song_get_chain_assignment(song, 0, LSDJ_CHANNEL_PULSE2) == 2 );
 		REQUIRE( lsdj_song_get_chain_assignment(song, 0, LSDJ_CHANNEL_WAVE) == 3 );
