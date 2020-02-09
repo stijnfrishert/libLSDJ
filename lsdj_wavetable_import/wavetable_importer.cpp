@@ -79,7 +79,7 @@ namespace lsdj
         if (verbose)
             std::cout << "Loaded sav " + path.string() << std::endl;
         
-        lsdj_song_t* song = lsdj_sav_get_working_memory_song(sav);
+        const auto song = lsdj_song_read_from_buffer(lsdj_sav_get_working_memory_song(sav), &error);
         if (!song)
         {
             lsdj_sav_free(sav);
@@ -88,6 +88,8 @@ namespace lsdj
         
         // Do the actual import
         const auto result = importToSong(song, wavetableName);
+        lsdj_song_free(song);
+        
         if (!result.first)
         {
             lsdj_sav_free(sav);
@@ -97,8 +99,7 @@ namespace lsdj
         
         // Write the sav back to file
         const auto outputPath = ghc::filesystem::absolute(outputName);
-        lsdj_sav_write_to_file(sav, outputPath.string().c_str(), &error);
-        if (error != nullptr)
+        if (!lsdj_sav_write_to_file(sav, outputPath.string().c_str(), nullptr, &error))
         {
             lsdj_sav_free(sav);
             return false;
@@ -123,10 +124,16 @@ namespace lsdj
         if (verbose)
             std::cout << "Loaded project " + path.string() << std::endl;
         
-        lsdj_song_t* song = lsdj_project_get_song(project);
+        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_project_get_song_buffer(project), &error);
+        if (!song)
+        {
+            lsdj_project_free(project);
+            return false;
+        }
         
         // Do the actual import
         const auto result = importToSong(song, wavetableName);
+        lsdj_song_free(song);
         if (!result.first)
         {
             lsdj_project_free(project);
@@ -136,8 +143,7 @@ namespace lsdj
         
         // Write the project back to file
         const auto outputPath = ghc::filesystem::absolute(outputName);
-        lsdj_project_write_lsdsng_to_file(project, outputPath.string().c_str(), &error);
-        if (error != nullptr)
+        if (!lsdj_project_write_lsdsng_to_file(project, outputPath.string().c_str(), nullptr, &error))
         {
             lsdj_project_free(project);
             return false;

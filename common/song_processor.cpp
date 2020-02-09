@@ -63,7 +63,20 @@ namespace lsdj
         if (verbose)
             std::cout << "Processing sav '" + path.string() + "'" << std::endl;
         
-        processSong(*lsdj_sav_get_working_memory_song(sav));
+        const auto song = lsdj_song_read_from_buffer(lsdj_sav_get_working_memory_song(sav), &error);
+        if (!song)
+        {
+            lsdj_sav_free(sav);
+            return false;
+        }
+        
+        const auto result = processSong(*song);
+        lsdj_song_free(song);
+        if (!result)
+        {
+            lsdj_sav_free(sav);
+            return false;
+        }
         
         for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
         {
@@ -105,11 +118,20 @@ namespace lsdj
         if (verbose)
             std::cout << "Processing lsdsng '" + path.string() + "'" << std::endl;
         
+        const auto song = lsdj_song_read_from_buffer(lsdj_project_get_song_buffer(project), &error);
+        if (!song)
+        {
+            lsdj_project_free(project);
+            return false;
+        }
+        
         if (!processSong(*song))
         {
             lsdj_project_free(project);
             return false;
         }
+        
+        lsdj_song_free(song);
         
         if (!lsdj_project_write_lsdsng_to_file(project, constructLsdsngDestinationPath(path).string().c_str(), nullptr, &error))
         {

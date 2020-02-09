@@ -47,12 +47,13 @@
 #include "../common/common.hpp"
 #include "../liblsdj/project.h"
 #include "../liblsdj/sav.h"
+#include "../liblsdj/version.h"
 #include "wavetable_importer.hpp"
 
 void printHelp(const popl::OptionParser& options)
 {
     std::cout << "lsdj-wavetable-import source.lsdsng wavetables.snt --[synth 0-F | index 00-FF]\n\n"
-              << "Version: " << lsdj::VERSION << "\n\n"
+              << "Version: " << LSDJ_VERSION_STRING << "\n\n"
               << options << "\n";
 
     std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";

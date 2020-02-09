@@ -284,6 +284,8 @@ namespace lsdj
         }
         
         std::cout << std::endl;
+        
+        lsdj_song_free(song);
     }
 
     void Exporter::printProject(const lsdj_sav_t* sav, std::size_t index)
@@ -345,6 +347,8 @@ namespace lsdj
         }
         
         std::cout << std::endl;
+        
+        lsdj_song_free(song);
     }
     
     std::string Exporter::constructName(const lsdj_project_t* project)

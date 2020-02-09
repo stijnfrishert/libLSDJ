@@ -39,12 +39,13 @@
 #include <popl/popl.hpp>
 
 #include "../common/common.hpp"
+#include "../liblsdj/version.h"
 #include "mono_processor.hpp"
 
 void printHelp(const popl::OptionParser& options)
 {
     std::cout << "lsdj-mono mymusic.sav|mymusic.lsdsng ...\n\n"
-              << "Version: " << lsdj::VERSION << "\n\n"
+              << "Version: " << LSDJ_VERSION_STRING << "\n\n"
               << options << "\n\n";
 
     std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";
