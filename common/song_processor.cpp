@@ -118,7 +118,7 @@ namespace lsdj
         if (verbose)
             std::cout << "Processing lsdsng '" + path.string() + "'" << std::endl;
         
-        const auto song = lsdj_song_read_from_buffer(lsdj_project_get_song_buffer(project), &error);
+        const auto song = lsdj_song_read_from_buffer(lsdj_project_get_song(project), &error);
         if (!song)
         {
             lsdj_project_free(project);

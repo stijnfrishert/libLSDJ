@@ -33,8 +33,8 @@
  
  */
 
-#ifndef LSDJ_SONG_BUFFER_H
-#define LSDJ_SONG_BUFFER_H
+#ifndef LSDJ_SONG_H
+#define LSDJ_SONG_H
 
 /* Song buffers are the representation of an LSDJ song uncompressed in memory.
    It hasn't been parsed yet into meaningful data. This is raw song data, and
@@ -53,13 +53,13 @@ extern "C" {
 #include "error.h"
 
 //! The size of a decompressed song in memory
-#define LSDJ_SONG_BUFFER_BYTE_COUNT (0x8000)
+#define LSDJ_SONG_BYTE_COUNT (0x8000)
 
 //! A structure that can hold one entire decompressed song in memory
 typedef struct
 {
-	unsigned char bytes[LSDJ_SONG_BUFFER_BYTE_COUNT];
-} lsdj_song_buffer_t;
+	unsigned char bytes[LSDJ_SONG_BYTE_COUNT];
+} lsdj_song_t;
     
 #ifdef __cplusplus
 }

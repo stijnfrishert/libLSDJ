@@ -12,7 +12,7 @@ set(HEADERS
 	error.h
 	project.h
 	sav.h
-	song_buffer.h
+	song.h
 	version.h
 	vio.h
 	)

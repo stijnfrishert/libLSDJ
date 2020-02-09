@@ -124,7 +124,7 @@ namespace lsdj
         if (verbose)
             std::cout << "Loaded project " + path.string() << std::endl;
         
-        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_project_get_song_buffer(project), &error);
+        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_project_get_song(project), &error);
         if (!song)
         {
             lsdj_project_free(project);

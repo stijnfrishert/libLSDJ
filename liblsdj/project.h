@@ -49,14 +49,14 @@ extern "C" {
 #include <stddef.h>
 
 #include "error.h"
-#include "song_buffer.h"
+#include "song.h"
 #include "vio.h"
 
 //! The length of project names
 #define LSDJ_PROJECT_NAME_LENGTH (8)
 
 //! The maximum size of an lsdsng is a version byte +  project name + full song
-#define LSDSNG_MAX_SIZE (1 + LSDJ_PROJECT_NAME_LENGTH + LSDJ_SONG_BUFFER_BYTE_COUNT)
+#define LSDSNG_MAX_SIZE (1 + LSDJ_PROJECT_NAME_LENGTH + LSDJ_SONG_BYTE_COUNT)
 
 //! Representation of a project within an LSDJ sav file, or an imported .lsdsng
 typedef struct lsdj_project_t lsdj_project_t;
@@ -105,11 +105,11 @@ unsigned char lsdj_project_get_version(const lsdj_project_t* project);
 //! Copy a full song's byte data into the project
 /*! A song buffer's data is copied into the project.
 	This leaves the original song buffer intact */
-void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* songBuffer);
+void lsdj_project_set_song(lsdj_project_t* project, const lsdj_song_t* song);
 
 //! Retrieve the song buffer for this project
 /*! Song buffers contain the actual song data for a project. */
-const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* project);
+const lsdj_song_t* lsdj_project_get_song(const lsdj_project_t* project);
 
 
 // --- I/O --- //

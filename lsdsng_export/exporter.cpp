@@ -333,7 +333,7 @@ namespace lsdj
             std::cout << ' ';
         
         // Retrieve the format version of the song to display
-        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_project_get_song_buffer(project), nullptr);
+        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_project_get_song(project), nullptr);
         const auto formatVersionString = std::to_string(lsdj_song_get_format_version(song));
         std::cout << formatVersionString;
         for (auto i = 0; i < 5 - formatVersionString.length(); i++)

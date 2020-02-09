@@ -7,8 +7,7 @@ set(SOURCES
 	main.cpp
 	project.cpp
 	sav.cpp
-	# song.cpp
-	song_buffer.cpp
+	song.cpp
 	vio.cpp
 	)
 
