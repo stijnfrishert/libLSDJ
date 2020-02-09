@@ -62,6 +62,9 @@ struct lsdj_sav_t
     
     //! Reserved empty memory
     unsigned char reserved8120[30];
+
+    //! The allocator used to create this sav
+    const lsdj_allocator_t* allocator;
 };
 
 typedef struct
@@ -78,22 +81,26 @@ typedef struct
 // --- Allocation --- //
 
 //! Allocate a sav in memory
-lsdj_sav_t* lsdj_sav_alloc(lsdj_error_t** error)
+lsdj_sav_t* lsdj_sav_alloc(const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_sav_t* sav = (lsdj_sav_t*)calloc(sizeof(lsdj_sav_t), 1);
-    if (sav == NULL)
+    void* memory = lsdj_allocate_or_malloc(allocator, sizeof(lsdj_sav_t));;
+    if (memory == NULL)
     {
         lsdj_error_optional_new(error, "could not allocate sav");
         return NULL;
     }
+
+    lsdj_sav_t* sav = (lsdj_sav_t*)memory;
+    memset(sav, 0, sizeof(lsdj_sav_t));
+    sav->allocator = allocator;
     
     return sav;
 }
 
-lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error)
+lsdj_sav_t* lsdj_sav_new(const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     // Allocate memory for a new sav
-    lsdj_sav_t* sav = lsdj_sav_alloc(error);
+    lsdj_sav_t* sav = lsdj_sav_alloc(allocator, error);
     if (sav == NULL)
     {
         lsdj_error_optional_new(error, "could not allocate memory for sav");
@@ -115,10 +122,10 @@ lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error)
     return sav;
 }
 
-lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, lsdj_error_t** error)
+lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     // Allocate memory for a new sav
-    lsdj_sav_t* copy = lsdj_sav_alloc(error);
+    lsdj_sav_t* copy = lsdj_sav_alloc(allocator, error);
     if (copy == NULL)
     {
         lsdj_error_optional_new(error, "could not allocate memory for sav");
@@ -134,7 +141,7 @@ lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, lsdj_error_t** error)
     {
         if (sav->projects[i] != NULL)
         {
-            copy->projects[i] = lsdj_project_copy(sav->projects[i], error);
+            copy->projects[i] = lsdj_project_copy(sav->projects[i], allocator, error);
             if (copy->projects[i] == NULL)
             {
                 copy_projects_succeeded = false;
@@ -165,11 +172,11 @@ void lsdj_sav_free(lsdj_sav_t* sav)
     {
         for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
         {
-            if (sav->projects[i])
+            if (sav->projects[i] != NULL)
                 lsdj_project_free(sav->projects[i]);
         }
         
-        free(sav);
+        lsdj_deallocate_or_free(sav->allocator, sav);
     }
 }
 
@@ -220,9 +227,9 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
     return sav->activeProjectIndex;
 }
 
- lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error)
+ lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, const lsdj_allocator_t* allocator, lsdj_error_t** error)
  {
-     lsdj_project_t* newProject = lsdj_project_new(error);
+     lsdj_project_t* newProject = lsdj_project_new(allocator, error);
      if (newProject == NULL)
      {
          lsdj_error_optional_new(error, "could not allocate memory for project");
@@ -251,9 +258,9 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
      return newProject;
  }
 
-bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, lsdj_error_t** error)
+bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_project_t* copy = lsdj_project_copy(project, error);
+    lsdj_project_t* copy = lsdj_project_copy(project, allocator, error);
     if (copy == NULL)
         return false;
     
@@ -286,7 +293,7 @@ const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char 
 }
 
 // Read compressed project data from memory sav file
-bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** projects, lsdj_error_t** error)
+bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** projects, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     const long firstBlockPosition = lsdj_vio_tell(rvio);
     
@@ -316,7 +323,7 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
                 return false;
             }
             
-            lsdj_project_t* project = lsdj_project_new(error);
+            lsdj_project_t* project = lsdj_project_new(allocator, error);
             if (project == NULL)
             {
                 lsdj_error_optional_new(error, "could not create project for sav loading");
@@ -352,9 +359,9 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
     return true;
 }
 
-lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* rvio, lsdj_error_t** error)
+lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* rvio, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_sav_t* sav = lsdj_sav_alloc(error);
+    lsdj_sav_t* sav = lsdj_sav_new(allocator, error);
     if (sav == NULL)
         return NULL;
 
@@ -393,7 +400,7 @@ lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* rvio, lsdj_error_t** error)
     memcpy(sav->reserved8120, header.empty, sizeof(sav->reserved8120));
     
     // Read the compressed projects
-    if (decompress_blocks(rvio, &header, sav->projects, error) == false)
+    if (decompress_blocks(rvio, &header, sav->projects, sav->allocator, error) == false)
     {
         lsdj_sav_free(sav);
         return NULL;
@@ -402,7 +409,7 @@ lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* rvio, lsdj_error_t** error)
     return sav;
 }
 
-lsdj_sav_t* lsdj_sav_read_from_file(const char* path, lsdj_error_t** error)
+lsdj_sav_t* lsdj_sav_read_from_file(const char* path, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     if (path == NULL)
     {
@@ -421,13 +428,13 @@ lsdj_sav_t* lsdj_sav_read_from_file(const char* path, lsdj_error_t** error)
     
     lsdj_vio_t rvio = lsdj_create_file_vio(file);
 
-    lsdj_sav_t* sav = lsdj_sav_read(&rvio, error);
+    lsdj_sav_t* sav = lsdj_sav_read(&rvio, allocator, error);
     
     fclose(file);
     return sav;
 }
 
-lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     if (data == NULL)
     {
@@ -441,7 +448,7 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, ls
     
     lsdj_vio_t rvio = lsdj_create_memory_vio(&state);
     
-    return lsdj_sav_read(&rvio, error);
+    return lsdj_sav_read(&rvio, allocator, error);
 }
 
 bool lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error)

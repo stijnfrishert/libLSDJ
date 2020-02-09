@@ -17,7 +17,7 @@ SCENARIO( "Saves", "[sav]" )
 	REQUIRE(LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX == 0xFF);
 
 	// Sample project used in some tests
-	auto project = lsdj_project_new(nullptr);
+	auto project = lsdj_project_new(nullptr, nullptr);
 	lsdj_project_set_name(project, "MYSONG", 6);
 	lsdj_project_set_version(project, 16);
 
@@ -27,7 +27,7 @@ SCENARIO( "Saves", "[sav]" )
 
 	GIVEN( "A new sav is created" )
 	{
-		auto sav = lsdj_sav_new(nullptr);
+		auto sav = lsdj_sav_new(nullptr, nullptr);
 		REQUIRE( sav != nullptr );
 
 		WHEN( "The working memory song buffer is requested" )
@@ -89,7 +89,7 @@ SCENARIO( "Saves", "[sav]" )
 
 		WHEN( "Copying a project into a sav" )
 		{
-			lsdj_sav_set_project_copy(sav, 7, project, nullptr);
+			lsdj_sav_set_project_copy(sav, 7, project, nullptr, nullptr);
 
 			THEN( "The data in the project should be identical " )
 			{
@@ -145,7 +145,7 @@ SCENARIO( "Saves", "[sav]" )
 
 			THEN( "The data should remain intact" )
 			{
-				auto copy = lsdj_sav_copy(sav, nullptr);
+				auto copy = lsdj_sav_copy(sav, nullptr, nullptr);
 				REQUIRE( copy != nullptr );
 
 				auto copyBuffer = lsdj_sav_get_working_memory_song(sav);
@@ -158,7 +158,7 @@ SCENARIO( "Saves", "[sav]" )
         WHEN( "Creating a project from the working memory song with no active project" )
         {
             lsdj_sav_set_active_project_index(sav, LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX);
-            auto project = lsdj_project_new_from_working_memory_song(sav, nullptr);
+            auto project = lsdj_project_new_from_working_memory_song(sav, nullptr, nullptr);
             auto wm = lsdj_sav_get_working_memory_song(sav);
             
             THEN( "It should contain the same data" )
@@ -181,7 +181,7 @@ SCENARIO( "Saves", "[sav]" )
             lsdj_sav_set_project_move(sav, 3, project);
             lsdj_sav_set_active_project_index(sav, 3);
             
-            auto project = lsdj_project_new_from_working_memory_song(sav, nullptr);
+            auto project = lsdj_project_new_from_working_memory_song(sav, nullptr, nullptr);
             auto wm = lsdj_sav_get_working_memory_song(sav);
             
             THEN( "It should contain the same data" )
@@ -211,7 +211,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 	SECTION( "Reading a .sav from file" )
 	{
-		auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", nullptr);
+		auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", nullptr, nullptr);
 		REQUIRE( sav != nullptr );
 
 		auto wm = lsdj_sav_get_working_memory_song(sav);
@@ -236,7 +236,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 	SECTION( "Reading a .sav from memory" )
 	{
-		auto sav = lsdj_sav_read_from_memory(save.data(), save.size(), nullptr);
+		auto sav = lsdj_sav_read_from_memory(save.data(), save.size(), nullptr, nullptr);
 		REQUIRE( sav != nullptr );
 
 		// Working memory
@@ -263,7 +263,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 	SECTION( "Writing a .sav to memory" )
 	{
-		auto sav = lsdj_sav_new(nullptr);
+		auto sav = lsdj_sav_new(nullptr, nullptr);
 		REQUIRE( sav != nullptr );
 
 		// Working memory
@@ -274,7 +274,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 		// Active project
 		lsdj_sav_set_active_project_index(sav, LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX);
 
-		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr);
+		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr, nullptr);
 		assert(project != nullptr);
 
 		lsdj_sav_set_project_move(sav, 0, project);
@@ -286,7 +286,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 		lsdj_sav_free(sav);
 
-		auto compSav = lsdj_sav_read_from_memory(memory.data(), writeCount, nullptr);
+		auto compSav = lsdj_sav_read_from_memory(memory.data(), writeCount, nullptr, nullptr);
 		REQUIRE( compSav != nullptr );
         
         // --- Comparison --- //

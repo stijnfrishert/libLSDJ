@@ -92,8 +92,8 @@ namespace lsdj
         // Try to load the provided destination sav, or create a new one
         lsdj_error_t* error = nullptr;
         lsdj_sav_t* sav = savName ?
-            lsdj_sav_read_from_file(ghc::filesystem::absolute(savName).string().c_str(), &error) :
-            lsdj_sav_new(&error);
+            lsdj_sav_read_from_file(ghc::filesystem::absolute(savName).string().c_str(), nullptr, &error) :
+            lsdj_sav_new(nullptr, &error);
         
         if (sav == nullptr)
             return handle_error(error);
@@ -180,7 +180,7 @@ namespace lsdj
     
     void Importer::importSong(const std::string& path, lsdj_sav_t* sav, unsigned char index, unsigned char active, lsdj_error_t** error)
     {
-        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.c_str(), error);
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.c_str(), nullptr, error);
         if (!project)
             return;
         
@@ -203,7 +203,7 @@ namespace lsdj
     
     void Importer::importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<ghc::filesystem::path>& paths, lsdj_error_t** error)
     {
-        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(workingMemoryPath.string().c_str(), error);
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(workingMemoryPath.string().c_str(), nullptr, error);
         if (!project)
             return;
         

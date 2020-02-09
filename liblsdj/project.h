@@ -123,15 +123,28 @@ const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* pro
 /*! This function uses liblsdj's virtual I/O system. There are other convenience functions to
 	directly read from memory or file.
 
+    @param rvio The virtual I/O stream to read from
+    @param allocator The allocator to create and free memory with for this project (optional)
+    @param In case of an error, more info is found in here (optional)
+
 	@return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
 lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Read an LSDJ Project from an .lsdsng file
-/*! @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
+/*! @param path The path to the lsdsng file to read
+    @param allocator The allocator to create and free memory with for this project (optional)
+    @param In case of an error, more info is found in here (optional)
+
+    @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
 lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Read an LSDJ Project from an .lsdsng in memory
-/*! @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
+/*! @param data Points to the memory to read from
+    @param size The amount of bytes of the memory to read from
+    @param allocator The allocator to create and free memory with for this project (optional)
+    @param In case of an error, more info is found in here (optional)
+
+    @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
 lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
     
 //! Find out whether given data is likely a valid lsdsng

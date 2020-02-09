@@ -63,7 +63,7 @@ struct lsdj_project_t
 
 // --- Allocation --- //
 
-lsdj_project_t* alloc_project(const lsdj_allocator_t* allocator, lsdj_error_t** error)
+lsdj_project_t* lsdj_project_alloc(const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     void* memory = lsdj_allocate_or_malloc(allocator, sizeof(lsdj_project_t));;
     if (memory == NULL)
@@ -80,7 +80,7 @@ lsdj_project_t* alloc_project(const lsdj_allocator_t* allocator, lsdj_error_t** 
 
 lsdj_project_t* lsdj_project_new(const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_project_t* project = alloc_project(allocator, error);
+    lsdj_project_t* project = lsdj_project_alloc(allocator, error);
     if (project == NULL)
     {
         lsdj_error_optional_new(error, "could not allocate memory for project");
@@ -96,7 +96,7 @@ lsdj_project_t* lsdj_project_new(const lsdj_allocator_t* allocator, lsdj_error_t
 
 lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_project_t* copy = alloc_project(allocator, error);
+    lsdj_project_t* copy = lsdj_project_alloc(allocator, error);
     if (copy == NULL)
     {
         lsdj_error_optional_new(error, "could not allocate memory for project");
@@ -113,9 +113,7 @@ lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, const lsdj_allo
 void lsdj_project_free(lsdj_project_t* project)
 {
     if (project)
-    {
         lsdj_deallocate_or_free(project->allocator, project);
-    }
 }
 
 
@@ -162,7 +160,7 @@ const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* pro
 
 lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_project_t* project = alloc_project(allocator, error);
+    lsdj_project_t* project = lsdj_project_alloc(allocator, error);
     if (project == NULL)
         return NULL;
     

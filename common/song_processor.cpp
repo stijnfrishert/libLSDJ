@@ -53,7 +53,7 @@ namespace lsdj
             return true;
         
         lsdj_error_t* error = nullptr;
-        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);
+        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), nullptr, &error);
         if (error != nullptr)
         {
             lsdj_sav_free(sav);

@@ -79,12 +79,12 @@ typedef struct lsdj_sav_t lsdj_sav_t;
 /*! The working memory song buffer is zeroed out, and the sav contains no
 	songs in the project slots.
 	@note Every call must be paired with an lsdj_sav_free() */
-lsdj_sav_t* lsdj_sav_new(lsdj_error_t** error);
+lsdj_sav_t* lsdj_sav_new(const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Copy a save into a new save
 /*! Creates a new save and copies the data into it
 	@note Every call must be paired with an lsdj_sav_free() */
-lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, lsdj_error_t** error);
+lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Frees a sav from memory
 /*! Call this when you no longer need a sav. */
@@ -120,7 +120,7 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
     the slots, its name and version are also copied over
  
     @note Remember to call lsdj_project_free() after you're done with the result */
-lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error);
+lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Copy a project into one of the project slots
 /*! This copies data from the parameter project into the sav, without taking over ownership
@@ -128,7 +128,7 @@ lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav,
  
 	@param project The project to move, or NULL is the slot should be freed up
     @return Whether the copy was successful */
-bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, lsdj_error_t** error);
+bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error);
     
 //! Move a project into one of the project slots
 /*! This moves the parameter project into the sav, taking over ownership. You don't have
@@ -151,18 +151,18 @@ const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char 
 //! Read an LSDj sav from virtual I/O
 /*! @param wvio The virtual stream to read from
     @param error A description of the error that occured, if provided */
-lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error);
+lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Read an LSDj sav from file
 /*! @param path The path to te file to read from
     @param error A description of the error that occured, if provided */
-lsdj_sav_t* lsdj_sav_read_from_file(const char* path, lsdj_error_t** error);
+lsdj_sav_t* lsdj_sav_read_from_file(const char* path, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Read an LSDj sav from memory
 /*! @param data Points to the memory to read from
 	@param size The size in bytes of the memory to read from
     @param error A description of the error that occured, if provided */
-lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Find out whether given data is likely a valid sav
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */

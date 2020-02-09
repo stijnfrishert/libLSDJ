@@ -49,7 +49,7 @@ namespace lsdj
     {
         // Load in the save file
         lsdj_error_t* error = nullptr;
-        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);
+        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), nullptr, &error);
         if (sav == nullptr)
             return handle_error(error);
         
@@ -62,7 +62,7 @@ namespace lsdj
         // display the working memory song as well
         if ((indices.empty() && names.empty()) || std::find(std::begin(indices), std::end(indices), -1) != std::end(indices))
         {
-            lsdj_project_t* project = lsdj_project_new_from_working_memory_song(sav, &error);
+            lsdj_project_t* project = lsdj_project_new_from_working_memory_song(sav, nullptr, &error);
             if (error)
             {
                 lsdj_sav_free(sav);
@@ -179,7 +179,7 @@ namespace lsdj
     {
         // Try and read the sav
         lsdj_error_t* error = nullptr;
-        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), &error);
+        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), nullptr, &error);
         if (sav == nullptr)
             return lsdj::handle_error(error);
         
