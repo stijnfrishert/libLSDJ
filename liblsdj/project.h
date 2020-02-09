@@ -48,6 +48,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "allocator.h"
 #include "error.h"
 #include "song_buffer.h"
 #include "vio.h"
@@ -66,13 +67,17 @@ typedef struct lsdj_project_t lsdj_project_t;
 
 //! Create a new project
 /*! Creates a new project with an empty name, version #0 and zeroed out song
+
+    @param allocator The allocator (or null) used for memory (de)allocation
     @note Every call must be paired with an lsdj_project_free() */
-lsdj_project_t* lsdj_project_new(lsdj_error_t** error);
+lsdj_project_t* lsdj_project_new(const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Copy a project into a new project
 /*! Creates a new project and copies the data into it.
+
+    @param allocator The allocator (or null) used for memory (de)allocation
 	@note Every call must be paired with an lsdj_project_free() */
-lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, lsdj_error_t** error);
+lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Frees a project from memory
 /*! Call this when you no longer need a project. */
@@ -119,15 +124,15 @@ const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* pro
 	directly read from memory or file.
 
 	@return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
-lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error);
+lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Read an LSDJ Project from an .lsdsng file
 /*! @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
-lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error);
+lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Read an LSDJ Project from an .lsdsng in memory
 /*! @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
-lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
     
 //! Find out whether given data is likely a valid lsdsng
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */

@@ -16,7 +16,7 @@ SCENARIO( "Project creation and querying", "[project]" )
 
 	GIVEN( "A new project is created" )
 	{
-		auto project = lsdj_project_new(nullptr);
+		auto project = lsdj_project_new(nullptr, nullptr);
 		REQUIRE(project != nullptr);
 
 		WHEN( "Requesting the name")
@@ -102,7 +102,7 @@ SCENARIO( "Project creation and querying", "[project]" )
 			std::fill_n(buffer.bytes, LSDJ_SONG_BUFFER_BYTE_COUNT, 40);
 			lsdj_project_set_song_buffer(project, &buffer);
 
-			auto copy = lsdj_project_copy(project, nullptr);
+			auto copy = lsdj_project_copy(project, nullptr, nullptr);
 			REQUIRE(copy != nullptr);
 				
 			THEN( "The data should remain intact" )
@@ -133,7 +133,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 	SECTION( "Reading an .lsdsng from memory" )
 	{
         // Read the lsdsng from memory
-		auto project = lsdj_project_read_lsdsng_from_memory(lsdsng.data(), lsdsng.size(), nullptr);
+		auto project = lsdj_project_read_lsdsng_from_memory(lsdsng.data(), lsdsng.size(), nullptr, nullptr);
 		REQUIRE( project != nullptr );
 
         // Name
@@ -154,7 +154,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 	SECTION( "Reading an .lsdsng from file" )
 	{
         // Read the lsdsng from file
-		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr);
+		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr, nullptr);
 		REQUIRE( project != nullptr );
 
         // Name
@@ -175,7 +175,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 	SECTION( "Writing an .lsdsng to memory")
 	{
         // Create the project
-		auto project = lsdj_project_new(nullptr);
+		auto project = lsdj_project_new(nullptr, nullptr);
 		REQUIRE( project != nullptr );
 
         lsdj_project_set_name(project, "HAPPY BD", 8);
@@ -196,7 +196,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         // Decompress (the other test makes sure it's correct) back and compare against
         // the raw
         
-        auto lsdsng = lsdj_project_read_lsdsng_from_memory(data.data(), writeCount * LSDJ_BLOCK_SIZE, nullptr);
+        auto lsdsng = lsdj_project_read_lsdsng_from_memory(data.data(), writeCount * LSDJ_BLOCK_SIZE, nullptr, nullptr);
         assert(lsdsng != nullptr);
         
         std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;

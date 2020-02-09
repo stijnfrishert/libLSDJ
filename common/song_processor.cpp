@@ -108,7 +108,7 @@ namespace lsdj
             return true;
         
         lsdj_error_t* error = nullptr;
-        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.string().c_str(), &error);
+        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.string().c_str(), nullptr, &error);
         if (!project)
         {
             lsdj_project_free(project);

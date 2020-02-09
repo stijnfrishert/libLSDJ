@@ -55,26 +55,32 @@ struct lsdj_project_t
     //! The song buffer belonging to this project
     /*! Uncompressed, but you'll need to call a parsing function to get a sensible lsdj_song_t structured object. */
     lsdj_song_buffer_t songBuffer;
+
+    //! The allocator used to create this project
+    const lsdj_allocator_t* allocator;
 };
 
 
 // --- Allocation --- //
 
-lsdj_project_t* alloc_project(lsdj_error_t** error)
+lsdj_project_t* alloc_project(const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_project_t* project = (lsdj_project_t*)calloc(sizeof(lsdj_project_t), 1);
-    if (project == NULL)
+    void* memory = lsdj_allocate_or_malloc(allocator, sizeof(lsdj_project_t));;
+    if (memory == NULL)
     {
         lsdj_error_optional_new(error, "could not allocate project");
         return NULL;
     }
+
+    lsdj_project_t* project = (lsdj_project_t*)memory;
+    project->allocator = allocator;
     
     return project;
 }
 
-lsdj_project_t* lsdj_project_new(lsdj_error_t** error)
+lsdj_project_t* lsdj_project_new(const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_project_t* project = alloc_project(error);
+    lsdj_project_t* project = alloc_project(allocator, error);
     if (project == NULL)
     {
         lsdj_error_optional_new(error, "could not allocate memory for project");
@@ -88,9 +94,9 @@ lsdj_project_t* lsdj_project_new(lsdj_error_t** error)
     return project;
 }
 
-lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, lsdj_error_t** error)
+lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_project_t* copy = alloc_project(error);
+    lsdj_project_t* copy = alloc_project(allocator, error);
     if (copy == NULL)
     {
         lsdj_error_optional_new(error, "could not allocate memory for project");
@@ -107,7 +113,9 @@ lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, lsdj_error_t** 
 void lsdj_project_free(lsdj_project_t* project)
 {
     if (project)
-        free(project);
+    {
+        lsdj_deallocate_or_free(project->allocator, project);
+    }
 }
 
 
@@ -152,9 +160,9 @@ const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* pro
 
 // --- I/O --- //
 
-lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
+lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
-    lsdj_project_t* project = alloc_project(error);
+    lsdj_project_t* project = alloc_project(allocator, error);
     if (project == NULL)
         return NULL;
     
@@ -191,7 +199,7 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
     return project;
 }
 
-lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_t** error)
+lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     if (path == NULL)
     {
@@ -210,14 +218,14 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, lsdj_error_
 
     lsdj_vio_t rvio = lsdj_create_file_vio(file);
     
-    lsdj_project_t* project = lsdj_project_read_lsdsng(&rvio, error);
+    lsdj_project_t* project = lsdj_project_read_lsdsng(&rvio, allocator, error);
     
     fclose(file);
     
     return project;
 }
 
-lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     if (data == NULL)
     {
@@ -231,7 +239,7 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, 
 
     lsdj_vio_t rvio = lsdj_create_memory_vio(&state);
     
-    return lsdj_project_read_lsdsng(&rvio, error);
+    return lsdj_project_read_lsdsng(&rvio, allocator, error);
 }
 
 bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
