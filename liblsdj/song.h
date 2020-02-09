@@ -50,16 +50,45 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
+
+#include "channel.h"
 #include "error.h"
 
 //! The size of a decompressed song in memory
 #define LSDJ_SONG_BYTE_COUNT (0x8000)
 
+//! The value representing an empty row + channel slot
+#define LSDJ_NO_CHAIN (0xFF)
+
 //! A structure that can hold one entire decompressed song in memory
 typedef struct
 {
-	unsigned char bytes[LSDJ_SONG_BYTE_COUNT];
+	uint8_t bytes[LSDJ_SONG_BYTE_COUNT];
 } lsdj_song_t;
+
+
+// --- SONG --- //
+
+//! Change the format version of the song
+/*! @note This is not the same as the project version in the song save/load screen,
+	nor the version of LSDj itself. This relates to the internal format version
+	that is increased everytime the song format changes. */
+void lsdj_song_set_format_version(lsdj_song_t* song, uint8_t version);
+
+//! Retrieve the format version of the song
+/*! @note This is not the same as the project version in the song save/load screen,
+	nor the version of LSDj itself. This relates to the internal format version
+	that is increased everytime the song format changes. */
+uint8_t lsdj_song_get_format_version(const lsdj_song_t* song);
+
+//! Change the chain assigned to a row + channel slot
+/*! @param chain The chain number to assign, or LSDJ_NO_CHAIN to set it to empty */
+void lsdj_song_set_chain_assignment(lsdj_song_t* song, uint8_t row, lsdj_channel channel, uint8_t chain);
+
+//! Retrieve the chain assigned to a row + channel slot
+/*! @return The chain number of LSDJ_NO_CHAIN if empty */
+uint8_t lsdj_song_get_chain_assignment(const lsdj_song_t* song, uint8_t row, lsdj_channel channel);
     
 #ifdef __cplusplus
 }

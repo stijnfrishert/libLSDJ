@@ -1,28 +1,28 @@
 /*
-
+ 
  This file is a part of liblsdj, a C library for managing everything
  that has to do with LSDJ, software for writing music (chiptune) with
  your gameboy. For more information, see:
-
+ 
  * https://github.com/stijnfrishert/liblsdj
  * http://www.littlesounddj.com
-
+ 
  --------------------------------------------------------------------------------
-
+ 
  MIT License
-
+ 
  Copyright (c) 2018 - 2020 Stijn Frishert
-
+ 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
  furnished to do so, subject to the following conditions:
-
+ 
  The above copyright notice and this permission notice shall be included in all
  copies or substantial portions of the Software.
-
+ 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -30,26 +30,37 @@
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
-
+ 
  */
 
-#ifndef LSDJ_CHANNEL_H
-#define LSDJ_CHANNEL_H
+#ifndef LSDJ_INSTRUMENT_H
+#define LSDJ_INSTRUMENT_H
+
+#include <stdbool.h>
+
+#include "song.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum
-{
-    LSDJ_CHANNEL_PULSE1 = 0,
-    LSDJ_CHANNEL_PULSE2 = 1,
-    LSDJ_CHANNEL_WAVE = 2,
-    LSDJ_CHANNEL_NOISE = 3,
-} lsdj_channel;
+#define LSDJ_INSTRUMENT_COUNT (0x40)
+#define LSDJ_INSTRUMENT_NAME_LENGTH (5)
 
-#define LSDJ_CHANNEL_COUNT (4)
+//! @todo Allocating instruments
 
+//! Returns whether an instrument is in use
+bool lsdj_instrument_is_allocated(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the name of an instrument
+/*! @param instrument The index of the instrument to change
+	@param name The name to set, null-terminated of LSDJ_INSTRUMENT_NAME_LENGTH at max */
+void lsdj_instrument_set_name(lsdj_song_t* song, uint8_t instrument, const char* name);
+
+//! Retrieve the name of an instrument
+/*! @return The name of the instrument, at maximum LSDJ_INSTRUMENT_NAME_LENGTH (may not be null-terminated) */
+const char* lsdj_instrument_get_name(const lsdj_song_t* song, uint8_t instrument);
+    
 #ifdef __cplusplus
 }
 #endif

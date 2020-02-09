@@ -40,10 +40,6 @@
 extern "C" {
 #endif
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-
 #define LSDJ_COMMAND_NONE (0x00)
 #define LSDJ_COMMAND_A (0x01)
 #define LSDJ_COMMAND_C (0x02)
@@ -67,22 +63,6 @@ extern "C" {
 #define LSDJ_COMMAND_ARDUINO_BOY_X (0x14)
 #define LSDJ_COMMAND_ARDUINO_BOY_Q (0x15)
 #define LSDJ_COMMAND_ARDUINO_BOY_Y (0x16)
-    
-// Structure representing an effect command with its argument value
-typedef struct
-{
-    unsigned char command;
-    unsigned char value;
-} lsdj_command_t;
-    
-// Clear the command to factory settings
-void lsdj_command_clear(lsdj_command_t* command);
-
-// Check to see if two commands contain the same content
-bool lsdj_command_equals(const lsdj_command_t* lhs, const lsdj_command_t* rhs);
-
-// Replace a specfic command value with another
-void lsdj_command_replace_value(lsdj_command_t* cmd, unsigned char command, unsigned char value, unsigned char replacement);
     
 #ifdef __cplusplus
 }

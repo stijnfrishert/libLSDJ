@@ -10,9 +10,12 @@ set(HEADERS
 	command.h
 	compression.h
 	error.h
+	instrument.h
+	panning.h
 	project.h
 	sav.h
 	song.h
+	table.h
 	version.h
 	vio.h
 	)
@@ -20,8 +23,11 @@ set(HEADERS
 set(SOURCES
 	compression.c
 	error.c
+	instrument.c
 	project.c
 	sav.c
+	song.c
+	table.c
 	vio.c
 	)
 

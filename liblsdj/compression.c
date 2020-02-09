@@ -231,17 +231,10 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
     const long readStart = lsdj_vio_tell(rvio);
     const long writeStart = lsdj_vio_tell(wvio);
     
-    unsigned char byte = 0;
-    
     // Keep on decompressing blocks until we've reached an end-of-stream
     unsigned short nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
     do
     {
-        // Uncomment this to see every read and corresponding write position
-//        const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
-//        const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
-//        printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
-        
         if (!lsdj_decompress_block(rvio, readCounter,
                                    wvio, writeCounter,
                                    &nextBlockIndex,
@@ -292,6 +285,11 @@ bool lsdj_decompress_block(lsdj_vio_t* rvio, size_t* readCounter,
                            unsigned short* nextBlockIndex,
                            lsdj_error_t** error)
 {
+    // Uncomment this to see every read and corresponding write position
+//    const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
+//    const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
+//    printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
+    
     // First, set the next block index to be absent
     // We'll fill this if we actually find one
     *nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
@@ -329,6 +327,11 @@ bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
                           unsigned short* nextBlockIndex,
                           lsdj_error_t** error)
 {
+    // Uncomment this to see every read and corresponding write position
+//    const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
+//    const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
+//    printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
+    
     // First, set the next block index to be absent
     // We'll fill this if we actually find one
     *nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
