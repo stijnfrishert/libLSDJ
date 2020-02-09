@@ -68,7 +68,8 @@ int main(int argc, char* argv[])
     auto index = options.add<popl::Value<int>>("i", "index", "Single out a given project index to export, 0 or more");
     auto name = options.add<popl::Value<std::string>>("n", "name", "Single out a given project by name to export");
     auto wm = options.add<popl::Switch>("w", "working-memory", "Single out the working-memory song to export");
-    
+    auto skipWorkingMemory = options.add<popl::Switch>("", "skip-working", "Do not export the song in working-memory when no other projects are given");
+
     try
     {
         options.parse(argc, argv);
@@ -89,6 +90,13 @@ int main(int argc, char* argv[])
                 std::cerr << "Path '" << path.string() << "' does not exist" << std::endl;
                 return 1;
             }
+
+            // Find conflicting arguments
+            if (wm->is_set() && skipWorkingMemory->is_set())
+            {
+                std::cerr << "Incompatible arguments: --working-memory and --skip-working";
+                return 1;
+            }
             
             // Create the exporter, that will do the work
             lsdj::Exporter exporter;
@@ -98,7 +106,8 @@ int main(int argc, char* argv[])
             exporter.underscore = underscore->is_set();
             exporter.putInFolder = folder->is_set();
             exporter.verbose = verbose->is_set();
-            
+            exporter.skipWorkingMemory = skipWorkingMemory->is_set();
+
             // Has the user specified one or more specific indices to export?
             if (index->is_set())
             {

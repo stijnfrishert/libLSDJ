@@ -55,9 +55,7 @@ namespace lsdj
         
         const auto outputFolder = ghc::filesystem::absolute(output);
         
-        // If no specific indices were given, or -w was flagged (index == -1),
-        // display the working memory song as well
-        if ((indices.empty() && names.empty()) || std::find(std::begin(indices), std::end(indices), -1) != std::end(indices))
+        if (shouldExportWorkingMemory())
         {
             lsdj_project_t* project = lsdj_project_new_from_working_memory_song(sav, &error);
             if (error)
@@ -194,9 +192,7 @@ namespace lsdj
             std::cout << "Ver    ";
         std::cout << "Fmt    BPM" << std::endl;
         
-        // If no specific indices were given, or -w was flagged (index == -1),
-        // display the working memory song as well
-        if ((indices.empty() && names.empty()) || std::find(std::begin(indices), std::end(indices), -1) != std::end(indices))
+        if (shouldExportWorkingMemory())
         {
             printWorkingMemorySong(sav);
         }
@@ -371,6 +367,17 @@ namespace lsdj
         std::cout << std::endl;
     }
     
+    bool Exporter::shouldExportWorkingMemory()
+    {
+        // No specific indices were given, export working memory based on --skip-working
+        if (indices.empty() && names.empty())
+        {
+            return !skipWorkingMemory;
+        }
+        // Export based on -w or --index -1
+        return std::find(std::begin(indices), std::end(indices), -1) != std::end(indices);
+    }
+
     std::string Exporter::constructName(const lsdj_project_t* project)
     {
         return constructProjectName(project, underscore);

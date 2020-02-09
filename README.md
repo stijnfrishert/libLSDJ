@@ -29,7 +29,8 @@ LibLSDJ is open source and freely available to anyone. If you'd like to show you
 	  -i [ --index ] arg       Single out a given project index to export, 0 or 
 	                           more
 	  -n [ --name ] arg        Single out a given project by name to export
-	  -w [ --working-memory ]  Single out the working-memory song to expor
+	  -w [ --working-memory ]  Single out the working-memory song to export
+	  --skip-working           Do not export the song in working memory when no other projects are given
 
 ## lsdsng-import
 
