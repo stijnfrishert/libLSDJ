@@ -6,6 +6,7 @@ if (APPLE)
 endif (APPLE)
 
 set(HEADERS
+	allocator.h
 	chain.h
 	channel.h
 	command.h
@@ -33,6 +34,7 @@ set(HEADERS
 	word.h)
 
 set(SOURCES
+	allocator.c
 	chain.c
 	command.c
 	compression.c
