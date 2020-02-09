@@ -121,10 +121,7 @@ void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t siz
 
 void lsdj_project_get_name(const lsdj_project_t* project, char* data)
 {
-    const size_t len = strnlen(project->name, LSDJ_PROJECT_NAME_LENGTH);
-    strncpy(data, project->name, len);
-    for (size_t i = len; i < LSDJ_PROJECT_NAME_LENGTH; i += 1)
-        data[i] = '\0';
+    strncpy(data, project->name, LSDJ_PROJECT_NAME_LENGTH);
 }
 
 size_t lsdj_project_get_name_length(const lsdj_project_t* project)

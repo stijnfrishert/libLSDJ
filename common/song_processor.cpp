@@ -65,14 +65,10 @@ namespace lsdj
         
         processSong(*lsdj_sav_get_working_memory_song(sav));
         
-        for (int i = 0; i < lsdj_sav_get_project_count(sav); ++i)
+        for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
         {
-            lsdj_project_t* project = lsdj_sav_get_project(sav, i);
+            const lsdj_project_t* project = lsdj_sav_get_project(sav, i);
             if (project == nullptr)
-                continue;
-            
-            lsdj_song_t* song = lsdj_project_get_song(project);
-            if (song == nullptr)
                 continue;
             
             if (!processSong(*song))
@@ -82,8 +78,7 @@ namespace lsdj
             }
         }
         
-        lsdj_sav_write_to_file(sav, constructSavDestinationPath(path).string().c_str(), &error);
-        if (error != nullptr)
+        if (!lsdj_sav_write_to_file(sav, constructSavDestinationPath(path).string().c_str(), nullptr, &error))
         {
             lsdj_sav_free(sav);
             return false;
@@ -101,7 +96,7 @@ namespace lsdj
         
         lsdj_error_t* error = nullptr;
         lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.string().c_str(), &error);
-        if (error != nullptr)
+        if (!project)
         {
             lsdj_project_free(project);
             return false;
@@ -110,18 +105,13 @@ namespace lsdj
         if (verbose)
             std::cout << "Processing lsdsng '" + path.string() + "'" << std::endl;
         
-        lsdj_song_t* song = lsdj_project_get_song(project);
-        if (song == nullptr)
-            return true;
-        
         if (!processSong(*song))
         {
             lsdj_project_free(project);
             return false;
         }
         
-        lsdj_project_write_lsdsng_to_file(project, constructLsdsngDestinationPath(path).string().c_str(), &error);
-        if (error != nullptr)
+        if (!lsdj_project_write_lsdsng_to_file(project, constructLsdsngDestinationPath(path).string().c_str(), nullptr, &error))
         {
             lsdj_project_free(project);
             return false;

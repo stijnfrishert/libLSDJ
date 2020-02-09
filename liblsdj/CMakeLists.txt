@@ -33,22 +33,22 @@ set(HEADERS
 	word.h)
 
 set(SOURCES
-	# chain.c
-	# command.c
+	chain.c
+	command.c
 	compression.c
 	error.c
-	# groove.c
-	# instrument.c
-	# phrase.c
+	groove.c
+	instrument.c
+	phrase.c
 	project.c
-	# row.c
+	row.c
 	sav.c
-	# song.c
-	# synth.c
-	# table.c
+	song.c
+	synth.c
+	table.c
 	vio.c
-	# wave.c
-	# word.c
+	wave.c
+	word.c
 	)
 
 # Create the library target

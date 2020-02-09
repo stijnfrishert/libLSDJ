@@ -64,7 +64,7 @@ namespace lsdj
         if (underscore)
             std::replace(name.begin(), name.end(), 'x', '_');
         
-        return {name.data(), name.size()};
+        return {name.data(), strnlen(name.data(), name.size())};
     }
     
     bool isHiddenFile(const std::string& str)

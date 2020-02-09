@@ -41,6 +41,7 @@
 
 #include "../common/common.hpp"
 #include "../liblsdj/sav.h"
+#include "../liblsdj/song.h"
 
 namespace lsdj
 {
@@ -183,10 +184,10 @@ namespace lsdj
             return lsdj::handle_error(error);
         
         // Header
-        std::cout << "#   Name     ";
+        std::cout << "#   Name       ";
         if (versionStyle != VersionStyle::NONE)
-            std::cout << "Ver    ";
-        std::cout << "Fmt    BPM" << std::endl;
+            std::cout << "Ver  ";
+        std::cout << "Fmt  BPM" << std::endl;
         
         // If no specific indices were given, or -w was flagged (index == -1),
         // display the working memory song as well
@@ -228,7 +229,7 @@ namespace lsdj
             case VersionStyle::HEX:
                 if (prefixDot)
                     stream << '.';
-                stream << std::uppercase << std::setfill('0') << std::setw(2) << std::hex << static_cast<unsigned int>(version);
+                stream << std::uppercase << std::setfill(' ') << std::setw(2) << std::hex << static_cast<unsigned int>(version);
                 break;
             case VersionStyle::DECIMAL:
                 if (prefixDot)
@@ -252,47 +253,35 @@ namespace lsdj
             
             const auto name = constructName(project);
             std::cout << name;
-            for (auto i = 0; i < (9 - name.length()); ++i)
+            for (auto i = name.length(); i < 11; i += 1)
                 std::cout << ' ';
         } else {
             // The working memory doesn't represent one of the projects, so it
             // doesn't really have a name
-            std::cout << "         ";
+            std::cout << "          ";
         }
         
-//        // Display whether the working memory song is "dirty"/edited, and display that
-//        // as version number (it doesn't really have a version number otherwise)
-//        const lsdj_song_buffer_t* workingMemorySongBuffer = lsdj_sav_get_working_memory_song(sav);
-//        if (lsdj_song_get_file_changed_flag(workingMemorySongBuffer))
-//        {
-//            switch (versionStyle)
-//            {
-//                case VersionStyle::NONE:
-//                    std::cout << "";
-//                    break;
-//                case VersionStyle::HEX:
-//                    std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
-//                    break;
-//                case VersionStyle::DECIMAL:
-//                    std::cout << (lsdj_song_get_file_changed_flag(song) ? "*" : " ") << "  \t";
-//                    break;
-//            }
-//        } else {
-//            std::cout << "\t\t";
-//        }
+        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_sav_get_working_memory_song(sav), nullptr);
         
-//        // Retrieve the sav format version of the song and display it as well
-//        const auto versionString = std::to_string(lsdj_song_get_format_version(song));
-//        std::cout << versionString;
-//        for (auto i = 0; i < 7 - versionString.length(); i++)
-//            std::cout << ' ';
+        // Display whether the working memory song is "dirty"/edited, and display that
+        // as version number (it doesn't really have a version number otherwise)
+        if (versionStyle != VersionStyle::NONE && lsdj_song_get_file_changed_flag(song))
+            std::cout << "*    ";
+        else
+            std::cout << "     ";
         
-//        // Display the bpm of the project
-//        if (song)
-//        {
-//            int tempo = lsdj_song_get_tempo(song);
-//            std::cout << tempo;
-//        }
+        // Retrieve the sav format version of the song and display it as well
+        const auto versionString = std::to_string(lsdj_song_get_format_version(song));
+        std::cout << versionString;
+        for (auto i = 0; i < 5 - versionString.length(); i++)
+            std::cout << ' ';
+        
+        // Display the bpm of the project
+        if (song)
+        {
+            int tempo = lsdj_song_get_tempo(song);
+            std::cout << tempo;
+        }
         
         std::cout << std::endl;
     }
@@ -332,30 +321,28 @@ namespace lsdj
         const auto name = constructName(project);
         std::cout << name;
         
-        for (auto i = 0; i < (9 - name.length()); ++i)
+        for (auto i = 0; i < (11 - name.length()); ++i)
             std::cout << ' ';
         
         // Display the version number of the project
-        std::cout << convertVersionToString(lsdj_project_get_version(project), false);
-        switch (versionStyle)
+        const auto songVersionString = convertVersionToString(lsdj_project_get_version(project), false);
+        std::cout << songVersionString;
+        for (auto i = songVersionString.size(); i < 5; i += 1)
+            std::cout << ' ';
+        
+        // Retrieve the format version of the song to display
+        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_project_get_song_buffer(project), nullptr);
+        const auto formatVersionString = std::to_string(lsdj_song_get_format_version(song));
+        std::cout << formatVersionString;
+        for (auto i = 0; i < 5 - formatVersionString.length(); i++)
+            std::cout << ' ';
+        
+        // Display the bpm of the project
+        if (song)
         {
-            case VersionStyle::NONE: break;
-            case VersionStyle::HEX: std::cout << " \t"; break;
-            case VersionStyle::DECIMAL: std::cout << "\t"; break;
+            int tempo = lsdj_song_get_tempo(song);
+            std::cout << std::setfill(' ') << std::setw(3) << tempo;
         }
-        
-//        // Retrieve the sav format version of the song and display it as well
-//        const auto versionString = std::to_string(lsdj_song_get_format_version(project));
-//        std::cout << versionString;
-//        for (auto i = 0; i < 7 - versionString.length(); i++)
-//            std::cout << ' ';
-        
-//        // Display the bpm of the project
-//        if (song)
-//        {
-//            int tempo = lsdj_song_get_tempo(song);
-//            std::cout << tempo;
-//        }
         
         std::cout << std::endl;
     }

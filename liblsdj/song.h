@@ -46,6 +46,7 @@ extern "C" {
 #include "instrument.h"
 #include "phrase.h"
 #include "row.h"
+#include "song_buffer.h"
 #include "synth.h"
 #include "table.h"
 #include "vio.h"
@@ -78,6 +79,7 @@ void lsdj_song_free(lsdj_song_t* song);
 // Deserialize a song
 lsdj_song_t* lsdj_song_read(lsdj_vio_t* vio, lsdj_error_t** error);
 lsdj_song_t* lsdj_song_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+lsdj_song_t* lsdj_song_read_from_buffer(const lsdj_song_buffer_t* song_buffer, lsdj_error_t** error);
     
 // Serialize a song
 void lsdj_song_write(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error);
