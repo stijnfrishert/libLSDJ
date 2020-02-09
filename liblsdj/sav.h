@@ -118,18 +118,22 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
 //! Create a new project from the working memory song
 /*! Copies the working memory song into a new project. If the song represents a project in one of
     the slots, its name and version are also copied over
+ 
     @note Remember to call lsdj_project_free() after you're done with the result */
 lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_error_t** error);
 
 //! Copy a project into one of the project slots
 /*! This copies data from the parameter project into the sav, without taking over ownership
 	of the original project parameter.
-	@param project The project to move, or NULL is the slot should be freed up */
-void lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, lsdj_error_t** error);
+ 
+	@param project The project to move, or NULL is the slot should be freed up
+    @return Whether the copy was successful */
+bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, lsdj_error_t** error);
     
 //! Move a project into one of the project slots
 /*! This moves the parameter project into the sav, taking over ownership. You don't have
 	to call lsdj_project_free() afterwards anymore.
+ 
 	@param project The project to move, or NULL is the slot should be freed up */
 void lsdj_sav_set_project_move(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project);
 

@@ -91,17 +91,18 @@ namespace lsdj
     {
         // Try to load the provided destination sav, or create a new one
         lsdj_error_t* error = nullptr;
-        lsdj_sav_t* sav = savName ? lsdj_sav_read_from_file(ghc::filesystem::absolute(savName).string().c_str(), &error) : lsdj_sav_new(&error);
-        if (error)
+        lsdj_sav_t* sav = savName ?
+            lsdj_sav_read_from_file(ghc::filesystem::absolute(savName).string().c_str(), &error) :
+            lsdj_sav_new(&error);
+        
+        if (sav == nullptr)
             return handle_error(error);
         
         // Find the first available project slot index
         auto index = 0;
-        for( ; index < lsdj_sav_get_project_count(sav); ++index)
+        for( ; index < LSDJ_SAV_PROJECT_COUNT; ++index)
         {
-            lsdj_project_t* project = lsdj_sav_get_project(sav, index);
-            lsdj_song_t* song = lsdj_project_get_song(project);
-            if (!song)
+            if (!lsdj_sav_get_project(sav, index))
                 break;
         }
         
@@ -135,10 +136,10 @@ namespace lsdj
         }
         
         // Import all lsdsng files
-        const auto active = lsdj_sav_get_active_project(sav);
+        const auto active = lsdj_sav_get_active_project_index(sav);
         for (auto i = 0; i < paths.size(); ++i)
         {
-            if (index == lsdj_sav_get_project_count(sav))
+            if (index == LSDJ_SAV_PROJECT_COUNT)
             {
                 std::cerr << "Reached maximum project count, can't write " << paths[i].string() << std::endl;
                 break;
@@ -168,8 +169,7 @@ namespace lsdj
             outputFile = "out.sav";
         
         // Write the sav to file
-        lsdj_sav_write_to_file(sav, ghc::filesystem::absolute(outputFile).string().c_str(), &error);
-        if (error)
+        if (!lsdj_sav_write_to_file(sav, ghc::filesystem::absolute(outputFile).string().c_str(), nullptr, &error))
         {
             lsdj_sav_free(sav);
             return handle_error(error);
@@ -181,16 +181,14 @@ namespace lsdj
     void Importer::importSong(const std::string& path, lsdj_sav_t* sav, unsigned char index, unsigned char active, lsdj_error_t** error)
     {
         lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.c_str(), error);
-        if (*error != nullptr)
+        if (!project)
             return;
         
-        lsdj_sav_set_project(sav, index, project, error);
-        if (*error != nullptr)
-            return lsdj_project_free(project);
+        lsdj_sav_set_project_move(sav, index, project);
         
         std::array<char, 9> name;
         name.fill('\0');
-        lsdj_project_get_name(project, name.data(), 8);
+        lsdj_project_get_name(project, name.data());
         
         if (verbose)
             std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
@@ -206,26 +204,23 @@ namespace lsdj
     void Importer::importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<ghc::filesystem::path>& paths, lsdj_error_t** error)
     {
         lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(workingMemoryPath.string().c_str(), error);
-        if (*error != nullptr)
-            return lsdj_project_free(project);
+        if (!project)
+            return;
         
-        lsdj_song_t* song = lsdj_song_copy(lsdj_project_get_song(project), error);
-        if (*error != nullptr)
-            return lsdj_project_free(project);
+        const auto songBuffer = lsdj_project_get_song_buffer(project);
+        lsdj_sav_set_working_memory_song(sav, songBuffer);
         
-        int active = LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX;
+        // Find out if one of the slots has the same name as the working memory filename
         const auto str = workingMemoryPath.stem().string();
         const auto stem = str.substr(0, str.size() - 3);
         for (int i = 0; i != paths.size(); ++i)
         {
             if (stem == paths[i].stem().string())
             {
-                active = i;
+                lsdj_sav_set_active_project_index(sav, i);
                 break;
             }
         }
-        
-        lsdj_sav_set_working_memory_song(sav, song, active);
         
         lsdj_project_free(project);
     }

@@ -38,12 +38,13 @@
 #include <iostream>
 
 #include "../common/common.hpp"
+#include "../liblsdj/version.h"
 #include "importer.hpp"
 
 void printHelp(const popl::OptionParser& options)
 {
     std::cout << "lsdsng-import -o output.sav song1.lsgsng song2.lsdsng...\n\n"
-              << "Version: " << lsdj::VERSION << "\n\n"
+              << "Version: " << LSDJ_VERSION_STRING << "\n\n"
               << options << "\n";
 
     std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";

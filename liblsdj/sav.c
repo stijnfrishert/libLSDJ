@@ -251,13 +251,19 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
      return newProject;
  }
 
-void lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, lsdj_error_t** error)
+bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, lsdj_error_t** error)
 {
+    lsdj_project_t* copy = lsdj_project_copy(project, error);
+    if (copy == NULL)
+        return false;
+    
     lsdj_project_t* slot = sav->projects[index];
     if (slot)
         lsdj_project_free(slot);
 
-    sav->projects[index] = lsdj_project_copy(project, error);
+    sav->projects[index] = copy;
+    
+    return true;
 }
 
 void lsdj_sav_set_project_move(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project)
