@@ -67,6 +67,9 @@ bool move_to_next_block_alignment(lsdj_vio_t* rvio, long firstBlockPosition, lsd
     return true;
 }
 
+
+// --- Decompression --- //
+
 bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
     // Read the second byte of an RLE section
@@ -338,6 +341,9 @@ bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
             return true;
     }
 }
+
+
+// --- Compression --- //
 
 bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCounter, lsdj_error_t** error)
 {

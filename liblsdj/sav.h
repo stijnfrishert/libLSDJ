@@ -145,17 +145,24 @@ const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char 
 // --- I/O --- //
 
 //! Read an LSDj sav from virtual I/O
+/*! @param wvio The virtual stream to read from
+    @param error A description of the error that occured, if provided */
 lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, lsdj_error_t** error);
 
 //! Read an LSDj sav from file
+/*! @param path The path to te file to read from
+    @param error A description of the error that occured, if provided */
 lsdj_sav_t* lsdj_sav_read_from_file(const char* path, lsdj_error_t** error);
 
 //! Read an LSDj sav from memory
+/*! @param data Points to the memory to read from
+	@param size The size in bytes of the memory to read from
+    @param error A description of the error that occured, if provided */
 lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
 
 //! Find out whether given data is likely a valid sav
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
-bool lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error);
+bool lsdj_sav_is_likely_valid(lsdj_vio_t* wvio, lsdj_error_t** error);
 
 //! Find out whether given data is likely a valid sav
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
@@ -167,12 +174,12 @@ bool lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsd
     
 //! Write a sav to virtual I/O
 /*! @param sav The save to be written to stream
-    @param vio The virtual stream into which the sav is written
+    @param rvio The virtual stream into which the sav is written
     @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
     @param error A description of the error that occured, if provided
 
     @return Whether the write was successful */
-bool lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, size_t* writeCounter, lsdj_error_t** error);
+bool lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* rvio, size_t* writeCounter, lsdj_error_t** error);
 
 //! Write a sav to file
 /*! @param sav The save to be written to memory

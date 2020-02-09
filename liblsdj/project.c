@@ -116,7 +116,7 @@ void lsdj_project_free(lsdj_project_t* project)
 void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size)
 {
     //! @todo: Should I sanitize this name into something LSDj accepts?
-    strncpy(project->name, data, size < LSDJ_PROJECT_NAME_LENGTH ? size : LSDJ_PROJECT_NAME_LENGTH);
+    strncpy(project->name, data, LSDJ_PROJECT_NAME_LENGTH);
 }
 
 void lsdj_project_get_name(const lsdj_project_t* project, char* data)
@@ -184,7 +184,10 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_error_t** error)
     lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
     
     if (!lsdj_decompress(rvio, NULL, &wvio, NULL, lsdj_vio_tell(rvio), false, error))
+    {
+        lsdj_project_free(project);
         return NULL;
+    }
     
     lsdj_project_set_song_buffer(project, &songBuffer);
     
