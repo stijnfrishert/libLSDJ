@@ -4,7 +4,6 @@
 #include <array>
 #include <cassert>
 #include <catch2/catch.hpp>
-#include <fstream>
 
 #include <compression.h>
 #include "file.hpp"

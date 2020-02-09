@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <catch2/catch.hpp>
 
 #include "file.hpp"
