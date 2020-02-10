@@ -29,17 +29,17 @@
 //  256 3EB2-3FB1: softsynth params (16 parameter blocks of 16 bytes each)
    1 3FB2-3FB2: clock, hours
    1 3FB3-3FB3: clock, minutes
-//    1 3FB4-3FB4: tempo
-//    1 3FB5-3FB5: tune setting
+   1 3FB4-3FB4: tempo
+   1 3FB5-3FB5: tune setting
    1 3FB6-3FB6: total clock, days
    1 3FB7-3FB7: total clock, hours
    1 3FB8-3FB8: total clock, minutes
    1 3FB9-3FB9: total clock, checksum (days+hours+minutes)
-//    1 3FBA-3FBA: key delay
-//    1 3FBB-3FBB: key repeat
-//    1 3FBC-3FBC: font
-//    1 3FBD-3FBD: sync setting
-//    1 3FBE-3FBE: colorset
+   1 3FBA-3FBA: key delay
+   1 3FBB-3FBB: key repeat
+   1 3FBC-3FBC: font
+   1 3FBD-3FBD: sync setting
+   1 3FBE-3FBE: colorset
    1 3FBF-3FBF: empty
 //    1 3FC0-3FC0: clone (0=deep, 1=slim)
 //    1 3FC1-3FC1: file changed?
