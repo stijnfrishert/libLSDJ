@@ -41,10 +41,10 @@
    1 3FBD-3FBD: sync setting
    1 3FBE-3FBE: colorset
    1 3FBF-3FBF: empty
-//    1 3FC0-3FC0: clone (0=deep, 1=slim)
-//    1 3FC1-3FC1: file changed?
+   1 3FC0-3FC0: clone (0=deep, 1=slim)
+   1 3FC1-3FC1: file changed?
 //    1 3FC2-3FC2: power save
-//    1 3FC3-3FC3: prelisten
+   1 3FC3-3FC3: prelisten
 //    2 3FC4-3FC5: wave synth overwrite locks
   58 3FC6-3FFF: empty
 

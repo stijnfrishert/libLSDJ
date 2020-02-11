@@ -68,9 +68,24 @@ typedef struct
 	uint8_t bytes[LSDJ_SONG_BYTE_COUNT];
 } lsdj_song_t;
 
+typedef enum
+{
+   LSDJ_CLONE_DEEP = 0,
+   LSDJ_CLONE_SLIM = 1
+} lsdj_clone_mode;
 
-// --- SONG --- //
+typedef enum
+{
+   LSDJ_SYNC_NONE = 0,
+   LSDJ_SYNC_LSDJ = 1,
+   LSDJ_SYNC_MIDI = 2,
+   LSDJ_SYNC_KEYBOARD = 3,
+   LSDJ_SYNC_ANALOG_IN = 4,
+   LSDJ_SYNC_ANALOG_OUT = 5,
+} lsdj_sync_mode;
 
+
+// --- Song Settings --- //
 
 //! Retrieve the format version of the song
 /*! @note This is not the same as the project version in the song save/load screen,
@@ -78,77 +93,59 @@ typedef struct
     that is increased everytime the song format changes. */
 uint8_t lsdj_song_get_format_version(const lsdj_song_t* song);
 
-//! Change the tempo (beats-per-minute) at which this song runs
-void lsdj_song_set_tempo(lsdj_song_t* song, uint8_t bpm);
+//! Has the song been changed since the last save?
+bool lsdj_song_has_changed(const lsdj_song_t* song);
 
-//! Retrieve the tempo (beats-per-minute) at which this song runs
+void lsdj_song_set_tempo(lsdj_song_t* song, uint8_t bpm);
 uint8_t lsdj_song_get_tempo(const lsdj_song_t* song);
 
-//! Change the global transposition (in semitones) at which this song runs
-void lsdj_song_set_transposition(lsdj_song_t* song, int8_t semitones);
+void lsdj_song_set_transposition(lsdj_song_t* song, uint8_t semitones);
+uint8_t lsdj_song_get_transposition(const lsdj_song_t* song);
 
-//! Retrieve the tempo (beats-per-minute) at which this song runs
-int8_t lsdj_song_get_transposition(const lsdj_song_t* song);
+void lsdj_song_set_sync_mode(lsdj_song_t* song, lsdj_sync_mode mode);
+lsdj_sync_mode lsdj_song_get_sync_mode(const lsdj_song_t* song);
 
-//! Retrieve the total work time days stored in the song
-void lsdj_song_set_total_days(lsdj_song_t* song, uint8_t days);
 
-//! Retrieve the total work time days stored in the song
-uint8_t lsdj_song_get_total_days(const lsdj_song_t* song);
+// --- Editor Settings --- //
 
-//! Retrieve the total work time hours stored in the song
-void lsdj_song_set_total_hours(lsdj_song_t* song, uint8_t hours);
+void lsdj_song_set_clone_mode(lsdj_song_t* song, lsdj_clone_mode clone);
+lsdj_clone_mode lsdj_song_get_clone_mode(const lsdj_song_t* song);
 
-//! Retrieve the total work time hours stored in the song
-uint8_t lsdj_song_get_total_hours(const lsdj_song_t* song);
-
-//! Retrieve the total work time minutes stored in the song
-void lsdj_song_set_total_minutes(lsdj_song_t* song, uint8_t minutes);
-
-//! Retrieve the total work time minutes stored in the song
-uint8_t lsdj_song_get_total_minutes(const lsdj_song_t* song);
-
-//! Retrieve the work time hours stored in the song
-void lsdj_song_set_work_hours(lsdj_song_t* song, uint8_t hours);
-
-//! Retrieve the work time hours stored in the song
-uint8_t lsdj_song_get_work_hours(const lsdj_song_t* song);
-
-//! Retrieve the work time minutes stored in the song
-void lsdj_song_set_work_minutes(lsdj_song_t* song, uint8_t minutes);
-
-//! Retrieve the work time minutes stored in the song
-uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song);
-
-//! Change the key repeat delay
-void lsdj_song_set_key_delay(lsdj_song_t* song, uint8_t delay);
-
-//! Retrieve the key repeat delay
-uint8_t lsdj_song_get_key_delay(const lsdj_song_t* song);
-
-//! Change the key repeat rate
-void lsdj_song_set_key_repeat(lsdj_song_t* song, uint8_t repeat);
-
-//! Retrieve the key repeat rate
-uint8_t lsdj_song_get_key_repeat(const lsdj_song_t* song);
-
-//! Change the font used for this song
-void lsdj_song_set_font(lsdj_song_t* song, uint8_t repeat);
-
-//! Retrieve the font used for this song
+void lsdj_song_set_font(lsdj_song_t* song, uint8_t font);
 uint8_t lsdj_song_get_font(const lsdj_song_t* song);
 
-//! Change the sync setting used for this song
-void lsdj_song_set_sync_setting(lsdj_song_t* song, uint8_t repeat);
-
-//! Retrieve the sync setting used for this song
-uint8_t lsdj_song_get_sync_setting(const lsdj_song_t* song);
-
-//! Change the color set used for this song
-void lsdj_song_set_color_set(lsdj_song_t* song, uint8_t repeat);
-
-//! Retrieve the color set used for this song
+void lsdj_song_set_color_set(lsdj_song_t* song, uint8_t colorSet);
 uint8_t lsdj_song_get_color_set(const lsdj_song_t* song);
+
+void lsdj_song_set_key_delay(lsdj_song_t* song, uint8_t delay);
+uint8_t lsdj_song_get_key_delay(const lsdj_song_t* song);
+
+void lsdj_song_set_key_repeat(lsdj_song_t* song, uint8_t repeat);
+uint8_t lsdj_song_get_key_repeat(const lsdj_song_t* song);
+
+void lsdj_song_set_prelisten(lsdj_song_t* song, bool prelisten);
+bool lsdj_song_get_prelisten(const lsdj_song_t* song);
+
+
+// --- Clocks --- //
+
+void lsdj_song_set_total_days(lsdj_song_t* song, uint8_t days);
+uint8_t lsdj_song_get_total_days(const lsdj_song_t* song);
+
+void lsdj_song_set_total_hours(lsdj_song_t* song, uint8_t hours);
+uint8_t lsdj_song_get_total_hours(const lsdj_song_t* song);
+
+void lsdj_song_set_total_minutes(lsdj_song_t* song, uint8_t minutes);
+uint8_t lsdj_song_get_total_minutes(const lsdj_song_t* song);
+
+void lsdj_song_set_work_hours(lsdj_song_t* song, uint8_t hours);
+uint8_t lsdj_song_get_work_hours(const lsdj_song_t* song);
+
+void lsdj_song_set_work_minutes(lsdj_song_t* song, uint8_t minutes);
+uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song);
+
+
+// --- Musical data --- //
 
 //! Change the chain assigned to a row + channel slot
 /*! @param chain The chain number to assign, or LSDJ_NO_CHAIN to set it to empty */

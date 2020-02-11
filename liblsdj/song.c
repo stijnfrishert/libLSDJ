@@ -42,7 +42,6 @@
 
 #define WORK_HOURS_OFFSET (0x3FB2)
 #define WORK_MINUTES_OFFSET (0x3FB3)
-
 #define TEMPO_OFFSET (0x3FB4)
 #define TRANSPOSITION_OFFSET (0x3FB5)
 #define TOTAL_DAYS_OFFSET (0x3FB6)
@@ -52,14 +51,24 @@
 #define KEY_DELAY_OFFSET (0x3FBA)
 #define KEY_REPEAT_OFFSET (0x3FBB)
 #define FONT_OFFSET (0x3FBC)
-#define SYNC_SETTING_OFFSET (0x3FBD)
+#define SYNC_MODE_OFFSET (0x3FBD)
 #define COLOR_SET_OFFSET (0x3FBE)
+#define CLONE_MODE_OFFSET (0x3FC0)
+#define FILE_CHANGED_OFFSET (0x3FC1)
+#define PRELISTEN_OFFSET (0x3FC3)
 
 #define FORMAT_VERSION_OFFSET (0x7FFF)
+
+// --- Song Settings --- //
 
 uint8_t lsdj_song_get_format_version(const lsdj_song_t* song)
 {
     return song->bytes[FORMAT_VERSION_OFFSET];
+}
+
+bool lsdj_song_has_changed(const lsdj_song_t* song)
+{
+	return song->bytes[FILE_CHANGED_OFFSET] == 1;
 }
 
 void lsdj_song_set_tempo(lsdj_song_t* song, uint8_t bpm)
@@ -72,15 +81,91 @@ uint8_t lsdj_song_get_tempo(const lsdj_song_t* song)
 	return song->bytes[TEMPO_OFFSET];
 }
 
-void lsdj_song_set_transposition(lsdj_song_t* song, int8_t semitones)
+void lsdj_song_set_transposition(lsdj_song_t* song, uint8_t semitones)
 {
-	song->bytes[TRANSPOSITION_OFFSET] = (uint8_t)(semitones);
+	song->bytes[TRANSPOSITION_OFFSET] = semitones;
 }
 
-int8_t lsdj_song_get_transposition(const lsdj_song_t* song)
+uint8_t lsdj_song_get_transposition(const lsdj_song_t* song)
 {
-	return (int8_t)(song->bytes[TRANSPOSITION_OFFSET]);
+	return song->bytes[TRANSPOSITION_OFFSET];
 }
+
+void lsdj_song_set_sync_mode(lsdj_song_t* song, lsdj_sync_mode mode)
+{
+	song->bytes[SYNC_MODE_OFFSET] = (uint8_t)mode;
+}
+
+lsdj_sync_mode lsdj_song_get_sync_mode(const lsdj_song_t* song)
+{
+	return (lsdj_sync_mode)song->bytes[SYNC_MODE_OFFSET];
+}
+
+
+// --- Editor Settings --- //
+
+void lsdj_song_set_clone_mode(lsdj_song_t* song, lsdj_clone_mode clone)
+{
+	song->bytes[CLONE_MODE_OFFSET] = (uint8_t)clone;
+}
+
+lsdj_clone_mode lsdj_song_get_clone_mode(const lsdj_song_t* song)
+{
+	return (lsdj_clone_mode)song->bytes[CLONE_MODE_OFFSET];
+}
+
+void lsdj_song_set_font(lsdj_song_t* song, uint8_t font)
+{
+	song->bytes[FONT_OFFSET] = font;
+}
+
+uint8_t lsdj_song_get_font(const lsdj_song_t* song)
+{
+	return song->bytes[FONT_OFFSET];
+}
+
+void lsdj_song_set_color_set(lsdj_song_t* song, uint8_t colorSet)
+{
+	song->bytes[COLOR_SET_OFFSET] = colorSet;
+}
+
+uint8_t lsdj_song_get_color_set(const lsdj_song_t* song)
+{
+	return song->bytes[COLOR_SET_OFFSET];
+}
+
+void lsdj_song_set_key_delay(lsdj_song_t* song, uint8_t delay)
+{
+	song->bytes[KEY_DELAY_OFFSET] = delay;
+}
+
+uint8_t lsdj_song_get_key_delay(const lsdj_song_t* song)
+{
+	return song->bytes[KEY_DELAY_OFFSET];
+}
+
+void lsdj_song_set_key_repeat(lsdj_song_t* song, uint8_t repeat)
+{
+	song->bytes[KEY_REPEAT_OFFSET] = repeat;
+}
+
+uint8_t lsdj_song_get_key_repeat(const lsdj_song_t* song)
+{
+	return song->bytes[KEY_REPEAT_OFFSET];
+}
+
+void lsdj_song_set_prelisten(lsdj_song_t* song, bool prelisten)
+{
+	song->bytes[PRELISTEN_OFFSET] = prelisten ? 1 : 0;
+}
+
+bool lsdj_song_get_prelisten(const lsdj_song_t* song)
+{
+	return song->bytes[PRELISTEN_OFFSET] == 1;
+}
+
+
+// --- Clocks --- //
 
 void lsdj_song_set_total_days(lsdj_song_t* song, uint8_t days)
 {
@@ -130,56 +215,6 @@ void lsdj_song_set_work_minutes(lsdj_song_t* song, uint8_t minutes)
 uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song)
 {
 	return song->bytes[WORK_MINUTES_OFFSET];
-}
-
-void lsdj_song_set_key_delay(lsdj_song_t* song, uint8_t delay)
-{
-	song->bytes[KEY_DELAY_OFFSET] = delay;
-}
-
-uint8_t lsdj_song_get_key_delay(const lsdj_song_t* song)
-{
-	return song->bytes[KEY_DELAY_OFFSET];
-}
-
-void lsdj_song_set_key_repeat(lsdj_song_t* song, uint8_t repeat)
-{
-	song->bytes[KEY_REPEAT_OFFSET] = repeat;
-}
-
-uint8_t lsdj_song_get_key_repeat(const lsdj_song_t* song)
-{
-	return song->bytes[KEY_REPEAT_OFFSET];
-}
-
-void lsdj_song_set_font(lsdj_song_t* song, uint8_t repeat)
-{
-	song->bytes[FONT_OFFSET] = repeat;
-}
-
-uint8_t lsdj_song_get_font(const lsdj_song_t* song)
-{
-	return song->bytes[FONT_OFFSET];
-}
-
-void lsdj_song_set_sync_setting(lsdj_song_t* song, uint8_t repeat)
-{
-	song->bytes[SYNC_SETTING_OFFSET] = repeat;
-}
-
-uint8_t lsdj_song_get_sync_setting(const lsdj_song_t* song)
-{
-	return song->bytes[SYNC_SETTING_OFFSET];
-}
-
-void lsdj_song_set_color_set(lsdj_song_t* song, uint8_t repeat)
-{
-	song->bytes[COLOR_SET_OFFSET] = repeat;
-}
-
-uint8_t lsdj_song_get_color_set(const lsdj_song_t* song)
-{
-	return song->bytes[COLOR_SET_OFFSET];
 }
 
 void lsdj_song_set_chain_assignment(lsdj_song_t* song, uint8_t row, lsdj_channel channel, uint8_t chain)
