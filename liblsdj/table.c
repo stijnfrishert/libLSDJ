@@ -50,14 +50,14 @@
 #define CONTENT_LENGTH (512)
 
 #define TABLE_SETTER(OFFSET, LENGTH, VALUE) \
-const size_t index = OFFSET + table * LSDJ_TABLE_LENGTH + row; \
-assert(index <= OFFSET + LENGTH); \
-song->bytes[index] = VALUE;
+const size_t index = table * LSDJ_TABLE_LENGTH + row; \
+assert(index <= LENGTH); \
+song->bytes[OFFSET + index] = VALUE;
 
 #define TABLE_GETTER(OFFSET, LENGTH) \
-const size_t index = OFFSET + table * LSDJ_TABLE_LENGTH + row; \
-assert(index <= OFFSET + LENGTH); \
-return song->bytes[index];
+const size_t index = table * LSDJ_TABLE_LENGTH + row; \
+assert(index <= LENGTH); \
+return song->bytes[OFFSET + index];
 
 bool lsdj_table_is_allocated(const lsdj_song_t* song, uint8_t table)
 {

@@ -29,7 +29,7 @@ SCENARIO( "Song", "[song]" )
 
 		REQUIRE( lsdj_song_get_clone_mode(song) == LSDJ_CLONE_DEEP );
 		REQUIRE( lsdj_song_get_font(song) == 0 );
-		REQUIRE( lsdj_song_get_color_set(song) == 0 );
+		REQUIRE( lsdj_song_get_color_palette(song) == 0 );
 		REQUIRE( lsdj_song_get_key_delay(song) == 7 );
 		REQUIRE( lsdj_song_get_key_repeat(song) == 2 );
 		REQUIRE( lsdj_song_get_prelisten(song) == true );
@@ -40,11 +40,33 @@ SCENARIO( "Song", "[song]" )
 
 		// --- Rows --- //
 
-		REQUIRE( lsdj_song_get_chain_assignment(song, 0, LSDJ_CHANNEL_PULSE1) == 1 );
-		REQUIRE( lsdj_song_get_chain_assignment(song, 0, LSDJ_CHANNEL_PULSE2) == 2 );
-		REQUIRE( lsdj_song_get_chain_assignment(song, 0, LSDJ_CHANNEL_WAVE) == 3 );
-		REQUIRE( lsdj_song_get_chain_assignment(song, 0, LSDJ_CHANNEL_NOISE) == 4 );
-		REQUIRE( lsdj_song_get_chain_assignment(song, 1, LSDJ_CHANNEL_PULSE1) == LSDJ_NO_CHAIN );
+		REQUIRE( lsdj_row_get_chain(song, 0, LSDJ_CHANNEL_PULSE1) == 1 );
+		REQUIRE( lsdj_row_get_chain(song, 0, LSDJ_CHANNEL_PULSE2) == 2 );
+		REQUIRE( lsdj_row_get_chain(song, 0, LSDJ_CHANNEL_WAVE) == 3 );
+		REQUIRE( lsdj_row_get_chain(song, 0, LSDJ_CHANNEL_NOISE) == 4 );
+		REQUIRE( lsdj_row_get_chain(song, 1, LSDJ_CHANNEL_PULSE1) == LSDJ_NO_CHAIN );
+
+		REQUIRE( lsdj_chain_is_allocated(song, 0x00) == false );
+		REQUIRE( lsdj_chain_is_allocated(song, 0x01) == true );
+		REQUIRE( lsdj_chain_is_allocated(song, 0x02) == true );
+		REQUIRE( lsdj_chain_is_allocated(song, 0x03) == true );
+		REQUIRE( lsdj_chain_is_allocated(song, 0x04) == true );
+		REQUIRE( lsdj_chain_is_allocated(song, 0x05) == false );
+
+		REQUIRE( lsdj_chain_get_phrase(song, 0x01, 6) == 0x07 );
+		REQUIRE( lsdj_chain_get_phrase(song, 0x02, 5) == 0x1B );
+		REQUIRE( lsdj_chain_get_phrase(song, 0x03, 2) == 0x0E );
+		REQUIRE( lsdj_chain_get_phrase(song, 0x04, 9) == 0x25 );
+		REQUIRE( lsdj_chain_get_transposition(song, 0x03, 15) == 0 );
+
+		REQUIRE( lsdj_phrase_is_allocated(song, 0x00) == false );
+		REQUIRE( lsdj_phrase_is_allocated(song, 0x01) == true );
+		REQUIRE( lsdj_phrase_is_allocated(song, 0x0A) == true );
+		REQUIRE( lsdj_phrase_is_allocated(song, 0x1A) == true );
+		REQUIRE( lsdj_phrase_is_allocated(song, 0x24) == true );
+		REQUIRE( lsdj_phrase_is_allocated(song, 0x26) == false );
+
+		REQUIRE( lsdj_phrase_get_note(song, 0x05, 3) == 49 );
 
 		// --- Instruments --- //
 

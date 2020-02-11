@@ -37,8 +37,14 @@
 
 #include <assert.h>
 
+#define PHRASE_NOTES_OFFSET (0x0000)
 #define CHAIN_ASSIGNMENTS_OFFSET (0x1290)
 #define CHAIN_ASSIGNMENTS_LENGTH (1024)
+
+#define CHAIN_PHRASES_OFFSET (0x2080)
+#define CHAIN_TRANSPOSITIONS_OFFSET (0x2880)
+#define PHRASE_ALLOCATIONS_OFFSET (0x3E82)
+#define CHAIN_ALLOCATIONS_OFFSET (0x3EA2)
 
 #define WORK_HOURS_OFFSET (0x3FB2)
 #define WORK_MINUTES_OFFSET (0x3FB3)
@@ -52,12 +58,25 @@
 #define KEY_REPEAT_OFFSET (0x3FBB)
 #define FONT_OFFSET (0x3FBC)
 #define SYNC_MODE_OFFSET (0x3FBD)
-#define COLOR_SET_OFFSET (0x3FBE)
+#define COLOR_PALETTE_OFFSET (0x3FBE)
 #define CLONE_MODE_OFFSET (0x3FC0)
 #define FILE_CHANGED_OFFSET (0x3FC1)
 #define PRELISTEN_OFFSET (0x3FC3)
+#define PHRASE_COMMANDS_OFFSET (0x4000)
+#define PHRASE_COMMAND_VALUES_OFFSET (0x4FF0)
 
+#define PHRASE_INSTRUMENTS_OFFSET (0x7000)
 #define FORMAT_VERSION_OFFSET (0x7FFF)
+
+#define PHRASE_SETTER(OFFSET, LENGTH, VALUE) \
+const size_t index = phrase * LSDJ_PHRASE_LENGTH + row; \
+assert(index <= LENGTH); \
+song->bytes[OFFSET + index] = VALUE;
+
+#define PHRASE_GETTER(OFFSET, LENGTH) \
+const size_t index = phrase * LSDJ_PHRASE_LENGTH + row; \
+assert(index <= LENGTH); \
+return song->bytes[OFFSET + index];
 
 // --- Song Settings --- //
 
@@ -124,14 +143,14 @@ uint8_t lsdj_song_get_font(const lsdj_song_t* song)
 	return song->bytes[FONT_OFFSET];
 }
 
-void lsdj_song_set_color_set(lsdj_song_t* song, uint8_t colorSet)
+void lsdj_song_set_color_palette(lsdj_song_t* song, uint8_t palette)
 {
-	song->bytes[COLOR_SET_OFFSET] = colorSet;
+	song->bytes[COLOR_PALETTE_OFFSET] = palette;
 }
 
-uint8_t lsdj_song_get_color_set(const lsdj_song_t* song)
+uint8_t lsdj_song_get_color_palette(const lsdj_song_t* song)
 {
-	return song->bytes[COLOR_SET_OFFSET];
+	return song->bytes[COLOR_PALETTE_OFFSET];
 }
 
 void lsdj_song_set_key_delay(lsdj_song_t* song, uint8_t delay)
@@ -217,7 +236,7 @@ uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song)
 	return song->bytes[WORK_MINUTES_OFFSET];
 }
 
-void lsdj_song_set_chain_assignment(lsdj_song_t* song, uint8_t row, lsdj_channel channel, uint8_t chain)
+void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel channel, uint8_t chain)
 {
 	const size_t index = CHAIN_ASSIGNMENTS_OFFSET + row * LSDJ_CHANNEL_COUNT + channel;
 	assert(index < CHAIN_ASSIGNMENTS_OFFSET + CHAIN_ASSIGNMENTS_LENGTH);
@@ -225,10 +244,104 @@ void lsdj_song_set_chain_assignment(lsdj_song_t* song, uint8_t row, lsdj_channel
     song->bytes[index] = chain;   
 }
 
-uint8_t lsdj_song_get_chain_assignment(const lsdj_song_t* song, uint8_t row, lsdj_channel channel)
+uint8_t lsdj_row_get_chain(const lsdj_song_t* song, uint8_t row, lsdj_channel channel)
 {
 	const size_t index = CHAIN_ASSIGNMENTS_OFFSET + row * LSDJ_CHANNEL_COUNT + channel;
 	assert(index < CHAIN_ASSIGNMENTS_OFFSET + CHAIN_ASSIGNMENTS_LENGTH);
 
     return song->bytes[CHAIN_ASSIGNMENTS_OFFSET + row * LSDJ_CHANNEL_COUNT + channel];
+}
+
+
+
+bool lsdj_chain_is_allocated(const lsdj_song_t* song, uint8_t chain)
+{
+	const size_t index = chain / 8;
+	assert(index < 16);
+
+	const size_t mask = 1 << (chain - (index * 8));
+    
+	return (song->bytes[CHAIN_ALLOCATIONS_OFFSET + index] & mask) != 0;
+}
+
+void lsdj_chain_set_phrase(lsdj_song_t* song, uint8_t chain, uint8_t row, uint8_t phrase)
+{
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + row;
+	assert(index < 2048);
+
+	song->bytes[CHAIN_PHRASES_OFFSET + index] = phrase;
+}
+
+uint8_t lsdj_chain_get_phrase(const lsdj_song_t* song, uint8_t chain, uint8_t row)
+{
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + row;
+	assert(index < 2048);
+
+	return song->bytes[CHAIN_PHRASES_OFFSET + index];
+}
+
+void lsdj_chain_set_transposition(lsdj_song_t* song, uint8_t chain, uint8_t row, uint8_t transposition)
+{
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + row;
+	assert(index < 2048);
+
+	song->bytes[CHAIN_TRANSPOSITIONS_OFFSET + index] = transposition;
+}
+
+uint8_t lsdj_chain_get_transposition(const lsdj_song_t* song, uint8_t chain, uint8_t row)
+{
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + row;
+	assert(index < 2048);
+
+	return song->bytes[CHAIN_TRANSPOSITIONS_OFFSET + index];
+}
+
+bool lsdj_phrase_is_allocated(const lsdj_song_t* song, uint8_t phrase)
+{
+	const size_t index = phrase / 8;
+	assert(index < 32);
+
+	const size_t mask = 1 << (phrase - (index * 8));
+    
+	return (song->bytes[PHRASE_ALLOCATIONS_OFFSET + index] & mask) != 0;
+}
+
+void lsdj_phrase_set_note(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t note)
+{
+	PHRASE_SETTER(PHRASE_NOTES_OFFSET, 4080, note)
+}
+
+uint8_t lsdj_phrase_get_note(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+{
+	PHRASE_GETTER(PHRASE_NOTES_OFFSET, 4080)
+}
+
+void lsdj_phrase_set_instrument(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t instrument)
+{
+	PHRASE_SETTER(PHRASE_INSTRUMENTS_OFFSET, 4080, instrument)
+}
+
+uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+{
+	PHRASE_GETTER(PHRASE_INSTRUMENTS_OFFSET, 4080)
+}
+
+void lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t command)
+{
+	PHRASE_SETTER(PHRASE_COMMANDS_OFFSET, 4080, command)
+}
+
+uint8_t lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+{
+	PHRASE_GETTER(PHRASE_COMMANDS_OFFSET, 4080)
+}
+
+void lsdj_phrase_set_command_value(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t value)
+{
+	PHRASE_SETTER(PHRASE_COMMAND_VALUES_OFFSET, 4080, value)
+}
+
+uint8_t lsdj_phrase_get_command_value(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+{
+	PHRASE_GETTER(PHRASE_COMMAND_VALUES_OFFSET, 4080)
 }
