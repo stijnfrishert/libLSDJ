@@ -6,12 +6,14 @@ if (APPLE)
 endif (APPLE)
 
 set(HEADERS
+	chain.h
 	channel.h
 	command.h
 	compression.h
 	error.h
 	instrument.h
 	panning.h
+	phrase.h
 	project.h
 	sav.h
 	song.h
@@ -22,9 +24,11 @@ set(HEADERS
 
 set(SOURCES
 	compression.c
+	chain.c
 	error.c
 	groove.c
 	instrument.c
+	phrase.c
 	project.c
 	sav.c
 	song.c

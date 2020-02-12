@@ -33,9 +33,9 @@
  
  */
 
-#include <assert.h>
-
 #include "groove.h"
+
+#include <assert.h>
 
 #define GROOVES_OFFSET (0x1090)
 

@@ -61,13 +61,7 @@ extern "C" {
 #define LSDJ_SONG_BYTE_COUNT (0x8000)
 
 //! The value representing an empty row + channel slot
-#define LSDJ_NO_CHAIN (0xFF)
-
-//! The number of steps in a chain
-#define LSDJ_CHAIN_LENGTH (16)
-
-//! The number of steps in a phrase
-#define LSDJ_PHRASE_LENGTH (16)
+#define LSDJ_SONG_NO_CHAIN (0xFF)
 
 //! A structure that can hold one entire decompressed song in memory
 typedef struct
@@ -202,31 +196,6 @@ bool lsdj_song_set_row_bookmarked(lsdj_song_t* song, uint8_t row, lsdj_channel c
 //! Ask whether a row + channel slot is bookmarked
 /*! @return True when the row has been bookmarked on this channel */
 bool lsdj_song_is_row_bookmarked(const lsdj_song_t* song, uint8_t row, lsdj_channel channel);
-
-//! Is a chain with a given index in use?
-bool lsdj_chain_is_allocated(const lsdj_song_t* song, uint8_t chain);
-
-void lsdj_chain_set_phrase(lsdj_song_t* song, uint8_t chain, uint8_t row, uint8_t phrase);
-uint8_t lsdj_chain_get_phrase(const lsdj_song_t* song, uint8_t chain, uint8_t row);
-
-void lsdj_chain_set_transposition(lsdj_song_t* song, uint8_t chain, uint8_t row, uint8_t transposition);
-uint8_t lsdj_chain_get_transposition(const lsdj_song_t* song, uint8_t chain, uint8_t row);
-
-
-//! Is a phrase with a given index in use?
-bool lsdj_phrase_is_allocated(const lsdj_song_t* song, uint8_t phrase);
-
-void lsdj_phrase_set_note(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t note);
-uint8_t lsdj_phrase_get_note(const lsdj_song_t* song, uint8_t phrase, uint8_t row);
-
-void lsdj_phrase_set_instrument(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t instrument);
-uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint8_t row);
-
-void lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t row, lsdj_command command);
-lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t row);
-
-void lsdj_phrase_set_command_value(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t value);
-uint8_t lsdj_phrase_get_command_value(const lsdj_song_t* song, uint8_t phrase, uint8_t row);
     
 #ifdef __cplusplus
 }

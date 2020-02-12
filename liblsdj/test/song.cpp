@@ -1,10 +1,12 @@
 #include <song.h>
 
 #include <catch2/catch.hpp>
+#include <chain.h>
 #include <command.h>
 #include <groove.h>
 #include <instrument.h>
 #include <panning.h>
+#include <phrase.h>
 #include <sav.h>
 #include <table.h>
 
@@ -57,7 +59,7 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_row_get_chain(song, 0, LSDJ_CHANNEL_PULSE2) == 2 );
 			REQUIRE( lsdj_row_get_chain(song, 0, LSDJ_CHANNEL_WAVE) == 3 );
 			REQUIRE( lsdj_row_get_chain(song, 0, LSDJ_CHANNEL_NOISE) == 4 );
-			REQUIRE( lsdj_row_get_chain(song, 1, LSDJ_CHANNEL_PULSE1) == LSDJ_NO_CHAIN );
+			REQUIRE( lsdj_row_get_chain(song, 1, LSDJ_CHANNEL_PULSE1) == LSDJ_SONG_NO_CHAIN );
             
             REQUIRE( lsdj_song_is_row_bookmarked(song, 0, LSDJ_CHANNEL_PULSE1) == false );
             REQUIRE( lsdj_song_is_row_bookmarked(song, 2, LSDJ_CHANNEL_PULSE2) == false );
@@ -79,6 +81,8 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_chain_get_phrase(song, 0x02, 5) == 0x1B );
 			REQUIRE( lsdj_chain_get_phrase(song, 0x03, 2) == 0x0E );
 			REQUIRE( lsdj_chain_get_phrase(song, 0x04, 9) == 0x25 );
+			REQUIRE( lsdj_chain_get_phrase(song, 0x05, 0) == LSDJ_CHAIN_NO_PHRASE );
+
 			REQUIRE( lsdj_chain_get_transposition(song, 0x03, 15) == 0 );
 		}
 
@@ -94,7 +98,12 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_phrase_get_note(song, 0x05, 0x3) == 49 );
 			REQUIRE( lsdj_phrase_get_note(song, 0x18, 0xE) == 19 );
 			REQUIRE( lsdj_phrase_get_note(song, 0x1C, 0x0) == 16 );
-			REQUIRE( lsdj_phrase_get_note(song, 0x08, 0x0B) == 0 );
+			REQUIRE( lsdj_phrase_get_note(song, 0x08, 0x0B) == LSDJ_PHRASE_NO_NOTE );
+
+			REQUIRE( lsdj_phrase_get_instrument(song, 0x0C, 0x6) == 0x02 );
+			REQUIRE( lsdj_phrase_get_instrument(song, 0x16, 0x0) == 0x03 );
+			REQUIRE( lsdj_phrase_get_instrument(song, 0x16, 0x4) == 0x06 );
+			REQUIRE( lsdj_phrase_get_instrument(song, 0x16, 0x6) == LSDJ_PHRASE_NO_INSTRUMENT );
 
 			REQUIRE( lsdj_phrase_get_command(song, 0x12, 0x2) == LSDJ_COMMAND_L );
 			REQUIRE( lsdj_phrase_get_command_value(song, 0x12, 0x2) == 0x20 );
@@ -154,7 +163,7 @@ TEST_CASE( "Song", "[song]" )
 		{
 			REQUIRE( lsdj_groove_get_step(song, 0, 0) == 6 );
 			REQUIRE( lsdj_groove_get_step(song, 0, 1) == 6 );
-			REQUIRE( lsdj_groove_get_step(song, 0, 2) == LSDJ_GROOVE_EMPTY_STEP_VALUE );
+			REQUIRE( lsdj_groove_get_step(song, 0, 2) == LSDJ_GROOVE_NO_VALUE );
 		}
 	}
 }

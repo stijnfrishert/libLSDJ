@@ -33,40 +33,52 @@
  
  */
 
-#ifndef LSDJ_GROOVE_H
-#define LSDJ_GROOVE_H
+#include "chain.h"
 
-#include "song.h"
+#include <assert.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#define CHAIN_PHRASES_OFFSET (0x2080)
+#define CHAIN_TRANSPOSITIONS_OFFSET (0x2880)
+#define CHAIN_ALLOCATIONS_OFFSET (0x3EA2)
 
-//! The amount of grooves in a song
-#define LSDJ_GROOVE_COUNT (0x1F)
+bool lsdj_chain_is_allocated(const lsdj_song_t* song, uint8_t chain)
+{
+	const size_t index = chain / 8;
+	assert(index < 16);
 
-//! The number of steps in a groove
-#define LSDJ_GROOVE_LENGTH (16)
-
-//! The value of an empty (unused) step
-#define LSDJ_GROOVE_NO_VALUE (0)
-
-//! Change the value of a step in a groove
-/*! @param song The song to which the groove belongs
-	@param groove The index of the groove (< LSDJ_GROOVE_COUNT)
-	@param step The index of the step within the groove (< LSDJ_GROOVE_LENGTH)
-	@param value The value to set at that step (or LSDJ_GROOVE_NO_VALUE) */
-void lsdj_groove_set_step(lsdj_song_t* song, uint8_t groove, uint8_t step, uint8_t value);
-
-//! Retrieve the value of a step in a groove
-/*! @param song The song to which the groove belongs
-	@param groove The index of the groove (< LSDJ_GROOVE_COUNT)
-	@param step The index of the step within the groove (< LSDJ_GROOVE_LENGTH)
-	@return The value at said step, or LSDJ_GROOVE_NO_VALUE */
-uint8_t lsdj_groove_get_step(const lsdj_song_t* song, uint8_t groove, uint8_t step);
+	const size_t mask = 1 << (chain - (index * 8));
     
-#ifdef __cplusplus
+	return (song->bytes[CHAIN_ALLOCATIONS_OFFSET + index] & mask) != 0;
 }
-#endif
 
-#endif
+void lsdj_chain_set_phrase(lsdj_song_t* song, uint8_t chain, uint8_t step, uint8_t phrase)
+{
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + step;
+	assert(index < 2048);
+
+	song->bytes[CHAIN_PHRASES_OFFSET + index] = phrase;
+}
+
+uint8_t lsdj_chain_get_phrase(const lsdj_song_t* song, uint8_t chain, uint8_t step)
+{
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + step;
+	assert(index < 2048);
+
+	return song->bytes[CHAIN_PHRASES_OFFSET + index];
+}
+
+void lsdj_chain_set_transposition(lsdj_song_t* song, uint8_t chain, uint8_t step, uint8_t transposition)
+{
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + step;
+	assert(index < 2048);
+
+	song->bytes[CHAIN_TRANSPOSITIONS_OFFSET + index] = transposition;
+}
+
+uint8_t lsdj_chain_get_transposition(const lsdj_song_t* song, uint8_t chain, uint8_t step)
+{
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + step;
+	assert(index < 2048);
+
+	return song->bytes[CHAIN_TRANSPOSITIONS_OFFSET + index];
+}
