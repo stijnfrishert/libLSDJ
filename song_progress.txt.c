@@ -1,5 +1,5 @@
 // Bank 0:
-// 4080 0000-0FEF: phrases-> notes
+4080 0000-0FEF: phrases-> notes
 //   64 0FF0-102F: bookmarks
   96 1030-108F: empty
 //  512 1090-128F: grooves
@@ -49,8 +49,8 @@
   58 3FC6-3FFF: empty
 
 // Bank 2:
-// 4080 4000-4FEF: phrases->fx
-// 4080 4FF0-5FDF: phrases->fx val
+4080 4000-4FEF: phrases->fx
+4080 4FF0-5FDF: phrases->fx val
   32 5FE0-5FFF: empty
 
 // Bank 3:

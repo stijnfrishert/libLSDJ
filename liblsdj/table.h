@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "command.h"
 #include "song.h"
 
 #ifdef __cplusplus
@@ -79,13 +80,13 @@ uint8_t lsdj_table_get_transposition(const lsdj_song_t* song, uint8_t table, uin
 //! Change the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
-	@param value The value to write into the slot */
-void lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value);
+	@param command The command to write into the slot */
+void lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command);
 
 //! Return the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH */
-uint8_t lsdj_table_get_command1(const lsdj_song_t* song, uint8_t table, uint8_t row);
+lsdj_command lsdj_table_get_command1(const lsdj_song_t* song, uint8_t table, uint8_t row);
 
 //! Change the command value at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
@@ -101,13 +102,13 @@ uint8_t lsdj_table_get_command1_value(const lsdj_song_t* song, uint8_t table, ui
 //! Change the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
-	@param value The value to write into the slot */
-void lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value);
+	@param command The command to write into the slot */
+void lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command);
 
 //! Return the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH */
-uint8_t lsdj_table_get_command2(const lsdj_song_t* song, uint8_t table, uint8_t row);
+lsdj_command lsdj_table_get_command2(const lsdj_song_t* song, uint8_t table, uint8_t row);
 
 //! Change the command value at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT

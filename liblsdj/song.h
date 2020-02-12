@@ -54,6 +54,7 @@ extern "C" {
 #include <stdint.h>
 
 #include "channel.h"
+#include "command.h"
 #include "error.h"
 
 //! The size of a decompressed song in memory
@@ -65,7 +66,7 @@ extern "C" {
 //! The number of steps in a chain
 #define LSDJ_CHAIN_LENGTH (16)
 
-   //! The number of steps in a phrase
+//! The number of steps in a phrase
 #define LSDJ_PHRASE_LENGTH (16)
 
 //! A structure that can hold one entire decompressed song in memory
@@ -213,8 +214,8 @@ uint8_t lsdj_phrase_get_note(const lsdj_song_t* song, uint8_t phrase, uint8_t ro
 void lsdj_phrase_set_instrument(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t instrument);
 uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint8_t row);
 
-void lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t command);
-uint8_t lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t row);
+void lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t row, lsdj_command command);
+lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t row);
 
 void lsdj_phrase_set_command_value(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t value);
 uint8_t lsdj_phrase_get_command_value(const lsdj_song_t* song, uint8_t phrase, uint8_t row);
