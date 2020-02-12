@@ -194,6 +194,11 @@ void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel channel, ui
 /*! @return The chain number of LSDJ_NO_CHAIN if empty */
 uint8_t lsdj_row_get_chain(const lsdj_song_t* song, uint8_t row, lsdj_channel channel);
 
+//! Set whether a row + channel slot should be bookmarked
+/*! @note There are only 16 bookmarks per channel available, so this function can fail if no more space is available
+    @return false If not bookmarks slots on this channel are available anymore */
+bool lsdj_song_set_row_bookmarked(lsdj_song_t* song, uint8_t row, lsdj_channel channel, bool bookmarked);
+bool lsdj_song_is_row_bookmarked(const lsdj_song_t* song, uint8_t row, lsdj_channel channel);
 
 //! Is a chain with a given index in use?
 bool lsdj_chain_is_allocated(const lsdj_song_t* song, uint8_t chain);

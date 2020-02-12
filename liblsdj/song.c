@@ -37,9 +37,11 @@
 
 #include <assert.h>
 
+// --- Offsets --- //
+
 #define PHRASE_NOTES_OFFSET (0x0000)
+#define BOOKMARKS_OFFSET (0x0FF0)
 #define CHAIN_ASSIGNMENTS_OFFSET (0x1290)
-#define CHAIN_ASSIGNMENTS_LENGTH (1024)
 
 #define CHAIN_PHRASES_OFFSET (0x2080)
 #define CHAIN_TRANSPOSITIONS_OFFSET (0x2880)
@@ -67,6 +69,13 @@
 
 #define PHRASE_INSTRUMENTS_OFFSET (0x7000)
 #define FORMAT_VERSION_OFFSET (0x7FFF)
+
+// --- Other macros --- //
+
+#define BOOKMARK_PER_CHANNEL_COUNT (16)
+#define NO_BOOKMARK_VALUE (0xFF)
+
+// --- Convenience Macros --- //
 
 #define PHRASE_SETTER(OFFSET, LENGTH, VALUE) \
 const size_t index = phrase * LSDJ_PHRASE_LENGTH + row; \
@@ -236,10 +245,13 @@ uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song)
 	return song->bytes[WORK_MINUTES_OFFSET];
 }
 
+
+// --- Chains, Phrases //
+
 void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel channel, uint8_t chain)
 {
 	const size_t index = CHAIN_ASSIGNMENTS_OFFSET + row * LSDJ_CHANNEL_COUNT + channel;
-	assert(index < CHAIN_ASSIGNMENTS_OFFSET + CHAIN_ASSIGNMENTS_LENGTH);
+	assert(index < CHAIN_ASSIGNMENTS_OFFSET + 1024);
 
     song->bytes[index] = chain;   
 }
@@ -247,11 +259,49 @@ void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel channel, ui
 uint8_t lsdj_row_get_chain(const lsdj_song_t* song, uint8_t row, lsdj_channel channel)
 {
 	const size_t index = CHAIN_ASSIGNMENTS_OFFSET + row * LSDJ_CHANNEL_COUNT + channel;
-	assert(index < CHAIN_ASSIGNMENTS_OFFSET + CHAIN_ASSIGNMENTS_LENGTH);
+	assert(index < CHAIN_ASSIGNMENTS_OFFSET + 1024);
 
     return song->bytes[CHAIN_ASSIGNMENTS_OFFSET + row * LSDJ_CHANNEL_COUNT + channel];
 }
 
+bool lsdj_song_set_row_bookmarked(lsdj_song_t* song, uint8_t row, lsdj_channel channel, bool bookmarked)
+{
+	if (lsdj_song_is_row_bookmarked(song, row, channel) == bookmarked)
+		return true;
+
+	for (size_t i = 0; i < BOOKMARK_PER_CHANNEL_COUNT; i++)
+	{
+		const size_t index = channel * BOOKMARK_PER_CHANNEL_COUNT + i;
+		assert(index < 64);
+
+		uint8_t* slot = &song->bytes[BOOKMARKS_OFFSET + index];
+
+		if (bookmarked && *slot == NO_BOOKMARK_VALUE)
+		{
+			*slot = row;
+			return true;
+		} else if (!bookmarked && *slot == row) {
+			*slot = NO_BOOKMARK_VALUE;
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool lsdj_song_is_row_bookmarked(const lsdj_song_t* song, uint8_t row, lsdj_channel channel)
+{
+	for (size_t i = 0; i < BOOKMARK_PER_CHANNEL_COUNT; i++)
+	{
+		const size_t index = channel * BOOKMARK_PER_CHANNEL_COUNT + i;
+		assert(index < 64);
+
+		if (song->bytes[BOOKMARKS_OFFSET + index] == row)
+			return true;
+	}
+
+	return false;
+}
 
 
 bool lsdj_chain_is_allocated(const lsdj_song_t* song, uint8_t chain)

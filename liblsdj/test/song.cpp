@@ -20,6 +20,12 @@ TEST_CASE( "Song", "[song]" )
 	{
 		auto song = lsdj_project_get_song(lsdj_sav_get_project(sav, 0));
 		assert(song != nullptr);
+        
+        REQUIRE( lsdj_song_is_row_bookmarked(song, 0, LSDJ_CHANNEL_PULSE1) == false );
+        REQUIRE( lsdj_song_is_row_bookmarked(song, 2, LSDJ_CHANNEL_PULSE2) == false );
+        REQUIRE( lsdj_song_is_row_bookmarked(song, 1, LSDJ_CHANNEL_WAVE) == false );
+        REQUIRE( lsdj_song_is_row_bookmarked(song, 3, LSDJ_CHANNEL_NOISE) == false );
+        REQUIRE( lsdj_song_is_row_bookmarked(song, 5, LSDJ_CHANNEL_PULSE1) == false );
 
 		SECTION( "Song settings" )
 		{
