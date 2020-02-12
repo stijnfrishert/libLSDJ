@@ -1,5 +1,6 @@
 #include <song.h>
 
+#include <array>
 #include <catch2/catch.hpp>
 #include <chain.h>
 #include <command.h>
@@ -9,6 +10,7 @@
 #include <phrase.h>
 #include <sav.h>
 #include <table.h>
+#include <wave.h>
 
 using namespace Catch;
 
@@ -157,6 +159,21 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_table_get_command2(song, 1, 1) == LSDJ_COMMAND_O );
 			REQUIRE( lsdj_table_get_command2_value(song, 1, 1) == LSDJ_PAN_LEFT_RIGHT );
 			REQUIRE( lsdj_table_get_command2(song, 1, 2) == LSDJ_COMMAND_NONE );
+		}
+
+		SECTION( "Waves" )
+		{
+			std::array<std::uint8_t, LSDJ_WAVE_BYTE_COUNT> wave00 = {
+				0x89, 0xBD, 0xFF, 0xDF, 0xFF, 0xFF, 0xFD, 0xB9, 0x86, 0x42, 0x00, 0x00, 0x00, 0x00, 0x02, 0x46
+			};
+
+			REQUIRE( memcmp(lsdj_wave_get_bytes(song, 0x00), wave00.data(), wave00.size()) == 0 );
+
+			std::array<std::uint8_t, LSDJ_WAVE_BYTE_COUNT> wave31 = {
+				0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31
+			};
+
+			REQUIRE( memcmp(lsdj_wave_get_bytes(song, 0x31), wave31.data(), wave31.size()) == 0 );
 		}
 
 		SECTION(" Grooves" )

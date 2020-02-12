@@ -54,7 +54,7 @@
   32 5FE0-5FFF: empty
 
 // Bank 3:
-// 4096 6000-6FFF: 256 wave frames (each frame has 32 4-bit samples)
+4096 6000-6FFF: 256 wave frames (each frame has 32 4-bit samples)
 4080 7000-7FEF: phrases->instr
 //    2 7FF0-7FF1: mem initialized flag (set to “rb” on init)
   13 7FF2-7FFE: empty

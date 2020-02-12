@@ -19,6 +19,7 @@ set(HEADERS
 	song.h
 	table.h
 	version.h
+	wave.h
 	vio.h
 	)
 
@@ -34,6 +35,7 @@ set(SOURCES
 	song.c
 	table.c
 	vio.c
+	wave.c
 	)
 
 # Create the library target
