@@ -2,7 +2,7 @@
 4080 0000-0FEF: phrases-> notes
   64 0FF0-102F: bookmarks
   96 1030-108F: empty
-//  512 1090-128F: grooves
+ 512 1090-128F: grooves
 1024 1290-168F: song-> chainno (listed PU1,PU2,WAV,NOI for $00 .. $ff in order)
  512 1690-188F: tables-> envelope
 // 1344 1890-1DCF: instrument->speech->words ($20*42)

@@ -2,6 +2,7 @@
 
 #include <catch2/catch.hpp>
 #include <command.h>
+#include <groove.h>
 #include <instrument.h>
 #include <panning.h>
 #include <sav.h>
@@ -21,12 +22,6 @@ TEST_CASE( "Song", "[song]" )
 		auto song = lsdj_project_get_song(lsdj_sav_get_project(sav, 0));
 		assert(song != nullptr);
         
-        REQUIRE( lsdj_song_is_row_bookmarked(song, 0, LSDJ_CHANNEL_PULSE1) == false );
-        REQUIRE( lsdj_song_is_row_bookmarked(song, 2, LSDJ_CHANNEL_PULSE2) == false );
-        REQUIRE( lsdj_song_is_row_bookmarked(song, 1, LSDJ_CHANNEL_WAVE) == false );
-        REQUIRE( lsdj_song_is_row_bookmarked(song, 3, LSDJ_CHANNEL_NOISE) == false );
-        REQUIRE( lsdj_song_is_row_bookmarked(song, 5, LSDJ_CHANNEL_PULSE1) == false );
-
 		SECTION( "Song settings" )
 		{
 			REQUIRE( lsdj_song_get_format_version(song) == 7 );
@@ -63,6 +58,12 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_row_get_chain(song, 0, LSDJ_CHANNEL_WAVE) == 3 );
 			REQUIRE( lsdj_row_get_chain(song, 0, LSDJ_CHANNEL_NOISE) == 4 );
 			REQUIRE( lsdj_row_get_chain(song, 1, LSDJ_CHANNEL_PULSE1) == LSDJ_NO_CHAIN );
+            
+            REQUIRE( lsdj_song_is_row_bookmarked(song, 0, LSDJ_CHANNEL_PULSE1) == false );
+            REQUIRE( lsdj_song_is_row_bookmarked(song, 2, LSDJ_CHANNEL_PULSE2) == false );
+            REQUIRE( lsdj_song_is_row_bookmarked(song, 1, LSDJ_CHANNEL_WAVE) == false );
+            REQUIRE( lsdj_song_is_row_bookmarked(song, 3, LSDJ_CHANNEL_NOISE) == false );
+            REQUIRE( lsdj_song_is_row_bookmarked(song, 5, LSDJ_CHANNEL_PULSE1) == false );
 		}
 
 		SECTION( "Chains" )
@@ -147,6 +148,13 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_table_get_command2(song, 1, 1) == LSDJ_COMMAND_O );
 			REQUIRE( lsdj_table_get_command2_value(song, 1, 1) == LSDJ_PAN_LEFT_RIGHT );
 			REQUIRE( lsdj_table_get_command2(song, 1, 2) == LSDJ_COMMAND_NONE );
+		}
+
+		SECTION(" Grooves" )
+		{
+			REQUIRE( lsdj_groove_get_step(song, 0, 0) == 6 );
+			REQUIRE( lsdj_groove_get_step(song, 0, 1) == 6 );
+			REQUIRE( lsdj_groove_get_step(song, 0, 2) == LSDJ_GROOVE_EMPTY_STEP_VALUE );
 		}
 	}
 }

@@ -23,6 +23,7 @@ set(HEADERS
 set(SOURCES
 	compression.c
 	error.c
+	groove.c
 	instrument.c
 	project.c
 	sav.c
