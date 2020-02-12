@@ -261,11 +261,11 @@ namespace lsdj
             std::cout << "          ";
         }
         
-        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_sav_get_working_memory_song(sav), nullptr);
+        const lsdj_song_t* song = lsdj_sav_get_working_memory_song(sav);
         
         // Display whether the working memory song is "dirty"/edited, and display that
         // as version number (it doesn't really have a version number otherwise)
-        if (versionStyle != VersionStyle::NONE && lsdj_song_get_file_changed_flag(song))
+        if (versionStyle != VersionStyle::NONE && lsdj_song_has_changed(song))
             std::cout << "*    ";
         else
             std::cout << "     ";
@@ -284,8 +284,6 @@ namespace lsdj
         }
         
         std::cout << std::endl;
-        
-        lsdj_song_free(song);
     }
 
     void Exporter::printProject(const lsdj_sav_t* sav, std::size_t index)
@@ -333,7 +331,7 @@ namespace lsdj
             std::cout << ' ';
         
         // Retrieve the format version of the song to display
-        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_project_get_song(project), nullptr);
+        const lsdj_song_t* song = lsdj_project_get_song(project);
         const auto formatVersionString = std::to_string(lsdj_song_get_format_version(song));
         std::cout << formatVersionString;
         for (auto i = 0; i < 5 - formatVersionString.length(); i++)
@@ -347,8 +345,6 @@ namespace lsdj
         }
         
         std::cout << std::endl;
-        
-        lsdj_song_free(song);
     }
     
     std::string Exporter::constructName(const lsdj_project_t* project)
