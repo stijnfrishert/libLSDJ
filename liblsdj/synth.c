@@ -37,7 +37,18 @@
 
 #include <assert.h>
 
- #define SYNTHS_OFFSET (0x3EB2)
+#define SYNTHS_OFFSET (0x3EB2)
+#define OVERWRITES_OFFSET (0x3FC4)
+
+bool lsdj_synth_is_wave_overwritten(const lsdj_song_t* song, uint8_t synth)
+{
+	const size_t index = synth / 8;
+	assert(index < 2);
+
+	const size_t mask = 1 << (synth - (index * 8));
+
+	return (song->bytes[OVERWRITES_OFFSET + index] & mask) != 0;
+}
 
 void set_synth_byte(lsdj_song_t* song, uint8_t synth, uint8_t byte, uint8_t value)
 {

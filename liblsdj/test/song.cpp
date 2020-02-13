@@ -137,6 +137,9 @@ TEST_CASE( "Song", "[song]" )
 
 		SECTION( "Synths" )
 		{
+			REQUIRE( lsdj_synth_is_wave_overwritten(song, 0x0) == false );
+			REQUIRE( lsdj_synth_is_wave_overwritten(song, 0x1) == false );
+
 			REQUIRE( lsdj_synth_get_waveform(song, 0x0) == LSDJ_SYNTH_WAVEFORM_TRIANGLE );
 			REQUIRE( lsdj_synth_get_waveform(song, 0x1) == LSDJ_SYNTH_WAVEFORM_SAW );
 			REQUIRE( lsdj_synth_get_distortion(song, 0x0) == LSDJ_SYNTH_DISTORTION_CLIP );

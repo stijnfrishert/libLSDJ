@@ -45,7 +45,7 @@
    1 3FC1-3FC1: file changed?
 //    1 3FC2-3FC2: power save
    1 3FC3-3FC3: prelisten
-//    2 3FC4-3FC5: wave synth overwrite locks
+   2 3FC4-3FC5: wave synth overwrite locks
   58 3FC6-3FFF: empty
 
 // Bank 2:

@@ -36,6 +36,8 @@
 #ifndef LSDJ_SYNTH_H
 #define LSDJ_SYNTH_H
 
+#include <stdbool.h>
+
 #include "song.h"
 
 #ifdef __cplusplus
@@ -80,6 +82,12 @@ typedef enum
 	LSDJ_SYNTH_PHASE_RESYNC,
 	LSDJ_SYNTH_PHASE_RESYNC2
 } lsdj_synth_phase_compression;
+
+//! Has the wave of this synth been overwritten?
+/*! @param song The song containing the synth and wave
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@return True when the wave has been overwritten */
+bool lsdj_synth_is_wave_overwritten(const lsdj_song_t* song, uint8_t synth);
 
 //! Change the waveform type of a synth
 /*! @param song The song containing the synth
