@@ -9,6 +9,7 @@
 #include <panning.h>
 #include <phrase.h>
 #include <sav.h>
+#include <synth.h>
 #include <table.h>
 #include <wave.h>
 
@@ -134,6 +135,42 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( strncmp(lsdj_instrument_get_name(song, 9), "ARP2", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
 		}
 
+		SECTION( "Synths" )
+		{
+			REQUIRE( lsdj_synth_get_waveform(song, 0x0) == LSDJ_SYNTH_WAVEFORM_TRIANGLE );
+			REQUIRE( lsdj_synth_get_waveform(song, 0x1) == LSDJ_SYNTH_WAVEFORM_SAW );
+			REQUIRE( lsdj_synth_get_distortion(song, 0x0) == LSDJ_SYNTH_DISTORTION_CLIP );
+			REQUIRE( lsdj_synth_get_phase_compression(song, 0x0) == LSDJ_SYNTH_PHASE_NORMAL );
+
+			REQUIRE( lsdj_synth_get_volume_start(song, 0x0) == 0x30 );
+			REQUIRE( lsdj_synth_get_volume_end(song, 0x0) == 0x10 );
+			REQUIRE( lsdj_synth_get_resonance_start(song, 0x0) == 0x0 );
+			REQUIRE( lsdj_synth_get_resonance_end(song, 0x0) == 0x0 );
+			REQUIRE( lsdj_synth_get_cutoff_start(song, 0x0) == 0xFF );
+			REQUIRE( lsdj_synth_get_cutoff_end(song, 0x0) == 0xFF );
+			REQUIRE( lsdj_synth_get_vshift_start(song, 0x0) == 0x0 );
+			REQUIRE( lsdj_synth_get_vshift_end(song, 0x0) == 0x0 );
+			REQUIRE( lsdj_synth_get_limit_start(song, 0x0) == 0xF );
+			REQUIRE( lsdj_synth_get_limit_end(song, 0x0) == 0xF );
+			REQUIRE( lsdj_synth_get_phase_start(song, 0x0) == 0x00 );
+			REQUIRE( lsdj_synth_get_phase_end(song, 0x0) == 0x00 );
+		}
+
+		SECTION( "Waves" )
+		{
+			std::array<std::uint8_t, LSDJ_WAVE_BYTE_COUNT> wave00 = {
+				0x89, 0xBD, 0xFF, 0xDF, 0xFF, 0xFF, 0xFD, 0xB9, 0x86, 0x42, 0x00, 0x00, 0x00, 0x00, 0x02, 0x46
+			};
+
+			REQUIRE( memcmp(lsdj_wave_get_bytes(song, 0x00), wave00.data(), wave00.size()) == 0 );
+
+			std::array<std::uint8_t, LSDJ_WAVE_BYTE_COUNT> wave31 = {
+				0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31
+			};
+
+			REQUIRE( memcmp(lsdj_wave_get_bytes(song, 0x31), wave31.data(), wave31.size()) == 0 );
+		}
+
 		SECTION( "Tables" )
 		{
 			for (uint8_t i = 0; i < 4; i += 1)
@@ -159,21 +196,6 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_table_get_command2(song, 1, 1) == LSDJ_COMMAND_O );
 			REQUIRE( lsdj_table_get_command2_value(song, 1, 1) == LSDJ_PAN_LEFT_RIGHT );
 			REQUIRE( lsdj_table_get_command2(song, 1, 2) == LSDJ_COMMAND_NONE );
-		}
-
-		SECTION( "Waves" )
-		{
-			std::array<std::uint8_t, LSDJ_WAVE_BYTE_COUNT> wave00 = {
-				0x89, 0xBD, 0xFF, 0xDF, 0xFF, 0xFF, 0xFD, 0xB9, 0x86, 0x42, 0x00, 0x00, 0x00, 0x00, 0x02, 0x46
-			};
-
-			REQUIRE( memcmp(lsdj_wave_get_bytes(song, 0x00), wave00.data(), wave00.size()) == 0 );
-
-			std::array<std::uint8_t, LSDJ_WAVE_BYTE_COUNT> wave31 = {
-				0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31
-			};
-
-			REQUIRE( memcmp(lsdj_wave_get_bytes(song, 0x31), wave31.data(), wave31.size()) == 0 );
 		}
 
 		SECTION(" Grooves" )

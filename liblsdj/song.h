@@ -126,6 +126,8 @@ void lsdj_song_set_sync_mode(lsdj_song_t* song, lsdj_sync_mode mode);
 /*! In some synchronisation modes the prelisten flag doesn't do anything */
 lsdj_sync_mode lsdj_song_get_sync_mode(const lsdj_song_t* song);
 
+//! @todo Drum max?
+
 
 // --- Editor Settings --- //
 

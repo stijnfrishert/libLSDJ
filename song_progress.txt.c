@@ -26,7 +26,7 @@
 //    2 3E80-3E81: mem initialized flag (set to “rb” on init)
   32 3E82-3EA1: phrase allocation table (bit per phrase, 1 if alloced, 0 else)
   16 3EA2-3EB1: chain allocation table (bit per chain, 1 if alloced, 0 else)
-//  256 3EB2-3FB1: softsynth params (16 parameter blocks of 16 bytes each)
+ 256 3EB2-3FB1: softsynth params (16 parameter blocks of 16 bytes each)
    1 3FB2-3FB2: clock, hours
    1 3FB3-3FB3: clock, minutes
    1 3FB4-3FB4: tempo

@@ -17,6 +17,7 @@ set(HEADERS
 	project.h
 	sav.h
 	song.h
+	synth.h
 	table.h
 	version.h
 	wave.h
@@ -33,6 +34,7 @@ set(SOURCES
 	project.c
 	sav.c
 	song.c
+	synth.c
 	table.c
 	vio.c
 	wave.c
