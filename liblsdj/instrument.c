@@ -39,15 +39,13 @@
 #include <string.h>
 
 #define NAMES_OFFSET (0x1E7A)
-#define NAMES_LENGTH (320)
-
 #define ALLOCATION_TABLE_OFFSET (0x2040)
-#define ALLOCATION_TABLE_LENGTH (64)
+#define INSTRUMENTS_OFFSET (0x3080)
 
 bool lsdj_instrument_is_allocated(const lsdj_song_t* song, uint8_t instrument)
 {
     const size_t index = ALLOCATION_TABLE_OFFSET + instrument;
-    assert(index <= ALLOCATION_TABLE_OFFSET + ALLOCATION_TABLE_LENGTH);
+    assert(index <= ALLOCATION_TABLE_OFFSET + 64);
 
     return song->bytes[index];
 }
@@ -55,7 +53,7 @@ bool lsdj_instrument_is_allocated(const lsdj_song_t* song, uint8_t instrument)
 void lsdj_instrument_set_name(lsdj_song_t* song, uint8_t instrument, const char* name)
 {
     const size_t index = NAMES_OFFSET + instrument * LSDJ_INSTRUMENT_NAME_LENGTH;
-    assert(index < NAMES_OFFSET + NAMES_LENGTH);
+    assert(index < NAMES_OFFSET + 320);
 
     strncpy((char*)(&song->bytes[index]), name, LSDJ_INSTRUMENT_NAME_LENGTH);
 }
@@ -63,7 +61,94 @@ void lsdj_instrument_set_name(lsdj_song_t* song, uint8_t instrument, const char*
 const char* lsdj_instrument_get_name(const lsdj_song_t* song, uint8_t instrument)
 {
     const size_t index = NAMES_OFFSET + instrument * LSDJ_INSTRUMENT_NAME_LENGTH;
-    assert(index < NAMES_OFFSET + NAMES_LENGTH);
+    assert(index < NAMES_OFFSET + 320);
 
     return (const char*)(&song->bytes[index]);
+}
+
+void set_instrument_byte(lsdj_song_t* song, uint8_t instrument, uint8_t byte, uint8_t value)
+{
+	const size_t index = instrument * LSDJ_INSTRUMENT_BYTE_COUNT + byte;
+	assert(index < 1024);
+
+	song->bytes[INSTRUMENTS_OFFSET + index] = value;
+}
+
+const uint8_t get_instrument_byte(const lsdj_song_t* song, uint8_t instrument, uint8_t byte)
+{
+	const size_t index = instrument * LSDJ_INSTRUMENT_BYTE_COUNT + byte;
+	assert(index < 1024);
+
+	return song->bytes[INSTRUMENTS_OFFSET + index];
+}
+
+void lsdj_instrument_set_type(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_type type)
+{
+	set_instrument_byte(song, instrument, 0, (uint8_t)type);
+}
+
+lsdj_instrument_type lsdj_instrument_get_type(const lsdj_song_t* song, uint8_t instrument)
+{
+	return (uint8_t)get_instrument_byte(song, instrument, 0);
+}
+
+void lsdj_instrument_set_envelope(lsdj_song_t* song, uint8_t instrument, uint8_t envelope)
+{
+	set_instrument_byte(song, instrument, 1, envelope);
+}
+
+uint8_t lsdj_instrument_get_envelope(const lsdj_song_t* song, uint8_t instrument)
+{
+	return get_instrument_byte(song, instrument, 1);
+}
+
+void lsdj_instrument_set_panning(lsdj_song_t* song, uint8_t instrument, lsdj_panning panning)
+{
+	const unsigned int byte = (get_instrument_byte(song, instrument, 7) & 0xFC) | (panning & 0x3);
+	set_instrument_byte(song, instrument, 7, (uint8_t)byte);
+}
+
+lsdj_panning lsdj_instrument_get_panning(const lsdj_song_t* song, uint8_t instrument)
+{
+	return (lsdj_panning)get_instrument_byte(song, instrument, 7) & 0x3;
+}
+
+void lsdj_instrument_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width pulseWidth)
+{
+	const unsigned int byte = (get_instrument_byte(song, instrument, 7) & 0x3F) | ((pulseWidth & 0x3) << 6);
+	set_instrument_byte(song, instrument, 7, (uint8_t)byte);
+}
+
+lsdj_instrument_pulse_width lsdj_instrument_get_pulse_width(const lsdj_song_t* song, uint8_t instrument)
+{
+	return (lsdj_instrument_pulse_width)get_instrument_byte(song, instrument, 7) >> 6 & 0x3;
+}
+
+void lsdj_instrument_set_pulse_length(lsdj_song_t* song, uint8_t instrument, uint8_t length)
+{
+	uint8_t byte = get_instrument_byte(song, instrument, 3);
+	if (length == LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE)
+		byte = (byte & 0xC0) | LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE;
+	else
+		byte = (byte & 0xC0) | ~(length & 0x3F);
+	set_instrument_byte(song, instrument, 3, byte);
+}
+
+uint8_t lsdj_instrument_get_pulse_length(const lsdj_song_t* song, uint8_t instrument)
+{
+	const uint8_t byte = get_instrument_byte(song, instrument, 3);
+	if (byte & LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE)
+		return ~(byte & 0x3F);
+	else
+		return LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE;
+}
+
+void lsdj_instrument_set_pulse_sweep(lsdj_song_t* song, uint8_t instrument, uint8_t sweep)
+{
+	set_instrument_byte(song, instrument, 4, sweep);
+}
+
+uint8_t lsdj_instrument_get_pulse_sweep(const lsdj_song_t* song, uint8_t instrument)
+{
+	return get_instrument_byte(song, instrument, 4);
 }

@@ -17,7 +17,7 @@
   64 2040-207F: instr alloc table (byte per instrument, 1 if alloced, 0 else)
 2048 2080-287F: chains-> phraseno
 2048 2880-307F: chains-> transposes
-// 1024 3080-347F: instr->param
+1024 3080-347F: instr->param
  512 3480-367F: tables-> transpose
  512 3680-387F: tables-> fx
  512 3880-3A7F: tables-> fx val

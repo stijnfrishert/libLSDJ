@@ -22,10 +22,13 @@ TEST_CASE( "Song", "[song]" )
 
 	REQUIRE(LSDJ_SONG_BYTE_COUNT == 0x8000);
 
+
 	SECTION( "Happy Birthday" )
 	{
 		auto song = lsdj_project_get_song(lsdj_sav_get_project(sav, 0));
 		assert(song != nullptr);
+        
+        const auto env = lsdj_instrument_get_envelope(song, 3);
         
 		SECTION( "Song settings" )
 		{
@@ -133,6 +136,17 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( strncmp(lsdj_instrument_get_name(song, 7), "ARP", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
 			REQUIRE( strncmp(lsdj_instrument_get_name(song, 8), "SIDE", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
 			REQUIRE( strncmp(lsdj_instrument_get_name(song, 9), "ARP2", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+
+			REQUIRE( lsdj_instrument_get_type(song, 0) == LSDJ_INSTRUMENT_TYPE_PULSE );
+			REQUIRE( lsdj_instrument_get_type(song, 3) == LSDJ_INSTRUMENT_TYPE_WAVE );
+			REQUIRE( lsdj_instrument_get_envelope(song, 0) == 0xA6 );
+			REQUIRE( lsdj_instrument_get_envelope(song, 2) == 0x93 );
+			REQUIRE( lsdj_instrument_get_envelope(song, 3) == LSDJ_INSTRUMENT_WAVE_VOLUME_3 );
+			REQUIRE( lsdj_instrument_get_pulse_width(song, 0) == LSDJ_INSTRUMENT_PULSE_WIDTH_25 );
+			REQUIRE( lsdj_instrument_get_pulse_width(song, 1) == LSDJ_INSTRUMENT_PULSE_WIDTH_50 );
+			REQUIRE( lsdj_instrument_get_panning(song, 0) == LSDJ_PAN_LEFT_RIGHT );
+			REQUIRE( lsdj_instrument_get_pulse_length(song, 0) == LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE );
+			REQUIRE( lsdj_instrument_get_pulse_sweep(song, 0) == 0xFF );
 		}
 
 		SECTION( "Synths" )
