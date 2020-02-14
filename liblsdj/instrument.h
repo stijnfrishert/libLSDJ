@@ -137,6 +137,44 @@ void lsdj_instrument_set_panning(lsdj_song_t* song, uint8_t instrument, lsdj_pan
 	@return The panning of the instrument */
 lsdj_panning lsdj_instrument_get_panning(const lsdj_song_t* song, uint8_t instrument);
 
+//! Enable or disable the table of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param enabled Whether the table is enabled */
+void lsdj_instrument_enable_table(lsdj_song_t* song, uint8_t instrument, bool enabled);
+
+//! Ask whether the table field of an instrument is enabled
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return Whether the table is enabled */
+bool lsdj_instrument_is_table_enabled(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the table of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param table The table value to set or LSDJ_INSTRUMENT_NO_TABLE
+	@note You should also call lsdj_instrument_enable_table() to enable/disable it */
+void lsdj_instrument_set_table(lsdj_song_t* song, uint8_t instrument, uint8_t table);
+
+//! Retrieve the table of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@note You should also call lsdj_instrument_enable_table() to find out if the table is enabled in the first place
+	@return The table of the instrument or LSDJ_INSTRUMENT_NO_TABLE */
+uint8_t lsdj_instrument_get_table(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the table automation of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param automate Whether the table automates */
+void lsdj_instrument_automate_table(lsdj_song_t* song, uint8_t instrument, bool automate);
+
+//! Retrieve the table automation of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return Whether the table automates */
+uint8_t lsdj_instrument_is_table_automated(const lsdj_song_t* song, uint8_t instrument);
+
 
 // --- Pulse --- //
 
@@ -177,6 +215,45 @@ void lsdj_instrument_set_pulse_sweep(lsdj_song_t* song, uint8_t instrument, uint
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The sweep of the instrument */
 uint8_t lsdj_instrument_get_pulse_sweep(const lsdj_song_t* song, uint8_t instrument);
+
+
+// P/L/V
+
+//! Change the transpose of a pulse instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param transpose Whether the instrument transposes */
+void lsdj_instrument_set_pulse_transpose(lsdj_song_t* song, uint8_t instrument, bool transpose);
+
+//! Retrieve the transpose of a pulse instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return Whether the instrument transposes */
+bool lsdj_instrument_get_pulse_transpose(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the pulse2 tune of a pulse instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param tune The tune value to set */
+void lsdj_instrument_set_pulse2_tune(lsdj_song_t* song, uint8_t instrument, uint8_t tune);
+
+//! Retrieve the pulse2 tune of a pulse instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The pulse2 tune of the instrument */
+uint8_t lsdj_instrument_get_pulse2_tune(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the finetune of a pulse instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param finetune The finetune value to set */
+void lsdj_instrument_set_pulse_finetune(lsdj_song_t* song, uint8_t instrument, bool finetune);
+
+//! Retrieve the finetune of a pulse instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The finetune of the instrument */
+bool lsdj_instrument_get_pulse_finetune(const lsdj_song_t* song, uint8_t instrument);
     
 #ifdef __cplusplus
 }

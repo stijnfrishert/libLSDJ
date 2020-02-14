@@ -147,6 +147,15 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_instrument_get_panning(song, 0) == LSDJ_PAN_LEFT_RIGHT );
 			REQUIRE( lsdj_instrument_get_pulse_length(song, 0) == LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE );
 			REQUIRE( lsdj_instrument_get_pulse_sweep(song, 0) == 0xFF );
+			REQUIRE( lsdj_instrument_get_pulse_transpose(song, 0) == false );
+			REQUIRE( lsdj_instrument_get_pulse2_tune(song, 0) == 0x00 );
+			REQUIRE( lsdj_instrument_get_pulse_finetune(song, 0) == 0x0 );
+
+			REQUIRE( lsdj_instrument_is_table_enabled(song, 0) == false );
+			REQUIRE( lsdj_instrument_is_table_enabled(song, 3) == true );
+			REQUIRE( lsdj_instrument_get_table(song, 3) == 0x00 );
+			REQUIRE( lsdj_instrument_is_table_automated(song, 0) == false );
+			REQUIRE( lsdj_instrument_is_table_automated(song, 3) == false );
 		}
 
 		SECTION( "Synths" )

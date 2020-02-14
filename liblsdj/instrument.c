@@ -113,6 +113,44 @@ lsdj_panning lsdj_instrument_get_panning(const lsdj_song_t* song, uint8_t instru
 	return (lsdj_panning)get_instrument_byte(song, instrument, 7) & 0x3;
 }
 
+void lsdj_instrument_enable_table(lsdj_song_t* song, uint8_t instrument, bool enabled)
+{
+	uint8_t byte = get_instrument_byte(song, instrument, 6) & 0xDF;
+	if (enabled)
+		byte |= 0x20;
+
+	set_instrument_byte(song, instrument, 6, byte);	
+}
+
+bool lsdj_instrument_is_table_enabled(const lsdj_song_t* song, uint8_t instrument)
+{
+	return (get_instrument_byte(song, instrument, 6) & 0x20) != 0;
+}
+
+void lsdj_instrument_set_table(lsdj_song_t* song, uint8_t instrument, uint8_t table)
+{
+	const unsigned int byte = (get_instrument_byte(song, instrument, 6) & 0xE0) | (table & 0x1F);
+}
+
+uint8_t lsdj_instrument_get_table(const lsdj_song_t* song, uint8_t instrument)
+{
+	return get_instrument_byte(song, instrument, 6) & 0x1F;
+}
+
+void lsdj_instrument_automate_table(lsdj_song_t* song, uint8_t instrument, bool automate)
+{
+	uint8_t byte = get_instrument_byte(song, instrument, 5) & 0xF7;
+	if (automate)
+		byte |= 0x8;
+
+	set_instrument_byte(song, instrument, 5, byte);	
+}
+
+uint8_t lsdj_instrument_is_table_automated(const lsdj_song_t* song, uint8_t instrument)
+{
+	return (get_instrument_byte(song, instrument, 6) & 0x8) != 0;
+}
+
 void lsdj_instrument_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width pulseWidth)
 {
 	const unsigned int byte = (get_instrument_byte(song, instrument, 7) & 0x3F) | ((pulseWidth & 0x3) << 6);
@@ -151,4 +189,39 @@ void lsdj_instrument_set_pulse_sweep(lsdj_song_t* song, uint8_t instrument, uint
 uint8_t lsdj_instrument_get_pulse_sweep(const lsdj_song_t* song, uint8_t instrument)
 {
 	return get_instrument_byte(song, instrument, 4);
+}
+
+void lsdj_instrument_set_pulse_transpose(lsdj_song_t* song, uint8_t instrument, bool transpose)
+{
+	uint8_t byte = get_instrument_byte(song, instrument, 5) & 0xDF;
+	if (transpose)
+		byte |= 0x20;
+
+	set_instrument_byte(song, instrument, 5, byte);
+}
+
+bool lsdj_instrument_get_pulse_transpose(const lsdj_song_t* song, uint8_t instrument)
+{
+	return (get_instrument_byte(song, instrument, 5) & 0x20) != 0;
+}
+
+void lsdj_instrument_set_pulse2_tune(lsdj_song_t* song, uint8_t instrument, uint8_t tune)
+{
+	set_instrument_byte(song, instrument, 2, tune);
+}
+
+uint8_t lsdj_instrument_get_pulse2_tune(const lsdj_song_t* song, uint8_t instrument)
+{
+	return get_instrument_byte(song, instrument, 2);
+}
+
+void lsdj_instrument_set_pulse_finetune(lsdj_song_t* song, uint8_t instrument, bool finetune)
+{
+	const int byte = (get_instrument_byte(song, instrument, 7) & 0xC3) | ((finetune & 0xF) << 2);
+	set_instrument_byte(song, instrument, 7, (uint8_t)byte);
+}
+
+bool lsdj_instrument_get_pulse_finetune(const lsdj_song_t* song, uint8_t instrument)
+{
+	return (get_instrument_byte(song, instrument, 7) >> 2) & 0xF;
 }
