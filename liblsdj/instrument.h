@@ -48,11 +48,14 @@ extern "C" {
 //! The amount of instruments in a song
 #define LSDJ_INSTRUMENT_COUNT (0x40)
 
-//! The amount of bytes a instrument takes
+//! The amount of bytes an instrument takes
 #define LSDJ_INSTRUMENT_BYTE_COUNT (16)
 
 //! The amount of bytes an instrument name takes
 #define LSDJ_INSTRUMENT_NAME_LENGTH (5)
+
+//! The value of an infinite pulse length
+#define LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE (0x40)
 
 //! The kind of instrument types that exist
 typedef enum
@@ -79,7 +82,34 @@ typedef enum
 	LSDJ_INSTRUMENT_PULSE_WIDTH_75
 } lsdj_instrument_pulse_width;
 
-#define LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE (0x40)
+typedef enum
+{
+	LSDJ_INSTRUMENT_VIBRATO_TRIANGLE = 0,
+	LSDJ_INSTRUMENT_VIBRATO_SAWTOOTH,
+	LSDJ_INSTRUMENT_VIBRATO_SQUARE
+} lsdj_vibrato_shape;
+
+typedef enum
+{
+	LSDJ_INSTRUMENT_VIBRATO_DOWN = 0,
+	LSDJ_INSTRUMENT_VIBRATO_UP
+} lsdj_vibrato_direction;
+
+typedef enum
+{
+	LSDJ_INSTRUMENT_PLV_FAST,
+	LSDJ_INSTRUMENT_PLV_TICK,
+	LSDJ_INSTRUMENT_PLV_STEP,
+	LSDJ_INSTRUMENT_PLV_DRUM,
+} lsdj_plv_speed;
+
+typedef enum
+{
+	LSDJ_INSTRUMENT_WAVE_PLAY_ONCE = 0,
+	LSDJ_INSTRUMENT_WAVE_PLAY_LOOP,
+	LSDJ_INSTRUMENT_WAVE_PLAY_PING_PONG,
+	LSDJ_INSTRUMENT_WAVE_PLAY_MANUAL,
+} lsdj_wave_play_mode;
 
 //! Returns whether an instrument is in use
 /*! @param song The song that contains the instrument
@@ -137,6 +167,20 @@ void lsdj_instrument_set_panning(lsdj_song_t* song, uint8_t instrument, lsdj_pan
 	@return The panning of the instrument */
 lsdj_panning lsdj_instrument_get_panning(const lsdj_song_t* song, uint8_t instrument);
 
+//! Change the transpose of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param transpose Whether the instrument transposes
+	@note This only makes sense for pulse and wave instruments */
+void lsdj_instrument_set_transpose(lsdj_song_t* song, uint8_t instrument, bool transpose);
+
+//! Retrieve the transpose of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return Whether the instrument transposes
+	@note This only makes sense for pulse and wave instruments*/
+bool lsdj_instrument_get_transpose(const lsdj_song_t* song, uint8_t instrument);
+
 //! Enable or disable the table of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
@@ -174,6 +218,43 @@ void lsdj_instrument_automate_table(lsdj_song_t* song, uint8_t instrument, bool 
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return Whether the table automates */
 uint8_t lsdj_instrument_is_table_automated(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the vibrato direction of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param direction The direction of the vibrato to write
+	@note This only makes sense for pulse and wave instruments */
+void lsdj_instrument_set_vibrato_direction(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_direction direction);
+
+//! Retrieve the vibrato direction of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The direction of the vibrato
+	@note This only makes sense for pulse and wave instruments*/
+lsdj_vibrato_direction lsdj_instrument_get_vibrato_direction(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the vibrato shape of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param shape The shape of the vibrato to write
+	@note This only makes sense for pulse and wave instruments */
+// void lsdj_instrument_set_vibrato_shape(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape shape);
+
+//! Retrieve the vibrato shape of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The shape of the vibrato
+	@note This only makes sense for pulse and wave instruments*/
+lsdj_vibrato_shape lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, uint8_t instrument);
+
+//! Retrieve the P/L/V speed setting of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The speed setting of P/L/V commands
+	@note This only makes sense for pulse and wave instruments*/
+lsdj_plv_speed lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t instrument);
+
+//! @todo Drum mode
 
 
 // --- Pulse --- //
@@ -216,21 +297,6 @@ void lsdj_instrument_set_pulse_sweep(lsdj_song_t* song, uint8_t instrument, uint
 	@return The sweep of the instrument */
 uint8_t lsdj_instrument_get_pulse_sweep(const lsdj_song_t* song, uint8_t instrument);
 
-
-// P/L/V
-
-//! Change the transpose of a pulse instrument
-/*! @param song The song that contains the instrument
-	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@param transpose Whether the instrument transposes */
-void lsdj_instrument_set_pulse_transpose(lsdj_song_t* song, uint8_t instrument, bool transpose);
-
-//! Retrieve the transpose of a pulse instrument
-/*! @param song The song that contains the instrument
-	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@return Whether the instrument transposes */
-bool lsdj_instrument_get_pulse_transpose(const lsdj_song_t* song, uint8_t instrument);
-
 //! Change the pulse2 tune of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
@@ -254,6 +320,71 @@ void lsdj_instrument_set_pulse_finetune(lsdj_song_t* song, uint8_t instrument, b
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The finetune of the instrument */
 bool lsdj_instrument_get_pulse_finetune(const lsdj_song_t* song, uint8_t instrument);
+
+
+// --- Wave --- //
+
+//! Change the synth index that a wave instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param synth The synth the instrument uses (0 - F) */
+void lsdj_instrument_wave_set_synth(lsdj_song_t* song, uint8_t instrument, uint8_t synth);
+
+//! Retrieve the synth index that a wave instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The synth the instrument uses (0 - F) */
+uint8_t lsdj_instrument_wave_get_synth(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the play mode for a wave instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param play_mode The play mode */
+void lsdj_instrument_wave_set_play_mode(lsdj_song_t* song, uint8_t instrument, lsdj_wave_play_mode mode);
+
+//! Retrieve the play_mode index that a wave instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The play mode */
+lsdj_wave_play_mode lsdj_instrument_wave_get_play_mode(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the length value for a wave instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param length The length value (0 - F)
+	@note This is only available with format version >= 6
+	@return false if the format version doesn't support wave length */
+bool lsdj_instrument_wave_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length);
+
+//! Retrieve the length index that a wave instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The length value (0 - F) */
+uint8_t lsdj_instrument_wave_get_length(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the repeat value for a wave instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param repeat The repeat value (0 - F) */
+void lsdj_instrument_wave_set_repeat(lsdj_song_t* song, uint8_t instrument, uint8_t repeat);
+
+//! Retrieve the repeat index that a wave instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The repeat value (0 - F) */
+uint8_t lsdj_instrument_wave_get_repeat(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the speed value for a wave instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param speed The speed value (0 - F) */
+bool lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed);
+
+//! Retrieve the speed index that a wave instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The speed value (0 - F) */
+uint8_t lsdj_instrument_wave_get_speed(const lsdj_song_t* song, uint8_t instrument);
     
 #ifdef __cplusplus
 }

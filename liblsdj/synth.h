@@ -169,8 +169,9 @@ uint8_t lsdj_synth_get_resonance_start(const lsdj_song_t* song, uint8_t synth);
 //! Change the resonance end of a synth
 /*! @param song The song containing the synth
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
-	@param resonance The resonance to set */
-void lsdj_synth_set_resonance_end(lsdj_song_t* song, uint8_t synth, uint8_t resonance);
+	@param resonance The resonance to set
+	@return false if the format version doesn't support this (< 5)*/
+bool lsdj_synth_set_resonance_end(lsdj_song_t* song, uint8_t synth, uint8_t resonance);
 
 //! Retrieve the resonance end of a synth
 /*! @param song The song containing the synth

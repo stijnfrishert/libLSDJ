@@ -18,6 +18,7 @@ using namespace Catch;
 TEST_CASE( "Song", "[song]" )
 {
 	auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", nullptr);
+//    auto sav = lsdj_sav_read_from_file("/Users/stijn/Google Drive/lsdj/lsdj/old/lsdj_571.sav", nullptr);
 	REQUIRE( sav != nullptr );
 
 	REQUIRE(LSDJ_SONG_BYTE_COUNT == 0x8000);
@@ -26,7 +27,17 @@ TEST_CASE( "Song", "[song]" )
 	SECTION( "Happy Birthday" )
 	{
 		auto song = lsdj_project_get_song(lsdj_sav_get_project(sav, 0));
+//        auto song = lsdj_sav_get_working_memory_song(sav);
 		assert(song != nullptr);
+        
+//        auto speed = lsdj_instrument_get_plv_speed(song, 0);
+//        speed = lsdj_instrument_get_plv_speed(song, 1);
+//        speed = lsdj_instrument_get_plv_speed(song, 2);
+//        speed = lsdj_instrument_get_plv_speed(song, 3);
+//        speed = lsdj_instrument_get_plv_speed(song, 4);
+//        auto trans = lsdj_instrument_get_transpose(song, 2);
+//        trans = lsdj_instrument_get_transpose(song, 3);
+//        trans = lsdj_instrument_get_transpose(song, 4);
         
         const auto env = lsdj_instrument_get_envelope(song, 3);
         
@@ -122,40 +133,69 @@ TEST_CASE( "Song", "[song]" )
 
 		SECTION( "Instruments" )
 		{
-			for (uint8_t i = 0; i < 10; i += 1)
-				REQUIRE( lsdj_instrument_is_allocated(song, i) );
-			REQUIRE( lsdj_instrument_is_allocated(song, 10) != true );
+			SECTION ("Check allocations" )
+			{
+				for (uint8_t i = 0; i < 10; i += 1)
+					REQUIRE( lsdj_instrument_is_allocated(song, i) );
+				REQUIRE( lsdj_instrument_is_allocated(song, 10) != true );
+			}
 
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 0), "LEAD1", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 1), "LEAD2", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 2), "SIDE", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 3), "KICK", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 4), "HATC", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 5), "SNARE", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 6), "BASS", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 7), "ARP", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 8), "SIDE", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
-			REQUIRE( strncmp(lsdj_instrument_get_name(song, 9), "ARP2", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+			SECTION( "Names" )
+			{
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 0), "LEAD1", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 1), "LEAD2", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 2), "SIDE", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 3), "KICK", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 4), "HATC", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 5), "SNARE", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 6), "BASS", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 7), "ARP", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 8), "SIDE", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+				REQUIRE( strncmp(lsdj_instrument_get_name(song, 9), "ARP2", LSDJ_INSTRUMENT_NAME_LENGTH) == 0 );
+			}
 
-			REQUIRE( lsdj_instrument_get_type(song, 0) == LSDJ_INSTRUMENT_TYPE_PULSE );
-			REQUIRE( lsdj_instrument_get_type(song, 3) == LSDJ_INSTRUMENT_TYPE_WAVE );
-			REQUIRE( lsdj_instrument_get_envelope(song, 0) == 0xA6 );
-			REQUIRE( lsdj_instrument_get_envelope(song, 2) == 0x93 );
-			REQUIRE( lsdj_instrument_get_envelope(song, 3) == LSDJ_INSTRUMENT_WAVE_VOLUME_3 );
-			REQUIRE( lsdj_instrument_get_pulse_width(song, 0) == LSDJ_INSTRUMENT_PULSE_WIDTH_25 );
-			REQUIRE( lsdj_instrument_get_pulse_width(song, 1) == LSDJ_INSTRUMENT_PULSE_WIDTH_50 );
-			REQUIRE( lsdj_instrument_get_panning(song, 0) == LSDJ_PAN_LEFT_RIGHT );
-			REQUIRE( lsdj_instrument_get_pulse_length(song, 0) == LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE );
-			REQUIRE( lsdj_instrument_get_pulse_sweep(song, 0) == 0xFF );
-			REQUIRE( lsdj_instrument_get_pulse_transpose(song, 0) == false );
-			REQUIRE( lsdj_instrument_get_pulse2_tune(song, 0) == 0x00 );
-			REQUIRE( lsdj_instrument_get_pulse_finetune(song, 0) == 0x0 );
+			SECTION( "Generic" )
+			{
+				REQUIRE( lsdj_instrument_get_type(song, 0) == LSDJ_INSTRUMENT_TYPE_PULSE );
+				REQUIRE( lsdj_instrument_get_type(song, 3) == LSDJ_INSTRUMENT_TYPE_WAVE );
+				REQUIRE( lsdj_instrument_get_envelope(song, 0) == 0xA6 );
+				REQUIRE( lsdj_instrument_get_envelope(song, 2) == 0x93 );
+				REQUIRE( lsdj_instrument_get_envelope(song, 3) == LSDJ_INSTRUMENT_WAVE_VOLUME_3 );
+				REQUIRE( lsdj_instrument_get_transpose(song, 0) == true );
 
-			REQUIRE( lsdj_instrument_is_table_enabled(song, 0) == false );
-			REQUIRE( lsdj_instrument_is_table_enabled(song, 3) == true );
-			REQUIRE( lsdj_instrument_get_table(song, 3) == 0x00 );
-			REQUIRE( lsdj_instrument_is_table_automated(song, 0) == false );
-			REQUIRE( lsdj_instrument_is_table_automated(song, 3) == false );
+				REQUIRE( lsdj_instrument_is_table_enabled(song, 0) == false );
+				REQUIRE( lsdj_instrument_is_table_enabled(song, 3) == true );
+				REQUIRE( lsdj_instrument_get_table(song, 3) == 0x00 );
+				REQUIRE( lsdj_instrument_is_table_automated(song, 0) == false );
+				REQUIRE( lsdj_instrument_is_table_automated(song, 3) == false );
+
+				REQUIRE( lsdj_instrument_get_vibrato_direction(song, 0) == LSDJ_INSTRUMENT_VIBRATO_DOWN );
+				REQUIRE( lsdj_instrument_get_vibrato_shape(song, 0) == LSDJ_INSTRUMENT_VIBRATO_TRIANGLE );
+				REQUIRE( lsdj_instrument_get_plv_speed(song, 0) == LSDJ_INSTRUMENT_PLV_FAST );
+			}
+
+			SECTION( "Pulse" )
+			{
+				REQUIRE( lsdj_instrument_get_pulse_width(song, 0) == LSDJ_INSTRUMENT_PULSE_WIDTH_25 );
+				REQUIRE( lsdj_instrument_get_pulse_width(song, 1) == LSDJ_INSTRUMENT_PULSE_WIDTH_50 );
+				REQUIRE( lsdj_instrument_get_panning(song, 0) == LSDJ_PAN_LEFT_RIGHT );
+				REQUIRE( lsdj_instrument_get_pulse_length(song, 0) == LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE );
+				REQUIRE( lsdj_instrument_get_pulse_sweep(song, 0) == 0xFF );
+				REQUIRE( lsdj_instrument_get_pulse2_tune(song, 0) == 0x00 );
+				REQUIRE( lsdj_instrument_get_pulse_finetune(song, 0) == 0x0 );
+			}
+
+			SECTION( "Wave" )
+			{
+				REQUIRE( lsdj_instrument_wave_get_synth(song, 3) == 0x0 );
+				REQUIRE( lsdj_instrument_wave_get_synth(song, 6) == 0x1 );
+				REQUIRE( lsdj_instrument_wave_get_play_mode(song, 3) == LSDJ_INSTRUMENT_WAVE_PLAY_MANUAL );
+				REQUIRE( lsdj_instrument_wave_get_length(song, 3) == 0xF );
+				REQUIRE( lsdj_instrument_wave_get_repeat(song, 3) == 0x0 );
+
+				REQUIRE( lsdj_instrument_wave_get_speed(song, 3) == 0x04 );
+
+			}
 		}
 
 		SECTION( "Synths" )

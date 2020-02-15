@@ -137,15 +137,24 @@ uint8_t lsdj_synth_get_resonance_start(const lsdj_song_t* song, uint8_t synth)
 	return (get_synth_byte(song, synth, 2) & 0xF0) >> 4;
 }
 
-void lsdj_synth_set_resonance_end(lsdj_song_t* song, uint8_t synth, uint8_t resonance)
+bool lsdj_synth_set_resonance_end(lsdj_song_t* song, uint8_t synth, uint8_t resonance)
 {
-	const int byte = (get_synth_byte(song, synth, 2) & 0xF0) | (resonance & 0x0F);
-	set_synth_byte(song, synth, 2, (uint8_t)byte);
+	if (lsdj_song_get_format_version(song) < 5)
+	{
+		return false;
+	} else {
+		const int byte = (get_synth_byte(song, synth, 2) & 0xF0) | (resonance & 0x0F);
+		set_synth_byte(song, synth, 2, (uint8_t)byte);
+		return true;
+	}
 }
 
 uint8_t lsdj_synth_get_resonance_end(const lsdj_song_t* song, uint8_t synth)
 {
-	return (get_synth_byte(song, synth, 2) & 0x0F);
+	if (lsdj_song_get_format_version(song) < 5)
+		return 0;
+	else
+		return (get_synth_byte(song, synth, 2) & 0x0F);
 }
 
 void lsdj_synth_set_cutoff_start(lsdj_song_t* song, uint8_t synth, uint8_t cutoff)
