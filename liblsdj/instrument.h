@@ -351,10 +351,8 @@ lsdj_wave_play_mode lsdj_instrument_wave_get_play_mode(const lsdj_song_t* song, 
 //! Change the length value for a wave instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@param length The length value (0 - F)
-	@note This is only available with format version >= 6
-	@return false if the format version doesn't support wave length */
-bool lsdj_instrument_wave_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length);
+	@param length The length value (0 - F) */
+void lsdj_instrument_wave_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length);
 
 //! Retrieve the length index that a wave instrument uses
 /*! @param song The song that contains the instrument
@@ -378,7 +376,7 @@ uint8_t lsdj_instrument_wave_get_repeat(const lsdj_song_t* song, uint8_t instrum
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param speed The speed value (0 - F) */
-bool lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed);
+void lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed);
 
 //! Retrieve the speed index that a wave instrument uses
 /*! @param song The song that contains the instrument

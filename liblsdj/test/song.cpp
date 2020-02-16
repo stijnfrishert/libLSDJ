@@ -30,6 +30,9 @@ TEST_CASE( "Song", "[song]" )
 //        auto song = lsdj_sav_get_working_memory_song(sav);
 		assert(song != nullptr);
         
+//        auto speed = lsdj_instrument_wave_get_speed(song, 0);
+//        auto length = lsdj_instrument_wave_get_length(song, 0);
+        
 //        auto speed = lsdj_instrument_get_plv_speed(song, 0);
 //        speed = lsdj_instrument_get_plv_speed(song, 1);
 //        speed = lsdj_instrument_get_plv_speed(song, 2);
