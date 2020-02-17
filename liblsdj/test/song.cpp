@@ -42,8 +42,6 @@ TEST_CASE( "Song", "[song]" )
 //        trans = lsdj_instrument_get_transpose(song, 3);
 //        trans = lsdj_instrument_get_transpose(song, 4);
         
-        const auto env = lsdj_instrument_get_envelope(song, 3);
-        
 		SECTION( "Song settings" )
 		{
 			REQUIRE( lsdj_song_get_format_version(song) == 7 );

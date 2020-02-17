@@ -313,13 +313,13 @@ uint8_t lsdj_instrument_get_pulse2_tune(const lsdj_song_t* song, uint8_t instrum
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param finetune The finetune value to set */
-void lsdj_instrument_set_pulse_finetune(lsdj_song_t* song, uint8_t instrument, bool finetune);
+void lsdj_instrument_set_pulse_finetune(lsdj_song_t* song, uint8_t instrument, uint8_t finetune);
 
 //! Retrieve the finetune of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The finetune of the instrument */
-bool lsdj_instrument_get_pulse_finetune(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_get_pulse_finetune(const lsdj_song_t* song, uint8_t instrument);
 
 
 // --- Wave --- //

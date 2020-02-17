@@ -6,6 +6,7 @@ if (APPLE)
 endif (APPLE)
 
 set(HEADERS
+	bytes.h
 	chain.h
 	channel.h
 	command.h
@@ -25,6 +26,7 @@ set(HEADERS
 	)
 
 set(SOURCES
+	bytes.c
 	compression.c
 	chain.c
 	error.c
