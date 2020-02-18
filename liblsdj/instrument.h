@@ -233,12 +233,17 @@ void lsdj_instrument_set_vibrato_direction(lsdj_song_t* song, uint8_t instrument
 	@note This only makes sense for pulse and wave instruments*/
 lsdj_vibrato_direction lsdj_instrument_get_vibrato_direction(const lsdj_song_t* song, uint8_t instrument);
 
-//! Change the vibrato shape of an instrument
+//! Change the vibrato shape and P/L/V speed of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param shape The shape of the vibrato to write
+
+	In versions before 5.7.0 (fmt4) only certain combinations of shape and speed exist, which there only
+	exists a function taking both. If the combination provided by you didn't exist, this function returns
+	bool.
+	
 	@note This only makes sense for pulse and wave instruments */
-// void lsdj_instrument_set_vibrato_shape(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape shape);
+bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape shape, lsdj_plv_speed speed);
 
 //! Retrieve the vibrato shape of an instrument
 /*! @param song The song that contains the instrument

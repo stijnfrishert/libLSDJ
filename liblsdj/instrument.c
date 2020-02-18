@@ -175,13 +175,44 @@ lsdj_vibrato_direction lsdj_instrument_get_vibrato_direction(const lsdj_song_t* 
 	return (lsdj_vibrato_direction)get_instrument_bits(song, instrument, 5, 0, 1);
 }
 
-// void lsdj_instrument_set_vibrato_shape(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape shape)
-// {
-// 	if (lsdj_song_get_format_version(song) < 4)
-// 	{
+bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape shape, lsdj_plv_speed speed)
+{
+	if (lsdj_song_get_format_version(song) >= 4)
+	{
+		set_instrument_byte(song, instrument, 5, 1, 2, (uint8_t)shape);
 
-// 	}
-// }
+		set_instrument_byte(song, instrument, 5, 7, 1, speed == LSDJ_INSTRUMENT_PLV_STEP ? 1 : 0);
+		set_instrument_byte(song, instrument, 5, 4, 1, speed == LSDJ_INSTRUMENT_PLV_TICK ? 1 : 0);
+
+		return true;
+	} else {
+
+		switch (speed)
+		{
+		case LSDJ_INSTRUMENT_PLV_FAST:
+			if (shape == LSDJ_INSTRUMENT_SHAPE_TRIANGLE)
+			{
+				set_instrument_byte(song, instrument, 5, 1, 2, 0x0);
+				return true;
+			} else {
+				return false;
+			}
+
+		case LSDJ_INSTRUMENT_PLV_TICK:
+			switch (shape)
+			{
+				case LSDJ_INSTRUMENT_SHAPE_SAWTOOTH: set_instrument_byte(song, instrument, 5, 1, 2, 0x1); return true;
+				case LSDJ_INSTRUMENT_SHAPE_TRIANGLE: set_instrument_byte(song, instrument, 5, 1, 2, 0x2); return true;
+				case LSDJ_INSTRUMENT_SHAPE_SQUARE: set_instrument_byte(song, instrument, 5, 1, 2, 0x3); return true;
+				default: return false;
+			}
+
+		default:
+			return false;
+		}
+
+	}
+}
 
 lsdj_vibrato_shape lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, uint8_t instrument)
 {
@@ -225,6 +256,7 @@ lsdj_plv_speed lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t in
 		switch (get_instrument_bits(song, instrument, 5, 1, 2))
         {
             case 0: return LSDJ_INSTRUMENT_PLV_FAST;
+
             case 1:
             case 2:
             case 3: return LSDJ_INSTRUMENT_PLV_TICK;
