@@ -515,28 +515,28 @@ uint8_t lsdj_instrument_kit_get_length2(const lsdj_song_t* song, uint8_t instrum
 
 void lsdj_instrument_kit_set_loop1(lsdj_song_t* song, uint8_t instrument, lsdj_kit_loop_mode loop)
 {
-	set_instrument_bits(song, instrument, 2, 7, 1, loop == LSDJ_KIT_LOOP_ATTACK ? 1 : 0);
-	set_instrument_bits(song, instrument, 5, 6, 1, loop == LSDJ_KIT_LOOP_ON ? 1 : 0);
+	set_instrument_bits(song, instrument, 2, 7, 1, loop == LSDJ_INSTRUMENT_KIT_LOOP_ATTACK ? 1 : 0);
+	set_instrument_bits(song, instrument, 5, 6, 1, loop == LSDJ_INSTRUMENT_KIT_LOOP_ON ? 1 : 0);
 }
 
 lsdj_kit_loop_mode lsdj_instrument_kit_get_loop1(const lsdj_song_t* song, uint8_t instrument)
 {
 	if (get_instrument_bits(song, instrument, 2, 7, 1) == 1)
-		return LSDJ_KIT_LOOP_ATTACK;
+		return LSDJ_INSTRUMENT_KIT_LOOP_ATTACK;
 	else
 		return get_instrument_bits(song, instrument, 5, 6, 1);
 }
 
 void lsdj_instrument_kit_set_loop2(lsdj_song_t* song, uint8_t instrument, lsdj_kit_loop_mode loop)
 {
-	set_instrument_bits(song, instrument, 9, 7, 1, loop == LSDJ_KIT_LOOP_ATTACK ? 1 : 0);
-	set_instrument_bits(song, instrument, 5, 5, 1, loop == LSDJ_KIT_LOOP_ON ? 1 : 0);
+	set_instrument_bits(song, instrument, 9, 7, 1, loop == LSDJ_INSTRUMENT_KIT_LOOP_ATTACK ? 1 : 0);
+	set_instrument_bits(song, instrument, 5, 5, 1, loop == LSDJ_INSTRUMENT_KIT_LOOP_ON ? 1 : 0);
 }
 
 lsdj_kit_loop_mode lsdj_instrument_kit_get_loop2(const lsdj_song_t* song, uint8_t instrument)
 {
 	if (get_instrument_bits(song, instrument, 9, 7, 1) == 1)
-		return LSDJ_KIT_LOOP_ATTACK;
+		return LSDJ_INSTRUMENT_KIT_LOOP_ATTACK;
 	else
 		return get_instrument_bits(song, instrument, 5, 5, 1);
 }
