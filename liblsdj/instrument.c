@@ -190,7 +190,7 @@ bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t 
 		switch (speed)
 		{
 		case LSDJ_INSTRUMENT_PLV_FAST:
-			if (shape == LSDJ_INSTRUMENT_SHAPE_TRIANGLE)
+			if (shape == LSDJ_INSTRUMENT_VIBRATO_TRIANGLE)
 			{
 				set_instrument_byte(song, instrument, 5, 1, 2, 0x0);
 				return true;
@@ -201,9 +201,9 @@ bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t 
 		case LSDJ_INSTRUMENT_PLV_TICK:
 			switch (shape)
 			{
-				case LSDJ_INSTRUMENT_SHAPE_SAWTOOTH: set_instrument_byte(song, instrument, 5, 1, 2, 0x1); return true;
-				case LSDJ_INSTRUMENT_SHAPE_TRIANGLE: set_instrument_byte(song, instrument, 5, 1, 2, 0x2); return true;
-				case LSDJ_INSTRUMENT_SHAPE_SQUARE: set_instrument_byte(song, instrument, 5, 1, 2, 0x3); return true;
+				case LSDJ_INSTRUMENT_VIBRATO_SAWTOOTH: set_instrument_byte(song, instrument, 5, 1, 2, 0x1); return true;
+				case LSDJ_INSTRUMENT_VIBRATO_TRIANGLE: set_instrument_byte(song, instrument, 5, 1, 2, 0x2); return true;
+				case LSDJ_INSTRUMENT_VIBRATO_SQUARE: set_instrument_byte(song, instrument, 5, 1, 2, 0x3); return true;
 				default: return false;
 			}
 
@@ -379,7 +379,7 @@ uint8_t lsdj_instrument_wave_get_repeat(const lsdj_song_t* song, uint8_t instrum
 	return get_instrument_bits(song, instrument, 2, 0, 4);
 }
 
-void lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed)
+bool lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed)
 {
     const uint8_t version = lsdj_song_get_format_version(song);
     
@@ -390,8 +390,14 @@ void lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8
         set_instrument_byte(song, instrument, 11, 0, 8, speed - 3);
     else if (version == 6)
         set_instrument_byte(song, instrument, 11, 0, 8, speed);
-    else
+    else {
+    	if (speed > 0x0F)
+    		return false;
+
         set_instrument_byte(song, instrument, 14, 0, 4, speed);
+    }
+
+    return true;
 }
 
 uint8_t lsdj_instrument_wave_get_speed(const lsdj_song_t* song, uint8_t instrument)

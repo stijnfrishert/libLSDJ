@@ -241,7 +241,7 @@ lsdj_vibrato_direction lsdj_instrument_get_vibrato_direction(const lsdj_song_t* 
 	In versions before 5.7.0 (fmt4) only certain combinations of shape and speed exist, which there only
 	exists a function taking both. If the combination provided by you didn't exist, this function returns
 	bool.
-	
+
 	@note This only makes sense for pulse and wave instruments */
 bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape shape, lsdj_plv_speed speed);
 
@@ -380,8 +380,10 @@ uint8_t lsdj_instrument_wave_get_repeat(const lsdj_song_t* song, uint8_t instrum
 //! Change the speed value for a wave instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@param speed The speed value (0 - F) */
-void lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed);
+	@param speed The speed value (1 - FF for fmt 6+, 1-F below fmt6)
+	Note: < fmt6 speed could only go up to F, in 6 and higher the max is FF
+	@return false If the format version does not support that speed value*/
+bool lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed);
 
 //! Retrieve the speed index that a wave instrument uses
 /*! @param song The song that contains the instrument

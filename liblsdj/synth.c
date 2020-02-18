@@ -139,13 +139,13 @@ uint8_t lsdj_synth_get_resonance_start(const lsdj_song_t* song, uint8_t synth)
 
 bool lsdj_synth_set_resonance_end(lsdj_song_t* song, uint8_t synth, uint8_t resonance)
 {
-	if (lsdj_song_get_format_version(song) < 5)
+	if (lsdj_song_get_format_version(song) >= 5)
 	{
-		return false;
-	} else {
 		const int byte = (get_synth_byte(song, synth, 2) & 0xF0) | (resonance & 0x0F);
 		set_synth_byte(song, synth, 2, (uint8_t)byte);
 		return true;
+	} else {
+		return false;
 	}
 }
 
