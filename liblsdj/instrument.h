@@ -57,6 +57,9 @@ extern "C" {
 //! The value of an infinite pulse length
 #define LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE (0x40)
 
+//! The value of a kit length set to AUTO
+#define LSDJ_INSTRUMENT_KIT_LENGTH_AUTO (0x0)
+
 //! The kind of instrument types that exist
 typedef enum
 {
@@ -110,6 +113,21 @@ typedef enum
 	LSDJ_INSTRUMENT_WAVE_PLAY_PING_PONG,
 	LSDJ_INSTRUMENT_WAVE_PLAY_MANUAL,
 } lsdj_wave_play_mode;
+
+typedef enum
+{
+	LSDJ_KIT_LOOP_OFF = 0,
+	LSDJ_KIT_LOOP_ON,
+	LSDJ_KIT_LOOP_ATTACK
+} lsdj_kit_loop_mode;
+
+typedef enum
+{
+	LSDJ_KIT_DISTORTION_CLIP = 0,
+	LSDJ_KIT_DISTORTION_SHAPE,
+	LSDJ_KIT_DISTORTION_SHAPE2,
+	LSDJ_KIT_DISTORTION_WRAP,
+} lsdj_kit_distortion_mode;
 
 //! Returns whether an instrument is in use
 /*! @param song The song that contains the instrument
@@ -347,7 +365,7 @@ uint8_t lsdj_instrument_wave_get_synth(const lsdj_song_t* song, uint8_t instrume
 	@param play_mode The play mode */
 void lsdj_instrument_wave_set_play_mode(lsdj_song_t* song, uint8_t instrument, lsdj_wave_play_mode mode);
 
-//! Retrieve the play_mode index that a wave instrument uses
+//! Retrieve the play mode that a wave instrument uses
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The play mode */
@@ -359,7 +377,7 @@ lsdj_wave_play_mode lsdj_instrument_wave_get_play_mode(const lsdj_song_t* song, 
 	@param length The length value (0 - F) */
 void lsdj_instrument_wave_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length);
 
-//! Retrieve the length index that a wave instrument uses
+//! Retrieve the length value that a wave instrument uses
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The length value (0 - F) */
@@ -371,7 +389,7 @@ uint8_t lsdj_instrument_wave_get_length(const lsdj_song_t* song, uint8_t instrum
 	@param repeat The repeat value (0 - F) */
 void lsdj_instrument_wave_set_repeat(lsdj_song_t* song, uint8_t instrument, uint8_t repeat);
 
-//! Retrieve the repeat index that a wave instrument uses
+//! Retrieve the repeat value that a wave instrument uses
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The repeat value (0 - F) */
@@ -390,6 +408,141 @@ bool lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The speed value (0 - F) */
 uint8_t lsdj_instrument_wave_get_speed(const lsdj_song_t* song, uint8_t instrument);
+
+
+// --- Kit --- //
+
+//! Change the pitch for a kit instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param pitch The pitch */
+void lsdj_instrument_kit_set_pitch(lsdj_song_t* song, uint8_t instrument, uint8_t pitch);
+
+//! Retrieve the pitch that a kit instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The pitch */
+uint8_t lsdj_instrument_kit_get_pitch(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change whether a kit instrument runs at half speed
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param halfSpeed Whether the instrument should be half speed */
+void lsdj_instrument_kit_set_half_speed(lsdj_song_t* song, uint8_t instrument, bool halfSpeed);
+
+//! Ask whether a kit instrument runs at half speed
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return Whether the instrument runs at half speed */
+bool lsdj_instrument_kit_get_half_speed(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the distortion mode for a kit instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param distortion The distortion mode */
+void lsdj_instrument_kit_set_distortion_mode(lsdj_song_t* song, uint8_t instrument, lsdj_kit_distortion_mode distortion);
+
+//! Retrieve the distortion mode that a kit instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The distortion mode */
+lsdj_kit_distortion_mode lsdj_instrument_kit_get_distortion_mode(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the first kit for a kit instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param kit The kit of the first kit */
+void lsdj_instrument_kit_set_kit1(lsdj_song_t* song, uint8_t instrument, uint8_t kit);
+
+//! Retrieve the first kit that a kit instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The kit of the first kit */
+uint8_t lsdj_instrument_kit_get_kit1(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the second kit for a kit instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param kit The kit of the set second kit */
+void lsdj_instrument_kit_set_kit2(lsdj_song_t* song, uint8_t instrument, uint8_t kit);
+
+//! Retrieve the second kit that a kit instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The kit of the second kit */
+uint8_t lsdj_instrument_kit_get_kit2(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the offset of the first kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param offset The offset of the first kit */
+void lsdj_instrument_kit_set_offset1(lsdj_song_t* song, uint8_t instrument, uint8_t offset);
+
+//! Retrieve the offset of the first kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The offset of the first kit */
+uint8_t lsdj_instrument_kit_get_offset1(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the offset of the second kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param offset The offset of the set second kit */
+void lsdj_instrument_kit_set_offset2(lsdj_song_t* song, uint8_t instrument, uint8_t offset);
+
+//! Retrieve the offset of the second kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The offset of the second kit */
+uint8_t lsdj_instrument_kit_get_offset2(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the length of the first kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param length The length of the first kit */
+void lsdj_instrument_kit_set_length1(lsdj_song_t* song, uint8_t instrument, uint8_t length);
+
+//! Retrieve the length of the first kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The length of the first kit */
+uint8_t lsdj_instrument_kit_get_length1(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the length of the second kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param length The length of the set second kit */
+void lsdj_instrument_kit_set_length2(lsdj_song_t* song, uint8_t instrument, uint8_t length);
+
+//! Retrieve the length of the second kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The length of the second kit */
+uint8_t lsdj_instrument_kit_get_length2(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the loop of the first kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param loop The loop of the first kit */
+void lsdj_instrument_kit_set_loop1(lsdj_song_t* song, uint8_t instrument, lsdj_kit_loop_mode loop);
+
+//! Retrieve the loop of the first kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The loop of the first kit */
+lsdj_kit_loop_mode lsdj_instrument_kit_get_loop1(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the loop of the second kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param loop The loop of the set second kit */
+void lsdj_instrument_kit_set_loop2(lsdj_song_t* song, uint8_t instrument, lsdj_kit_loop_mode loop);
+
+//! Retrieve the loop of the second kit
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The loop of the second kit */
+lsdj_kit_loop_mode lsdj_instrument_kit_get_loop2(const lsdj_song_t* song, uint8_t instrument);
     
 #ifdef __cplusplus
 }
