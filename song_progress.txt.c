@@ -5,8 +5,8 @@
  512 1090-128F: grooves
 1024 1290-168F: song-> chainno (listed PU1,PU2,WAV,NOI for $00 .. $ff in order)
  512 1690-188F: tables-> envelope
-// 1344 1890-1DCF: instrument->speech->words ($20*42)
-//  168 1DD0-1E77: instr->speech->wordnames
+1344 1890-1DCF: instrument->speech->words ($20*42)
+ 168 1DD0-1E77: instr->speech->wordnames
 //    2 1E78-1E79: mem initialized flag (set to “rb” on init)
  320 1E7A-1FB9: instr->names
   70 1FBA-1FFF: empty

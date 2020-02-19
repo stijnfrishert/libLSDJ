@@ -9,6 +9,7 @@
 #include <panning.h>
 #include <phrase.h>
 #include <sav.h>
+#include <speech.h>
 #include <synth.h>
 #include <table.h>
 #include <wave.h>
@@ -281,6 +282,16 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_groove_get_step(song0, 0, 0) == 6 );
 			REQUIRE( lsdj_groove_get_step(song0, 0, 1) == 6 );
 			REQUIRE( lsdj_groove_get_step(song0, 0, 2) == LSDJ_GROOVE_NO_VALUE );
+		}
+
+		SECTION( "Speech" )
+		{
+			REQUIRE( strncmp(lsdj_speech_get_word_name(song0, 0), "C 2 ", LSDJ_SPEECH_WORD_NAME_LENGTH) == 0 );
+			REQUIRE( strncmp(lsdj_speech_get_word_name(song0, 3), "D#2 ", LSDJ_SPEECH_WORD_NAME_LENGTH) == 0 );
+			REQUIRE( strncmp(lsdj_speech_get_word_name(song0, 32), "G#4 ", LSDJ_SPEECH_WORD_NAME_LENGTH) == 0 );
+
+			REQUIRE( lsdj_speech_get_word_allophone(song0, 0, 0) == LSDJ_SPEECH_WORD_NO_ALLOPHONE_VALUE );
+			REQUIRE( lsdj_speech_get_word_allophone_duration(song0, 0, 0) == 0x00 );
 		}
 	}
 }

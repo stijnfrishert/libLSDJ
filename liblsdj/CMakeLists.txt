@@ -40,6 +40,7 @@ set(SOURCES
 	project.c
 	sav.c
 	song.c
+	speech.c
 	synth.c
 	table.c
 	vio.c
