@@ -32,6 +32,10 @@ set(SOURCES
 	error.c
 	groove.c
 	instrument.c
+	instrument_kit.c
+	instrument_noise.c
+	instrument_pulse.c
+	instrument_wave.c
 	phrase.c
 	project.c
 	sav.c

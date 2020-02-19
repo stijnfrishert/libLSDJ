@@ -138,6 +138,14 @@ typedef enum
 	LSDJ_INSTRUMENT_NOISE_STABLE,
 } lsdj_noise_stability;
 
+//! Copy some bits over to a specific byte in an instrument
+/*! @note You won't have to use this function if you just use the other instrument functions */
+void set_instrument_bits(lsdj_song_t* song, uint8_t instrument, uint8_t byte, uint8_t position, uint8_t count, uint8_t value);
+
+//! Copy some bits over from a specific byte in an instrument
+/*! @note You won't have to use this function if you just use the other instrument functions */
+uint8_t get_instrument_bits(const lsdj_song_t* song, uint8_t instrument, uint8_t byte, uint8_t position, uint8_t count);
+
 //! Returns whether an instrument is in use
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
