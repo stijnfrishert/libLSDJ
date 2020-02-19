@@ -268,17 +268,17 @@ lsdj_plv_speed lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t in
 
 // --- Pulse --- //
 
-void lsdj_instrument_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width pulseWidth)
+void lsdj_instrument_pulse_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width pulseWidth)
 {
 	set_instrument_bits(song, instrument, 7, 6, 2, (uint8_t)pulseWidth);
 }
 
-lsdj_instrument_pulse_width lsdj_instrument_get_pulse_width(const lsdj_song_t* song, uint8_t instrument)
+lsdj_instrument_pulse_width lsdj_instrument_pulse_get_pulse_width(const lsdj_song_t* song, uint8_t instrument)
 {
 	return (lsdj_instrument_pulse_width)get_instrument_bits(song, instrument, 7, 6, 2);
 }
 
-void lsdj_instrument_set_pulse_length(lsdj_song_t* song, uint8_t instrument, uint8_t length)
+void lsdj_instrument_pulse_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length)
 {
 	const bool unlimited = length == LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE;
 	set_instrument_bits(song, instrument, 3, 6, 1, unlimited ? 0 : 1);
@@ -287,7 +287,7 @@ void lsdj_instrument_set_pulse_length(lsdj_song_t* song, uint8_t instrument, uin
 		set_instrument_bits(song, instrument, 3, 0, 5, length);
 }
 
-uint8_t lsdj_instrument_get_pulse_length(const lsdj_song_t* song, uint8_t instrument)
+uint8_t lsdj_instrument_pulse_get_length(const lsdj_song_t* song, uint8_t instrument)
 {
 	if (get_instrument_bits(song, instrument, 3, 6, 1) == 0)
 		return LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE;
@@ -295,32 +295,32 @@ uint8_t lsdj_instrument_get_pulse_length(const lsdj_song_t* song, uint8_t instru
 		return (~get_instrument_bits(song, instrument, 3, 0, 5)) & 0x3F;
 }
 
-void lsdj_instrument_set_pulse_sweep(lsdj_song_t* song, uint8_t instrument, uint8_t sweep)
+void lsdj_instrument_pulse_set_sweep(lsdj_song_t* song, uint8_t instrument, uint8_t sweep)
 {
 	set_instrument_bits(song, instrument, 4, 0, 8, sweep);
 }
 
-uint8_t lsdj_instrument_get_pulse_sweep(const lsdj_song_t* song, uint8_t instrument)
+uint8_t lsdj_instrument_pulse_get_sweep(const lsdj_song_t* song, uint8_t instrument)
 {
 	return get_instrument_bits(song, instrument, 4, 0, 8);
 }
 
-void lsdj_instrument_set_pulse2_tune(lsdj_song_t* song, uint8_t instrument, uint8_t tune)
+void lsdj_instrument_pulse_set_pulse2_tune(lsdj_song_t* song, uint8_t instrument, uint8_t tune)
 {
 	set_instrument_bits(song, instrument, 2, 0, 8, tune);
 }
 
-uint8_t lsdj_instrument_get_pulse2_tune(const lsdj_song_t* song, uint8_t instrument)
+uint8_t lsdj_instrument_pulse_get_pulse2_tune(const lsdj_song_t* song, uint8_t instrument)
 {
 	return get_instrument_bits(song, instrument, 2, 0, 8);
 }
 
-void lsdj_instrument_set_pulse_finetune(lsdj_song_t* song, uint8_t instrument, uint8_t finetune)
+void lsdj_instrument_pulse_set_finetune(lsdj_song_t* song, uint8_t instrument, uint8_t finetune)
 {
 	set_instrument_bits(song, instrument, 7, 2, 4, finetune);
 }
 
-uint8_t lsdj_instrument_get_pulse_finetune(const lsdj_song_t* song, uint8_t instrument)
+uint8_t lsdj_instrument_pulse_get_finetune(const lsdj_song_t* song, uint8_t instrument)
 {
 	return get_instrument_bits(song, instrument, 7, 2, 4);
 }
@@ -539,4 +539,17 @@ lsdj_kit_loop_mode lsdj_instrument_kit_get_loop2(const lsdj_song_t* song, uint8_
 		return LSDJ_INSTRUMENT_KIT_LOOP_ATTACK;
 	else
 		return get_instrument_bits(song, instrument, 5, 5, 1);
+}
+
+
+// --- Noise --- //
+
+void lsdj_instrument_noise_set_stability(lsdj_song_t* song, uint8_t instrument, lsdj_noise_stability stability)
+{
+	set_instrument_bits(song, instrument, 2, 0, 1, (uint8_t)stability);
+}
+
+lsdj_noise_stability lsdj_instrument_noise_get_stability(const lsdj_song_t* song, uint8_t instrument)
+{
+	return (lsdj_noise_stability)get_instrument_bits(song, instrument, 2, 0, 1);
 }

@@ -129,6 +129,12 @@ typedef enum
 	LSDJ_INSTRUMENT_KIT_DISTORTION_WRAP,
 } lsdj_kit_distortion_mode;
 
+typedef enum
+{
+	LSDJ_INSTRUMENT_NOISE_FREE = 0,
+	LSDJ_INSTRUMENT_NOISE_STABLE,
+} lsdj_noise_stability;
+
 //! Returns whether an instrument is in use
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
@@ -241,14 +247,14 @@ uint8_t lsdj_instrument_is_table_automated(const lsdj_song_t* song, uint8_t inst
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param direction The direction of the vibrato to write
-	@note This only makes sense for pulse and wave instruments */
+	@note This only makes sense for pulse, wave and noise instruments */
 void lsdj_instrument_set_vibrato_direction(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_direction direction);
 
 //! Retrieve the vibrato direction of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The direction of the vibrato
-	@note This only makes sense for pulse and wave instruments*/
+	@note This only makes sense for pulse, wave and noise instruments*/
 lsdj_vibrato_direction lsdj_instrument_get_vibrato_direction(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the vibrato shape and P/L/V speed of an instrument
@@ -260,21 +266,21 @@ lsdj_vibrato_direction lsdj_instrument_get_vibrato_direction(const lsdj_song_t* 
 	exists a function taking both. If the combination provided by you didn't exist, this function returns
 	bool.
 
-	@note This only makes sense for pulse and wave instruments */
+	@note This only makes sense for pulse, wave and noise instruments */
 bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape shape, lsdj_plv_speed speed);
 
 //! Retrieve the vibrato shape of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The shape of the vibrato
-	@note This only makes sense for pulse and wave instruments*/
+	@note This only makes sense for pulse, wave and noise instruments*/
 lsdj_vibrato_shape lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, uint8_t instrument);
 
 //! Retrieve the P/L/V speed setting of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The speed setting of P/L/V commands
-	@note This only makes sense for pulse and wave instruments*/
+	@note This only makes sense for pulse, wave and noise instruments*/
 lsdj_plv_speed lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t instrument);
 
 //! @todo Drum mode
@@ -287,62 +293,62 @@ lsdj_plv_speed lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t in
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param pulse width The pulse width to set
 	@note Calling this only makes sense if the instrument is a pulse instrument */
-void lsdj_instrument_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width pulseWidth);
+void lsdj_instrument_pulse_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width pulseWidth);
 
 //! Retrieve the pulse width of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The pulse width of the instrument
 	@note Calling this only makes sense if the instrument is a pulse instrument */
-lsdj_instrument_pulse_width lsdj_instrument_get_pulse_width(const lsdj_song_t* song, uint8_t instrument);
+lsdj_instrument_pulse_width lsdj_instrument_pulse_get_pulse_width(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the length of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param length The length value to set */
-void lsdj_instrument_set_pulse_length(lsdj_song_t* song, uint8_t instrument, uint8_t length);
+void lsdj_instrument_pulse_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length);
 
 //! Retrieve the length of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The length of the instrument */
-uint8_t lsdj_instrument_get_pulse_length(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_pulse_get_length(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the sweep of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param sweep The sweep value to set */
-void lsdj_instrument_set_pulse_sweep(lsdj_song_t* song, uint8_t instrument, uint8_t sweep);
+void lsdj_instrument_pulse_set_sweep(lsdj_song_t* song, uint8_t instrument, uint8_t sweep);
 
 //! Retrieve the sweep of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The sweep of the instrument */
-uint8_t lsdj_instrument_get_pulse_sweep(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_pulse_get_sweep(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the pulse2 tune of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param tune The tune value to set */
-void lsdj_instrument_set_pulse2_tune(lsdj_song_t* song, uint8_t instrument, uint8_t tune);
+void lsdj_instrument_pulse_set_pulse2_tune(lsdj_song_t* song, uint8_t instrument, uint8_t tune);
 
 //! Retrieve the pulse2 tune of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The pulse2 tune of the instrument */
-uint8_t lsdj_instrument_get_pulse2_tune(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_pulse_get_pulse2_tune(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the finetune of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param finetune The finetune value to set */
-void lsdj_instrument_set_pulse_finetune(lsdj_song_t* song, uint8_t instrument, uint8_t finetune);
+void lsdj_instrument_pulse_set_finetune(lsdj_song_t* song, uint8_t instrument, uint8_t finetune);
 
 //! Retrieve the finetune of a pulse instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The finetune of the instrument */
-uint8_t lsdj_instrument_get_pulse_finetune(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_pulse_get_finetune(const lsdj_song_t* song, uint8_t instrument);
 
 
 // --- Wave --- //
@@ -543,6 +549,45 @@ void lsdj_instrument_kit_set_loop2(lsdj_song_t* song, uint8_t instrument, lsdj_k
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The loop of the second kit */
 lsdj_kit_loop_mode lsdj_instrument_kit_get_loop2(const lsdj_song_t* song, uint8_t instrument);
+
+
+// --- Noise --- //
+
+//! Change the length of a noise instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param length The length value to set */
+void lsdj_instrument_noise_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length);
+
+//! Retrieve the length of a noise instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The length of the instrument */
+uint8_t lsdj_instrument_noise_get_length(const lsdj_song_t* song, uint8_t instrument);
+
+// //! Change the pitch for a noise instrument
+// /*! @param song The song that contains the instrument
+// 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+// 	@param pitch The pitch */
+// void lsdj_instrument_noise_set_pitch(lsdj_song_t* song, uint8_t instrument, uint8_t pitch);
+
+// //! Retrieve the pitch that a noise instrument uses
+// /*! @param song The song that contains the instrument
+// 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+// 	@return The pitch */
+// uint8_t lsdj_instrument_noise_get_pitch(const lsdj_song_t* song, uint8_t instrument);
+
+//! Change the stability for a noise instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param stability The stability */
+void lsdj_instrument_noise_set_stability(lsdj_song_t* song, uint8_t instrument, lsdj_noise_stability stability);
+
+//! Retrieve the stability that a noise instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The stability */
+lsdj_noise_stability lsdj_instrument_noise_get_stability(const lsdj_song_t* song, uint8_t instrument);
     
 #ifdef __cplusplus
 }

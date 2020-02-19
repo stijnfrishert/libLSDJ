@@ -167,13 +167,13 @@ TEST_CASE( "Song", "[song]" )
 
 			SECTION( "Pulse" )
 			{
-				REQUIRE( lsdj_instrument_get_pulse_width(song0, 0) == LSDJ_INSTRUMENT_PULSE_WIDTH_25 );
-				REQUIRE( lsdj_instrument_get_pulse_width(song0, 1) == LSDJ_INSTRUMENT_PULSE_WIDTH_50 );
+				REQUIRE( lsdj_instrument_pulse_get_pulse_width(song0, 0) == LSDJ_INSTRUMENT_PULSE_WIDTH_25 );
+				REQUIRE( lsdj_instrument_pulse_get_pulse_width(song0, 1) == LSDJ_INSTRUMENT_PULSE_WIDTH_50 );
 				REQUIRE( lsdj_instrument_get_panning(song0, 0) == LSDJ_PAN_LEFT_RIGHT );
-				REQUIRE( lsdj_instrument_get_pulse_length(song0, 0) == LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE );
-				REQUIRE( lsdj_instrument_get_pulse_sweep(song0, 0) == 0xFF );
-				REQUIRE( lsdj_instrument_get_pulse2_tune(song0, 0) == 0x00 );
-				REQUIRE( lsdj_instrument_get_pulse_finetune(song0, 0) == 0x0 );
+				REQUIRE( lsdj_instrument_pulse_get_length(song0, 0) == LSDJ_INSTRUMENT_PULSE_LENGTH_INFINITE );
+				REQUIRE( lsdj_instrument_pulse_get_sweep(song0, 0) == 0xFF );
+				REQUIRE( lsdj_instrument_pulse_get_pulse2_tune(song0, 0) == 0x00 );
+				REQUIRE( lsdj_instrument_pulse_get_finetune(song0, 0) == 0x0 );
 			}
 
 			SECTION( "Wave" )
