@@ -201,6 +201,13 @@ TEST_CASE( "Song", "[song]" )
                 REQUIRE( lsdj_instrument_kit_get_loop1(song1, 0) == LSDJ_INSTRUMENT_KIT_LOOP_OFF );
                 REQUIRE( lsdj_instrument_kit_get_loop2(song1, 0) == LSDJ_INSTRUMENT_KIT_LOOP_OFF );
             }
+
+            SECTION( "Noise" )
+			{
+				REQUIRE( lsdj_instrument_noise_get_length(song0, 4) == LSDJ_INSTRUMENT_NOISE_LENGTH_INFINITE );
+				REQUIRE( lsdj_instrument_noise_get_shape(song0, 4) == 0xFF );
+				REQUIRE( lsdj_instrument_noise_get_stability(song0, 4) == LSDJ_INSTRUMENT_NOISE_FREE );
+			}
 		}
 
 		SECTION( "Synths" )

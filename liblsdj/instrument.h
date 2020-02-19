@@ -60,6 +60,9 @@ extern "C" {
 //! The value of a kit length set to AUTO
 #define LSDJ_INSTRUMENT_KIT_LENGTH_AUTO (0x0)
 
+	//! The value of an infinite noise length
+#define LSDJ_INSTRUMENT_NOISE_LENGTH_INFINITE (0x40)
+
 //! The kind of instrument types that exist
 typedef enum
 {
@@ -565,17 +568,17 @@ void lsdj_instrument_noise_set_length(lsdj_song_t* song, uint8_t instrument, uin
 	@return The length of the instrument */
 uint8_t lsdj_instrument_noise_get_length(const lsdj_song_t* song, uint8_t instrument);
 
-// //! Change the pitch for a noise instrument
-// /*! @param song The song that contains the instrument
-// 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-// 	@param pitch The pitch */
-// void lsdj_instrument_noise_set_pitch(lsdj_song_t* song, uint8_t instrument, uint8_t pitch);
+//! Change the shape for a noise instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param shape The shape */
+void lsdj_instrument_noise_set_shape(lsdj_song_t* song, uint8_t instrument, uint8_t shape);
 
-// //! Retrieve the pitch that a noise instrument uses
-// /*! @param song The song that contains the instrument
-// 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-// 	@return The pitch */
-// uint8_t lsdj_instrument_noise_get_pitch(const lsdj_song_t* song, uint8_t instrument);
+//! Retrieve the shape that a noise instrument uses
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The shape */
+uint8_t lsdj_instrument_noise_get_shape(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the stability for a noise instrument
 /*! @param song The song that contains the instrument
