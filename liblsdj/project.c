@@ -52,9 +52,9 @@ struct lsdj_project_t
     /*! @note This is a simply song version counter increased with every song save in LSDJ; it has nothing to do with LSDJ versions of the sav format version. */
     unsigned char version;
     
-    //! The song buffer belonging to this project
+    //! The song belonging to this project
     /*! Uncompressed, but you'll need to call a parsing function to get a sensible lsdj_song_t structured object. */
-    lsdj_song_buffer_t songBuffer;
+    lsdj_song_t song;
 
     //! The allocator used to create this project
     const lsdj_allocator_t* allocator;
@@ -89,7 +89,7 @@ lsdj_project_t* lsdj_project_new(const lsdj_allocator_t* allocator, lsdj_error_t
     
     memset(project->name, '\0', sizeof(project->name));
     project->version = 0;
-    memset(&project->songBuffer, 0, sizeof(lsdj_song_buffer_t));
+    memset(&project->song, 0, sizeof(lsdj_song_t));
     
     return project;
 }
@@ -105,7 +105,7 @@ lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, const lsdj_allo
 
     memcpy(copy->name, project->name, sizeof(project->name));
     copy->version = project->version;
-    memcpy(&copy->songBuffer, &project->songBuffer, sizeof(project->songBuffer));
+    memcpy(&copy->song, &project->song, sizeof(project->song));
 
     return copy;
 }
@@ -145,14 +145,14 @@ unsigned char lsdj_project_get_version(const lsdj_project_t* project)
     return project->version;
 }
 
-void lsdj_project_set_song_buffer(lsdj_project_t* project, const lsdj_song_buffer_t* songBuffer)
+void lsdj_project_set_song(lsdj_project_t* project, const lsdj_song_t* song)
 {
-    memcpy(&project->songBuffer, songBuffer, sizeof(lsdj_song_buffer_t));
+    memcpy(&project->song, song, sizeof(lsdj_song_t));
 }
 
-const lsdj_song_buffer_t* lsdj_project_get_song_buffer(const lsdj_project_t* project)
+const lsdj_song_t* lsdj_project_get_song(const lsdj_project_t* project)
 {
-    return &project->songBuffer;
+    return &project->song;
 }
 
 
@@ -179,10 +179,12 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, const lsdj_allocator_
     }
 
     // Decompress the song data
-    lsdj_song_buffer_t songBuffer;
+    lsdj_song_t song;
+    memset(&song, 0, sizeof(lsdj_song_t));
+    
     lsdj_memory_access_state_t state;
-    state.begin = state.cur = songBuffer.bytes;
-    state.size = sizeof(songBuffer.bytes);
+    state.begin = state.cur = song.bytes;
+    state.size = sizeof(song.bytes);
     
     lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
     
@@ -192,7 +194,7 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, const lsdj_allocator_
         return NULL;
     }
     
-    lsdj_project_set_song_buffer(project, &songBuffer);
+    lsdj_project_set_song(project, &song);
     
     return project;
 }
@@ -330,8 +332,8 @@ bool lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio, 
     }
     
     // Compress and write the song buffer
-    const lsdj_song_buffer_t* songBuffer = lsdj_project_get_song_buffer(project);
-    return lsdj_compress(songBuffer->bytes, wvio, 1, writeCounter, error);
+    const lsdj_song_t* song = lsdj_project_get_song(project);
+    return lsdj_compress(song->bytes, wvio, 1, writeCounter, error);
 }
 
 bool lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, size_t* writeCounter, lsdj_error_t** error)

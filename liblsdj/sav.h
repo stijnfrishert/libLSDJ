@@ -54,7 +54,7 @@ extern "C" {
 
 #include "error.h"
 #include "project.h"
-#include "song_buffer.h"
+#include "song.h"
 #include "vio.h"
 
 //! The amount of project slots in an LSDj sav state
@@ -64,7 +64,7 @@ extern "C" {
 #define LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX (0xFF)
 
 //! The place in sav memory where the header starts 
-#define LSDJ_SAV_HEADER_POSITION LSDJ_SONG_BUFFER_BYTE_COUNT
+#define LSDJ_SAV_HEADER_POSITION LSDJ_SONG_BYTE_COUNT
 
 //! The size of a full sav file
 #define LSDJ_SAV_SIZE (0x20000)
@@ -95,7 +95,7 @@ void lsdj_sav_free(lsdj_sav_t* sav);
 
 //! Change the working memory song buffer
 /*! The song buffer's data is copied into the sav. This leaves the original intact */
-void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_buffer_t* songBuffer);
+void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_t* song);
 
 //! Copy the song buffer from a given project into the working memory
 /*! This effectively loads a project, and sets the current index to reflect that
@@ -103,7 +103,7 @@ void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_buffer_t*
 bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
     
 //! Retrieve the working memory song buffer from a sav
-const lsdj_song_buffer_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav);
+const lsdj_song_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav);
     
 //! Change which project slot is referenced by the working memory song
 /*! Indices start at 0.

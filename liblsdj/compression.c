@@ -37,19 +37,40 @@
 
 #include <assert.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 
-#include "instrument.h"
 #include "sav.h"
-#include "song_buffer.h"
-#include "wave.h"
+#include "song.h"
 
+//! The byte value signalling a Run-lenght Encoding (de)compression
 #define RUN_LENGTH_ENCODING_BYTE (0xC0)
+
+//! The byte value signalling a Special Action (de)compression
 #define SPECIAL_ACTION_BYTE (0xE0)
+
+//! The SA byte that signals a default wave (de)compression
 #define LSDJ_DEFAULT_WAVE_BYTE (0xF0)
+
+//! The number of bytes the default wave array takes up
+#define LSDJ_DEFAULT_WAVE_LENGTH (16)
+
+//! The default wave array
+static const unsigned char LSDJ_DEFAULT_WAVE[LSDJ_DEFAULT_WAVE_LENGTH] = {
+    0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31
+};
+
+//! The SA byte that signals a default instrument (de)compression
 #define LSDJ_DEFAULT_INSTRUMENT_BYTE (0xF1)
 
-static const unsigned char LSDJ_DEFAULT_INSTRUMENT_COMPRESSION[LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH] = { 0xA8, 0, 0, 0xFF, 0, 0, 3, 0, 0, 0xD0, 0, 0, 0, 0xF3, 0, 0 };
+//! The number of bytes the default instrument array takes up
+#define LSDJ_DEFAULT_INSTRUMENT_LENGTH (0x10)
+
+//! The default instrument array
+static const uint8_t LSDJ_DEFAULT_INSTRUMENT[LSDJ_DEFAULT_INSTRUMENT_LENGTH] = {
+    0xA8, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x03, 0x00, 0x00, 0xD0, 0x00, 0x00, 0x00, 0xF3, 0x00, 0x00
+};
+
 
 bool move_to_next_block_alignment(lsdj_vio_t* rvio, long firstBlockPosition, lsdj_error_t** error)
 {
@@ -144,7 +165,7 @@ bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size
     }
     
     // Write the default wave bytes to instrument
-    if (!lsdj_vio_write_repeat(wvio, LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, sizeof(LSDJ_DEFAULT_INSTRUMENT_COMPRESSION), count, writeCounter))
+    if (!lsdj_vio_write_repeat(wvio, LSDJ_DEFAULT_INSTRUMENT, sizeof(LSDJ_DEFAULT_INSTRUMENT), count, writeCounter))
     {
         lsdj_error_optional_new(error, "could not write default instrument byte");
         return false;
@@ -210,17 +231,10 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
     const long readStart = lsdj_vio_tell(rvio);
     const long writeStart = lsdj_vio_tell(wvio);
     
-    unsigned char byte = 0;
-    
     // Keep on decompressing blocks until we've reached an end-of-stream
     unsigned short nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
     do
     {
-        // Uncomment this to see every read and corresponding write position
-//        const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
-//        const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
-//        printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
-        
         if (!lsdj_decompress_block(rvio, readCounter,
                                    wvio, writeCounter,
                                    &nextBlockIndex,
@@ -254,7 +268,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
     }
     
     const long readSize = writeEnd - writeStart;
-    if (readSize != LSDJ_SONG_BUFFER_BYTE_COUNT)
+    if (readSize != LSDJ_SONG_BYTE_COUNT)
     {
         char buffer[100];
         memset(buffer, '\0', sizeof(buffer));
@@ -271,6 +285,11 @@ bool lsdj_decompress_block(lsdj_vio_t* rvio, size_t* readCounter,
                            unsigned short* nextBlockIndex,
                            lsdj_error_t** error)
 {
+    // Uncomment this to see every read and corresponding write position
+//    const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
+//    const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
+//    printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
+    
     // First, set the next block index to be absent
     // We'll fill this if we actually find one
     *nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
@@ -308,6 +327,11 @@ bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
                           unsigned short* nextBlockIndex,
                           lsdj_error_t** error)
 {
+    // Uncomment this to see every read and corresponding write position
+//    const long rcur = lsdj_vio_tell(rvio)/* - readStart*/;
+//    const long wcur = lsdj_vio_tell(wvio)/* - writeStart*/;
+//    printf("read: 0x%lx ->\twrite: 0x%lx\n", rcur, wcur);
+    
     // First, set the next block index to be absent
     // We'll fill this if we actually find one
     *nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
@@ -367,7 +391,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
         return false;
     }
     
-    const unsigned char* end = data + LSDJ_SONG_BUFFER_BYTE_COUNT;
+    const unsigned char* end = data + LSDJ_SONG_BYTE_COUNT;
     for (const unsigned char* read = data; read < end; )
     {
         // Uncomment this to print the current read and write positions
@@ -376,9 +400,9 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
         
         // Are we reading a default wave? If so, we can compress these!
         unsigned char defaultWaveLengthCount = 0;
-        while (read + LSDJ_WAVE_LENGTH < end && memcmp(read, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) == 0 && defaultWaveLengthCount != 0xFF)
+        while (read + LSDJ_DEFAULT_WAVE_LENGTH < end && memcmp(read, LSDJ_DEFAULT_WAVE, LSDJ_DEFAULT_WAVE_LENGTH) == 0 && defaultWaveLengthCount != 0xFF)
         {
-            read += LSDJ_WAVE_LENGTH;
+            read += LSDJ_DEFAULT_WAVE_LENGTH;
             ++defaultWaveLengthCount;
         }
         
@@ -391,9 +415,9 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
         } else {
             // Are we reading a default instrument? If so, we can compress these!
             unsigned char defaultInstrumentLengthCount = 0;
-            while (read + LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, LSDJ_DEFAULT_INSTRUMENT_COMPRESSION, LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH) == 0 && defaultInstrumentLengthCount != 0xFF)
+            while (read + LSDJ_DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, LSDJ_DEFAULT_INSTRUMENT, LSDJ_DEFAULT_INSTRUMENT_LENGTH) == 0 && defaultInstrumentLengthCount != 0xFF)
             {
-                read += LSDJ_LSDJ_DEFAULT_INSTRUMENT_LENGTH;
+                read += LSDJ_DEFAULT_INSTRUMENT_LENGTH;
                 ++defaultInstrumentLengthCount;
             }
             

@@ -35,19 +35,24 @@
 
 #include "wave.h"
 
+#include <assert.h>
 #include <string.h>
 
-void lsdj_wave_clear(lsdj_wave_t* wave)
+#define WAVES_OFFSET (0x6000)
+
+void lsdj_wave_set_bytes(lsdj_song_t* song, uint8_t wave, const uint8_t* data)
 {
-    memcpy(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH);
+	const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
+	assert(index < 4096);
+
+	memcpy(&song->bytes[WAVES_OFFSET + index], data, LSDJ_WAVE_BYTE_COUNT);
 }
 
-bool lsdj_wave_equals(const lsdj_wave_t* lhs, const lsdj_wave_t* rhs)
+const uint8_t* lsdj_wave_get_bytes(const lsdj_song_t* song, uint8_t wave)
 {
-    return memcmp(lhs, rhs, sizeof(lsdj_wave_t)) == 0 ? true : false;
+	const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
+	assert(index < 4096);
+
+	return &song->bytes[WAVES_OFFSET + index];
 }
 
-bool lsdj_wave_is_default(const lsdj_wave_t* wave)
-{
-    return memcmp(wave, LSDJ_DEFAULT_WAVE, sizeof(lsdj_wave_t)) == 0 ? true : false;
-}

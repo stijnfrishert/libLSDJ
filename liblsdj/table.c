@@ -35,135 +35,94 @@
 
 #include "table.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <assert.h>
 
-typedef struct lsdj_table_t
-{
-    // The volume column of the table
-    unsigned char volumes[LSDJ_TABLE_LENGTH];
-    
-    // The transposition column of the table
-    unsigned char transpositions[LSDJ_TABLE_LENGTH];
-    
-    // The first effect command column of the table
-    lsdj_command_t commands1[LSDJ_TABLE_LENGTH];
-    
-    // The second effect command column of the table
-    lsdj_command_t commands2[LSDJ_TABLE_LENGTH];
-} lsdj_table_t;
+#define ALLOCATION_TABLE_OFFSET (0x2020)
+#define ALLOCATION_TABLE_LENGTH (0x32)
 
-lsdj_table_t* lsdj_table_new()
+#define ENVELOPES_OFFSET (0x1690)
+#define TRANSPOSITION_OFFSET (0x3480)
+#define COMMAND1_OFFSET (0x3680)
+#define COMMAND1_VALUE_OFFSET (0x3880)
+#define COMMAND2_OFFSET (0x3a80)
+#define COMMAND2_VALUE_OFFSET (0x3c80)
+
+#define CONTENT_LENGTH (512)
+
+#define TABLE_SETTER(OFFSET, LENGTH, VALUE) \
+const size_t index = table * LSDJ_TABLE_LENGTH + row; \
+assert(index <= LENGTH); \
+song->bytes[OFFSET + index] = VALUE;
+
+#define TABLE_GETTER(OFFSET, LENGTH) \
+const size_t index = table * LSDJ_TABLE_LENGTH + row; \
+assert(index <= LENGTH); \
+return song->bytes[OFFSET + index];
+
+bool lsdj_table_is_allocated(const lsdj_song_t* song, uint8_t table)
 {
-    lsdj_table_t* table = (lsdj_table_t*)malloc(sizeof(lsdj_table_t));
-    lsdj_table_clear(table);
-    return table;
+    const size_t index = ALLOCATION_TABLE_OFFSET + table;
+    assert(index <= ALLOCATION_TABLE_OFFSET + ALLOCATION_TABLE_LENGTH);
+
+    return song->bytes[index];
 }
 
-lsdj_table_t* lsdj_copy_table(const lsdj_table_t* table)
+void lsdj_table_set_envelope(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value)
 {
-    lsdj_table_t* newTable = malloc(sizeof(lsdj_table_t));
-    memcpy(newTable, table, sizeof(lsdj_table_t));
-    return newTable;
+    TABLE_SETTER(ENVELOPES_OFFSET, CONTENT_LENGTH, value);
 }
 
-void lsdj_table_free(lsdj_table_t* table)
+uint8_t lsdj_table_get_envelope(const lsdj_song_t* song, uint8_t table, uint8_t row)
 {
-    free(table);
+	TABLE_GETTER(ENVELOPES_OFFSET, CONTENT_LENGTH);
 }
 
-void lsdj_table_clear(lsdj_table_t* table)
+void lsdj_table_set_transposition(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value)
 {
-    memset(table->volumes, 0, LSDJ_TABLE_LENGTH);
-    memset(table->transpositions, 0, LSDJ_TABLE_LENGTH);
-    
-    for (int i = 0; i < LSDJ_TABLE_LENGTH; ++i)
-    {
-        lsdj_command_clear(&table->commands1[i]);
-        lsdj_command_clear(&table->commands2[i]);
-    }
+	TABLE_SETTER(TRANSPOSITION_OFFSET, CONTENT_LENGTH, value);
 }
 
-void lsdj_table_set_volume(lsdj_table_t* table, size_t index, unsigned char volume)
+uint8_t lsdj_table_get_transposition(const lsdj_song_t* song, uint8_t table, uint8_t row)
 {
-    table->volumes[index] = volume;
+	TABLE_GETTER(TRANSPOSITION_OFFSET, CONTENT_LENGTH);
 }
 
-void lsdj_table_set_volumes(lsdj_table_t* table, unsigned char* volumes)
+void lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command)
 {
-    memcpy(table->volumes, volumes, sizeof(table->volumes));
+	TABLE_SETTER(COMMAND1_OFFSET, CONTENT_LENGTH, (uint8_t)command);
 }
 
-unsigned char lsdj_table_get_volume(const lsdj_table_t* table, size_t index)
+lsdj_command lsdj_table_get_command1(const lsdj_song_t* song, uint8_t table, uint8_t row)
 {
-    return table->volumes[index];
+	TABLE_GETTER(COMMAND1_OFFSET, CONTENT_LENGTH);
 }
 
-void lsdj_table_set_transposition(lsdj_table_t* table, size_t index, unsigned char transposition)
+void lsdj_table_set_command1_value(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value)
 {
-    table->transpositions[index] = transposition;
+	TABLE_SETTER(COMMAND1_VALUE_OFFSET, CONTENT_LENGTH, value);
 }
 
-void lsdj_table_set_transpositions(lsdj_table_t* table, unsigned char* transpositions)
+uint8_t lsdj_table_get_command1_value(const lsdj_song_t* song, uint8_t table, uint8_t row)
 {
-    memcpy(table->transpositions, transpositions, sizeof(table->transpositions));
+	TABLE_GETTER(COMMAND1_VALUE_OFFSET, CONTENT_LENGTH);
 }
 
-unsigned char lsdj_table_get_transposition(const lsdj_table_t* table, size_t index)
+void lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command)
 {
-    return table->transpositions[index];
+	TABLE_SETTER(COMMAND2_OFFSET, CONTENT_LENGTH, (uint8_t)command);
 }
 
-lsdj_command_t* lsdj_table_get_command1(lsdj_table_t* table, size_t index)
+lsdj_command lsdj_table_get_command2(const lsdj_song_t* song, uint8_t table, uint8_t row)
 {
-    return &table->commands1[index];
+	TABLE_GETTER(COMMAND2_OFFSET, CONTENT_LENGTH);
 }
 
-lsdj_command_t* lsdj_table_get_command2(lsdj_table_t* table, size_t index)
+void lsdj_table_set_command2_value(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value)
 {
-    return &table->commands2[index];
+	TABLE_SETTER(COMMAND2_VALUE_OFFSET, CONTENT_LENGTH, value);
 }
 
-bool lsdj_table_equals(const lsdj_table_t* lhs, const lsdj_table_t* rhs)
+uint8_t lsdj_table_get_command2_value(const lsdj_song_t* song, uint8_t table, uint8_t row)
 {
-    // Compare the notes and instruments by memory compare
-    if (memcmp(lhs->volumes, rhs->volumes, sizeof(lhs->volumes)) != 0 ||
-        memcmp(lhs->transpositions, rhs->transpositions, sizeof(lhs->transpositions)) != 0)
-    {
-        return false;
-    }
-    
-    // Compare the commands through the command interface
-    for (int i = 0; i < LSDJ_TABLE_LENGTH; i++)
-    {
-        if (!lsdj_command_equals(&lhs->commands1[i], &rhs->commands1[i]) ||
-            !lsdj_command_equals(&lhs->commands2[i], &rhs->commands2[i]))
-        {
-            return false;
-        }
-    }
-    
-    return true;
-}
-
-void lsdj_table_replace_command1_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement)
-{
-    for (int i = 0; i < LSDJ_TABLE_LENGTH; i += 1)
-    {
-        lsdj_command_replace_value(&table->commands1[i], command, value, replacement);
-    }
-}
-
-void lsdj_table_replace_command2_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement)
-{
-    for (int i = 0; i < LSDJ_TABLE_LENGTH; i += 1)
-    {
-        lsdj_command_replace_value(&table->commands2[i], command, value, replacement);
-    }
-}
-
-void lsdj_table_replace_command_value(lsdj_table_t* table, unsigned char command, unsigned char value, unsigned char replacement)
-{
-    lsdj_table_replace_command1_value(table, command, value, replacement);
-    lsdj_table_replace_command2_value(table, command, value, replacement);
+	TABLE_GETTER(COMMAND2_VALUE_OFFSET, CONTENT_LENGTH);
 }

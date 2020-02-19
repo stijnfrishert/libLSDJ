@@ -40,11 +40,13 @@
 extern "C" {
 #endif
 
-typedef unsigned char lsdj_panning;
-#define LSDJ_PAN_NONE (0)
-#define LSDJ_PAN_RIGHT (1)
-#define LSDJ_PAN_LEFT (2)
-#define LSDJ_PAN_LEFT_RIGHT (3)
+typedef enum
+{
+    LSDJ_PAN_NONE = 0,
+    LSDJ_PAN_LEFT = 1,
+    LSDJ_PAN_RIGHT = 2,
+    LSDJ_PAN_LEFT_RIGHT = 3,
+} lsdj_panning;
     
 #ifdef __cplusplus
 }

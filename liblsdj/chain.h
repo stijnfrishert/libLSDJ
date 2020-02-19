@@ -36,38 +36,52 @@
 #ifndef LSDJ_CHAIN_H
 #define LSDJ_CHAIN_H
 
+#include "song.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "command.h"
+//! The amount of chains in a song
+#define LSDJ_CHAIN_COUNT (0x7F)
 
-// The length of a chain
+//! The number of steps in a chain
 #define LSDJ_CHAIN_LENGTH (16)
+
+//! The value of "no phrase" at a given step
 #define LSDJ_CHAIN_NO_PHRASE (0xFF)
-    
-// Structure representing a chain
-typedef struct
-{
-    // The phrases in the chain (indices, actual phrases are stored in the song)
-    unsigned char phrases[LSDJ_CHAIN_LENGTH];
-    
-    // The transpositions for each row
-    unsigned char transpositions[LSDJ_CHAIN_LENGTH];
-} lsdj_chain_t;
 
-lsdj_chain_t* lsdj_chain_new();
-lsdj_chain_t* lsdj_chain_copy(const lsdj_chain_t* chain);
-void lsdj_chain_free(lsdj_chain_t* chain);
-    
-// Clear chain data to factory settings
-void lsdj_chain_clear(lsdj_chain_t* chain);
+//! Is a chain with a given index in use?
+/*! @param song The song that contains the chain (< LSDJ_CHAIN_COUNT)
+	@param chain The index of the chain to check for usage */
+bool lsdj_chain_is_allocated(const lsdj_song_t* song, uint8_t chain);
 
-// Check to see if two chains contain the same content
-bool lsdj_chain_equals(const lsdj_chain_t* lhs, const lsdj_chain_t* rhs);
+//! Change the phrase set to a step in a chain
+/*! @param song The song that contains the chain
+	@param chain The index of the chain (< LSDJ_CHAIN_COUNT)
+	@param step The step within the chain (< LSDJ_CHAIN_LENGTH)
+	@param phrase The phrase to set to this step, or LSDJ_CHAIN_NO_PHRASE */
+void lsdj_chain_set_phrase(lsdj_song_t* song, uint8_t chain, uint8_t step, uint8_t phrase);
 
-// Replace a phrase within a chain with another
-void lsdj_chain_replace_phrase(lsdj_chain_t* chain, unsigned char phrase, unsigned char replacement);
+//! Retrieve the phrase set to a step in a chain
+/*! @param song The song that contains the chain
+	@param chain The index of the chain (< LSDJ_CHAIN_COUNT)
+	@param step The step within the chain (< LSDJ_CHAIN_LENGTH)
+	@return the phrase index at said step, or LSDJ_CHAIN_NO_PHRASE */
+uint8_t lsdj_chain_get_phrase(const lsdj_song_t* song, uint8_t chain, uint8_t step);
+
+//! Change the transposition set to a step in a chain
+/*! @param song The song that contains the chain
+	@param chain The index of the chain (< LSDJ_CHAIN_COUNT)
+	@param step The step within the chain (< LSDJ_CHAIN_LENGTH)
+	@param transposition The transposition to set to this step */
+void lsdj_chain_set_transposition(lsdj_song_t* song, uint8_t chain, uint8_t step, uint8_t transposition);
+
+//! Retrieve the transposition set to a step in a chain
+/*! @param song The song that contains the chain
+	@param chain The index of the chain (< LSDJ_CHAIN_COUNT)
+	@param step The step within the chain (< LSDJ_CHAIN_LENGTH) */
+uint8_t lsdj_chain_get_transposition(const lsdj_song_t* song, uint8_t chain, uint8_t step);
     
 #ifdef __cplusplus
 }

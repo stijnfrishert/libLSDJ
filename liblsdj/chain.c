@@ -35,44 +35,50 @@
 
 #include "chain.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <assert.h>
 
-lsdj_chain_t* lsdj_chain_new()
+#define CHAIN_PHRASES_OFFSET (0x2080)
+#define CHAIN_TRANSPOSITIONS_OFFSET (0x2880)
+#define CHAIN_ALLOCATIONS_OFFSET (0x3EA2)
+
+bool lsdj_chain_is_allocated(const lsdj_song_t* song, uint8_t chain)
 {
-    lsdj_chain_t* chain = (lsdj_chain_t*)malloc(sizeof(lsdj_chain_t));
-    lsdj_chain_clear(chain);
-    return chain;
+	const size_t index = chain / 8;
+	assert(index < 16);
+
+	const size_t mask = 1 << (chain - (index * 8));
+    
+	return (song->bytes[CHAIN_ALLOCATIONS_OFFSET + index] & mask) != 0;
 }
 
-lsdj_chain_t* lsdj_chain_copy(const lsdj_chain_t* chain)
+void lsdj_chain_set_phrase(lsdj_song_t* song, uint8_t chain, uint8_t step, uint8_t phrase)
 {
-    lsdj_chain_t* newChain = malloc(sizeof(lsdj_chain_t));
-    memcpy(newChain, chain, sizeof(lsdj_chain_t));
-    return newChain;
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + step;
+	assert(index < 2048);
+
+	song->bytes[CHAIN_PHRASES_OFFSET + index] = phrase;
 }
 
-void lsdj_chain_free(lsdj_chain_t* chain)
+uint8_t lsdj_chain_get_phrase(const lsdj_song_t* song, uint8_t chain, uint8_t step)
 {
-    free(chain);
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + step;
+	assert(index < 2048);
+
+	return song->bytes[CHAIN_PHRASES_OFFSET + index];
 }
 
-void lsdj_chain_clear(lsdj_chain_t* chain)
+void lsdj_chain_set_transposition(lsdj_song_t* song, uint8_t chain, uint8_t step, uint8_t transposition)
 {
-    memset(chain->phrases, LSDJ_CHAIN_NO_PHRASE, LSDJ_CHAIN_LENGTH);
-    memset(chain->transpositions, 0, LSDJ_CHAIN_LENGTH);
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + step;
+	assert(index < 2048);
+
+	song->bytes[CHAIN_TRANSPOSITIONS_OFFSET + index] = transposition;
 }
 
-bool lsdj_chain_equals(const lsdj_chain_t* lhs, const lsdj_chain_t* rhs)
+uint8_t lsdj_chain_get_transposition(const lsdj_song_t* song, uint8_t chain, uint8_t step)
 {
-    return memcmp(lhs, rhs, sizeof(lsdj_chain_t)) == 0 ? true : false;
-}
+	const size_t index = chain * LSDJ_CHAIN_LENGTH + step;
+	assert(index < 2048);
 
-void lsdj_chain_replace_phrase(lsdj_chain_t* chain, unsigned char phrase, unsigned char replacement)
-{
-    for (int p = 0; p < LSDJ_CHAIN_LENGTH; p += 1)
-    {
-        if (chain->phrases[p] == phrase)
-            chain->phrases[p] = replacement;
-    }
+	return song->bytes[CHAIN_TRANSPOSITIONS_OFFSET + index];
 }

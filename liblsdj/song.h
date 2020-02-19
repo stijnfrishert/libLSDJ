@@ -36,94 +36,168 @@
 #ifndef LSDJ_SONG_H
 #define LSDJ_SONG_H
 
+/* Song buffers are the representation of an LSDJ song uncompressed in memory.
+   It hasn't been parsed yet into meaningful data. This is raw song data, and
+   for example how the song in working memory within your LSDJ sav is repre-
+   sented.
+
+   From here, you can either compress song buffers into memory blocks, which is
+   how all other projects in LSDJ are represented. You can also go the other
+   way around, and parse them into an lsdj_song_t structure, providing you with
+   detailed information about elements within your song. */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "chain.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "channel.h"
+#include "command.h"
 #include "error.h"
-#include "groove.h"
-#include "instrument.h"
-#include "phrase.h"
-#include "row.h"
-#include "song_buffer.h"
-#include "synth.h"
-#include "table.h"
-#include "vio.h"
-#include "wave.h"
-#include "word.h"
 
-#define LSDJ_ROW_COUNT (256)
-#define LSDJ_CHAIN_COUNT (128)
-#define LSDJ_PHRASE_COUNT (0xFF)
-#define LSDJ_INSTRUMENT_COUNT (64)
-#define LSDJ_SYNTH_COUNT (16)
-#define LSDJ_TABLE_COUNT (32)
-#define LSDJ_WAVE_COUNT (256)
-#define LSDJ_GROOVE_COUNT (32)
-#define LSDJ_WORD_COUNT (42)
-#define LSDJ_BOOKMARK_POSITION_COUNT (16)
-#define LSDJ_NO_BOOKMARK (0xFF)
-    
-#define LSDJ_CLONE_DEEP (0)
-#define LSDJ_CLONE_SLIM (1)
+//! The size of a decompressed song in memory
+#define LSDJ_SONG_BYTE_COUNT (0x8000)
 
-// An LSDJ song
-typedef struct lsdj_song_t lsdj_song_t;
+//! The value representing an empty row + channel slot
+#define LSDJ_SONG_NO_CHAIN (0xFF)
 
-// Create/free projects
-lsdj_song_t* lsdj_song_new(lsdj_error_t** error);
-lsdj_song_t* lsdj_song_copy(const lsdj_song_t* song, lsdj_error_t** error);
-void lsdj_song_free(lsdj_song_t* song);
+//! A structure that can hold one entire decompressed song in memory
+typedef struct
+{
+	uint8_t bytes[LSDJ_SONG_BYTE_COUNT];
+} lsdj_song_t;
 
-// Deserialize a song
-lsdj_song_t* lsdj_song_read(lsdj_vio_t* vio, lsdj_error_t** error);
-lsdj_song_t* lsdj_song_read_from_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
-lsdj_song_t* lsdj_song_read_from_buffer(const lsdj_song_buffer_t* song_buffer, lsdj_error_t** error);
-    
-// Serialize a song
-void lsdj_song_write(const lsdj_song_t* song, lsdj_vio_t* vio, lsdj_error_t** error);
-void lsdj_song_write_to_memory(const lsdj_song_t* song, unsigned char* data, size_t size, lsdj_error_t** error);
+//! Clone mode describing whether a chain clone also creates phrase copies or not
+typedef enum
+{
+   LSDJ_CLONE_DEEP = 0,
+   LSDJ_CLONE_SLIM = 1
+} lsdj_clone_mode;
 
-// Change data in a song
-void lsdj_song_set_format_version(lsdj_song_t* song, unsigned char version);
-unsigned char lsdj_song_get_format_version(const lsdj_song_t* song);
-void lsdj_song_set_tempo(lsdj_song_t* song, unsigned char tempo);
-unsigned char lsdj_song_get_tempo(const lsdj_song_t* song);
-void lsdj_song_set_transposition(lsdj_song_t* song, unsigned char transposition);
-unsigned char lsdj_song_get_transposition(const lsdj_song_t* song);
-unsigned char lsdj_song_get_file_changed_flag(const lsdj_song_t* song);
-void lsdj_song_set_drum_max(lsdj_song_t* song, unsigned char drumMax);
-unsigned char lsdj_song_get_drum_max(const lsdj_song_t* song);
+//! The different sync modes that LSDj supports
+typedef enum
+{
+   LSDJ_SYNC_NONE = 0,
+   LSDJ_SYNC_LSDJ = 1,
+   LSDJ_SYNC_MIDI = 2,
+   LSDJ_SYNC_KEYBOARD = 3,
+   LSDJ_SYNC_ANALOG_IN = 4,
+   LSDJ_SYNC_ANALOG_OUT = 5,
+} lsdj_sync_mode;
 
-lsdj_row_t* lsdj_song_get_row(lsdj_song_t* song, size_t index);
 
-lsdj_chain_t* lsdj_song_get_chain(lsdj_song_t* song, size_t index);
-void lsdj_song_erase_chain(lsdj_song_t* song, size_t index);
-void lsdj_song_deduplicate_chains(lsdj_song_t* song);
-void lsdj_song_replace_chain(lsdj_song_t* song, unsigned char chain, unsigned char replacement);
+// --- Song Settings --- //
 
-lsdj_phrase_t* lsdj_song_get_phrase(lsdj_song_t* song, size_t index);
-void lsdj_song_erase_phrase(lsdj_song_t* song, size_t index);
-void lsdj_song_deduplicate_phrases(lsdj_song_t* song);
-void lsdj_song_replace_phrase(lsdj_song_t* song, unsigned char phrase, unsigned char replacement);
+//! Retrieve the format version of the song
+/*! @note This is not the same as the project version in the song save/load screen,
+    nor the version of LSDj itself. This relates to the internal format version
+    that is increased everytime the song format changes. */
+uint8_t lsdj_song_get_format_version(const lsdj_song_t* song);
 
-lsdj_instrument_t* lsdj_song_get_instrument(lsdj_song_t* song, size_t index);
-lsdj_synth_t* lsdj_song_get_synth(lsdj_song_t* song, size_t index);
-lsdj_wave_t* lsdj_song_get_wave(lsdj_song_t* song, size_t index);
+//! Has the song been changed since the last save?
+/*! When a song gets edited, this flag gets set and asks for a confirmation on
+    project load or new. You can use it to know whether a working memory song con-
+    tains any differences with its corresponding project slot */
+bool lsdj_song_has_changed(const lsdj_song_t* song);
 
-lsdj_table_t* lsdj_song_get_table(lsdj_song_t* song, size_t index);
-void lsdj_song_erase_table(lsdj_song_t* song, size_t index);
-void lsdj_song_deduplicate_tables(lsdj_song_t* song);
-void lsdj_song_replace_table(lsdj_song_t* song, unsigned char table, unsigned char replacement);
+//! Change the tempo of a song, in beats-per-minute
+/*! @todo Should I convert this to the actual tempo (range 0 - 40 is mapped to higher bpm's)? */
+void lsdj_song_set_tempo(lsdj_song_t* song, uint8_t bpm);
 
-lsdj_groove_t* lsdj_song_get_groove(lsdj_song_t* song, size_t index);
-lsdj_word_t* lsdj_song_get_word(lsdj_song_t* song, size_t index);
-void lsdj_song_set_word_name(lsdj_song_t* song, size_t index, const char* data, size_t size);
-void lsdj_song_get_word_name(lsdj_song_t* song, size_t index, char* data, size_t size);
-void lsdj_song_set_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position, unsigned char bookmark);
-unsigned char lsdj_song_get_bookmark(lsdj_song_t* song, lsdj_channel_t channel, size_t position);
+//! Retrieve the tempo of a song, in beats-per-minute
+/*! @todo Should I convert this to the actual tempo (range 0 - 40 is mapped to higher bpm's)? */
+uint8_t lsdj_song_get_tempo(const lsdj_song_t* song);
 
+//! Change the global transposition of a song
+/*! The value given is in semitones. 0 or higher maps to a positive increase, 0xFF or lower to a negative one */
+void lsdj_song_set_transposition(lsdj_song_t* song, uint8_t semitones);
+
+//! Retrieve the global transposition of a song
+/*! The value given is in semitones. 0 or higher maps to a positive increase, 0xFF or lower to a negative one */
+uint8_t lsdj_song_get_transposition(const lsdj_song_t* song);
+
+//! Change the synchronisation mode of a song (none, LSDJ, MIDI, etc.)
+/*! In some synchronisation modes the prelisten flag doesn't do anything */
+void lsdj_song_set_sync_mode(lsdj_song_t* song, lsdj_sync_mode mode);
+
+//! Retrieve the synchronisation mode of a song (none, LSDJ, MIDI, etc.)
+/*! In some synchronisation modes the prelisten flag doesn't do anything */
+lsdj_sync_mode lsdj_song_get_sync_mode(const lsdj_song_t* song);
+
+//! @todo Drum max?
+
+
+// --- Editor Settings --- //
+
+//! Change whether cloning a chain also creates new phrases or not
+void lsdj_song_set_clone_mode(lsdj_song_t* song, lsdj_clone_mode clone);
+
+//! Ask whether cloning a chain also creates new phrases or not
+lsdj_clone_mode lsdj_song_get_clone_mode(const lsdj_song_t* song);
+
+//! Change which font from the LSDj ROM is used for displaying
+void lsdj_song_set_font(lsdj_song_t* song, uint8_t font);
+
+//! Retrieve which font from the LSDj ROM is used for displaying
+uint8_t lsdj_song_get_font(const lsdj_song_t* song);
+
+//! Change which color palette from the LSDj ROM is used for displaying
+void lsdj_song_set_color_palette(lsdj_song_t* song, uint8_t palette);
+
+//! Retrieve which color palette from the LSDj ROM is used for displaying
+uint8_t lsdj_song_get_color_palette(const lsdj_song_t* song);
+
+void lsdj_song_set_key_delay(lsdj_song_t* song, uint8_t delay);
+uint8_t lsdj_song_get_key_delay(const lsdj_song_t* song);
+
+void lsdj_song_set_key_repeat(lsdj_song_t* song, uint8_t repeat);
+uint8_t lsdj_song_get_key_repeat(const lsdj_song_t* song);
+
+//! Change whether entering notes and instruments also plays them live
+void lsdj_song_set_prelisten(lsdj_song_t* song, bool prelisten);
+
+//! Ask whether entering notes and instruments also plays them live
+bool lsdj_song_get_prelisten(const lsdj_song_t* song);
+
+
+// --- Clocks --- //
+
+void lsdj_song_set_total_days(lsdj_song_t* song, uint8_t days);
+uint8_t lsdj_song_get_total_days(const lsdj_song_t* song);
+
+void lsdj_song_set_total_hours(lsdj_song_t* song, uint8_t hours);
+uint8_t lsdj_song_get_total_hours(const lsdj_song_t* song);
+
+void lsdj_song_set_total_minutes(lsdj_song_t* song, uint8_t minutes);
+uint8_t lsdj_song_get_total_minutes(const lsdj_song_t* song);
+
+void lsdj_song_set_work_hours(lsdj_song_t* song, uint8_t hours);
+uint8_t lsdj_song_get_work_hours(const lsdj_song_t* song);
+
+void lsdj_song_set_work_minutes(lsdj_song_t* song, uint8_t minutes);
+uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song);
+
+
+// --- Chains and phrases --- //
+
+//! Change the chain assigned to a row + channel slot
+/*! @param chain The chain number to assign, or LSDJ_NO_CHAIN to set it to empty */
+void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel channel, uint8_t chain);
+
+//! Retrieve the chain assigned to a row + channel slot
+/*! @return The chain number of LSDJ_NO_CHAIN if empty */
+uint8_t lsdj_row_get_chain(const lsdj_song_t* song, uint8_t row, lsdj_channel channel);
+
+//! Set whether a row + channel slot should be bookmarked
+/*! @note There are only 16 bookmarks per channel available, so this function can fail if no more space is available
+    @return false If not bookmarks slots on this channel are available anymore */
+bool lsdj_song_set_row_bookmarked(lsdj_song_t* song, uint8_t row, lsdj_channel channel, bool bookmarked);
+
+//! Ask whether a row + channel slot is bookmarked
+/*! @return True when the row has been bookmarked on this channel */
+bool lsdj_song_is_row_bookmarked(const lsdj_song_t* song, uint8_t row, lsdj_channel channel);
     
 #ifdef __cplusplus
 }

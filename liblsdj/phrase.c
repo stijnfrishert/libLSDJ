@@ -35,62 +35,70 @@
 
 #include "phrase.h"
 
-#include <stdlib.h>
-#include <string.h>
+#include <assert.h>
 
-lsdj_phrase_t* lsdj_phrase_new()
-{
-    lsdj_phrase_t* phrase = (lsdj_phrase_t*)malloc(sizeof(lsdj_phrase_t));
-    lsdj_phrase_clear(phrase);
-    return phrase;
-}
+#define PHRASE_NOTES_OFFSET (0x0000)
+#define PHRASE_ALLOCATIONS_OFFSET (0x3E82)
+#define PHRASE_COMMANDS_OFFSET (0x4000)
+#define PHRASE_COMMAND_VALUES_OFFSET (0x4FF0)
+#define PHRASE_INSTRUMENTS_OFFSET (0x7000)
 
-lsdj_phrase_t* lsdj_phrase_copy(const lsdj_phrase_t* phrase)
-{
-    lsdj_phrase_t* newPhrase = malloc(sizeof(lsdj_phrase_t));
-    memcpy(newPhrase, phrase, sizeof(lsdj_phrase_t));
-    return newPhrase;
-}
+#define PHRASE_SETTER(OFFSET, LENGTH, VALUE) \
+const size_t index = phrase * LSDJ_PHRASE_LENGTH + row; \
+assert(index <= LENGTH); \
+song->bytes[OFFSET + index] = VALUE;
 
-void lsdj_phrase_free(lsdj_phrase_t* phrase)
-{
-    free(phrase);
-}
+#define PHRASE_GETTER(OFFSET, LENGTH) \
+const size_t index = phrase * LSDJ_PHRASE_LENGTH + row; \
+assert(index <= LENGTH); \
+return song->bytes[OFFSET + index];
 
-void lsdj_phrase_clear(lsdj_phrase_t* phrase)
+bool lsdj_phrase_is_allocated(const lsdj_song_t* song, uint8_t phrase)
 {
-    memset(phrase->notes, 0, LSDJ_PHRASE_LENGTH);
-    memset(phrase->instruments, 0xFF, LSDJ_PHRASE_LENGTH);
+	const size_t index = phrase / 8;
+	assert(index < 32);
+
+	const size_t mask = 1 << (phrase - (index * 8));
     
-    for (int i = 0; i < LSDJ_PHRASE_LENGTH; ++i)
-        lsdj_command_clear(&phrase->commands[i]);
+	return (song->bytes[PHRASE_ALLOCATIONS_OFFSET + index] & mask) != 0;
 }
 
-bool lsdj_phrase_equals(const lsdj_phrase_t* lhs, const lsdj_phrase_t* rhs)
+void lsdj_phrase_set_note(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t note)
 {
-    // Compare the notes and instruments by memory compare
-    if (memcmp(lhs->notes, rhs->notes, sizeof(lhs->notes)) != 0 ||
-        memcmp(lhs->instruments, rhs->instruments, sizeof(lhs->instruments)) != 0)
-    {
-        return false;
-    }
-    
-    // Compare the commands through the command interface
-    for (int i = 0; i < LSDJ_PHRASE_LENGTH; i++)
-    {
-        if (!lsdj_command_equals(&lhs->commands[i], &rhs->commands[i]))
-        {
-            return false;
-        }
-    }
-    
-    return true;
+	PHRASE_SETTER(PHRASE_NOTES_OFFSET, 4080, note)
 }
 
-void lsdj_phrase_replace_command_value(lsdj_phrase_t* phrase, unsigned char command, unsigned char value, unsigned char replacement)
+uint8_t lsdj_phrase_get_note(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
 {
-    for (int i  = 0; i < LSDJ_PHRASE_LENGTH; i++)
-    {
-        lsdj_command_replace_value(&phrase->commands[i], command, value, replacement);
-    }
+	PHRASE_GETTER(PHRASE_NOTES_OFFSET, 4080)
+}
+
+void lsdj_phrase_set_instrument(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t instrument)
+{
+	PHRASE_SETTER(PHRASE_INSTRUMENTS_OFFSET, 4080, instrument)
+}
+
+uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+{
+	PHRASE_GETTER(PHRASE_INSTRUMENTS_OFFSET, 4080)
+}
+
+void lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t row, lsdj_command command)
+{
+	PHRASE_SETTER(PHRASE_COMMANDS_OFFSET, 4080, (uint8_t)command)
+}
+
+lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+{
+	PHRASE_GETTER(PHRASE_COMMANDS_OFFSET, 4080)
+}
+
+void lsdj_phrase_set_command_value(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t value)
+{
+	PHRASE_SETTER(PHRASE_COMMAND_VALUES_OFFSET, 4080, value)
+}
+
+uint8_t lsdj_phrase_get_command_value(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+{
+	PHRASE_GETTER(PHRASE_COMMAND_VALUES_OFFSET, 4080)
 }

@@ -36,41 +36,83 @@
 #ifndef LSDJ_PHRASE_H
 #define LSDJ_PHRASE_H
 
+#include "command.h"
+#include "song.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdbool.h>
+//! The amount of phrases in a song
+#define LSDJ_PHRASE_COUNT (0xFF)
 
-#include "command.h"
-
-// The default constant lenght of a phrase
+//! The number of steps in a phrase
 #define LSDJ_PHRASE_LENGTH (16)
 
-typedef struct
-{
-    // The notes in the phrase
-    unsigned char notes[LSDJ_PHRASE_LENGTH];
-    
-    // The instruments the phrase uses for each row
-    unsigned char instruments[LSDJ_PHRASE_LENGTH];
-    
-    // The effect command column for a phrase
-    lsdj_command_t commands[LSDJ_PHRASE_LENGTH];
-} lsdj_phrase_t;
+//! The value of "no note" at a given step
+#define LSDJ_PHRASE_NO_NOTE (0)
 
-lsdj_phrase_t* lsdj_phrase_new();
-lsdj_phrase_t* lsdj_phrase_copy(const lsdj_phrase_t* phrase);
-void lsdj_phrase_free(lsdj_phrase_t* phrase);
-    
-// Clear all phrase data to factory settings
-void lsdj_phrase_clear(lsdj_phrase_t* phrase);
+	//! The value of "no instrument" at a given step
+#define LSDJ_PHRASE_NO_INSTRUMENT (0xFF)
 
-// Check to see if two phrases contain the same content
-bool lsdj_phrase_equals(const lsdj_phrase_t* lhs, const lsdj_phrase_t* rhs);
+//! Is a phrase with a given index in use?
+/*! @param song The song that contains the phrase (< LSDJ_PHRASE_COUNT)
+	@param phrase The index of the phrase to check for usage */
+bool lsdj_phrase_is_allocated(const lsdj_song_t* song, uint8_t phrase);
 
-// Replace a specfic command value with another
-void lsdj_phrase_replace_command_value(lsdj_phrase_t* phrase, unsigned char command, unsigned char value, unsigned char replacement);
+//! Change the note at a step in a phrase
+/*! @param song The song that contains the phrase
+	@param phrase The index of the phrase (< LSDJ_PHRASE_COUNT)
+	@param step The step within the phrase (< LSDJ_PHRASE_LENGTH)
+	@param phrase The note to set to this step, or LSDJ_PHRASE_NO_NOTE */
+void lsdj_phrase_set_note(lsdj_song_t* song, uint8_t phrase, uint8_t step, uint8_t note);
+
+//! Retrieve the note at a step in a phrase
+/*! @param song The song that contains the phrase
+	@param phrase The index of the phrase (< LSDJ_PHRASE_COUNT)
+	@param step The step within the phrase (< LSDJ_PHRASE_LENGTH)
+	@return The note at said step, or LSDJ_PHRASE_NO_NOTE */
+uint8_t lsdj_phrase_get_note(const lsdj_song_t* song, uint8_t phrase, uint8_t step);
+
+//! Change the instrument at a step in a phrase
+/*! @param song The song that contains the phrase
+	@param phrase The index of the phrase (< LSDJ_PHRASE_COUNT)
+	@param step The step within the phrase (< LSDJ_PHRASE_LENGTH)
+	@param phrase The instrument to set to this step or LSDJ_PHRASE_NO_INSTRUMENT */
+void lsdj_phrase_set_instrument(lsdj_song_t* song, uint8_t phrase, uint8_t step, uint8_t instrument);
+
+//! Retrieve the instrument at a step in a phrase
+/*! @param song The song that contains the phrase
+	@param phrase The index of the phrase (< LSDJ_PHRASE_COUNT)
+	@param step The step within the phrase (< LSDJ_PHRASE_LENGTH)
+	@return The instrument at said step, or LSDJ_PHRASE_NO_INSTRUMENT  */
+uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint8_t step);
+
+//! Change the command at a step in a phrase
+/*! @param song The song that contains the phrase
+	@param phrase The index of the phrase (< LSDJ_PHRASE_COUNT)
+	@param step The step within the phrase (< LSDJ_PHRASE_LENGTH)
+	@param phrase The command to set to this step */
+void lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t step, lsdj_command command);
+
+//! Retrieve the command at a step in a phrase
+/*! @param song The song that contains the phrase
+	@param phrase The index of the phrase (< LSDJ_PHRASE_COUNT)
+	@param step The step within the phrase (< LSDJ_PHRASE_LENGTH) */
+lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t step);
+
+//! Change the command value at a step in a phrase
+/*! @param song The song that contains the phrase
+	@param phrase The index of the phrase (< LSDJ_PHRASE_COUNT)
+	@param step The step within the phrase (< LSDJ_PHRASE_LENGTH)
+	@param phrase The command value to set to this step */
+void lsdj_phrase_set_command_value(lsdj_song_t* song, uint8_t phrase, uint8_t step, uint8_t value);
+
+//! Retrieve the command value at a step in a phrase
+/*! @param song The song that contains the phrase
+	@param phrase The index of the phrase (< LSDJ_PHRASE_COUNT)
+	@param step The step within the phrase (< LSDJ_PHRASE_LENGTH) */
+uint8_t lsdj_phrase_get_command_value(const lsdj_song_t* song, uint8_t phrase, uint8_t step);
     
 #ifdef __cplusplus
 }

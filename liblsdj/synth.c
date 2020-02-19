@@ -35,38 +35,206 @@
 
 #include "synth.h"
 
-#include <string.h>
+#include <assert.h>
 
-void lsdj_synth_clear(lsdj_synth_t* synth)
+#define SYNTHS_OFFSET (0x3EB2)
+#define OVERWRITES_OFFSET (0x3FC4)
+
+bool lsdj_synth_is_wave_overwritten(const lsdj_song_t* song, uint8_t synth)
 {
-    synth->waveform = LSDJ_SYNTH_WAVEFORM_SAWTOOTH;
-    synth->filter = LSDJ_SYNTH_FILTER_LOW_PASS;
-    synth->resonanceStart = 0;
-    synth->resonanceEnd = 0;
-    synth->distortion = LSDJ_SYNTH_DISTORTION_CLIP;
-    synth->phase = LSDJ_SYNTH_PHASE_NORMAL;
-    synth->volumeStart = 0x10;
-    synth->cutOffStart = 0xFF;
-    synth->phaseStart = 0;
-    synth->vshiftStart = 0;
-    synth->volumeEnd = 0x10;
-    synth->cutOffEnd = 0xFF;
-    synth->phaseEnd = 0;
-    synth->vshiftEnd = 0;
-    synth->limitStart = 0xF;
-    synth->limitEnd = 0xF;
-    synth->reserved[0] = 0;
-    synth->reserved[1] = 0;
-    
-    synth->overwritten = 0;
+	const size_t index = synth / 8;
+	assert(index < 2);
+
+	const size_t mask = 1 << (synth - (index * 8));
+
+	return (song->bytes[OVERWRITES_OFFSET + index] & mask) != 0;
 }
 
-bool lsdj_synth_equals(const lsdj_synth_t* lhs, const lsdj_synth_t* rhs)
+void set_synth_byte(lsdj_song_t* song, uint8_t synth, uint8_t byte, uint8_t value)
 {
-    if (lhs->overwritten == 1 || rhs->overwritten == 1)
-    {
-        return false;
-    } else {
-        return memcmp(lhs, rhs, sizeof(lsdj_synth_t)) == 0 ? true : false;
-    }
+	const size_t index = synth * LSDJ_SYNTH_BYTE_COUNT + byte;
+	assert(index < 256);
+
+	song->bytes[SYNTHS_OFFSET + index] = value;
+}
+
+const uint8_t get_synth_byte(const lsdj_song_t* song, uint8_t synth, uint8_t byte)
+{
+	const size_t index = synth * LSDJ_SYNTH_BYTE_COUNT + byte;
+	assert(index < 256);
+
+	return song->bytes[SYNTHS_OFFSET + index];
+}
+
+void lsdj_synth_set_waveform(lsdj_song_t* song, uint8_t synth, lsdj_synth_waveform waveform)
+{
+	set_synth_byte(song, synth, 0, (uint8_t)waveform);
+}
+
+lsdj_synth_waveform lsdj_synth_get_waveform(const lsdj_song_t* song, uint8_t synth)
+{
+	return (lsdj_synth_waveform)get_synth_byte(song, synth, 0);
+}
+
+void lsdj_synth_set_filter(lsdj_song_t* song, uint8_t synth, lsdj_synth_filter filter)
+{
+	set_synth_byte(song, synth, 1, (uint8_t)filter);
+}
+
+lsdj_synth_filter lsdj_synth_get_filter(const lsdj_song_t* song, uint8_t synth)
+{
+	return (lsdj_synth_filter)get_synth_byte(song, synth, 1);
+}
+
+void lsdj_synth_set_distortion(lsdj_song_t* song, uint8_t synth, lsdj_synth_distortion distortion)
+{
+	set_synth_byte(song, synth, 3, (uint8_t)distortion);
+}
+
+lsdj_synth_distortion lsdj_synth_get_distortion(const lsdj_song_t* song, uint8_t synth)
+{
+	return (lsdj_synth_distortion)get_synth_byte(song, synth, 3);
+}
+
+void lsdj_synth_set_phase_compression(lsdj_song_t* song, uint8_t synth, lsdj_synth_phase_compression compression)
+{
+	set_synth_byte(song, synth, 4, (uint8_t)compression);
+}
+
+lsdj_synth_phase_compression lsdj_synth_get_phase_compression(const lsdj_song_t* song, uint8_t synth)
+{
+	return (lsdj_synth_phase_compression)get_synth_byte(song, synth, 4);
+}
+
+void lsdj_synth_set_volume_start(lsdj_song_t* song, uint8_t synth, uint8_t volume)
+{
+	set_synth_byte(song, synth, 5, volume);
+}
+
+uint8_t lsdj_synth_get_volume_start(const lsdj_song_t* song, uint8_t synth)
+{
+	return get_synth_byte(song, synth, 5);
+}
+
+void lsdj_synth_set_volume_end(lsdj_song_t* song, uint8_t synth, uint8_t volume)
+{
+	set_synth_byte(song, synth, 9, volume);
+}
+
+uint8_t lsdj_synth_get_volume_end(const lsdj_song_t* song, uint8_t synth)
+{
+	return get_synth_byte(song, synth, 9);
+}
+
+void lsdj_synth_set_resonance_start(lsdj_song_t* song, uint8_t synth, uint8_t resonance)
+{
+	const int byte = (get_synth_byte(song, synth, 2) & 0x0F) | ((resonance & 0x0F) << 4);
+	set_synth_byte(song, synth, 2, (uint8_t)byte);
+}
+
+uint8_t lsdj_synth_get_resonance_start(const lsdj_song_t* song, uint8_t synth)
+{
+	return (get_synth_byte(song, synth, 2) & 0xF0) >> 4;
+}
+
+bool lsdj_synth_set_resonance_end(lsdj_song_t* song, uint8_t synth, uint8_t resonance)
+{
+	if (lsdj_song_get_format_version(song) >= 5)
+	{
+		const int byte = (get_synth_byte(song, synth, 2) & 0xF0) | (resonance & 0x0F);
+		set_synth_byte(song, synth, 2, (uint8_t)byte);
+		return true;
+	} else {
+		return false;
+	}
+}
+
+uint8_t lsdj_synth_get_resonance_end(const lsdj_song_t* song, uint8_t synth)
+{
+	if (lsdj_song_get_format_version(song) < 5)
+		return 0;
+	else
+		return (get_synth_byte(song, synth, 2) & 0x0F);
+}
+
+void lsdj_synth_set_cutoff_start(lsdj_song_t* song, uint8_t synth, uint8_t cutoff)
+{
+	set_synth_byte(song, synth, 6, cutoff);
+}
+
+uint8_t lsdj_synth_get_cutoff_start(const lsdj_song_t* song, uint8_t synth)
+{
+	return get_synth_byte(song, synth, 6);
+}
+
+void lsdj_synth_set_cutoff_end(lsdj_song_t* song, uint8_t synth, uint8_t cutoff)
+{
+	set_synth_byte(song, synth, 10, cutoff);
+}
+
+uint8_t lsdj_synth_get_cutoff_end(const lsdj_song_t* song, uint8_t synth)
+{
+	return get_synth_byte(song, synth, 10);
+}
+
+void lsdj_synth_set_vshift_start(lsdj_song_t* song, uint8_t synth, uint8_t vshift)
+{
+	set_synth_byte(song, synth, 8, vshift);
+}
+
+uint8_t lsdj_synth_get_vshift_start(const lsdj_song_t* song, uint8_t synth)
+{
+	return get_synth_byte(song, synth, 8);
+}
+
+void lsdj_synth_set_vshift_end(lsdj_song_t* song, uint8_t synth, uint8_t vshift)
+{
+	set_synth_byte(song, synth, 12, vshift);
+}
+
+uint8_t lsdj_synth_get_vshift_end(const lsdj_song_t* song, uint8_t synth)
+{
+	return get_synth_byte(song, synth, 12);
+}
+
+void lsdj_synth_set_limit_start(lsdj_song_t* song, uint8_t synth, uint8_t limit)
+{
+	const int byte = (get_synth_byte(song, synth, 13) & 0x0F) | (0xF - ((limit & 0x0F) << 4));
+	set_synth_byte(song, synth, 13, (uint8_t)byte);
+}
+
+uint8_t lsdj_synth_get_limit_start(const lsdj_song_t* song, uint8_t synth)
+{
+	return 0xF - ((get_synth_byte(song, synth, 13) & 0xF0) >> 4);
+}
+
+void lsdj_synth_set_limit_end(lsdj_song_t* song, uint8_t synth, uint8_t limit)
+{
+	const int byte = (get_synth_byte(song, synth, 13) & 0xF0) | (0xF - (limit & 0x0F));
+	set_synth_byte(song, synth, 13, (uint8_t)byte);
+}
+
+uint8_t lsdj_synth_get_limit_end(const lsdj_song_t* song, uint8_t synth)
+{
+	return 0xF - (get_synth_byte(song, synth, 13) & 0x0F);
+}
+
+void lsdj_synth_set_phase_start(lsdj_song_t* song, uint8_t synth, uint8_t phase)
+{
+	set_synth_byte(song, synth, 7, phase);
+}
+
+uint8_t lsdj_synth_get_phase_start(const lsdj_song_t* song, uint8_t synth)
+{
+	return get_synth_byte(song, synth, 7);
+}
+
+void lsdj_synth_set_phase_end(lsdj_song_t* song, uint8_t synth, uint8_t phase)
+{
+	set_synth_byte(song, synth, 11, phase);
+}
+
+uint8_t lsdj_synth_get_phase_end(const lsdj_song_t* song, uint8_t synth)
+{
+	return get_synth_byte(song, synth, 11);
 }

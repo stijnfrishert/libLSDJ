@@ -66,6 +66,7 @@ namespace lsdj
         bool underscore = false;
         bool putInFolder = false;
         bool verbose = false;
+        bool skipWorkingMemory = false;
         
         std::vector<int> indices;
         std::vector<std::string> names;
@@ -73,6 +74,7 @@ namespace lsdj
     private:
         int printFolder(const ghc::filesystem::path& path);
         int printSav(const ghc::filesystem::path& path);
+        bool shouldExportWorkingMemory();
         
     private:
         // Converts a project version to a string representation using the current VersionStyle

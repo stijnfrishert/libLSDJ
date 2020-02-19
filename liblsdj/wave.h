@@ -36,29 +36,35 @@
 #ifndef LSDJ_WAVE_H
 #define LSDJ_WAVE_H
 
+#include "song.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdbool.h>
+//! The amount of waves in a song
+#define LSDJ_WAVE_COUNT (0xFF)
 
-#include "command.h"
+//! The number of bytes a wave takes
+/*! Do note that each step is represented by 4 bits, so the step count is twice this */
+#define LSDJ_WAVE_BYTE_COUNT (16)
 
-// The default length of wave data
-#define LSDJ_WAVE_LENGTH (16)
-static const unsigned char LSDJ_DEFAULT_WAVE[LSDJ_WAVE_LENGTH] = { 0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31 };
-    
-// Structure represening a wave for the wave synthesizer
-typedef struct
-{
-    unsigned char data[LSDJ_WAVE_LENGTH];
-} lsdj_wave_t;
-    
-// Clear all wave data to factory settings
-void lsdj_wave_clear(lsdj_wave_t* wave);
+//! The number of steps in a wave
+/*! Do note that each step is represented by 4 bits, so the byte count is half this */
+#define LSDJ_WAVE_STEP_COUNT (LSDJ_WAVE_BYTE_LENGTH * 2)
 
-bool lsdj_wave_equals(const lsdj_wave_t* lhs, const lsdj_wave_t* rhs);
-bool lsdj_wave_is_default(const lsdj_wave_t* wave);
+//! Change the bytes that represent a wave
+/*! @param song The song that contains the wave
+	@param wave The index of the wave (< LSDJ_WAVE_COUNT)
+	@param data Pointer to the data to copy over in the wave, should be of size LSDJ_WAVE_BYTE_COUNT */
+void lsdj_wave_set_bytes(lsdj_song_t* song, uint8_t wave, const uint8_t* data);
+
+//! Retrieve a pointer to the bytes that make up a wave
+/*! @param song The song that contains the wave
+	@param wave The index of the wave (< LSDJ_WAVE_COUNT)
+	@return A pointer to the byte array describing the wave (LSDJ_WAVE_BYTE_COUNT in size) */
+const uint8_t* lsdj_wave_get_bytes(const lsdj_song_t* song, uint8_t wave);
+
     
 #ifdef __cplusplus
 }

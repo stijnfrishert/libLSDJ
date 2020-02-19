@@ -42,11 +42,11 @@ extern "C" {
 
 typedef enum
 {
-    LSDJ_PULSE1,
-    LSDJ_PULSE2,
-    LSDJ_WAVE,
-    LSDJ_NOISE,
-} lsdj_channel_t;
+    LSDJ_CHANNEL_PULSE1 = 0,
+    LSDJ_CHANNEL_PULSE2 = 1,
+    LSDJ_CHANNEL_WAVE = 2,
+    LSDJ_CHANNEL_NOISE = 3,
+} lsdj_channel;
 
 #define LSDJ_CHANNEL_COUNT (4)
 

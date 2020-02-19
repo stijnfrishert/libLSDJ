@@ -33,12 +33,29 @@
  
  */
 
-#include "word.h"
+#ifndef LSDJ_BYTES_H
+#define LSDJ_BYTES_H
 
-#include <string.h>
+#include <stdint.h>
 
-void lsdj_word_clear(lsdj_word_t* word)
-{
-    memset(word->allophones, 0, LSDJ_WORD_LENGTH);
-    memset(word->lengths, 0, LSDJ_WORD_LENGTH);
-}
+//! Copy some bits over to another byte
+/*! @param byte The byte which will be overwritten
+	@param position the position (0-7) where `bits` should be inserted
+	@param count the amount of bits (0-7) form `bits` that should be copied over */
+uint8_t copy_bits(uint8_t byte, uint8_t position, uint8_t count, uint8_t bits);
+
+//! Copy some bits over to another byte in-place
+/*! @param byte The byte which will be overwritten
+	@param position the position (0-7) where `bits` should be inserted
+	@param count the amount of bits (0-7) form `bits` that should be copied over
+	@note position + count should not go above 8 */
+void copy_bits_in_place(uint8_t* byte, uint8_t position, uint8_t count, uint8_t bits);
+
+//! Retrieve a bit string from a byte at (position - count)
+/*! @param byte The byte to take bits from
+	@param position The position (0-7)
+	@param count The amount of bits to copy over (0-7)
+	@note position + count should not go above 8 */
+uint8_t get_bits(uint8_t byte, uint8_t position, uint8_t count);
+
+#endif

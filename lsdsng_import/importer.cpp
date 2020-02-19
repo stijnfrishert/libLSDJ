@@ -207,8 +207,8 @@ namespace lsdj
         if (!project)
             return;
         
-        const auto songBuffer = lsdj_project_get_song_buffer(project);
-        lsdj_sav_set_working_memory_song(sav, songBuffer);
+        const auto song = lsdj_project_get_song(project);
+        lsdj_sav_set_working_memory_song(sav, song);
         
         // Find out if one of the slots has the same name as the working memory filename
         const auto str = workingMemoryPath.stem().string();

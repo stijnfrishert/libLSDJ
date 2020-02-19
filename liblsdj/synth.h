@@ -36,66 +36,238 @@
 #ifndef LSDJ_SYNTH_H
 #define LSDJ_SYNTH_H
 
+#include <stdbool.h>
+
+#include "song.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdbool.h>
+//! The amount of synths in a song
+#define LSDJ_SYNTH_COUNT (0x10)
 
-#define LSDJ_SYNTH_WAVEFORM_SAWTOOTH (0)
-#define LSDJ_SYNTH_WAVEFORM_SQUARE (1)
-#define LSDJ_SYNTH_WAVEFORM_TRIANGLE (2)
-    
-#define LSDJ_SYNTH_FILTER_LOW_PASS (0)
-#define LSDJ_SYNTH_FILTER_HIGH_PASS (1)
-#define LSDJ_SYNTH_FILTER_BAND_PASS (2)
-#define LSDJ_SYNTH_FILTER_ALL_PASS (3)
-    
-#define LSDJ_SYNTH_DISTORTION_CLIP (0)
-#define LSDJ_SYNTH_DISTORTION_WRAP (1)
-#define LSDJ_SYNTH_DISTORTION_FOLD (2)
-    
-#define LSDJ_SYNTH_PHASE_NORMAL (0)
-#define LSDJ_SYNTH_PHASE_RESYNC (1)
-#define LSDJ_SYNTH_PHASE_RESYNC2 (2)
+//! The amount of bytes a synth takes
+#define LSDJ_SYNTH_BYTE_COUNT (16)
 
-// Structure representing soft synth data
-typedef struct
+//! The waveform shapes the synth can use
+typedef enum
 {
-    unsigned char waveform;
-    unsigned char filter;
-    unsigned char resonanceStart;
-    unsigned char resonanceEnd;
-    unsigned char distortion;
-    unsigned char phase;
-    
-    unsigned char volumeStart;
-    unsigned char volumeEnd;
-    unsigned char cutOffStart;
-    unsigned char cutOffEnd;
-    
-    unsigned char phaseStart;
-    unsigned char phaseEnd;
-    unsigned char vshiftStart;
-    unsigned char vshiftEnd;
-    
-    unsigned char limitStart;
-    unsigned char limitEnd;
-    
-    unsigned char reserved[2];
-    
-    unsigned char overwritten; // 0 if false, 1 if true
-} lsdj_synth_t;
+	LSDJ_SYNTH_WAVEFORM_SAW = 0,
+	LSDJ_SYNTH_WAVEFORM_SQUARE,
+	LSDJ_SYNTH_WAVEFORM_TRIANGLE
+} lsdj_synth_waveform;
 
-// Clear all soft synth data to factory settings
-void lsdj_synth_clear(lsdj_synth_t* synth);
+//! The filter types the synth can use
+typedef enum
+{
+	LSDJ_SYNTH_FILTER_LOW_PASS = 0,
+	LSDJ_SYNTH_FILTER_HIGH_PASS,
+	LSDJ_SYNTH_FILTER_BAND_PASS,
+	LSDJ_SYNTH_FILTER_ALL_PASS,
+} lsdj_synth_filter;
 
-// Check if two synths are equal
-// Will result in false if either of these has its wavetable overwritten
-bool lsdj_synth_equals(const lsdj_synth_t* lhs, const lsdj_synth_t* rhs);
+//! The distortion types the synth can use
+typedef enum
+{
+	LSDJ_SYNTH_DISTORTION_CLIP = 0,
+	LSDJ_SYNTH_DISTORTION_WRAP,
+	LSDJ_SYNTH_DISTORTION_FOLD
+} lsdj_synth_distortion;
+
+//! The phase compression modes the synth can use
+typedef enum
+{
+	LSDJ_SYNTH_PHASE_NORMAL = 0,
+	LSDJ_SYNTH_PHASE_RESYNC,
+	LSDJ_SYNTH_PHASE_RESYNC2
+} lsdj_synth_phase_compression;
+
+//! Has the wave of this synth been overwritten?
+/*! @param song The song containing the synth and wave
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@return True when the wave has been overwritten */
+bool lsdj_synth_is_wave_overwritten(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the waveform type of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param waveform The waveform to set */
+void lsdj_synth_set_waveform(lsdj_song_t* song, uint8_t synth, lsdj_synth_waveform waveform);
+
+//! Retrieve the waveform type of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+lsdj_synth_waveform lsdj_synth_get_waveform(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the filter type of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param filter The filter to set */
+void lsdj_synth_set_filter(lsdj_song_t* song, uint8_t synth, lsdj_synth_filter filter);
+
+//! Retrieve the filter type of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+lsdj_synth_filter lsdj_synth_get_filter(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the distortion type of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param distortion The distortion to set */
+void lsdj_synth_set_distortion(lsdj_song_t* song, uint8_t synth, lsdj_synth_distortion distortion);
+
+//! Retrieve the distortion type of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+lsdj_synth_distortion lsdj_synth_get_distortion(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the phase compression mode of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param phase_compression The phase_compression to set */
+void lsdj_synth_set_phase_compression(lsdj_song_t* song, uint8_t synth, lsdj_synth_phase_compression compression);
+
+//! Retrieve the phase compression mode of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+lsdj_synth_phase_compression lsdj_synth_get_phase_compression(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the volume start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param volume The volume to set */
+void lsdj_synth_set_volume_start(lsdj_song_t* song, uint8_t synth, uint8_t volume);
+
+//! Retrieve the volume start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_volume_start(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the volume end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param volume The volume to set */
+void lsdj_synth_set_volume_end(lsdj_song_t* song, uint8_t synth, uint8_t volume);
+
+//! Retrieve the volume end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_volume_end(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the resonance start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param resonance The resonance to set */
+void lsdj_synth_set_resonance_start(lsdj_song_t* song, uint8_t synth, uint8_t resonance);
+
+//! Retrieve the resonance start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_resonance_start(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the resonance end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param resonance The resonance to set
+	@return false if the format version doesn't support this (< 5)*/
+bool lsdj_synth_set_resonance_end(lsdj_song_t* song, uint8_t synth, uint8_t resonance);
+
+//! Retrieve the resonance end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_resonance_end(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the cutoff start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param cutoff The cutoff to set */
+void lsdj_synth_set_cutoff_start(lsdj_song_t* song, uint8_t synth, uint8_t cutoff);
+
+//! Retrieve the cutoff start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_cutoff_start(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the cutoff end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param cutoff The cutoff to set */
+void lsdj_synth_set_cutoff_end(lsdj_song_t* song, uint8_t synth, uint8_t cutoff);
+
+//! Retrieve the cutoff end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_cutoff_end(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the vshift start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param vshift The vshift to set */
+void lsdj_synth_set_vshift_start(lsdj_song_t* song, uint8_t synth, uint8_t vshift);
+
+//! Retrieve the vshift start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_vshift_start(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the vshift end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param vshift The vshift to set */
+void lsdj_synth_set_vshift_end(lsdj_song_t* song, uint8_t synth, uint8_t vshift);
+
+//! Retrieve the vshift end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_vshift_end(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the limit start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param limit The limit to set */
+void lsdj_synth_set_limit_start(lsdj_song_t* song, uint8_t synth, uint8_t limit);
+
+//! Retrieve the limit start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_limit_start(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the limit end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param limit The limit to set */
+void lsdj_synth_set_limit_end(lsdj_song_t* song, uint8_t synth, uint8_t limit);
+
+//! Retrieve the limit end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_limit_end(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the phase start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param phase The phase to set */
+void lsdj_synth_set_phase_start(lsdj_song_t* song, uint8_t synth, uint8_t phase);
+
+//! Retrieve the phase start of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_phase_start(const lsdj_song_t* song, uint8_t synth);
+
+//! Change the phase end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param phase The phase to set */
+void lsdj_synth_set_phase_end(lsdj_song_t* song, uint8_t synth, uint8_t phase);
+
+//! Retrieve the phase end of a synth
+/*! @param song The song containing the synth
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
+uint8_t lsdj_synth_get_phase_end(const lsdj_song_t* song, uint8_t synth);
     
 #ifdef __cplusplus
 }
 #endif
-    
+
 #endif

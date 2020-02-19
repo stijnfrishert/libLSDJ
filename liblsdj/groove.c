@@ -35,12 +35,22 @@
 
 #include "groove.h"
 
-#include <string.h>
+#include <assert.h>
 
-static const unsigned char DEFAULT_GROOVE[LSDJ_GROOVE_LENGTH] = { 0x06, 0x06, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+#define GROOVES_OFFSET (0x1090)
 
-void lsdj_groove_clear(lsdj_groove_t* groove)
+void lsdj_groove_set_step(lsdj_song_t* song, uint8_t groove, uint8_t step, uint8_t value)
 {
-    memcpy(groove->data, DEFAULT_GROOVE, LSDJ_GROOVE_LENGTH);
+	const size_t index = groove * LSDJ_GROOVE_LENGTH + step;
+	assert(index < 2048);
+
+	song->bytes[GROOVES_OFFSET + index] = value;	
 }
 
+uint8_t lsdj_groove_get_step(const lsdj_song_t* song, uint8_t groove, uint8_t step)
+{
+	const size_t index = groove * LSDJ_GROOVE_LENGTH + step;
+	assert(index < 512);
+
+	return song->bytes[GROOVES_OFFSET + index];
+}

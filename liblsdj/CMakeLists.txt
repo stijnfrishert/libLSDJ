@@ -7,50 +7,46 @@ endif (APPLE)
 
 set(HEADERS
 	allocator.h
+	bytes.h
 	chain.h
 	channel.h
 	command.h
 	compression.h
 	error.h
-	groove.h
 	instrument.h
-	instrument_constants.h
-	instrument_kit.h
-	instrument_noise.h
-	instrument_pulse.h
-	instrument_wave.h
 	panning.h
 	phrase.h
 	project.h
-	row.h
 	sav.h
 	song.h
-	song_buffer.h
 	synth.h
 	table.h
 	version.h
-	vio.h
 	wave.h
-	word.h)
+	vio.h
+	)
 
 set(SOURCES
 	allocator.c
+	bytes.c
 	chain.c
-	command.c
 	compression.c
 	error.c
 	groove.c
 	instrument.c
+	instrument_kit.c
+	instrument_noise.c
+	instrument_pulse.c
+	instrument_wave.c
 	phrase.c
 	project.c
-	row.c
 	sav.c
 	song.c
+	speech.c
 	synth.c
 	table.c
 	vio.c
 	wave.c
-	word.c
 	)
 
 # Create the library target
