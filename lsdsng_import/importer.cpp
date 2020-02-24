@@ -37,8 +37,8 @@
 #include <array>
 #include <iostream>
 
-#include "../liblsdj/song.h"
-#include "../liblsdj/project.h"
+#include <lsdj/song.h>
+#include <lsdj/project.h>
 
 #include "../common/common.hpp"
 #include "importer.hpp"

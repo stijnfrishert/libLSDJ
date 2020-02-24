@@ -38,9 +38,9 @@
 
 #include <ghc/filesystem.hpp>
 
-#include "../liblsdj/error.h"
-#include "../liblsdj/project.h"
-#include "../liblsdj/sav.h"
+#include <lsdj/error.h>
+#include <lsdj/project.h>
+#include <lsdj/sav.h>
 
 namespace lsdj
 {

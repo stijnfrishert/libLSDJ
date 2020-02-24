@@ -39,9 +39,10 @@
 #include <iostream>
 #include <sstream>
 
+#include <lsdj/sav.h>
+#include <lsdj/song.h>
+
 #include "../common/common.hpp"
-#include "../liblsdj/sav.h"
-#include "../liblsdj/song.h"
 
 namespace lsdj
 {

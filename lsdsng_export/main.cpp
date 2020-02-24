@@ -41,9 +41,10 @@
 #include <sstream>
 #include <vector>
 
+#include <lsdj/sav.h>
+#include <lsdj/version.h>
+
 #include "../common/common.hpp"
-#include "../liblsdj/sav.h"
-#include "../liblsdj/version.h"
 #include "exporter.hpp"
 
 void printHelp(const popl::OptionParser& options)

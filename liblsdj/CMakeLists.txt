@@ -5,55 +5,58 @@ if (APPLE)
   add_definitions(-Wall -Werror -Wconversion -Wno-unused-variable)
 endif (APPLE)
 
-set(HEADERS
-	bytes.h
-	chain.h
-	channel.h
-	command.h
-	compression.h
-	error.h
-	instrument.h
-	panning.h
-	phrase.h
-	project.h
-	sav.h
-	song.h
-	synth.h
-	table.h
-	version.h
-	wave.h
-	vio.h
+set(PUBLIC_HEADERS
+	include/lsdj/chain.h
+	include/lsdj/channel.h
+	include/lsdj/command.h
+	include/lsdj/compression.h
+	include/lsdj/error.h
+	include/lsdj/instrument.h
+	include/lsdj/panning.h
+	include/lsdj/phrase.h
+	include/lsdj/project.h
+	include/lsdj/sav.h
+	include/lsdj/song.h
+	include/lsdj/synth.h
+	include/lsdj/table.h
+	include/lsdj/version.h
+	include/lsdj/wave.h
+	include/lsdj/vio.h
 	)
 
 set(SOURCES
-	bytes.c
-	compression.c
-	chain.c
-	error.c
-	groove.c
-	instrument.c
-	instrument_kit.c
-	instrument_noise.c
-	instrument_pulse.c
-	instrument_wave.c
-	phrase.c
-	project.c
-	sav.c
-	song.c
-	speech.c
-	synth.c
-	table.c
-	vio.c
-	wave.c
+	src/bytes.c
+	src/bytes.h
+	src/compression.c
+	src/chain.c
+	src/error.c
+	src/groove.c
+	src/instrument.c
+	src/instrument_kit.c
+	src/instrument_noise.c
+	src/instrument_pulse.c
+	src/instrument_wave.c
+	src/phrase.c
+	src/project.c
+	src/sav.c
+	src/song.c
+	src/speech.c
+	src/synth.c
+	src/table.c
+	src/vio.c
+	src/wave.c
 	)
 
 # Create the library target
-add_library(liblsdj STATIC ${HEADERS} ${SOURCES})
+add_library(liblsdj STATIC ${PUBLIC_HEADERS} ${SOURCES})
 set_target_properties(liblsdj PROPERTIES OUTPUT_NAME lsdj)
-source_group(\\ FILES ${HEADERS} ${SOURCES})
-target_include_directories(liblsdj INTERFACE ".")
+source_group(\\ FILES ${PUBLIC_HEADERS} ${SOURCES})
+target_include_directories(liblsdj
+	INTERFACE "include"
+	PRIVATE "include/lsdj"
+	)
 
 install(TARGETS liblsdj DESTINATION lib)
-install(FILES ${HEADERS} DESTINATION include/lsdj)
+install(FILES ${PUBLIC_HEADERS} DESTINATION include/lsdj)
 
 add_subdirectory(test)

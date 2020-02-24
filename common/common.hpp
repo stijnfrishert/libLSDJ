@@ -38,8 +38,8 @@
 
 #include <string>
 
-#include "../liblsdj/error.h"
-#include "../liblsdj/project.h"
+#include <lsdj/error.h>
+#include <lsdj/project.h>
 
 namespace lsdj
 {   
