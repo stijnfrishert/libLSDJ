@@ -46,12 +46,18 @@ uint8_t lsdj_instrument_wave_get_length(const lsdj_song_t* song, uint8_t instrum
 
 void lsdj_instrument_wave_set_repeat(lsdj_song_t* song, uint8_t instrument, uint8_t repeat)
 {
-	set_instrument_bits(song, instrument, 2, 0, 4, repeat);
+    if (lsdj_song_get_format_version(song) >= 9)
+        set_instrument_bits(song, instrument, 2, 0, 4, (repeat & 0xF) ^ 0xF);
+    else
+        set_instrument_bits(song, instrument, 2, 0, 4, (repeat & 0xF));
 }
 
 uint8_t lsdj_instrument_wave_get_repeat(const lsdj_song_t* song, uint8_t instrument)
 {
-	return get_instrument_bits(song, instrument, 2, 0, 4);
+    if (lsdj_song_get_format_version(song) >= 9)
+        return (get_instrument_bits(song, instrument, 2, 0, 4) & 0xF) ^ 0xF;
+    else
+        return get_instrument_bits(song, instrument, 2, 0, 4) & 0xF;
 }
 
 bool lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed)
