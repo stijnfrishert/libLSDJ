@@ -43,8 +43,7 @@ extern "C" {
 typedef enum
 {
 	LSDJ_COMMAND_NONE = 0,
-	LSDJ_COMMAND_A,
-    LSDJ_COMMAND_B,
+	LSDJ_COMMAND_A = 1,
 	LSDJ_COMMAND_C,
 	LSDJ_COMMAND_D,
 	LSDJ_COMMAND_E,
@@ -66,6 +65,7 @@ typedef enum
 	LSDJ_COMMAND_ARDUINO_BOY_X,
 	LSDJ_COMMAND_ARDUINO_BOY_Q,
 	LSDJ_COMMAND_ARDUINO_BOY_Y,
+    LSDJ_COMMAND_B // Added in 7.1.0
 } lsdj_command;
     
 #ifdef __cplusplus

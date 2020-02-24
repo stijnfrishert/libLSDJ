@@ -89,16 +89,47 @@ uint8_t lsdj_table_get_transposition(const lsdj_song_t* song, uint8_t table, uin
 
 bool lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command)
 {
-    if (command == LSDJ_COMMAND_B && lsdj_song_get_format_version(song) < 8)
-        return false;
+    if (lsdj_song_get_format_version(song) >= 8)
+    {
+        uint8_t byte = 0;
+        if (command == LSDJ_COMMAND_B)
+            byte = 1;
+        else if (command > 1)
+            byte = ((uint8_t)command) + 1;
+        else
+            byte = (uint8_t)command;
+            
+        const size_t index = table * LSDJ_TABLE_LENGTH + row;
+        assert(index <= CONTENT_LENGTH);
+        song->bytes[COMMAND1_OFFSET + index] = byte;
+    } else {
+        if (command == LSDJ_COMMAND_B)
+            return false;
+        
+        TABLE_SETTER(COMMAND1_OFFSET, CONTENT_LENGTH, (uint8_t)command)
+    }
     
-	TABLE_SETTER(COMMAND1_OFFSET, CONTENT_LENGTH, (uint8_t)command);
     return true;
 }
 
 lsdj_command lsdj_table_get_command1(const lsdj_song_t* song, uint8_t table, uint8_t row)
 {
-	TABLE_GETTER(COMMAND1_OFFSET, CONTENT_LENGTH);
+	if (lsdj_song_get_format_version(song) >= 8)
+    {
+        const size_t index = table * LSDJ_TABLE_LENGTH + row;
+        assert(index <= COMMAND1_OFFSET);
+        
+        const uint8_t byte = song->bytes[COMMAND2_OFFSET + index];
+        
+        if (byte > 1)
+            return (lsdj_command)(byte - 1);
+        else if (byte == 1)
+            return LSDJ_COMMAND_B;
+        else
+            return (lsdj_command)byte;
+    } else {
+        TABLE_GETTER(COMMAND1_OFFSET, COMMAND2_OFFSET)
+    }
 }
 
 void lsdj_table_set_command1_value(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value)
@@ -113,16 +144,47 @@ uint8_t lsdj_table_get_command1_value(const lsdj_song_t* song, uint8_t table, ui
 
 bool lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command)
 {
-    if (command == LSDJ_COMMAND_B && lsdj_song_get_format_version(song) < 8)
-        return false;
+    if (lsdj_song_get_format_version(song) >= 8)
+    {
+        uint8_t byte = 0;
+        if (command == LSDJ_COMMAND_B)
+            byte = 1;
+        else if (command > 1)
+            byte = ((uint8_t)command) + 1;
+        else
+            byte = (uint8_t)command;
+            
+        const size_t index = table * LSDJ_TABLE_LENGTH + row;
+        assert(index <= CONTENT_LENGTH);
+        song->bytes[COMMAND2_OFFSET + index] = byte;
+    } else {
+        if (command == LSDJ_COMMAND_B)
+            return false;
+        
+        TABLE_SETTER(COMMAND2_OFFSET, CONTENT_LENGTH, (uint8_t)command)
+    }
     
-	TABLE_SETTER(COMMAND2_OFFSET, CONTENT_LENGTH, (uint8_t)command);
     return true;
 }
 
 lsdj_command lsdj_table_get_command2(const lsdj_song_t* song, uint8_t table, uint8_t row)
 {
-	TABLE_GETTER(COMMAND2_OFFSET, CONTENT_LENGTH);
+    if (lsdj_song_get_format_version(song) >= 8)
+    {
+        const size_t index = table * LSDJ_TABLE_LENGTH + row;
+        assert(index <= COMMAND2_OFFSET);
+        
+        const uint8_t byte = song->bytes[COMMAND2_OFFSET + index];
+        
+        if (byte > 1)
+            return (lsdj_command)(byte - 1);
+        else if (byte == 1)
+            return LSDJ_COMMAND_B;
+        else
+            return (lsdj_command)byte;
+    } else {
+        TABLE_GETTER(COMMAND2_OFFSET, COMMAND2_OFFSET)
+    }
 }
 
 void lsdj_table_set_command2_value(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value)
