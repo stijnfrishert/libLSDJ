@@ -1,4 +1,4 @@
-#include <error.h>
+#include <lsdj/error.h>
 
 #include <catch2/catch.hpp>
 

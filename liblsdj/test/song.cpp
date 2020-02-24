@@ -1,18 +1,18 @@
-#include <song.h>
+#include <lsdj/song.h>
 
 #include <array>
 #include <catch2/catch.hpp>
-#include <chain.h>
-#include <command.h>
-#include <groove.h>
-#include <instrument.h>
-#include <panning.h>
-#include <phrase.h>
-#include <sav.h>
-#include <speech.h>
-#include <synth.h>
-#include <table.h>
-#include <wave.h>
+#include <lsdj/chain.h>
+#include <lsdj/command.h>
+#include <lsdj/groove.h>
+#include <lsdj/instrument.h>
+#include <lsdj/panning.h>
+#include <lsdj/phrase.h>
+#include <lsdj/sav.h>
+#include <lsdj/speech.h>
+#include <lsdj/synth.h>
+#include <lsdj/table.h>
+#include <lsdj/wave.h>
 
 using namespace Catch;
 

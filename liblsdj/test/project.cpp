@@ -1,11 +1,11 @@
-#include <project.h>
+#include <lsdj/project.h>
 
 #include <algorithm>
 #include <array>
 #include <cassert>
 #include <catch2/catch.hpp>
+#include <lsdj/compression.h>
 
-#include <compression.h>
 #include "file.hpp"
 
 using namespace Catch;
