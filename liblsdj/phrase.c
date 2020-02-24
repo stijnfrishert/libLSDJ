@@ -83,9 +83,13 @@ uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint
 	PHRASE_GETTER(PHRASE_INSTRUMENTS_OFFSET, 4080)
 }
 
-void lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t row, lsdj_command command)
+bool lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t row, lsdj_command command)
 {
+    if (command == LSDJ_COMMAND_B && lsdj_song_get_format_version(song) < 8)
+        return false;
+    
 	PHRASE_SETTER(PHRASE_COMMANDS_OFFSET, 4080, (uint8_t)command)
+    return true;
 }
 
 lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t row)

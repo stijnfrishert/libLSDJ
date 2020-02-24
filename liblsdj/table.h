@@ -80,8 +80,10 @@ uint8_t lsdj_table_get_transposition(const lsdj_song_t* song, uint8_t table, uin
 //! Change the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
-	@param command The command to write into the slot */
-void lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command);
+	@param command The command to write into the slot
+    @note Versions earlier than 7.1.0 (fmt v8 don't support the B command
+    @return false if the command is not supported in your LSDj version */
+bool lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command);
 
 //! Return the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
@@ -102,8 +104,10 @@ uint8_t lsdj_table_get_command1_value(const lsdj_song_t* song, uint8_t table, ui
 //! Change the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
-	@param command The command to write into the slot */
-void lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command);
+	@param command The command to write into the slot
+    @note Versions earlier than 7.1.0 (fmt v8 don't support the B command
+    @return false if the command is not supported in your LSDj version */
+bool lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command);
 
 //! Return the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT

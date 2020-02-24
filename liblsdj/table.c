@@ -87,9 +87,13 @@ uint8_t lsdj_table_get_transposition(const lsdj_song_t* song, uint8_t table, uin
 	TABLE_GETTER(TRANSPOSITION_OFFSET, CONTENT_LENGTH);
 }
 
-void lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command)
+bool lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command)
 {
+    if (command == LSDJ_COMMAND_B && lsdj_song_get_format_version(song) < 8)
+        return false;
+    
 	TABLE_SETTER(COMMAND1_OFFSET, CONTENT_LENGTH, (uint8_t)command);
+    return true;
 }
 
 lsdj_command lsdj_table_get_command1(const lsdj_song_t* song, uint8_t table, uint8_t row)
@@ -107,9 +111,13 @@ uint8_t lsdj_table_get_command1_value(const lsdj_song_t* song, uint8_t table, ui
 	TABLE_GETTER(COMMAND1_VALUE_OFFSET, CONTENT_LENGTH);
 }
 
-void lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command)
+bool lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command)
 {
+    if (command == LSDJ_COMMAND_B && lsdj_song_get_format_version(song) < 8)
+        return false;
+    
 	TABLE_SETTER(COMMAND2_OFFSET, CONTENT_LENGTH, (uint8_t)command);
+    return true;
 }
 
 lsdj_command lsdj_table_get_command2(const lsdj_song_t* song, uint8_t table, uint8_t row)
