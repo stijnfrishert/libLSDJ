@@ -33,36 +33,38 @@
  
  */
 
-#ifndef LSDJ_WAVETABLE_IMPORTER_HPP
-#define LSDJ_WAVETABLE_IMPORTER_HPP
+#ifndef LSDJ_CHAIN_H
+#define LSDJ_CHAIN_H
 
-#include <ghc/filesystem.hpp>
-#include <string>
-#include <vector>
+#include "song.h"
 
-#include <lsdj/error.h>
-#include <lsdj/song.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-namespace lsdj
-{
-    class WavetableImporter
-    {
-    public:
-        bool import(const std::string& projectName, const std::string& wavetableName);
-        
-    public:
-        std::string outputName;
-        unsigned char wavetableIndex = 0;
-        
-        bool zero = false;
-        bool force = false;
-        bool verbose = false;
-        
-    private:
-        bool importToSav(const ghc::filesystem::path& path, const std::string& wavetableName);
-        bool importToLsdsng(const ghc::filesystem::path& path, const std::string& wavetableName);
-        std::pair<bool, unsigned int> importToSong(lsdj_song_t* song, const std::string& wavetableName);
-    };
+	//! The number of bytes the default wave array takes up
+#define LSDJ_DEFAULT_WAVE_LENGTH (16)
+
+//! The default wave array
+static const unsigned char LSDJ_DEFAULT_WAVE[LSDJ_DEFAULT_WAVE_LENGTH] = {
+    0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31
+};
+
+//! The empty (silent) wave array
+static const unsigned char LSDJ_SILENT_WAVE[LSDJ_DEFAULT_WAVE_LENGTH] = {
+    0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88
+};
+
+//! The number of bytes the default instrument array takes up
+#define LSDJ_DEFAULT_INSTRUMENT_LENGTH (0x10)
+
+//! The default instrument array
+static const uint8_t LSDJ_DEFAULT_INSTRUMENT[LSDJ_DEFAULT_INSTRUMENT_LENGTH] = {
+    0xA8, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x03, 0x00, 0x00, 0xD0, 0x00, 0x00, 0x00, 0xF3, 0x00, 0x00
+};
+    
+#ifdef __cplusplus
 }
+#endif
 
 #endif

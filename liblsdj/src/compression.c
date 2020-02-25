@@ -40,6 +40,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "defaults.h"
 #include "sav.h"
 #include "song.h"
 
@@ -52,41 +53,8 @@
 //! The SA byte that signals a default wave (de)compression
 #define LSDJ_DEFAULT_WAVE_BYTE (0xF0)
 
-//! The number of bytes the default wave array takes up
-#define LSDJ_DEFAULT_WAVE_LENGTH (16)
-
-//! The default wave array
-static const unsigned char LSDJ_DEFAULT_WAVE[LSDJ_DEFAULT_WAVE_LENGTH] = {
-    0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31
-};
-
 //! The SA byte that signals a default instrument (de)compression
 #define LSDJ_DEFAULT_INSTRUMENT_BYTE (0xF1)
-
-//! The number of bytes the default instrument array takes up
-#define LSDJ_DEFAULT_INSTRUMENT_LENGTH (0x10)
-
-//! The default instrument array
-static const uint8_t LSDJ_DEFAULT_INSTRUMENT[LSDJ_DEFAULT_INSTRUMENT_LENGTH] = {
-    0xA8, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x03, 0x00, 0x00, 0xD0, 0x00, 0x00, 0x00, 0xF3, 0x00, 0x00
-};
-
-
-bool move_to_next_block_alignment(lsdj_vio_t* rvio, long firstBlockPosition, lsdj_error_t** error)
-{
-    const long position = lsdj_vio_tell(rvio) - firstBlockPosition;
-    const long remainder = position % LSDJ_BLOCK_SIZE;
-    const long offset = LSDJ_BLOCK_SIZE - remainder;
-    if (!lsdj_vio_seek(rvio, offset, SEEK_CUR))
-    {
-        lsdj_error_optional_new(error, "could not jump to block alignment");
-        return false;
-    }
-    
-    assert((lsdj_vio_tell(rvio) - firstBlockPosition) % LSDJ_BLOCK_SIZE == 0);
-    
-    return true;
-}
 
 
 // --- Decompression --- //

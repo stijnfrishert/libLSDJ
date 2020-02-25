@@ -36,6 +36,8 @@
 #ifndef LSDJ_WAVE_H
 #define LSDJ_WAVE_H
 
+#include <stdbool.h>
+
 #include "song.h"
 
 #ifdef __cplusplus
@@ -59,11 +61,28 @@ extern "C" {
 	@param data Pointer to the data to copy over in the wave, should be of size LSDJ_WAVE_BYTE_COUNT */
 void lsdj_wave_set_bytes(lsdj_song_t* song, uint8_t wave, const uint8_t* data);
 
+//! Clear a wave so that it contains a silent table
+/*! @param song The song that contains the wave
+	@param wave The index of the wave (< LSDJ_WAVE_COUNT) */
+void lsdj_wave_set_silent(lsdj_song_t* song, uint8_t wave);
+
+//! Retrieve a pointer to the bytes that make up a wave
+/*! @param song The song that contains the wave
+    @param wave The index of the wave (< LSDJ_WAVE_COUNT)
+    This funtion returns mutable memory. See lsdj_wave_get_bytes_const() for const wave retrieval
+    @return A pointer to the byte array describing the wave (LSDJ_WAVE_BYTE_COUNT in size) */
+uint8_t* lsdj_wave_get_bytes(lsdj_song_t* song, uint8_t wave);
+
 //! Retrieve a pointer to the bytes that make up a wave
 /*! @param song The song that contains the wave
 	@param wave The index of the wave (< LSDJ_WAVE_COUNT)
+    This funtion returns const memory. See lsdj_wave_get_bytes() for mutable wave retrieval
 	@return A pointer to the byte array describing the wave (LSDJ_WAVE_BYTE_COUNT in size) */
-const uint8_t* lsdj_wave_get_bytes(const lsdj_song_t* song, uint8_t wave);
+const uint8_t* lsdj_wave_get_bytes_const(const lsdj_song_t* song, uint8_t wave);
+
+//! Is a given wave the default wave?
+/*! @return Whether the wave is the default one */
+bool lsdj_wave_is_default(const lsdj_song_t* song, uint8_t wave);
 
     
 #ifdef __cplusplus

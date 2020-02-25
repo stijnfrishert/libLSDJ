@@ -29,6 +29,7 @@ set(SOURCES
 	src/bytes.h
 	src/compression.c
 	src/chain.c
+	src/defaults.h
 	src/error.c
 	src/groove.c
 	src/instrument.c

@@ -38,6 +38,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include "defaults.h"
+
 #define WAVES_OFFSET (0x6000)
 
 void lsdj_wave_set_bytes(lsdj_song_t* song, uint8_t wave, const uint8_t* data)
@@ -48,7 +50,12 @@ void lsdj_wave_set_bytes(lsdj_song_t* song, uint8_t wave, const uint8_t* data)
 	memcpy(&song->bytes[WAVES_OFFSET + index], data, LSDJ_WAVE_BYTE_COUNT);
 }
 
-const uint8_t* lsdj_wave_get_bytes(const lsdj_song_t* song, uint8_t wave)
+void lsdj_wave_set_silent(lsdj_song_t* song, uint8_t wave)
+{
+	lsdj_wave_set_bytes(song, wave, LSDJ_SILENT_WAVE);
+}
+
+uint8_t* lsdj_wave_get_bytes(lsdj_song_t* song, uint8_t wave)
 {
 	const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
 	assert(index < 4096);
@@ -56,3 +63,18 @@ const uint8_t* lsdj_wave_get_bytes(const lsdj_song_t* song, uint8_t wave)
 	return &song->bytes[WAVES_OFFSET + index];
 }
 
+const uint8_t* lsdj_wave_get_bytes_const(const lsdj_song_t* song, uint8_t wave)
+{
+    const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
+    assert(index < 4096);
+
+    return &song->bytes[WAVES_OFFSET + index];
+}
+
+bool lsdj_wave_is_default(const lsdj_song_t* song, uint8_t wave)
+{
+	const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
+	assert(index < 4096);
+
+    return memcmp(&song->bytes[WAVES_OFFSET + index], LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE_LENGTH)) == 0;
+}
