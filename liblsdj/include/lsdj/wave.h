@@ -47,6 +47,9 @@ extern "C" {
 //! The amount of waves in a song
 #define LSDJ_WAVE_COUNT (0xFF)
 
+	//! The amount of waves per synth
+#define LSDJ_WAVE_PER_SYNTH_COUNT (0xF)
+
 //! The number of bytes a wave takes
 /*! Do note that each step is represented by 4 bits, so the step count is twice this */
 #define LSDJ_WAVE_BYTE_COUNT (16)

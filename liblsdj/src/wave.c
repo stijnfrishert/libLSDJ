@@ -39,6 +39,7 @@
 #include <string.h>
 
 #include "defaults.h"
+#include "synth.h"
 
 #define WAVES_OFFSET (0x6000)
 
@@ -48,6 +49,8 @@ void lsdj_wave_set_bytes(lsdj_song_t* song, uint8_t wave, const uint8_t* data)
 	assert(index < 4096);
 
 	memcpy(&song->bytes[WAVES_OFFSET + index], data, LSDJ_WAVE_BYTE_COUNT);
+
+	lsdj_synth_set_wave_overwritten(song, wave / LSDJ_WAVE_PER_SYNTH_COUNT, true);
 }
 
 void lsdj_wave_set_silent(lsdj_song_t* song, uint8_t wave)
