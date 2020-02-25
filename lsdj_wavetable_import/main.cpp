@@ -52,14 +52,14 @@ void printHelp(const popl::OptionParser& options)
     std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";
 }
 
-unsigned char parseSynthIndex(const std::string& str)
+uint8_t parseSynthIndex(const std::string& str)
 {
-    return static_cast<unsigned char>(std::stoul(str, nullptr, 16)) * 16;
+    return static_cast<uint8_t>(std::stoul(str, nullptr, 16)) * 16;
 }
 
-unsigned char parseIndex(const std::string& str)
+uint8_t parseIndex(const std::string& str)
 {
-    return static_cast<unsigned char>(std::stoul(str, nullptr, 16));
+    return static_cast<uint8_t>(std::stoul(str, nullptr, 16));
 }
 
 int main(int argc, char* argv[])

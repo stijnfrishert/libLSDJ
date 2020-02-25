@@ -58,8 +58,8 @@ namespace lsdj
     std::string constructProjectName(const lsdj_project_t* project, bool underscore)
     {
         std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-        name.fill(0);
-        lsdj_project_get_name(project, name.data());
+        name.fill('\0');
+        strncpy(name.data(), lsdj_project_get_name(project), name.size());
         
         if (underscore)
             std::replace(name.begin(), name.end(), 'x', '_');

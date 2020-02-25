@@ -37,6 +37,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -54,14 +55,14 @@ struct lsdj_sav_t
 
     //! Index of the project that is currently being edited
     /*! Indices start at 0, a value of LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX means there is no active project */
-    unsigned char activeProjectIndex;
+    uint8_t activeProjectIndex;
 
     //! The project slots
     /*! If one of these is NULL, it means the slot isn't used by the sav */
     lsdj_project_t* projects[LSDJ_SAV_PROJECT_COUNT];
     
     //! Reserved empty memory
-    unsigned char reserved8120[30];
+    uint8_t reserved8120[30];
 
     //! The allocator used to create this sav
     const lsdj_allocator_t* allocator;
@@ -70,11 +71,11 @@ struct lsdj_sav_t
 typedef struct
 {
 	char projectNames[LSDJ_SAV_PROJECT_COUNT][LSDJ_PROJECT_NAME_LENGTH];
-	unsigned char projectVersions[LSDJ_SAV_PROJECT_COUNT];
-	unsigned char empty[30];
-	char init[2];
-	unsigned char activeProject;
-    unsigned char blockAllocationTable[LSDJ_BLOCK_COUNT];
+	uint8_t projectVersions[LSDJ_SAV_PROJECT_COUNT];
+	uint8_t empty[30];
+	uint8_t init[2];
+	uint8_t activeProject;
+    uint8_t blockAllocationTable[LSDJ_BLOCK_COUNT];
 } header_t;
 
 
@@ -188,7 +189,7 @@ void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_t* song)
     memcpy(&sav->workingMemorysong, song, sizeof(lsdj_song_t));
 }
 
-bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error)
+bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, uint8_t index, lsdj_error_t** error)
 {
     if (index >= LSDJ_SAV_PROJECT_COUNT)
     {
@@ -222,12 +223,12 @@ const lsdj_song_t* lsdj_sav_get_working_memory_song_const(const lsdj_sav_t* sav)
     return &sav->workingMemorysong;
 }
 
-void lsdj_sav_set_active_project_index(lsdj_sav_t* sav, unsigned char index)
+void lsdj_sav_set_active_project_index(lsdj_sav_t* sav, uint8_t index)
 {
     sav->activeProjectIndex = index;
 }
 
-unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
+uint8_t lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
 {
     return sav->activeProjectIndex;
 }
@@ -241,29 +242,29 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
          return NULL;
      }
     
-     unsigned char active = sav->activeProjectIndex;
+     uint8_t active = sav->activeProjectIndex;
     
-     char name[9];
-     memset(name, '\0', 9);
-     unsigned char version = 0;
+     char name[LSDJ_PROJECT_NAME_LENGTH];
+     memset(name, '\0', LSDJ_PROJECT_NAME_LENGTH);
+     uint8_t version = 0;
      if (active != LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX)
      {
          const lsdj_project_t* oldProject = lsdj_sav_get_project_const(sav, active);
          if (oldProject != NULL)
          {
-             lsdj_project_get_name(oldProject, name);
+             strncpy(name, lsdj_project_get_name(oldProject), LSDJ_PROJECT_NAME_LENGTH);
              version = lsdj_project_get_version(oldProject);
          }
      }
     
      lsdj_project_set_song(newProject, &sav->workingMemorysong);
-     lsdj_project_set_name(newProject, name, 8);
+     lsdj_project_set_name(newProject, name);
      lsdj_project_set_version(newProject, version);
     
      return newProject;
  }
 
-bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error)
+bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, uint8_t index, const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     lsdj_project_t* copy = lsdj_project_copy(project, allocator, error);
     if (copy == NULL)
@@ -278,7 +279,7 @@ bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_
     return true;
 }
 
-void lsdj_sav_set_project_move(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project)
+void lsdj_sav_set_project_move(lsdj_sav_t* sav, uint8_t index, lsdj_project_t* project)
 {
     lsdj_project_t* slot = sav->projects[index];
     if (slot)
@@ -287,17 +288,17 @@ void lsdj_sav_set_project_move(lsdj_sav_t* sav, unsigned char index, lsdj_projec
     sav->projects[index] = project;
 }
 
-void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index)
+void lsdj_sav_erase_project(lsdj_sav_t* sav, uint8_t index)
 {
     lsdj_sav_set_project_move(sav, index, NULL);
 }
 
-lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, unsigned char index)
+lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, uint8_t index)
 {
     return sav->projects[index];
 }
 
-const lsdj_project_t* lsdj_sav_get_project_const(const lsdj_sav_t* sav, unsigned char index)
+const lsdj_project_t* lsdj_sav_get_project_const(const lsdj_sav_t* sav, uint8_t index)
 {
     return sav->projects[index];
 }
@@ -311,7 +312,7 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
     // Handle decompression
     for (int i = 0; i < LSDJ_BLOCK_COUNT; i += 1)
     {
-        unsigned char p = header->blockAllocationTable[i];
+        uint8_t p = header->blockAllocationTable[i];
         if (p == LSDJ_SAV_EMPTY_BLOCK_VALUE)
             continue;
 
@@ -340,7 +341,7 @@ bool decompress_blocks(lsdj_vio_t* rvio, header_t* header, lsdj_project_t** proj
                 return false;
             }
 
-            lsdj_project_set_name(project, header->projectNames[p], LSDJ_PROJECT_NAME_LENGTH);
+            lsdj_project_set_name(project, header->projectNames[p]);
             lsdj_project_set_version(project, header->projectVersions[p]);
 
             lsdj_song_t song;
@@ -444,7 +445,7 @@ lsdj_sav_t* lsdj_sav_read_from_file(const char* path, const lsdj_allocator_t* al
     return sav;
 }
 
-lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error)
+lsdj_sav_t* lsdj_sav_read_from_memory(const uint8_t* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     if (data == NULL)
     {
@@ -453,7 +454,7 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, co
     }
 
     lsdj_memory_access_state_t state;
-    state.begin = state.cur = (unsigned char*)data;
+    state.begin = state.cur = (uint8_t*)data;
     state.size = size;
     
     lsdj_vio_t rvio = lsdj_create_memory_vio(&state);
@@ -471,7 +472,7 @@ bool lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error)
     }
     
     // Ensure these bytes are 'jk', that's what LSDJ sets them to on RAM init
-    char buffer[2];
+    uint8_t buffer[2];
     if (!lsdj_vio_read(vio, buffer, sizeof(buffer), NULL))
     {
         lsdj_error_optional_new(error, "could not read bytes for 'jk' check");
@@ -512,7 +513,7 @@ bool lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error)
     return result;
 }
 
-bool lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+bool lsdj_sav_is_likely_valid_memory(const uint8_t* data, size_t size, lsdj_error_t** error)
 {
     if (data == NULL)
     {
@@ -521,7 +522,7 @@ bool lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsd
     }
     
     lsdj_memory_access_state_t state;
-    state.begin = state.cur = (unsigned char*)data;
+    state.begin = state.cur = (uint8_t*)data;
     state.size = size;
     
     lsdj_vio_t vio = lsdj_create_memory_vio(&state);
@@ -529,7 +530,7 @@ bool lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsd
     return lsdj_sav_is_likely_valid(&vio, error);
 }
 
-bool compress_projects(lsdj_project_t* const* projects, unsigned char* blocks, unsigned char* blockAllocTable, lsdj_error_t** error)
+bool compress_projects(lsdj_project_t* const* projects, uint8_t* blocks, uint8_t* blockAllocTable, lsdj_error_t** error)
 {
     lsdj_memory_access_state_t state;
     state.cur = state.begin = blocks;
@@ -589,8 +590,7 @@ bool lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, size_t* writeCounter
         lsdj_project_t* project = sav->projects[i];
         if (project)
         {
-            char name[LSDJ_PROJECT_NAME_LENGTH];
-            lsdj_project_get_name(project, name);
+            const char* name = lsdj_project_get_name(project);
             memcpy(header.projectNames[i], name, LSDJ_PROJECT_NAME_LENGTH);
             
             header.projectVersions[i] = lsdj_project_get_version(project);
@@ -598,7 +598,7 @@ bool lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, size_t* writeCounter
     }
     
     // Compress the projects into blocks
-    unsigned char blocks[LSDJ_BLOCK_COUNT * LSDJ_BLOCK_SIZE];
+    uint8_t blocks[LSDJ_BLOCK_COUNT * LSDJ_BLOCK_SIZE];
     memset(blocks, 0, sizeof(blocks));
     if (!compress_projects(sav->projects, blocks, header.blockAllocationTable, error))
         return false;
@@ -650,7 +650,7 @@ bool lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* vio, size_t* writeCounter
      return result;
  }
 
-bool lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, size_t* writeCounter, lsdj_error_t** error)
+bool lsdj_sav_write_to_memory(const lsdj_sav_t* sav, uint8_t* data, size_t size, size_t* writeCounter, lsdj_error_t** error)
 {
     if (sav == NULL)
     {

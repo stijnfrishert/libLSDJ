@@ -41,6 +41,7 @@ extern "C" {
 #endif
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "error.h"
 #include "vio.h"
@@ -138,7 +139,7 @@ bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
     @return True on success, false if something failed
 
     @todo Should the first argument be an lsdj_vio_t* rvio? */
-bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCounter, lsdj_error_t** error);
+bool lsdj_compress(const uint8_t* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCounter, lsdj_error_t** error);
     
 #ifdef __cplusplus
 }

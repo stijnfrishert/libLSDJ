@@ -47,6 +47,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #include "allocator.h"
 #include "error.h"
@@ -87,13 +88,13 @@ void lsdj_project_free(lsdj_project_t* project);
 // --- Changing data --- //
 
 //! Change the name of a project
-/*! @param data A pointer to char data
-	@param size The length of the name sent in (maximum LSDJ_PROJECT_NAME_LENGTH) */
-void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size);
+/*! @param project The project to change the name for
+    @param data A pointer to char data (maximum LSDJ_PROJECT_NAME_LENGTH) */
+void lsdj_project_set_name(lsdj_project_t* project, const char* name);
 
 //! Retrieve the name of this project
-/*! @param data A pointer to char data of at least LSDJ_PROJECT_NAME_LENGTH long */
-void lsdj_project_get_name(const lsdj_project_t* project, char* data);
+/*! @return data A pointer to char data of maximum LSDJ_PROJECT_NAME_LENGTH long (may not be null-terminated) */
+const char* lsdj_project_get_name(const lsdj_project_t* project);
 
 //! Retrieve the length of a project's name
 /*! This won't ever be larger than LSDJ_PROJECT_NAME_LENGTH */
@@ -101,11 +102,11 @@ size_t lsdj_project_get_name_length(const lsdj_project_t* project);
 
 //! Change the version number of a project
 /*! @note This has nothing to do with your LSDj or format version, it's just a project version */
-void lsdj_project_set_version(lsdj_project_t* project, unsigned char version);
+void lsdj_project_set_version(lsdj_project_t* project, uint8_t version);
 
 //! Retrieve the version number of the project
 /*! @note This has nothing to do with your LSDj or format version, it's just a project version */
-unsigned char lsdj_project_get_version(const lsdj_project_t* project);
+uint8_t lsdj_project_get_version(const lsdj_project_t* project);
 
 //! Copy a full song's byte data into the project
 /*! A song buffer's data is copied into the project.
@@ -151,7 +152,7 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, const lsdj_
     @param In case of an error, more info is found in here (optional)
 
     @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
-lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const uint8_t* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
     
 //! Find out whether given data is likely a valid lsdsng
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
@@ -163,7 +164,7 @@ bool lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** e
 
 //! Find out whether a memory address likely contains a valid lsdsng
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
-bool lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+bool lsdj_project_is_likely_valid_lsdsng_memory(const uint8_t* data, size_t size, lsdj_error_t** error);
     
 //! Write a project to an .lsdsng I/O stream
 /*! This function uses liblsdj's virtual I/O system. There are other convenience functions to
@@ -193,7 +194,7 @@ bool lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char
     @param error A description of the error that occured, if provided
 
     @return Whether the write was successful */
-bool lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t* writeCounter, lsdj_error_t** error);
+bool lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, uint8_t* data, size_t* writeCounter, lsdj_error_t** error);
     
 #ifdef __cplusplus
 }

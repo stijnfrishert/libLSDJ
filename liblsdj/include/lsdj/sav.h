@@ -100,7 +100,7 @@ void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_t* song);
 //! Copy the song buffer from a given project into the working memory
 /*! This effectively loads a project, and sets the current index to reflect that
 	@return false if the index is out of bounds, or the slot is empty */
-bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
+bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, uint8_t index, lsdj_error_t** error);
     
 //! Retrieve the working memory song buffer from a sav
 /*! This funtion returns a mutable song. See lsdj_sav_get_working_memory_song_const() for immutable song retrieval */
@@ -113,12 +113,12 @@ const lsdj_song_t* lsdj_sav_get_working_memory_song_const(const lsdj_sav_t* sav)
 //! Change which project slot is referenced by the working memory song
 /*! Indices start at 0.
 	Use LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX if none of the project slots should be the active one. */
-void lsdj_sav_set_active_project_index(lsdj_sav_t* sav, unsigned char index);
+void lsdj_sav_set_active_project_index(lsdj_sav_t* sav, uint8_t index);
     
 //! Retrieve the index of the project slot the working memory song represents
 /*! Indices start at 0.
 	If the working memory doesn't represent any project, this is LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX */
-unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
+uint8_t lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
     
 //! Create a new project from the working memory song
 /*! Copies the working memory song into a new project. If the song represents a project in one of
@@ -133,29 +133,29 @@ lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav,
  
 	@param project The project to move, or NULL is the slot should be freed up
     @return Whether the copy was successful */
-bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, unsigned char index, const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, uint8_t index, const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error);
     
 //! Move a project into one of the project slots
 /*! This moves the parameter project into the sav, taking over ownership. You don't have
 	to call lsdj_project_free() afterwards anymore.
  
 	@param project The project to move, or NULL is the slot should be freed up */
-void lsdj_sav_set_project_move(lsdj_sav_t* sav, unsigned char index, lsdj_project_t* project);
+void lsdj_sav_set_project_move(lsdj_sav_t* sav, uint8_t index, lsdj_project_t* project);
 
 //! Free up one of the project slots in a sav
-void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index);
+void lsdj_sav_erase_project(lsdj_sav_t* sav, uint8_t index);
     
 //! Retrieve one of the projects
 /*! The index should be < LSDJ_SAV_PROJECT_COUNT
     This funtion returns a mutable project. See lsdj_sav_get_project_const() for immutable project retrieval
 	@return NULL if the project slot is empty */
-lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, unsigned char index);
+lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, uint8_t index);
 
 //! Retrieve one of the projects
 /*! The index should be < LSDJ_SAV_PROJECT_COUNT
     This funtion returns a const project. See lsdj_sav_get_project() for mutable project retrieval
     @return NULL if the project slot is empty */
-const lsdj_project_t* lsdj_sav_get_project_const(const lsdj_sav_t* sav, unsigned char index);
+const lsdj_project_t* lsdj_sav_get_project_const(const lsdj_sav_t* sav, uint8_t index);
 
 
 // --- I/O --- //
@@ -174,7 +174,7 @@ lsdj_sav_t* lsdj_sav_read_from_file(const char* path, const lsdj_allocator_t* al
 /*! @param data Points to the memory to read from
 	@param size The size in bytes of the memory to read from
     @param error A description of the error that occured, if provided */
-lsdj_sav_t* lsdj_sav_read_from_memory(const unsigned char* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+lsdj_sav_t* lsdj_sav_read_from_memory(const uint8_t* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
 
 //! Find out whether given data is likely a valid sav
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
@@ -186,7 +186,7 @@ bool lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error);
 
 //! Find out whether given data is likely a valid sav
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
-bool lsdj_sav_is_likely_valid_memory(const unsigned char* data, size_t size, lsdj_error_t** error);
+bool lsdj_sav_is_likely_valid_memory(const uint8_t* data, size_t size, lsdj_error_t** error);
     
 //! Write a sav to virtual I/O
 /*! @param sav The save to be written to stream
@@ -213,7 +213,7 @@ bool lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, size_t* wri
     @param error A description of the error that occured, if provided
 
     @return Whether the write was successful */
-bool lsdj_sav_write_to_memory(const lsdj_sav_t* sav, unsigned char* data, size_t size, size_t* writeCounter, lsdj_error_t** error);
+bool lsdj_sav_write_to_memory(const lsdj_sav_t* sav, uint8_t* data, size_t size, size_t* writeCounter, lsdj_error_t** error);
    
 
 #ifdef __cplusplus

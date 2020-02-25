@@ -93,10 +93,8 @@ namespace lsdj
             // If not, skip it and move on to the next one
             if (!names.empty())
             {
-                char name[9];
-                std::fill_n(name, 9, '\0');
-                lsdj_project_get_name(project, name);
-                const auto namestr = std::string(name);
+                const char* name = lsdj_project_get_name(project);
+                const auto namestr = std::string(name, strnlen(name, LSDJ_PROJECT_NAME_LENGTH));
                 if (std::find_if(std::begin(names), std::end(names), [&](const auto& x){ return compareCaseInsensitive(x, namestr); }) == std::end(names))
                     continue;
             }
@@ -215,7 +213,7 @@ namespace lsdj
         return 0;
     }
     
-    std::string Exporter::convertVersionToString(unsigned char version, bool prefixDot) const
+    std::string Exporter::convertVersionToString(uint8_t version, bool prefixDot) const
     {
         std::ostringstream stream;
         
@@ -301,10 +299,8 @@ namespace lsdj
         // If not, skip it and move on to the next one
         if (!names.empty())
         {
-            char name[9];
-            std::fill_n(name, 9, '\0');
-            lsdj_project_get_name(project, name);
-            const auto namestr = std::string(name);
+            const char* name = lsdj_project_get_name(project);
+            const auto namestr = std::string(name, strnlen(name, LSDJ_PROJECT_NAME_LENGTH));
             if (std::find_if(std::begin(names), std::end(names), [&](const auto& x){ return lsdj::compareCaseInsensitive(x, namestr); }) == std::end(names))
                 return;
         }

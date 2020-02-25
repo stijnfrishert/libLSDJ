@@ -48,7 +48,7 @@ bool lsdj_vio_read(lsdj_vio_t* vio, void* ptr, size_t size, size_t* counter)
     return count == size;
 }
 
-bool lsdj_vio_read_byte(lsdj_vio_t* vio, unsigned char* value, size_t* counter)
+bool lsdj_vio_read_byte(lsdj_vio_t* vio, uint8_t* value, size_t* counter)
 {
     return lsdj_vio_read(vio, value, 1, counter);
 }
@@ -63,7 +63,7 @@ bool lsdj_vio_write(lsdj_vio_t* vio, const void* ptr, size_t size, size_t* count
     return count == size;
 }
 
-bool lsdj_vio_write_byte(lsdj_vio_t* vio, unsigned char value, size_t* counter)
+bool lsdj_vio_write_byte(lsdj_vio_t* vio, uint8_t value, size_t* counter)
 {
     return lsdj_vio_write(vio, &value, 1, counter);
 }
@@ -175,7 +175,7 @@ long lsdj_mseek(long offset, int whence, void* userData)
 {
     lsdj_memory_access_state_t* mem = (lsdj_memory_access_state_t*)userData;
     
-    unsigned char* cur = mem->cur;
+    uint8_t* cur = mem->cur;
     
     switch (whence)
     {

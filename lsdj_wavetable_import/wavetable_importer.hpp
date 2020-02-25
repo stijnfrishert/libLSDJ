@@ -52,7 +52,7 @@ namespace lsdj
         
     public:
         std::string outputName;
-        unsigned char wavetableIndex = 0;
+        uint8_t wavetableIndex = 0;
         
         bool zero = false;
         bool force = false;

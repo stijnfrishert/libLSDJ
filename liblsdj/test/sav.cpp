@@ -11,14 +11,14 @@ using namespace Catch;
 
 SCENARIO( "Saves", "[sav]" )
 {
-	std::array<unsigned char, LSDJ_SONG_BYTE_COUNT> zeroBuffer;
+	std::array<uint8_t, LSDJ_SONG_BYTE_COUNT> zeroBuffer;
 	zeroBuffer.fill(0);
 
 	REQUIRE(LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX == 0xFF);
 
 	// Sample project used in some tests
 	auto project = lsdj_project_new(nullptr, nullptr);
-	lsdj_project_set_name(project, "MYSONG", 6);
+	lsdj_project_set_name(project, "MYSONG");
 	lsdj_project_set_version(project, 16);
 
 	lsdj_song_t song;
@@ -97,7 +97,8 @@ SCENARIO( "Saves", "[sav]" )
 				REQUIRE( copy != nullptr );
 
 				std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-				lsdj_project_get_name(copy, name.data());
+                name.fill('\0');
+                strncpy(name.data(), lsdj_project_get_name(copy), name.size());
 
 				REQUIRE_THAT( name.data(), Equals("MYSONG") );
 				REQUIRE( lsdj_project_get_version(copy) == 16 );
@@ -166,7 +167,8 @@ SCENARIO( "Saves", "[sav]" )
                 REQUIRE( project != nullptr );
                 
                 std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-                lsdj_project_get_name(project, name.data());
+                name.fill('\0');
+                strncpy(name.data(), lsdj_project_get_name(project), name.size());
                 REQUIRE( strncmp(name.data(), "", LSDJ_PROJECT_NAME_LENGTH) == 0 );
                 
                 REQUIRE( lsdj_project_get_version(project) == 0 );
@@ -189,7 +191,8 @@ SCENARIO( "Saves", "[sav]" )
                 REQUIRE( project != nullptr );
                 
                 std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-                lsdj_project_get_name(project, name.data());
+                name.fill('\0');
+                strncpy(name.data(), lsdj_project_get_name(project), name.size());
                 REQUIRE( strncmp(name.data(), "MYSONG", LSDJ_PROJECT_NAME_LENGTH) == 0 );
                 
                 REQUIRE( lsdj_project_get_version(project) == 16 );
@@ -223,7 +226,8 @@ TEST_CASE( ".sav save/load", "[sav]" )
 		REQUIRE( project != nullptr );
 
 		std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-		lsdj_project_get_name(project, name.data());
+        name.fill('\0');
+        strncpy(name.data(), lsdj_project_get_name(project), name.size());
 		REQUIRE( strncmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
 
 		REQUIRE( lsdj_project_get_version(project) == 4 );
@@ -250,7 +254,8 @@ TEST_CASE( ".sav save/load", "[sav]" )
 		REQUIRE( project != nullptr );
 
 		std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-		lsdj_project_get_name(project, name.data());
+        name.fill('\0');
+        strncpy(name.data(), lsdj_project_get_name(project), name.size());
 		REQUIRE( strncmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
 
 		REQUIRE( lsdj_project_get_version(project) == 4 );
@@ -279,7 +284,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 		lsdj_sav_set_project_move(sav, 0, project);
 
-		std::array<unsigned char, 131072> memory;
+		std::array<uint8_t, 131072> memory;
         size_t writeCount = 0;
 		REQUIRE( lsdj_sav_write_to_memory(sav, memory.data(), memory.size(), &writeCount, nullptr) == true );
 		REQUIRE( writeCount == LSDJ_SAV_SIZE );
@@ -302,7 +307,8 @@ TEST_CASE( ".sav save/load", "[sav]" )
         REQUIRE( compProject != nullptr );
 
         std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-        lsdj_project_get_name(compProject, name.data());
+        name.fill('\0');
+        strncpy(name.data(), lsdj_project_get_name(compProject), name.size());
         REQUIRE( strncmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
 
         REQUIRE( lsdj_project_get_version(compProject) == 4 );

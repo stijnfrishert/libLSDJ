@@ -22,7 +22,8 @@ SCENARIO( "Project creation and querying", "[project]" )
 		WHEN( "Requesting the name")
 		{
 			std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-			lsdj_project_get_name(project, name.data());
+            name.fill('\0');
+			strncpy(name.data(), lsdj_project_get_name(project), name.size());
 
 			THEN( "The name should be empty")
 			{
@@ -33,12 +34,13 @@ SCENARIO( "Project creation and querying", "[project]" )
 
 		WHEN( "Setting the name" )
 		{
-			lsdj_project_set_name(project, "NAME", 4);
+			lsdj_project_set_name(project, "NAME");
 
 			THEN( "The name should have changed accordingly" )
 			{
 				std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-				lsdj_project_get_name(project, name.data());
+                name.fill('\0');
+				strncpy(name.data(), lsdj_project_get_name(project), name.size());
 
 				REQUIRE_THAT(name.data(), Equals("NAME"));
 				REQUIRE(lsdj_project_get_name_length(project) == 4);
@@ -73,7 +75,7 @@ SCENARIO( "Project creation and querying", "[project]" )
 
 			THEN( "It should be an zeroed out song buffer" )
 			{
-				std::array<unsigned char, LSDJ_SONG_BYTE_COUNT> zeroes;
+				std::array<uint8_t, LSDJ_SONG_BYTE_COUNT> zeroes;
 				zeroes.fill(0);
 
 				REQUIRE(memcmp(buffer->bytes, zeroes.data(), LSDJ_SONG_BYTE_COUNT) == 0);
@@ -95,7 +97,7 @@ SCENARIO( "Project creation and querying", "[project]" )
 
 		WHEN( "Copying a project" )
 		{
-			lsdj_project_set_name(project, "MYSONG", 6);
+			lsdj_project_set_name(project, "MYSONG");
 			lsdj_project_set_version(project, 16);
 
 			lsdj_song_t buffer;
@@ -108,7 +110,8 @@ SCENARIO( "Project creation and querying", "[project]" )
 			THEN( "The data should remain intact" )
 			{
 				std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-				lsdj_project_get_name(copy, name.data());
+                name.fill('\0');
+				strncpy(name.data(), lsdj_project_get_name(project), name.size());
 
 				REQUIRE_THAT(name.data(), Equals("MYSONG"));
 				REQUIRE(lsdj_project_get_version(copy) == 16);
@@ -138,7 +141,8 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 
         // Name
 		std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-		lsdj_project_get_name(project, name.data());
+        name.fill('\0');
+        strncpy(name.data(), lsdj_project_get_name(project), name.size());
 		REQUIRE( memcmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
 
         // Version
@@ -159,7 +163,8 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 
         // Name
 		std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-		lsdj_project_get_name(project, name.data());
+        name.fill('\0');
+        strncpy(name.data(), lsdj_project_get_name(project), name.size());
 		REQUIRE( memcmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
 
         // Version
@@ -178,7 +183,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 		auto project = lsdj_project_new(nullptr, nullptr);
 		REQUIRE( project != nullptr );
 
-        lsdj_project_set_name(project, "HAPPY BD", 8);
+        lsdj_project_set_name(project, "HAPPY BD");
         lsdj_project_set_version(project, 4);
         
         lsdj_song_t song;
@@ -186,7 +191,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         lsdj_project_set_song(project, &song);
         
         // Compress it to memory
-        std::array<unsigned char, LSDSNG_MAX_SIZE> data;
+        std::array<uint8_t, LSDSNG_MAX_SIZE> data;
         data.fill(0);
         size_t writeCount = 0;
         REQUIRE( lsdj_project_write_lsdsng_to_memory(project, data.data(), &writeCount, nullptr) == true );
@@ -200,7 +205,8 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         assert(lsdsng != nullptr);
         
         std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
-        lsdj_project_get_name(lsdsng, name.data());
+        name.fill('\0');
+        strncpy(name.data(), lsdj_project_get_name(lsdsng), name.size());
         REQUIRE( memcmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
         
         REQUIRE(lsdj_project_get_version(lsdsng) == 4);

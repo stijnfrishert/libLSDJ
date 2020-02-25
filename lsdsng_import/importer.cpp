@@ -178,7 +178,7 @@ namespace lsdj
         return 0;
     }
     
-    void Importer::importSong(const std::string& path, lsdj_sav_t* sav, unsigned char index, unsigned char active, lsdj_error_t** error)
+    void Importer::importSong(const std::string& path, lsdj_sav_t* sav, uint8_t index, uint8_t active, lsdj_error_t** error)
     {
         lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.c_str(), nullptr, error);
         if (!project)
@@ -186,9 +186,8 @@ namespace lsdj
         
         lsdj_sav_set_project_move(sav, index, project);
         
-        std::array<char, 9> name;
-        name.fill('\0');
-        lsdj_project_get_name(project, name.data());
+        const auto n = lsdj_project_get_name(project);
+        std::string name(n, strnlen(n, LSDJ_PROJECT_NAME_LENGTH));
         
         if (verbose)
             std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;

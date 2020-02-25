@@ -8,7 +8,7 @@ using namespace Catch;
 
 SCENARIO( "Virtual Memory I/O", "[vio]" )
 {
-	std::array<unsigned char, 5> memory = { 'H', 'e', 'l', 'l', 'o' };
+	std::array<uint8_t, 5> memory = { 'H', 'e', 'l', 'l', 'o' };
 
 	GIVEN( "A read state at the first byte of some memory" )
 	{
@@ -21,7 +21,7 @@ SCENARIO( "Virtual Memory I/O", "[vio]" )
 
 		WHEN( "Reading a part of the buffer" )
 		{
-			std::array<unsigned char, 4> output = { '\0', '\0', '\0', '\0' };
+			std::array<uint8_t, 4> output = { '\0', '\0', '\0', '\0' };
 
 			lsdj_mread(output.data(), output.size(), static_cast<void*>(&state));
 
@@ -33,7 +33,7 @@ SCENARIO( "Virtual Memory I/O", "[vio]" )
 
 		WHEN( "Writing to the buffer" )
 		{
-			std::array<unsigned char, 4> sample = { 'Y', 'o', 'y', 'o' };
+			std::array<uint8_t, 4> sample = { 'Y', 'o', 'y', 'o' };
 
 			lsdj_mwrite(sample.data(), sample.size(), static_cast<void*>(&state));
 

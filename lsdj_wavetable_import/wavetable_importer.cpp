@@ -215,7 +215,7 @@ namespace lsdj
         }
         
         // Apply the wavetable
-        for (unsigned char frame = 0; frame < actualFrameCount; frame++)
+        for (uint8_t frame = 0; frame < actualFrameCount; frame++)
         {
             std::uint8_t* memory = lsdj_wave_get_bytes(song, wavetableIndex + frame);
             wavetableStream.read(reinterpret_cast<char*>(memory), LSDJ_WAVE_BYTE_COUNT);
@@ -233,7 +233,7 @@ namespace lsdj
             std::array<std::uint8_t, LSDJ_WAVE_BYTE_COUNT> table;
             table.fill(0x88);
             
-            for (unsigned char frame = actualFrameCount; frame < 16; frame++)
+            for (uint8_t frame = actualFrameCount; frame < 16; frame++)
             {
                 lsdj_wave_set_silent(song, wavetableIndex + frame);
                 

@@ -50,7 +50,7 @@ struct lsdj_project_t
     
     //! The version of the song
     /*! @note This is a simply song version counter increased with every song save in LSDJ; it has nothing to do with LSDJ versions of the sav format version. */
-    unsigned char version;
+    uint8_t version;
     
     //! The song belonging to this project
     /*! Uncompressed, but you'll need to call a parsing function to get a sensible lsdj_song_t structured object. */
@@ -119,15 +119,15 @@ void lsdj_project_free(lsdj_project_t* project)
 
 // --- Changing Data --- //
 
-void lsdj_project_set_name(lsdj_project_t* project, const char* data, size_t size)
+void lsdj_project_set_name(lsdj_project_t* project, const char* name)
 {
     //! @todo: Should I sanitize this name into something LSDj accepts?
-    strncpy(project->name, data, LSDJ_PROJECT_NAME_LENGTH);
+    strncpy(project->name, name, LSDJ_PROJECT_NAME_LENGTH);
 }
 
-void lsdj_project_get_name(const lsdj_project_t* project, char* data)
+const char* lsdj_project_get_name(const lsdj_project_t* project)
 {
-    strncpy(data, project->name, LSDJ_PROJECT_NAME_LENGTH);
+    return project->name;
 }
 
 size_t lsdj_project_get_name_length(const lsdj_project_t* project)
@@ -135,12 +135,12 @@ size_t lsdj_project_get_name_length(const lsdj_project_t* project)
     return strnlen(project->name, LSDJ_PROJECT_NAME_LENGTH);
 }
 
-void lsdj_project_set_version(lsdj_project_t* project, unsigned char version)
+void lsdj_project_set_version(lsdj_project_t* project, uint8_t version)
 {
     project->version = version;
 }
 
-unsigned char lsdj_project_get_version(const lsdj_project_t* project)
+uint8_t lsdj_project_get_version(const lsdj_project_t* project)
 {
     return project->version;
 }
@@ -230,7 +230,7 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, const lsdj_
     return project;
 }
 
-lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error)
+lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const uint8_t* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error)
 {
     if (data == NULL)
     {
@@ -239,7 +239,7 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const unsigned char* data, 
     }
     
     lsdj_memory_access_state_t state;
-    state.begin = state.cur = (unsigned char*)data;
+    state.begin = state.cur = (uint8_t*)data;
     state.size = size;
 
     lsdj_vio_t rvio = lsdj_create_memory_vio(&state);
@@ -303,7 +303,7 @@ bool lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** e
     return result;
 }
 
-bool lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_t size, lsdj_error_t** error)
+bool lsdj_project_is_likely_valid_lsdsng_memory(const uint8_t* data, size_t size, lsdj_error_t** error)
 {
     if (data == NULL)
     {
@@ -312,7 +312,7 @@ bool lsdj_project_is_likely_valid_lsdsng_memory(const unsigned char* data, size_
     }
     
     lsdj_memory_access_state_t state;
-    state.begin = state.cur = (unsigned char*)data;
+    state.begin = state.cur = (uint8_t*)data;
     state.size = size;
     
     lsdj_vio_t rvio = lsdj_create_memory_vio(&state);
@@ -371,7 +371,7 @@ bool lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char
     return result;
 }
 
-bool lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, unsigned char* data, size_t* writeCounter, lsdj_error_t** error)
+bool lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, uint8_t* data, size_t* writeCounter, lsdj_error_t** error)
 {
     if (project == NULL)
     {

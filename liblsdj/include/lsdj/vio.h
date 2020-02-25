@@ -49,6 +49,7 @@ extern "C" {
 
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 
 //! The signature of a virtual I/O read function
@@ -89,7 +90,7 @@ bool lsdj_vio_read(lsdj_vio_t* vio, void* ptr, size_t size, size_t* counter);
 //! Read a single byte from virtual I/O
 /*! @param counter If given, the amount of bytes read is _added_ to this value
     @return Whether the read was fully successful */
-bool lsdj_vio_read_byte(lsdj_vio_t* vio, unsigned char* value, size_t* counter);
+bool lsdj_vio_read_byte(lsdj_vio_t* vio, uint8_t* value, size_t* counter);
 
 //! Write bytes to virtual I/O
 /*! @param counter If given, the amount of bytes written is _added_ to this value
@@ -99,7 +100,7 @@ bool lsdj_vio_write(lsdj_vio_t* vio, const void* ptr, size_t size, size_t* count
 //! Write a single byte to virtual I/O
 /*! @param counter If given, the amount of bytes written is _added_ to this value
     @return Whether the write was fully successful */
-bool lsdj_vio_write_byte(lsdj_vio_t* vio, unsigned char value, size_t* counter);
+bool lsdj_vio_write_byte(lsdj_vio_t* vio, uint8_t value, size_t* counter);
 
 //! Write a series of bytes repeatedly to a stream
 /*! @param count The amount of times the contents of ptr should be written
@@ -139,8 +140,8 @@ lsdj_vio_t lsdj_create_file_vio(FILE* file);
 	exist for more data structures, wrapping around this system. */
 typedef struct
 {
-    unsigned char* begin;
-    unsigned char* cur;
+    uint8_t* begin;
+    uint8_t* cur;
     size_t size;
 } lsdj_memory_access_state_t;
 

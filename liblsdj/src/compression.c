@@ -62,7 +62,7 @@
 bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
     // Read the second byte of an RLE section
-    unsigned char byte = 0;
+    uint8_t byte = 0;
     if (!lsdj_vio_read_byte(rvio, &byte, readCounter))
     {
         lsdj_error_optional_new(error, "could not read RLE byte");
@@ -84,7 +84,7 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio
     else
     {
         // Read the length of the string of identical bytes
-        unsigned char count = 0;
+        uint8_t count = 0;
         if (!lsdj_vio_read_byte(rvio, &count, readCounter))
         {
             lsdj_error_optional_new(error, "could not read RLE count byte");
@@ -105,7 +105,7 @@ bool decompress_rle_byte(lsdj_vio_t* rvio, size_t* readCounter, lsdj_vio_t* wvio
 bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
     // Read the amount of times we need to stamp the default wave
-    unsigned char count = 0;
+    uint8_t count = 0;
     if (!lsdj_vio_read_byte(rvio, &count, NULL))
     {
         lsdj_error_optional_new(error, "could not read default wave count byte");
@@ -125,7 +125,7 @@ bool decompress_default_wave_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* wr
 bool decompress_default_instrument_byte(lsdj_vio_t* rvio, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
 {
     // Read the amount of times we need to stamp the default instrument
-    unsigned char count = 0;
+    uint8_t count = 0;
     if (!lsdj_vio_read_byte(rvio, &count, NULL))
     {
         lsdj_error_optional_new(error, "could not read default instrument count byte");
@@ -152,7 +152,7 @@ bool decompress_sa_byte(lsdj_vio_t* rvio, size_t* readCounter,
     *nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
     
     // Read the first byte
-    unsigned char byte = 0;
+    uint8_t byte = 0;
     if (!lsdj_vio_read_byte(rvio, &byte, readCounter))
     {
         lsdj_error_optional_new(error, "could not read SA byte");
@@ -216,7 +216,7 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
         {
             if (followBlockJumps)
             {
-                const unsigned char index = (unsigned char)(nextBlockIndex) - 1;
+                const uint8_t index = (uint8_t)(nextBlockIndex) - 1;
                 if (!lsdj_vio_seek(rvio, firstBlockPosition + (index * LSDJ_BLOCK_SIZE), SEEK_SET))
                 {
                     lsdj_error_optional_new(error, "could not move to next block");
@@ -305,7 +305,7 @@ bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
     *nextBlockIndex = LSDJ_NO_NEXT_BLOCK_INDEX;
     
     // Read the byte that declares what step this is
-    unsigned char byte = 0;
+    uint8_t byte = 0;
     if (!lsdj_vio_read_byte(rvio, &byte, readCounter))
     {
         lsdj_error_optional_new(error, "could not read byte for decompression step");
@@ -337,20 +337,20 @@ bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
 
 // --- Compression --- //
 
-bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCounter, lsdj_error_t** error)
+bool lsdj_compress(const uint8_t* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCounter, lsdj_error_t** error)
 {
     //! @todo This function needs to be refactored because it is w-a-y too huge
 
     if (blockOffset == LSDJ_BLOCK_COUNT + 1)
         return false;
     
-    unsigned char nextEvent[3] = { 0, 0, 0 };
+    uint8_t nextEvent[3] = { 0, 0, 0 };
     unsigned short eventSize = 0;
     
     unsigned int currentBlock = blockOffset;
     unsigned int currentBlockSize = 0;
     
-    unsigned char byte = 0;
+    uint8_t byte = 0;
     
     long writeStart = lsdj_vio_tell(wvio);
     if (writeStart == -1L)
@@ -359,15 +359,15 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
         return false;
     }
     
-    const unsigned char* end = data + LSDJ_SONG_BYTE_COUNT;
-    for (const unsigned char* read = data; read < end; )
+    const uint8_t* end = data + LSDJ_SONG_BYTE_COUNT;
+    for (const uint8_t* read = data; read < end; )
     {
         // Uncomment this to print the current read and write positions
         // long wcur = lsdj_vio_tell(wvio) - writeStart;
         // printf("read: 0x%lx\twrite: 0x%lx\n", read - data, wcur);
         
         // Are we reading a default wave? If so, we can compress these!
-        unsigned char defaultWaveLengthCount = 0;
+        uint8_t defaultWaveLengthCount = 0;
         while (read + LSDJ_DEFAULT_WAVE_LENGTH < end && memcmp(read, LSDJ_DEFAULT_WAVE, LSDJ_DEFAULT_WAVE_LENGTH) == 0 && defaultWaveLengthCount != 0xFF)
         {
             read += LSDJ_DEFAULT_WAVE_LENGTH;
@@ -382,7 +382,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
             eventSize = 3;
         } else {
             // Are we reading a default instrument? If so, we can compress these!
-            unsigned char defaultInstrumentLengthCount = 0;
+            uint8_t defaultInstrumentLengthCount = 0;
             while (read + LSDJ_DEFAULT_INSTRUMENT_LENGTH < end && memcmp(read, LSDJ_DEFAULT_INSTRUMENT, LSDJ_DEFAULT_INSTRUMENT_LENGTH) == 0 && defaultInstrumentLengthCount != 0xFF)
             {
                 read += LSDJ_DEFAULT_INSTRUMENT_LENGTH;
@@ -415,9 +415,9 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
                         
                     default:
                     {
-                        const unsigned char* beg = read;
+                        const uint8_t* beg = read;
                        
-                        unsigned char c = *read;
+                        uint8_t c = *read;
                         
                         // See if we can do run-length encoding
                         if ((read + 3 < end) &&
@@ -425,7 +425,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
                             *(read + 2) == c &&
                             *(read + 3) == c)
                         {
-                            unsigned char count = 0;
+                            uint8_t count = 0;
                             
                             while (read < end && *read == c && count != 0xFF)
                             {
@@ -464,7 +464,7 @@ bool lsdj_compress(const unsigned char* data, lsdj_vio_t* wvio, unsigned int blo
                 return false;
             }
             
-            byte = (unsigned char)(currentBlock + 1);
+            byte = (uint8_t)(currentBlock + 1);
             if (!lsdj_vio_write_byte(wvio, byte, writeCounter))
             {
                 lsdj_error_optional_new(error, "could not write next block byte for compression");
