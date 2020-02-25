@@ -80,7 +80,7 @@ LibLSDJ is open source and freely available to anyone. If you'd like to show you
 
 # System Requirements
 
-The nature of *liblsdj* as a C library makes it compilable on nearly all common OSes. Both tools included have been tested on macOS Sierra and Windows 7/10 and seem to be working. DigiPack has also successfully built *liblsdj* on Arch Linux.
+The nature of *liblsdj* as a C library makes it compilable on nearly all common operating systems. Both tools included have been tested on macOS Sierra and Windows 7/10 and seem to be working. DigiPack has also successfully built *liblsdj* on Arch Linux.
 
 # Download
 
@@ -98,6 +98,11 @@ Developers that would like to help out are warmly invited to do so. This project
 
 *liblsdj* and its tools are released under the liberal MIT-license.
 
+*liblsdj* makes grateful use of the following dependencies:
+ - [Catch2](https://github.com/catchorg/Catch2) (Boost Software License 1.0)
+ - [ghc::filesystem](https://github.com/gulrak/filesystem) (MIT)
+ - [popl](https://github.com/badaix/popl) (MIT)
+
 ---
 
-Special thanks for Defense Mechanism (urbster1) for thinking along and helping out where needed.
+Special thanks for Defense Mechanism (urbster1) and .exe (rbong) for thinking along and helping out where needed.
