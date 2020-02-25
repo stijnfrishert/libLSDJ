@@ -1,10 +1,9 @@
 #pragma once
 
+#include <ghc/filesystem.hpp>
 #include <vector>
 
-#include <ghc/filesystem.hpp>
-
-#include "../liblsdj/song.h"
+#include <lsdj/song.h>
 
 namespace lsdj
 {
@@ -27,6 +26,6 @@ namespace lsdj
         [[nodiscard]] virtual ghc::filesystem::path constructSavDestinationPath(const ghc::filesystem::path& path) { return path; }
         [[nodiscard]] virtual ghc::filesystem::path constructLsdsngDestinationPath(const ghc::filesystem::path& path) { return path; }
         
-        virtual bool processSong(lsdj_song_t& song) = 0;
+        virtual bool processSong(lsdj_song_t* song) = 0;
     };
 }

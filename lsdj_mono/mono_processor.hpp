@@ -19,6 +19,6 @@ namespace lsdj
         [[nodiscard]] ghc::filesystem::path constructSavDestinationPath(const ghc::filesystem::path& path) final;
         [[nodiscard]] ghc::filesystem::path constructLsdsngDestinationPath(const ghc::filesystem::path& path) final;
         
-        bool processSong(lsdj_song_t& song) final;
+        bool processSong(lsdj_song_t* song) final;
     };
 }

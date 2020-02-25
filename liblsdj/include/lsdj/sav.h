@@ -103,7 +103,12 @@ void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_t* song);
 bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned char index, lsdj_error_t** error);
     
 //! Retrieve the working memory song buffer from a sav
-const lsdj_song_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav);
+/*! This funtion returns a mutable song. See lsdj_sav_get_working_memory_song_const() for immutable song retrieval */
+lsdj_song_t* lsdj_sav_get_working_memory_song(lsdj_sav_t* sav);
+
+//! Retrieve the working memory song buffer from a sav
+/*! This funtion returns a const song. See lsdj_sav_get_working_memory_song() for mutable song retrieval */
+const lsdj_song_t* lsdj_sav_get_working_memory_song_const(const lsdj_sav_t* sav);
     
 //! Change which project slot is referenced by the working memory song
 /*! Indices start at 0.
@@ -142,8 +147,15 @@ void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index);
     
 //! Retrieve one of the projects
 /*! The index should be < LSDJ_SAV_PROJECT_COUNT
+    This funtion returns a mutable project. See lsdj_sav_get_project_const() for immutable project retrieval
 	@return NULL if the project slot is empty */
-const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char index);
+lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, unsigned char index);
+
+//! Retrieve one of the projects
+/*! The index should be < LSDJ_SAV_PROJECT_COUNT
+    This funtion returns a const project. See lsdj_sav_get_project() for mutable project retrieval
+    @return NULL if the project slot is empty */
+const lsdj_project_t* lsdj_sav_get_project_const(const lsdj_sav_t* sav, unsigned char index);
 
 
 // --- I/O --- //

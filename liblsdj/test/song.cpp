@@ -27,10 +27,10 @@ TEST_CASE( "Song", "[song]" )
 
 	SECTION( "Happy Birthday" )
 	{
-		auto song0 = lsdj_project_get_song(lsdj_sav_get_project(sav, 0));
+		auto song0 = lsdj_project_get_song_const(lsdj_sav_get_project_const(sav, 0));
         assert(song0 != nullptr);
         
-        auto song1 = lsdj_project_get_song(lsdj_sav_get_project(sav, 1));
+        auto song1 = lsdj_project_get_song_const(lsdj_sav_get_project_const(sav, 1));
         assert(song1 != nullptr);
         
 		SECTION( "Song settings" )

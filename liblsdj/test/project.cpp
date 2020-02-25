@@ -69,7 +69,7 @@ SCENARIO( "Project creation and querying", "[project]" )
 
 		WHEN( "Requesting the song buffer" )
 		{
-			auto buffer = lsdj_project_get_song(project);
+			auto buffer = lsdj_project_get_song_const(project);
 
 			THEN( "It should be an zeroed out song buffer" )
 			{
@@ -88,7 +88,7 @@ SCENARIO( "Project creation and querying", "[project]" )
 
 			THEN( "The song buffer should have been updated accordingly" )
 			{
-				auto project_buffer = lsdj_project_get_song(project);
+				auto project_buffer = lsdj_project_get_song_const(project);
 				REQUIRE(memcmp(buffer.bytes, project_buffer->bytes, sizeof(buffer.bytes)) == 0);
 			}
 		}
@@ -113,7 +113,7 @@ SCENARIO( "Project creation and querying", "[project]" )
 				REQUIRE_THAT(name.data(), Equals("MYSONG"));
 				REQUIRE(lsdj_project_get_version(copy) == 16);
 
-				auto bufferCopy = lsdj_project_get_song(project);
+				auto bufferCopy = lsdj_project_get_song_const(project);
 				REQUIRE(memcmp(buffer.bytes, bufferCopy->bytes, LSDJ_SONG_BYTE_COUNT) == 0);
 			}
 		}
@@ -145,7 +145,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 		REQUIRE( lsdj_project_get_version(project) == 4 );
 
         // Read raw and compare
-		REQUIRE( memcmp(raw.data(), lsdj_project_get_song(project)->bytes, LSDJ_SONG_BYTE_COUNT) == 0 );
+		REQUIRE( memcmp(raw.data(), lsdj_project_get_song_const(project)->bytes, LSDJ_SONG_BYTE_COUNT) == 0 );
 
         // Clean up
 		lsdj_project_free(project);
@@ -166,7 +166,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 		REQUIRE( lsdj_project_get_version(project) == 4 );
 
         // Read raw and compare
-		REQUIRE( memcmp(raw.data(), lsdj_project_get_song(project)->bytes, LSDJ_SONG_BYTE_COUNT) == 0 );
+		REQUIRE( memcmp(raw.data(), lsdj_project_get_song_const(project)->bytes, LSDJ_SONG_BYTE_COUNT) == 0 );
 
         // Clean up
 		lsdj_project_free(project);
@@ -204,7 +204,7 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         REQUIRE( memcmp(name.data(), "HAPPY BD", LSDJ_PROJECT_NAME_LENGTH) == 0 );
         
         REQUIRE(lsdj_project_get_version(lsdsng) == 4);
-        REQUIRE( memcmp(raw.data(), lsdj_project_get_song(lsdsng)->bytes, LSDJ_SONG_BYTE_COUNT) == 0 );
+        REQUIRE( memcmp(raw.data(), lsdj_project_get_song_const(lsdsng)->bytes, LSDJ_SONG_BYTE_COUNT) == 0 );
         
         // Clean up
         lsdj_project_free(lsdsng);
