@@ -113,8 +113,14 @@ unsigned char lsdj_project_get_version(const lsdj_project_t* project);
 void lsdj_project_set_song(lsdj_project_t* project, const lsdj_song_t* song);
 
 //! Retrieve the song buffer for this project
-/*! Song buffers contain the actual song data for a project. */
-const lsdj_song_t* lsdj_project_get_song(const lsdj_project_t* project);
+/*! Song buffers contain the actual song data for a project.
+    This funtion returns a mutable song. See lsdj_project_get_song_const() for immutable song retrieval */
+lsdj_song_t* lsdj_project_get_song(lsdj_project_t* project);
+
+//! Retrieve the song buffer for this project
+/*! Song buffers contain the actual song data for a project.
+    This funtion returns a const song. See lsdj_project_get_song() for mutable song retrieval */
+const lsdj_song_t* lsdj_project_get_song_const(const lsdj_project_t* project);
 
 
 // --- I/O --- //

@@ -37,8 +37,8 @@
 #include <array>
 #include <iostream>
 
-#include "../liblsdj/song.h"
-#include "../liblsdj/project.h"
+#include <lsdj/song.h>
+#include <lsdj/project.h>
 
 #include "../common/common.hpp"
 #include "importer.hpp"
@@ -102,7 +102,7 @@ namespace lsdj
         auto index = 0;
         for( ; index < LSDJ_SAV_PROJECT_COUNT; ++index)
         {
-            if (!lsdj_sav_get_project(sav, index))
+            if (!lsdj_sav_get_project_const(sav, index))
                 break;
         }
         
@@ -207,7 +207,7 @@ namespace lsdj
         if (!project)
             return;
         
-        const auto song = lsdj_project_get_song(project);
+        const auto song = lsdj_project_get_song_const(project);
         lsdj_sav_set_working_memory_song(sav, song);
         
         // Find out if one of the slots has the same name as the working memory filename

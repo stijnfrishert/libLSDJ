@@ -39,9 +39,10 @@
 #include <iostream>
 #include <sstream>
 
+#include <lsdj/sav.h>
+#include <lsdj/song.h>
+
 #include "../common/common.hpp"
-#include "../liblsdj/sav.h"
-#include "../liblsdj/song.h"
 
 namespace lsdj
 {
@@ -79,7 +80,7 @@ namespace lsdj
         for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
         {
             // Retrieve the project
-            const lsdj_project_t* project = lsdj_sav_get_project(sav, i);
+            const lsdj_project_t* project = lsdj_sav_get_project_const(sav, i);
             if (project == NULL)
                 continue;
             
@@ -196,7 +197,7 @@ namespace lsdj
         int lastNonEmptyProject = LSDJ_SAV_PROJECT_COUNT - 1;
         for ( ; lastNonEmptyProject != 0; lastNonEmptyProject -= 1)
         {
-            const auto project = lsdj_sav_get_project(sav, lastNonEmptyProject);
+            const auto project = lsdj_sav_get_project_const(sav, lastNonEmptyProject);
             if (project)
                 break;
         }
@@ -245,7 +246,7 @@ namespace lsdj
         const auto active = lsdj_sav_get_active_project_index(sav);
         if (active != LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX)
         {
-            const lsdj_project_t* project = lsdj_sav_get_project(sav, active);
+            const lsdj_project_t* project = lsdj_sav_get_project_const(sav, active);
             
             const auto name = constructName(project);
             std::cout << name;
@@ -257,7 +258,7 @@ namespace lsdj
             std::cout << "          ";
         }
         
-        const lsdj_song_t* song = lsdj_sav_get_working_memory_song(sav);
+        const lsdj_song_t* song = lsdj_sav_get_working_memory_song_const(sav);
         
         // Display whether the working memory song is "dirty"/edited, and display that
         // as version number (it doesn't really have a version number otherwise)
@@ -285,7 +286,7 @@ namespace lsdj
     void Exporter::printProject(const lsdj_sav_t* sav, std::size_t index)
     {
         // Retrieve the project
-        const lsdj_project_t* project = lsdj_sav_get_project(sav, index);
+        const lsdj_project_t* project = lsdj_sav_get_project_const(sav, index);
         
         // See if there's actually a song here. If not, this is an (EMPTY) project among
         // existing projects, which is a thing that can happen in older versions of LSDJ
@@ -327,7 +328,7 @@ namespace lsdj
             std::cout << ' ';
         
         // Retrieve the format version of the song to display
-        const lsdj_song_t* song = lsdj_project_get_song(project);
+        const lsdj_song_t* song = lsdj_project_get_song_const(project);
         const auto formatVersionString = std::to_string(lsdj_song_get_format_version(song));
         std::cout << formatVersionString;
         for (auto i = 0; i < 5 - formatVersionString.length(); i++)

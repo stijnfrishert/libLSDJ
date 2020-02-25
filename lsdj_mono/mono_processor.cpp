@@ -1,40 +1,46 @@
 #include "mono_processor.hpp"
 
+#include <cassert>
+#include <lsdj/instrument.h>
+#include <lsdj/phrase.h>
+#include <lsdj/table.h>
+
 namespace lsdj
 {
-    void convertInstrument(lsdj_instrument_t* instrument)
+    void convertInstrument(lsdj_song_t* song, uint8_t instrument)
     {
-        if (instrument != nullptr && lsdj_instrument_get_panning(instrument) != LSDJ_PAN_NONE)
-            lsdj_instrument_set_panning(instrument, LSDJ_PAN_LEFT_RIGHT);
+        if (lsdj_instrument_get_panning(song, instrument) != LSDJ_PAN_NONE)
+            lsdj_instrument_set_panning(song, instrument, LSDJ_PAN_LEFT_RIGHT);
     }
 
-    void convertCommand(lsdj_command_t* command)
+    void convertTable(lsdj_song_t* song, uint8_t table)
     {
-        if (command->command == LSDJ_COMMAND_O && command->value != LSDJ_PAN_NONE)
+        for (int step = 0; step < LSDJ_TABLE_LENGTH; ++step)
         {
-            command->value = LSDJ_PAN_LEFT_RIGHT;
+            if (lsdj_table_get_command1(song, table, step) == LSDJ_COMMAND_O &&
+                lsdj_table_get_command1_value(song, table, step) != LSDJ_PAN_NONE)
+            {
+                lsdj_table_set_command1_value(song, table, step, LSDJ_PAN_LEFT_RIGHT);
+            }
+            
+            if (lsdj_table_get_command2(song, table, step) == LSDJ_COMMAND_O &&
+                lsdj_table_get_command2_value(song, table, step) != LSDJ_PAN_NONE)
+            {
+                lsdj_table_set_command2_value(song, table, step, LSDJ_PAN_LEFT_RIGHT);
+            }
         }
     }
 
-    void convertTable(lsdj_table_t* table)
+    void convertPhrase(lsdj_song_t* song, uint8_t phrase)
     {
-        if (table == nullptr)
-            return;
-        
-        for (int i = 0; i < LSDJ_TABLE_LENGTH; ++i)
+        for (int step = 0; step < LSDJ_PHRASE_LENGTH; ++step)
         {
-            convertCommand(lsdj_table_get_command1(table, i));
-            convertCommand(lsdj_table_get_command2(table, i));
+            if (lsdj_phrase_get_command(song, phrase, step) == LSDJ_COMMAND_O &&
+                lsdj_phrase_get_command_value(song, phrase, step) != LSDJ_PAN_NONE)
+            {
+                lsdj_phrase_set_command_value(song, phrase, step, LSDJ_PAN_LEFT_RIGHT);
+            }
         }
-    }
-
-    void convertPhrase(lsdj_phrase_t* phrase)
-    {
-        if (phrase == nullptr)
-            return;
-        
-        for (int i = 0; i < LSDJ_PHRASE_LENGTH; ++i)
-            convertCommand(&phrase->commands[i]);
     }
 
     [[nodiscard]] bool alreadyEndsWithMono(const ghc::filesystem::path& path)
@@ -68,24 +74,26 @@ namespace lsdj
         return addMonoSuffix(path);
     }
 
-    bool MonoProcessor::processSong(lsdj_song_t& song)
+    bool MonoProcessor::processSong(lsdj_song_t* song)
     {
+        assert(song != nullptr);
+        
         if (processInstruments)
         {
             for (int i = 0; i < LSDJ_INSTRUMENT_COUNT; ++i)
-                convertInstrument(lsdj_song_get_instrument(&song, i));
+                convertInstrument(song, i);
         }
 
         if (processTables)
         {
             for (int i = 0; i < LSDJ_TABLE_COUNT; ++i)
-                convertTable(lsdj_song_get_table(&song, i));
+                convertTable(song, i);
         }
 
         if (processPhrases)
         {
             for (int i = 0; i < LSDJ_PHRASE_COUNT; ++i)
-                convertPhrase(lsdj_song_get_phrase(&song, i));
+                convertPhrase(song, i);
         }
         
         return true;

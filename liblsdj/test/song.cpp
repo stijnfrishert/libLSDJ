@@ -1,18 +1,18 @@
-#include <song.h>
+#include <lsdj/song.h>
 
 #include <array>
 #include <catch2/catch.hpp>
-#include <chain.h>
-#include <command.h>
-#include <groove.h>
-#include <instrument.h>
-#include <panning.h>
-#include <phrase.h>
-#include <sav.h>
-#include <speech.h>
-#include <synth.h>
-#include <table.h>
-#include <wave.h>
+#include <lsdj/chain.h>
+#include <lsdj/command.h>
+#include <lsdj/groove.h>
+#include <lsdj/instrument.h>
+#include <lsdj/panning.h>
+#include <lsdj/phrase.h>
+#include <lsdj/sav.h>
+#include <lsdj/speech.h>
+#include <lsdj/synth.h>
+#include <lsdj/table.h>
+#include <lsdj/wave.h>
 
 using namespace Catch;
 
@@ -27,10 +27,10 @@ TEST_CASE( "Song", "[song]" )
 
 	SECTION( "Happy Birthday" )
 	{
-		auto song0 = lsdj_project_get_song(lsdj_sav_get_project(sav, 0));
+		auto song0 = lsdj_project_get_song_const(lsdj_sav_get_project_const(sav, 0));
         assert(song0 != nullptr);
         
-        auto song1 = lsdj_project_get_song(lsdj_sav_get_project(sav, 1));
+        auto song1 = lsdj_project_get_song_const(lsdj_sav_get_project_const(sav, 1));
         assert(song1 != nullptr);
         
 		SECTION( "Song settings" )
@@ -241,13 +241,13 @@ TEST_CASE( "Song", "[song]" )
 				0x89, 0xBD, 0xFF, 0xDF, 0xFF, 0xFF, 0xFD, 0xB9, 0x86, 0x42, 0x00, 0x00, 0x00, 0x00, 0x02, 0x46
 			};
 
-			REQUIRE( memcmp(lsdj_wave_get_bytes(song0, 0x00), wave00.data(), wave00.size()) == 0 );
+			REQUIRE( memcmp(lsdj_wave_get_bytes_const(song0, 0x00), wave00.data(), wave00.size()) == 0 );
 
 			std::array<std::uint8_t, LSDJ_WAVE_BYTE_COUNT> wave31 = {
 				0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31
 			};
 
-			REQUIRE( memcmp(lsdj_wave_get_bytes(song0, 0x31), wave31.data(), wave31.size()) == 0 );
+			REQUIRE( memcmp(lsdj_wave_get_bytes_const(song0, 0x31), wave31.data(), wave31.size()) == 0 );
 		}
 
 		SECTION( "Tables" )

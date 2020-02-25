@@ -44,12 +44,12 @@
 #define PHRASE_INSTRUMENTS_OFFSET (0x7000)
 
 #define PHRASE_SETTER(OFFSET, LENGTH, VALUE) \
-const size_t index = phrase * LSDJ_PHRASE_LENGTH + row; \
+const size_t index = phrase * LSDJ_PHRASE_LENGTH + step; \
 assert(index <= LENGTH); \
 song->bytes[OFFSET + index] = VALUE;
 
 #define PHRASE_GETTER(OFFSET, LENGTH) \
-const size_t index = phrase * LSDJ_PHRASE_LENGTH + row; \
+const size_t index = phrase * LSDJ_PHRASE_LENGTH + step; \
 assert(index <= LENGTH); \
 return song->bytes[OFFSET + index];
 
@@ -63,42 +63,77 @@ bool lsdj_phrase_is_allocated(const lsdj_song_t* song, uint8_t phrase)
 	return (song->bytes[PHRASE_ALLOCATIONS_OFFSET + index] & mask) != 0;
 }
 
-void lsdj_phrase_set_note(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t note)
+void lsdj_phrase_set_note(lsdj_song_t* song, uint8_t phrase, uint8_t step, uint8_t note)
 {
 	PHRASE_SETTER(PHRASE_NOTES_OFFSET, 4080, note)
 }
 
-uint8_t lsdj_phrase_get_note(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+uint8_t lsdj_phrase_get_note(const lsdj_song_t* song, uint8_t phrase, uint8_t step)
 {
 	PHRASE_GETTER(PHRASE_NOTES_OFFSET, 4080)
 }
 
-void lsdj_phrase_set_instrument(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t instrument)
+void lsdj_phrase_set_instrument(lsdj_song_t* song, uint8_t phrase, uint8_t step, uint8_t instrument)
 {
 	PHRASE_SETTER(PHRASE_INSTRUMENTS_OFFSET, 4080, instrument)
 }
 
-uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint8_t step)
 {
 	PHRASE_GETTER(PHRASE_INSTRUMENTS_OFFSET, 4080)
 }
 
-void lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t row, lsdj_command command)
+bool lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t step, lsdj_command command)
 {
-	PHRASE_SETTER(PHRASE_COMMANDS_OFFSET, 4080, (uint8_t)command)
+    if (lsdj_song_get_format_version(song) >= 8)
+    {
+        uint8_t byte = 0;
+        if (command == LSDJ_COMMAND_B)
+            byte = 1;
+        else if (command > 1)
+            byte = ((uint8_t)command) + 1;
+        else
+            byte = (uint8_t)command;
+            
+        const size_t index = phrase * LSDJ_PHRASE_LENGTH + step;
+        assert(index <= 4080);
+        song->bytes[PHRASE_COMMANDS_OFFSET + index] = byte;
+    } else {
+        if (command == LSDJ_COMMAND_B)
+            return false;
+        
+        PHRASE_SETTER(PHRASE_COMMANDS_OFFSET, 4080, (uint8_t)command)
+    }
+    
+    return true;
 }
 
-lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t step)
 {
-	PHRASE_GETTER(PHRASE_COMMANDS_OFFSET, 4080)
+    if (lsdj_song_get_format_version(song) >= 8)
+    {
+        const size_t index = phrase * LSDJ_PHRASE_LENGTH + step;
+        assert(index <= 4080);
+        
+        const uint8_t byte = song->bytes[PHRASE_COMMANDS_OFFSET + index];
+        
+        if (byte > 1)
+            return (lsdj_command)(byte - 1);
+        else if (byte == 1)
+            return LSDJ_COMMAND_B;
+        else
+            return (lsdj_command)byte;
+    } else {
+        PHRASE_GETTER(PHRASE_COMMANDS_OFFSET, 4080)
+    }
 }
 
-void lsdj_phrase_set_command_value(lsdj_song_t* song, uint8_t phrase, uint8_t row, uint8_t value)
+void lsdj_phrase_set_command_value(lsdj_song_t* song, uint8_t phrase, uint8_t step, uint8_t value)
 {
 	PHRASE_SETTER(PHRASE_COMMAND_VALUES_OFFSET, 4080, value)
 }
 
-uint8_t lsdj_phrase_get_command_value(const lsdj_song_t* song, uint8_t phrase, uint8_t row)
+uint8_t lsdj_phrase_get_command_value(const lsdj_song_t* song, uint8_t phrase, uint8_t step)
 {
 	PHRASE_GETTER(PHRASE_COMMAND_VALUES_OFFSET, 4080)
 }

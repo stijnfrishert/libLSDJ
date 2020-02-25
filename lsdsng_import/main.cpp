@@ -33,12 +33,12 @@
  
  */
 
+#include <iostream>
 #include <popl/popl.hpp>
 
-#include <iostream>
+#include <lsdj/version.h>
 
 #include "../common/common.hpp"
-#include "../liblsdj/version.h"
 #include "importer.hpp"
 
 void printHelp(const popl::OptionParser& options)

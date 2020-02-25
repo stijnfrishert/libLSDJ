@@ -203,7 +203,7 @@ bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned cha
         return false;
     }
 
-    const lsdj_song_t* song = lsdj_project_get_song(project);
+    const lsdj_song_t* song = lsdj_project_get_song_const(project);
     assert(song != NULL);
     
     lsdj_sav_set_working_memory_song(sav, song);
@@ -212,7 +212,12 @@ bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, unsigned cha
     return true;
 }
 
-const lsdj_song_t* lsdj_sav_get_working_memory_song(const lsdj_sav_t* sav)
+lsdj_song_t* lsdj_sav_get_working_memory_song(lsdj_sav_t* sav)
+{
+    return &sav->workingMemorysong;
+}
+
+const lsdj_song_t* lsdj_sav_get_working_memory_song_const(const lsdj_sav_t* sav)
 {
     return &sav->workingMemorysong;
 }
@@ -243,7 +248,7 @@ unsigned char lsdj_sav_get_active_project_index(const lsdj_sav_t* sav)
      unsigned char version = 0;
      if (active != LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX)
      {
-         const lsdj_project_t* oldProject = lsdj_sav_get_project(sav, active);
+         const lsdj_project_t* oldProject = lsdj_sav_get_project_const(sav, active);
          if (oldProject != NULL)
          {
              lsdj_project_get_name(oldProject, name);
@@ -287,7 +292,12 @@ void lsdj_sav_erase_project(lsdj_sav_t* sav, unsigned char index)
     lsdj_sav_set_project_move(sav, index, NULL);
 }
 
-const lsdj_project_t* lsdj_sav_get_project(const lsdj_sav_t* sav, unsigned char index)
+lsdj_project_t* lsdj_sav_get_project(lsdj_sav_t* sav, unsigned char index)
+{
+    return sav->projects[index];
+}
+
+const lsdj_project_t* lsdj_sav_get_project_const(const lsdj_sav_t* sav, unsigned char index)
 {
     return sav->projects[index];
 }
@@ -536,7 +546,7 @@ bool compress_projects(lsdj_project_t* const* projects, unsigned char* blocks, u
             continue;
         
         // Get the song buffer to compress
-        const lsdj_song_t* song = lsdj_project_get_song(project);
+        const lsdj_song_t* song = lsdj_project_get_song_const(project);
         
         // Compress and store success + how many bytes were written
         size_t compressionSize = 0;

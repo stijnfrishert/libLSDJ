@@ -33,21 +33,14 @@
  
  */
 
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <cstring>
-#include <fstream>
-#include <iostream>
-#include <string>
-
 #include <ghc/filesystem.hpp>
 #include <popl/popl.hpp>
 
+#include <lsdj/project.h>
+#include <lsdj/sav.h>
+#include <lsdj/version.h>
+
 #include "../common/common.hpp"
-#include "../liblsdj/project.h"
-#include "../liblsdj/sav.h"
-#include "../liblsdj/version.h"
 #include "wavetable_importer.hpp"
 
 void printHelp(const popl::OptionParser& options)

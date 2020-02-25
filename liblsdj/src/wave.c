@@ -33,42 +33,51 @@
  
  */
 
-#ifndef LSDJ_COMMAND_H_GUARD
-#define LSDJ_COMMAND_H_GUARD
+#include "wave.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <assert.h>
+#include <string.h>
 
-typedef enum
+#include "defaults.h"
+#include "synth.h"
+
+#define WAVES_OFFSET (0x6000)
+
+void lsdj_wave_set_bytes(lsdj_song_t* song, uint8_t wave, const uint8_t* data)
 {
-	LSDJ_COMMAND_NONE = 0,
-	LSDJ_COMMAND_A,
-	LSDJ_COMMAND_C,
-	LSDJ_COMMAND_D,
-	LSDJ_COMMAND_E,
-	LSDJ_COMMAND_F,
-	LSDJ_COMMAND_G,
-	LSDJ_COMMAND_H,
-	LSDJ_COMMAND_K,
-	LSDJ_COMMAND_L,
-	LSDJ_COMMAND_M,
-	LSDJ_COMMAND_O,
-	LSDJ_COMMAND_P,
-	LSDJ_COMMAND_R,
-	LSDJ_COMMAND_S,
-	LSDJ_COMMAND_T,
-	LSDJ_COMMAND_V,
-	LSDJ_COMMAND_W,
-	LSDJ_COMMAND_Z,
-	LSDJ_COMMAND_ARDUINO_BOY_N,
-	LSDJ_COMMAND_ARDUINO_BOY_X,
-	LSDJ_COMMAND_ARDUINO_BOY_Q,
-	LSDJ_COMMAND_ARDUINO_BOY_Y,
-} lsdj_command;
-    
-#ifdef __cplusplus
-}
-#endif
+	const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
+	assert(index < 4096);
 
-#endif
+	memcpy(&song->bytes[WAVES_OFFSET + index], data, LSDJ_WAVE_BYTE_COUNT);
+
+	lsdj_synth_set_wave_overwritten(song, wave / LSDJ_WAVE_PER_SYNTH_COUNT, true);
+}
+
+void lsdj_wave_set_silent(lsdj_song_t* song, uint8_t wave)
+{
+	lsdj_wave_set_bytes(song, wave, LSDJ_SILENT_WAVE);
+}
+
+uint8_t* lsdj_wave_get_bytes(lsdj_song_t* song, uint8_t wave)
+{
+	const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
+	assert(index < 4096);
+
+	return &song->bytes[WAVES_OFFSET + index];
+}
+
+const uint8_t* lsdj_wave_get_bytes_const(const lsdj_song_t* song, uint8_t wave)
+{
+    const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
+    assert(index < 4096);
+
+    return &song->bytes[WAVES_OFFSET + index];
+}
+
+bool lsdj_wave_is_default(const lsdj_song_t* song, uint8_t wave)
+{
+	const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
+	assert(index < 4096);
+
+    return memcmp(&song->bytes[WAVES_OFFSET + index], LSDJ_DEFAULT_WAVE, sizeof(LSDJ_DEFAULT_WAVE_LENGTH)) == 0;
+}

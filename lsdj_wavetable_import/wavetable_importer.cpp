@@ -37,8 +37,9 @@
 #include <array>
 #include <iostream>
 
-#include "../liblsdj/project.h"
-#include "../liblsdj/sav.h"
+#include <lsdj/project.h>
+#include <lsdj/sav.h>
+#include <lsdj/wave.h>
 
 #include "../common/common.hpp"
 #include "wavetable_importer.hpp"
@@ -79,17 +80,11 @@ namespace lsdj
         if (verbose)
             std::cout << "Loaded sav " + path.string() << std::endl;
         
-        const auto song = lsdj_song_read_from_buffer(lsdj_sav_get_working_memory_song(sav), &error);
-        if (!song)
-        {
-            lsdj_sav_free(sav);
-            return false;
-        }
+        auto song = lsdj_sav_get_working_memory_song(sav);
+        assert(song != nullptr);
         
         // Do the actual import
         const auto result = importToSong(song, wavetableName);
-        lsdj_song_free(song);
-        
         if (!result.first)
         {
             lsdj_sav_free(sav);
@@ -124,16 +119,11 @@ namespace lsdj
         if (verbose)
             std::cout << "Loaded project " + path.string() << std::endl;
         
-        lsdj_song_t* song = lsdj_song_read_from_buffer(lsdj_project_get_song(project), &error);
-        if (!song)
-        {
-            lsdj_project_free(project);
-            return false;
-        }
+        lsdj_song_t* song = lsdj_project_get_song(project);
+        assert(song != nullptr);
         
         // Do the actual import
         const auto result = importToSong(song, wavetableName);
-        lsdj_song_free(song);
         if (!result.first)
         {
             lsdj_project_free(project);
@@ -206,10 +196,10 @@ namespace lsdj
             
             for (auto frame = 0; frame < actualFrameCount; frame++)
             {
-                lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
-                if (memcmp(wave->data, LSDJ_DEFAULT_WAVE, LSDJ_WAVE_LENGTH) != 0)
+                if (!lsdj_wave_is_default(song, wavetableIndex + frame))
                 {
                     std::cout << "Some of the wavetable frames you are trying to overwrite already contain data.\nDo you want to continue? y/n\n> ";
+                    
                     char answer = 'n';
                     std::cin >> answer;
                     if (answer != 'y')
@@ -227,11 +217,11 @@ namespace lsdj
         // Apply the wavetable
         for (unsigned char frame = 0; frame < actualFrameCount; frame++)
         {
-            lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
-            wavetableStream.read(reinterpret_cast<char*>(wave->data), sizeof(wave->data));
+            std::uint8_t* memory = lsdj_wave_get_bytes(song, wavetableIndex + frame);
+            wavetableStream.read(reinterpret_cast<char*>(memory), LSDJ_WAVE_BYTE_COUNT);
             
             if (verbose)
-                std::cout << "Wrote " << std::dec << sizeof(wave->data) << " bytes to frame 0x" << std::hex << (wavetableIndex + frame) << std::endl;
+                std::cout << "Wrote " << std::dec << LSDJ_WAVE_BYTE_COUNT << " bytes to frame 0x" << std::hex << (wavetableIndex + frame) << std::endl;
         }
         
         // Write zero wavetables
@@ -240,16 +230,15 @@ namespace lsdj
             if (verbose)
                 std::cout << "Padding empty frames" << std::endl;
             
-            std::array<char, LSDJ_WAVE_LENGTH> table;
+            std::array<std::uint8_t, LSDJ_WAVE_BYTE_COUNT> table;
             table.fill(0x88);
             
             for (unsigned char frame = actualFrameCount; frame < 16; frame++)
             {
-                lsdj_wave_t* wave = lsdj_song_get_wave(song, wavetableIndex + frame);
-                memcpy(wave->data, table.data(), sizeof(table));
+                lsdj_wave_set_silent(song, wavetableIndex + frame);
                 
                 if (verbose)
-                    std::cout << "Wrote default bytes to frame 0x" << std::hex << (wavetableIndex + frame) << std::endl;
+                    std::cout << "Wrote silence to frame 0x" << std::hex << (wavetableIndex + frame) << std::endl;
             }
         }
         

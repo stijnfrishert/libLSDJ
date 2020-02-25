@@ -1,4 +1,4 @@
-#include <sav.h>
+#include <lsdj/sav.h>
 
 #include <algorithm>
 #include <array>
@@ -32,7 +32,7 @@ SCENARIO( "Saves", "[sav]" )
 
 		WHEN( "The working memory song buffer is requested" )
 		{
-			auto song = lsdj_sav_get_working_memory_song(sav);
+			auto song = lsdj_sav_get_working_memory_song_const(sav);
 			REQUIRE( song != nullptr );
 
 			THEN( "It should be a zeroed out array of bytes" )
@@ -47,7 +47,7 @@ SCENARIO( "Saves", "[sav]" )
 
 			THEN( "Retrieving the song buffer should return the same data" )
 			{
-				auto result = lsdj_sav_get_working_memory_song(sav);
+				auto result = lsdj_sav_get_working_memory_song_const(sav);
 				REQUIRE( memcpy(&song.bytes, result->bytes, LSDJ_SONG_BYTE_COUNT) );
 			}
 		}
@@ -61,7 +61,7 @@ SCENARIO( "Saves", "[sav]" )
 
 			THEN( "The working memory and index should change" )
 			{
-				auto result = lsdj_sav_get_working_memory_song(sav);
+				auto result = lsdj_sav_get_working_memory_song_const(sav);
 				REQUIRE( memcpy(&song.bytes, result->bytes, LSDJ_SONG_BYTE_COUNT) );
 			}
 		}
@@ -93,7 +93,7 @@ SCENARIO( "Saves", "[sav]" )
 
 			THEN( "The data in the project should be identical " )
 			{
-				auto copy = lsdj_sav_get_project(sav, 7);
+				auto copy = lsdj_sav_get_project_const(sav, 7);
 				REQUIRE( copy != nullptr );
 
 				std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
@@ -102,7 +102,7 @@ SCENARIO( "Saves", "[sav]" )
 				REQUIRE_THAT( name.data(), Equals("MYSONG") );
 				REQUIRE( lsdj_project_get_version(copy) == 16 );
 
-				auto bufferCopy = lsdj_project_get_song(project);
+				auto bufferCopy = lsdj_project_get_song_const(project);
 				REQUIRE( memcmp(song.bytes, bufferCopy->bytes, LSDJ_SONG_BYTE_COUNT) == 0 );
 			}
 		}
@@ -113,7 +113,7 @@ SCENARIO( "Saves", "[sav]" )
 
 			THEN( "The project in the sav should point to the same memory " )
 			{
-				REQUIRE(lsdj_sav_get_project(sav, 3) == project);
+				REQUIRE(lsdj_sav_get_project_const(sav, 3) == project);
 
 				WHEN( "Erasing a project from a sav" )
 				{
@@ -121,7 +121,7 @@ SCENARIO( "Saves", "[sav]" )
 
 					THEN( "The slot should be empty" )
 					{
-						REQUIRE( lsdj_sav_get_project(sav, 3) == nullptr );
+						REQUIRE( lsdj_sav_get_project_const(sav, 3) == nullptr );
 					}
 				}
 			}
@@ -129,7 +129,7 @@ SCENARIO( "Saves", "[sav]" )
 
 		WHEN( "Requesting a project" )
 		{
-			auto project = lsdj_sav_get_project(sav, 0);
+			auto project = lsdj_sav_get_project_const(sav, 0);
 
 			THEN( "The project should be NULL" )
 			{
@@ -148,10 +148,10 @@ SCENARIO( "Saves", "[sav]" )
 				auto copy = lsdj_sav_copy(sav, nullptr, nullptr);
 				REQUIRE( copy != nullptr );
 
-				auto copyBuffer = lsdj_sav_get_working_memory_song(sav);
+				auto copyBuffer = lsdj_sav_get_working_memory_song_const(sav);
 				REQUIRE( memcpy(&song.bytes, copyBuffer->bytes, LSDJ_SONG_BYTE_COUNT) );
 				REQUIRE( lsdj_sav_get_active_project_index(sav) == 15 );
-				REQUIRE( lsdj_sav_get_project(sav, 9) == project );
+				REQUIRE( lsdj_sav_get_project_const(sav, 9) == project );
 			}
 		}
         
@@ -159,7 +159,7 @@ SCENARIO( "Saves", "[sav]" )
         {
             lsdj_sav_set_active_project_index(sav, LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX);
             auto project = lsdj_project_new_from_working_memory_song(sav, nullptr, nullptr);
-            auto wm = lsdj_sav_get_working_memory_song(sav);
+            auto wm = lsdj_sav_get_working_memory_song_const(sav);
             
             THEN( "It should contain the same data" )
             {
@@ -171,7 +171,7 @@ SCENARIO( "Saves", "[sav]" )
                 
                 REQUIRE( lsdj_project_get_version(project) == 0 );
                 
-                auto song = lsdj_project_get_song(project);
+                auto song = lsdj_project_get_song_const(project);
                 REQUIRE( memcmp(song->bytes, wm->bytes, LSDJ_SONG_BYTE_COUNT) == 0 );
             }
         }
@@ -182,7 +182,7 @@ SCENARIO( "Saves", "[sav]" )
             lsdj_sav_set_active_project_index(sav, 3);
             
             auto project = lsdj_project_new_from_working_memory_song(sav, nullptr, nullptr);
-            auto wm = lsdj_sav_get_working_memory_song(sav);
+            auto wm = lsdj_sav_get_working_memory_song_const(sav);
             
             THEN( "It should contain the same data" )
             {
@@ -194,7 +194,7 @@ SCENARIO( "Saves", "[sav]" )
                 
                 REQUIRE( lsdj_project_get_version(project) == 16 );
                 
-                auto song = lsdj_project_get_song(project);
+                auto song = lsdj_project_get_song_const(project);
                 REQUIRE( memcmp(song->bytes, wm->bytes, LSDJ_SONG_BYTE_COUNT) == 0 );
             }
         }
@@ -214,12 +214,12 @@ TEST_CASE( ".sav save/load", "[sav]" )
 		auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", nullptr, nullptr);
 		REQUIRE( sav != nullptr );
 
-		auto wm = lsdj_sav_get_working_memory_song(sav);
+		auto wm = lsdj_sav_get_working_memory_song_const(sav);
 		REQUIRE( memcmp(wm->bytes, raw.data(), LSDJ_SONG_BYTE_COUNT) == 0 );
 
 		REQUIRE( lsdj_sav_get_active_project_index(sav) == LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX );
 
-		auto project = lsdj_sav_get_project(sav, 0);
+		auto project = lsdj_sav_get_project_const(sav, 0);
 		REQUIRE( project != nullptr );
 
 		std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
@@ -228,7 +228,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 		REQUIRE( lsdj_project_get_version(project) == 4 );
 
-		auto song = lsdj_project_get_song(project);
+		auto song = lsdj_project_get_song_const(project);
 		REQUIRE( memcmp(song->bytes, raw.data(), raw.size()) == 0 );
 
 		lsdj_sav_free(sav);
@@ -240,13 +240,13 @@ TEST_CASE( ".sav save/load", "[sav]" )
 		REQUIRE( sav != nullptr );
 
 		// Working memory
-		auto wm = lsdj_sav_get_working_memory_song(sav);
+		auto wm = lsdj_sav_get_working_memory_song_const(sav);
 		REQUIRE( memcmp(wm->bytes, raw.data(), LSDJ_SONG_BYTE_COUNT) == 0 );
 
 		// Active project
 		REQUIRE( lsdj_sav_get_active_project_index(sav) == LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX );
 
-		auto project = lsdj_sav_get_project(sav, 0);
+		auto project = lsdj_sav_get_project_const(sav, 0);
 		REQUIRE( project != nullptr );
 
 		std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
@@ -255,7 +255,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 		REQUIRE( lsdj_project_get_version(project) == 4 );
 
-		auto song = lsdj_project_get_song(project);
+		auto song = lsdj_project_get_song_const(project);
 		REQUIRE( memcmp(song->bytes, raw.data(), raw.size()) == 0 );
 
 		lsdj_sav_free(sav);
@@ -292,13 +292,13 @@ TEST_CASE( ".sav save/load", "[sav]" )
         // --- Comparison --- //
         
         // Working memory
-        auto compWm = lsdj_sav_get_working_memory_song(compSav);
+        auto compWm = lsdj_sav_get_working_memory_song_const(compSav);
         REQUIRE( memcmp(compWm->bytes, raw.data(), LSDJ_SONG_BYTE_COUNT) == 0 );
 
         // Active project
         REQUIRE( lsdj_sav_get_active_project_index(compSav) == LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX );
 
-        auto compProject = lsdj_sav_get_project(compSav, 0);
+        auto compProject = lsdj_sav_get_project_const(compSav, 0);
         REQUIRE( compProject != nullptr );
 
         std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
@@ -307,7 +307,7 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
         REQUIRE( lsdj_project_get_version(compProject) == 4 );
 
-        auto song = lsdj_project_get_song(compProject);
+        auto song = lsdj_project_get_song_const(compProject);
         REQUIRE( memcmp(song->bytes, raw.data(), raw.size()) == 0 );
 
 		lsdj_sav_free(compSav);

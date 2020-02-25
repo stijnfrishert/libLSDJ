@@ -38,8 +38,9 @@
 #include <ghc/filesystem.hpp>
 #include <popl/popl.hpp>
 
+#include <lsdj/version.h>
+
 #include "../common/common.hpp"
-#include "../liblsdj/version.h"
 #include "mono_processor.hpp"
 
 void printHelp(const popl::OptionParser& options)

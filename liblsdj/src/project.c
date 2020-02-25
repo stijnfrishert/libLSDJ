@@ -150,7 +150,12 @@ void lsdj_project_set_song(lsdj_project_t* project, const lsdj_song_t* song)
     memcpy(&project->song, song, sizeof(lsdj_song_t));
 }
 
-const lsdj_song_t* lsdj_project_get_song(const lsdj_project_t* project)
+lsdj_song_t* lsdj_project_get_song(lsdj_project_t* project)
+{
+    return &project->song;
+}
+
+const lsdj_song_t* lsdj_project_get_song_const(const lsdj_project_t* project)
 {
     return &project->song;
 }
@@ -332,7 +337,7 @@ bool lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio, 
     }
     
     // Compress and write the song buffer
-    const lsdj_song_t* song = lsdj_project_get_song(project);
+    const lsdj_song_t* song = lsdj_project_get_song_const(project);
     return lsdj_compress(song->bytes, wvio, 1, writeCounter, error);
 }
 

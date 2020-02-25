@@ -40,8 +40,8 @@
 #include <string>
 #include <vector>
 
-#include "../liblsdj/error.h"
-#include "../liblsdj/song.h"
+#include <lsdj/error.h>
+#include <lsdj/song.h>
 
 namespace lsdj
 {

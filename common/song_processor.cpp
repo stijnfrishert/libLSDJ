@@ -3,8 +3,9 @@
 #include <ghc/filesystem.hpp>
 #include <iostream>
 
-#include "../liblsdj/error.h"
-#include "../liblsdj/sav.h"
+#include <lsdj/error.h>
+#include <lsdj/sav.h>
+
 #include "common.hpp"
 
 namespace lsdj
@@ -63,16 +64,10 @@ namespace lsdj
         if (verbose)
             std::cout << "Processing sav '" + path.string() + "'" << std::endl;
         
-        const auto song = lsdj_song_read_from_buffer(lsdj_sav_get_working_memory_song(sav), &error);
-        if (!song)
-        {
-            lsdj_sav_free(sav);
-            return false;
-        }
-        
-        const auto result = processSong(*song);
-        lsdj_song_free(song);
-        if (!result)
+        auto song = lsdj_sav_get_working_memory_song(sav);
+        assert(song != nullptr);
+
+        if (!processSong(song))
         {
             lsdj_sav_free(sav);
             return false;
@@ -80,11 +75,14 @@ namespace lsdj
         
         for (int i = 0; i < LSDJ_SAV_PROJECT_COUNT; ++i)
         {
-            const lsdj_project_t* project = lsdj_sav_get_project(sav, i);
+            lsdj_project_t* project = lsdj_sav_get_project(sav, i);
             if (project == nullptr)
                 continue;
             
-            if (!processSong(*song))
+            auto song = lsdj_project_get_song(project);
+            assert(song != nullptr);
+
+            if (!processSong(song))
             {
                 lsdj_sav_free(sav);
                 return false;
@@ -118,20 +116,14 @@ namespace lsdj
         if (verbose)
             std::cout << "Processing lsdsng '" + path.string() + "'" << std::endl;
         
-        const auto song = lsdj_song_read_from_buffer(lsdj_project_get_song(project), &error);
-        if (!song)
+        auto song = lsdj_project_get_song(project);
+        assert(song != nullptr);
+        
+        if (!processSong(song))
         {
             lsdj_project_free(project);
             return false;
         }
-        
-        if (!processSong(*song))
-        {
-            lsdj_project_free(project);
-            return false;
-        }
-        
-        lsdj_song_free(song);
         
         if (!lsdj_project_write_lsdsng_to_file(project, constructLsdsngDestinationPath(path).string().c_str(), nullptr, &error))
         {

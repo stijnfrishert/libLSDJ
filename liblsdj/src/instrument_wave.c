@@ -12,12 +12,18 @@ uint8_t lsdj_instrument_wave_get_synth(const lsdj_song_t* song, uint8_t instrume
 
 void lsdj_instrument_wave_set_play_mode(lsdj_song_t* song, uint8_t instrument, lsdj_wave_play_mode mode)
 {
-	set_instrument_bits(song, instrument, 9, 0, 2, (uint8_t)mode);
+    if (lsdj_song_get_format_version(song) >= 10)
+        set_instrument_bits(song, instrument, 9, 0, 2, ((((uint8_t)mode) + 1) & 0x3));
+    else
+        set_instrument_bits(song, instrument, 9, 0, 2, (uint8_t)mode);
 }
 
 lsdj_wave_play_mode lsdj_instrument_wave_get_play_mode(const lsdj_song_t* song, uint8_t instrument)
 {
-	return (lsdj_wave_play_mode)get_instrument_bits(song, instrument, 9, 0, 2);
+    if (lsdj_song_get_format_version(song) >= 10)
+        return (lsdj_wave_play_mode)((get_instrument_bits(song, instrument, 9, 0, 2) - 1) & 0x3);
+    else
+        return (lsdj_wave_play_mode)get_instrument_bits(song, instrument, 9, 0, 2);
 }
 
 void lsdj_instrument_wave_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length)
@@ -46,12 +52,18 @@ uint8_t lsdj_instrument_wave_get_length(const lsdj_song_t* song, uint8_t instrum
 
 void lsdj_instrument_wave_set_repeat(lsdj_song_t* song, uint8_t instrument, uint8_t repeat)
 {
-	set_instrument_bits(song, instrument, 2, 0, 4, repeat);
+    if (lsdj_song_get_format_version(song) >= 9)
+        set_instrument_bits(song, instrument, 2, 0, 4, (repeat & 0xF) ^ 0xF);
+    else
+        set_instrument_bits(song, instrument, 2, 0, 4, (repeat & 0xF));
 }
 
 uint8_t lsdj_instrument_wave_get_repeat(const lsdj_song_t* song, uint8_t instrument)
 {
-	return get_instrument_bits(song, instrument, 2, 0, 4);
+    if (lsdj_song_get_format_version(song) >= 9)
+        return (get_instrument_bits(song, instrument, 2, 0, 4) & 0xF) ^ 0xF;
+    else
+        return get_instrument_bits(song, instrument, 2, 0, 4) & 0xF;
 }
 
 bool lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed)

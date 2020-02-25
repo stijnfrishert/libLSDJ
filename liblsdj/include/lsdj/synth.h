@@ -83,6 +83,12 @@ typedef enum
 	LSDJ_SYNTH_PHASE_RESYNC2
 } lsdj_synth_phase_compression;
 
+//! Set the flag that the wave for this synth has been overwritten
+/*! @param song The song containing the synth and wave
+	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
+	@param overwritten True when the wave has been overwritten */
+void lsdj_synth_set_wave_overwritten(lsdj_song_t* song, uint8_t synth, bool overwritten);
+
 //! Has the wave of this synth been overwritten?
 /*! @param song The song containing the synth and wave
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)

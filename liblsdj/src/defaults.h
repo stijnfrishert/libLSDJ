@@ -33,26 +33,38 @@
  
  */
 
-#include "wave.h"
+#ifndef LSDJ_CHAIN_H
+#define LSDJ_CHAIN_H
 
-#include <assert.h>
-#include <string.h>
+#include "song.h"
 
-#define WAVES_OFFSET (0x6000)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-void lsdj_wave_set_bytes(lsdj_song_t* song, uint8_t wave, const uint8_t* data)
-{
-	const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
-	assert(index < 4096);
+	//! The number of bytes the default wave array takes up
+#define LSDJ_DEFAULT_WAVE_LENGTH (16)
 
-	memcpy(&song->bytes[WAVES_OFFSET + index], data, LSDJ_WAVE_BYTE_COUNT);
+//! The default wave array
+static const unsigned char LSDJ_DEFAULT_WAVE[LSDJ_DEFAULT_WAVE_LENGTH] = {
+    0x8E, 0xCD, 0xCC, 0xBB, 0xAA, 0xA9, 0x99, 0x88, 0x87, 0x76, 0x66, 0x55, 0x54, 0x43, 0x32, 0x31
+};
+
+//! The empty (silent) wave array
+static const unsigned char LSDJ_SILENT_WAVE[LSDJ_DEFAULT_WAVE_LENGTH] = {
+    0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88
+};
+
+//! The number of bytes the default instrument array takes up
+#define LSDJ_DEFAULT_INSTRUMENT_LENGTH (0x10)
+
+//! The default instrument array
+static const uint8_t LSDJ_DEFAULT_INSTRUMENT[LSDJ_DEFAULT_INSTRUMENT_LENGTH] = {
+    0xA8, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x03, 0x00, 0x00, 0xD0, 0x00, 0x00, 0x00, 0xF3, 0x00, 0x00
+};
+    
+#ifdef __cplusplus
 }
+#endif
 
-const uint8_t* lsdj_wave_get_bytes(const lsdj_song_t* song, uint8_t wave)
-{
-	const size_t index = wave * LSDJ_WAVE_BYTE_COUNT;
-	assert(index < 4096);
-
-	return &song->bytes[WAVES_OFFSET + index];
-}
-
+#endif

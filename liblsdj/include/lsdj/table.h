@@ -59,67 +59,71 @@ bool lsdj_table_is_allocated(const lsdj_song_t* song, uint8_t table);
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
 	@param value The value to write into the slot */
-void lsdj_table_set_envelope(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value);
+void lsdj_table_set_envelope(lsdj_song_t* song, uint8_t table, uint8_t step, uint8_t value);
 
 //! Return the envelope value at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH */
-uint8_t lsdj_table_get_envelope(const lsdj_song_t* song, uint8_t table, uint8_t row);
+uint8_t lsdj_table_get_envelope(const lsdj_song_t* song, uint8_t table, uint8_t step);
 
 //! Change the transposition value at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
 	@param value The value to write into the slot */
-void lsdj_table_set_transposition(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value);
+void lsdj_table_set_transposition(lsdj_song_t* song, uint8_t table, uint8_t step, uint8_t value);
 
 //! Return the transposition value at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH */
-uint8_t lsdj_table_get_transposition(const lsdj_song_t* song, uint8_t table, uint8_t row);
+uint8_t lsdj_table_get_transposition(const lsdj_song_t* song, uint8_t table, uint8_t step);
 
 //! Change the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
-	@param command The command to write into the slot */
-void lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command);
+	@param command The command to write into the slot
+    @note Versions earlier than 7.1.0 (fmt v8 don't support the B command
+    @return false if the command is not supported in your LSDj version */
+bool lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t step, lsdj_command command);
 
 //! Return the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH */
-lsdj_command lsdj_table_get_command1(const lsdj_song_t* song, uint8_t table, uint8_t row);
+lsdj_command lsdj_table_get_command1(const lsdj_song_t* song, uint8_t table, uint8_t step);
 
 //! Change the command value at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
 	@param value The value to write into the slot */
-void lsdj_table_set_command1_value(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value);
+void lsdj_table_set_command1_value(lsdj_song_t* song, uint8_t table, uint8_t step, uint8_t value);
 
 //! Return the command value at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH */
-uint8_t lsdj_table_get_command1_value(const lsdj_song_t* song, uint8_t table, uint8_t row);
+uint8_t lsdj_table_get_command1_value(const lsdj_song_t* song, uint8_t table, uint8_t step);
 
 //! Change the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
-	@param command The command to write into the slot */
-void lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t row, lsdj_command command);
+	@param command The command to write into the slot
+    @note Versions earlier than 7.1.0 (fmt v8 don't support the B command
+    @return false if the command is not supported in your LSDj version */
+bool lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t step, lsdj_command command);
 
 //! Return the command at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH */
-lsdj_command lsdj_table_get_command2(const lsdj_song_t* song, uint8_t table, uint8_t row);
+lsdj_command lsdj_table_get_command2(const lsdj_song_t* song, uint8_t table, uint8_t step);
 
 //! Change the command value at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH
 	@param value The value to write into the slot */
-void lsdj_table_set_command2_value(lsdj_song_t* song, uint8_t table, uint8_t row, uint8_t value);
+void lsdj_table_set_command2_value(lsdj_song_t* song, uint8_t table, uint8_t step, uint8_t value);
 
 //! Return the command value at a slot in a table
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT
 	@param row The row, at maximum LSDJ_TABLE_LENGTH */
-uint8_t lsdj_table_get_command2_value(const lsdj_song_t* song, uint8_t table, uint8_t row);
+uint8_t lsdj_table_get_command2_value(const lsdj_song_t* song, uint8_t table, uint8_t step);
     
 #ifdef __cplusplus
 }
