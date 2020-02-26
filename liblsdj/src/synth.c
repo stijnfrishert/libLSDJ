@@ -38,16 +38,14 @@
 #include <assert.h>
 
 #include "bytes.h"
-
-#define SYNTHS_OFFSET (0x3EB2)
-#define OVERWRITES_OFFSET (0x3FC4)
+#include "song_offsets.h"
 
 void lsdj_synth_set_wave_overwritten(lsdj_song_t* song, uint8_t synth, bool overwritten)
 {
 	const size_t index = synth / 8;
 	assert(index < 2);
 
-	return copy_bits_in_place(&song->bytes[OVERWRITES_OFFSET + index], (uint8_t)(synth - (index * 8)), 1, overwritten ? 1 : 0);
+	return copy_bits_in_place(&song->bytes[SYNTH_OVERWRITES_OFFSET + index], (uint8_t)(synth - (index * 8)), 1, overwritten ? 1 : 0);
 }
 
 bool lsdj_synth_is_wave_overwritten(const lsdj_song_t* song, uint8_t synth)
@@ -55,7 +53,7 @@ bool lsdj_synth_is_wave_overwritten(const lsdj_song_t* song, uint8_t synth)
 	const size_t index = synth / 8;
 	assert(index < 2);
 
-	return get_bits(song->bytes[OVERWRITES_OFFSET + index], (uint8_t)(synth - (index * 8)), 1) != 0;
+	return get_bits(song->bytes[SYNTH_OVERWRITES_OFFSET + index], (uint8_t)(synth - (index * 8)), 1) != 0;
 }
 
 void set_synth_byte(lsdj_song_t* song, uint8_t synth, uint8_t byte, uint8_t value)
@@ -63,7 +61,7 @@ void set_synth_byte(lsdj_song_t* song, uint8_t synth, uint8_t byte, uint8_t valu
 	const size_t index = synth * LSDJ_SYNTH_BYTE_COUNT + byte;
 	assert(index < 256);
 
-	song->bytes[SYNTHS_OFFSET + index] = value;
+	song->bytes[SYNTH_PARAMS_OFFSET + index] = value;
 }
 
 const uint8_t get_synth_byte(const lsdj_song_t* song, uint8_t synth, uint8_t byte)
@@ -71,7 +69,7 @@ const uint8_t get_synth_byte(const lsdj_song_t* song, uint8_t synth, uint8_t byt
 	const size_t index = synth * LSDJ_SYNTH_BYTE_COUNT + byte;
 	assert(index < 256);
 
-	return song->bytes[SYNTHS_OFFSET + index];
+	return song->bytes[SYNTH_PARAMS_OFFSET + index];
 }
 
 void lsdj_synth_set_waveform(lsdj_song_t* song, uint8_t synth, lsdj_synth_waveform waveform)

@@ -2,8 +2,8 @@
 
 #include <string.h>
 
-#define WORDS_OFFSET (0x1890)
-#define WORD_NAMES_OFFSET (0x1DD0)
+#include "song_offsets.h"
+
 #define WORD_LENGTH (32)
 
 void lsdj_speech_set_word_name(lsdj_song_t* song, uint8_t word, const char* name)

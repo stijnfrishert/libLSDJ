@@ -37,33 +37,7 @@
 
 #include <assert.h>
 
-// --- Offsets --- //
-
-#define RB1_OFFSET (0x1E78)
-#define RB2_OFFSET (0x3E80)
-#define RB3_OFFSET (0x7FF0)
-
-#define BOOKMARKS_OFFSET (0x0FF0)
-#define CHAIN_ASSIGNMENTS_OFFSET (0x1290)
-
-#define WORK_HOURS_OFFSET (0x3FB2)
-#define WORK_MINUTES_OFFSET (0x3FB3)
-#define TEMPO_OFFSET (0x3FB4)
-#define TRANSPOSITION_OFFSET (0x3FB5)
-#define TOTAL_DAYS_OFFSET (0x3FB6)
-#define TOTAL_HOURS_OFFSET (0x3FB7)
-#define TOTAL_MINUTES_OFFSET (0x3FB8)
-#define TOTAL_TIME_CHECKSUM_OFFSET (0x3FB9)
-#define KEY_DELAY_OFFSET (0x3FBA)
-#define KEY_REPEAT_OFFSET (0x3FBB)
-#define FONT_OFFSET (0x3FBC)
-#define SYNC_MODE_OFFSET (0x3FBD)
-#define COLOR_PALETTE_OFFSET (0x3FBE)
-#define CLONE_MODE_OFFSET (0x3FC0)
-#define FILE_CHANGED_OFFSET (0x3FC1)
-#define PRELISTEN_OFFSET (0x3FC3)
-
-#define FORMAT_VERSION_OFFSET (0x7FFF)
+#include "song_offsets.h"
 
 // --- Other macros --- //
 

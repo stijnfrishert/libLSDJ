@@ -40,8 +40,7 @@
 
 #include "defaults.h"
 #include "synth.h"
-
-#define WAVES_OFFSET (0x6000)
+#include "song_offsets.h"
 
 void lsdj_wave_set_bytes(lsdj_song_t* song, uint8_t wave, const uint8_t* data)
 {

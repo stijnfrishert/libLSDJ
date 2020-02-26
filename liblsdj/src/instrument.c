@@ -39,31 +39,28 @@
 #include <string.h>
 
 #include "bytes.h"
-
-#define NAMES_OFFSET (0x1E7A)
-#define ALLOCATION_TABLE_OFFSET (0x2040)
-#define INSTRUMENTS_OFFSET (0x3080)
+#include "song_offsets.h"
 
 bool lsdj_instrument_is_allocated(const lsdj_song_t* song, uint8_t instrument)
 {
-    const size_t index = ALLOCATION_TABLE_OFFSET + instrument;
-    assert(index <= ALLOCATION_TABLE_OFFSET + 64);
+    const size_t index = INSTRUMENT_ALLOCATION_TABLE_OFFSET + instrument;
+    assert(index <= INSTRUMENT_ALLOCATION_TABLE_OFFSET + 64);
 
     return song->bytes[index];
 }
 
 void lsdj_instrument_set_name(lsdj_song_t* song, uint8_t instrument, const char* name)
 {
-    const size_t index = NAMES_OFFSET + instrument * LSDJ_INSTRUMENT_NAME_LENGTH;
-    assert(index < NAMES_OFFSET + 320);
+    const size_t index = INSTRUMENT_NAMES_OFFSET + instrument * LSDJ_INSTRUMENT_NAME_LENGTH;
+    assert(index < INSTRUMENT_NAMES_OFFSET + 320);
 
     strncpy((char*)(&song->bytes[index]), name, LSDJ_INSTRUMENT_NAME_LENGTH);
 }
 
 const char* lsdj_instrument_get_name(const lsdj_song_t* song, uint8_t instrument)
 {
-    const size_t index = NAMES_OFFSET + instrument * LSDJ_INSTRUMENT_NAME_LENGTH;
-    assert(index < NAMES_OFFSET + 320);
+    const size_t index = INSTRUMENT_NAMES_OFFSET + instrument * LSDJ_INSTRUMENT_NAME_LENGTH;
+    assert(index < INSTRUMENT_NAMES_OFFSET + 320);
 
     return (const char*)(&song->bytes[index]);
 }
@@ -74,7 +71,7 @@ void set_instrument_bits(lsdj_song_t* song, uint8_t instrument, uint8_t byte, ui
 	assert(index < 1024);
 
 	copy_bits_in_place(
-		&song->bytes[INSTRUMENTS_OFFSET + index],
+		&song->bytes[INSTRUMENT_PARAMS_OFFSET + index],
 		position, count, value
 	);
 }
@@ -84,7 +81,7 @@ uint8_t get_instrument_bits(const lsdj_song_t* song, uint8_t instrument, uint8_t
 	const size_t index = instrument * LSDJ_INSTRUMENT_BYTE_COUNT + byte;
 	assert(index < 1024);
 
-	return (uint8_t)(get_bits(song->bytes[INSTRUMENTS_OFFSET + index], position, count) >> position);
+	return (uint8_t)(get_bits(song->bytes[INSTRUMENT_PARAMS_OFFSET + index], position, count) >> position);
 }
 
 void lsdj_instrument_set_type(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_type type)

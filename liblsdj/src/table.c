@@ -37,16 +37,9 @@
 
 #include <assert.h>
 
-#define ALLOCATION_TABLE_OFFSET (0x2020)
+#include "song_offsets.h"
+
 #define ALLOCATION_TABLE_LENGTH (0x32)
-
-#define ENVELOPES_OFFSET (0x1690)
-#define TRANSPOSITION_OFFSET (0x3480)
-#define COMMAND1_OFFSET (0x3680)
-#define COMMAND1_VALUE_OFFSET (0x3880)
-#define COMMAND2_OFFSET (0x3a80)
-#define COMMAND2_VALUE_OFFSET (0x3c80)
-
 #define CONTENT_LENGTH (512)
 
 #define TABLE_SETTER(OFFSET, LENGTH, VALUE) \
@@ -61,30 +54,30 @@ return song->bytes[OFFSET + index];
 
 bool lsdj_table_is_allocated(const lsdj_song_t* song, uint8_t table)
 {
-    const size_t index = ALLOCATION_TABLE_OFFSET + table;
-    assert(index <= ALLOCATION_TABLE_OFFSET + ALLOCATION_TABLE_LENGTH);
+    const size_t index = TABLE_ALLOCATION_TABLE_OFFSET + table;
+    assert(index <= TABLE_ALLOCATION_TABLE_OFFSET + ALLOCATION_TABLE_LENGTH);
 
     return song->bytes[index];
 }
 
 void lsdj_table_set_envelope(lsdj_song_t* song, uint8_t table, uint8_t step, uint8_t value)
 {
-    TABLE_SETTER(ENVELOPES_OFFSET, CONTENT_LENGTH, value);
+    TABLE_SETTER(TABLE_ENVELOPES_OFFSET, CONTENT_LENGTH, value);
 }
 
 uint8_t lsdj_table_get_envelope(const lsdj_song_t* song, uint8_t table, uint8_t step)
 {
-	TABLE_GETTER(ENVELOPES_OFFSET, CONTENT_LENGTH);
+	TABLE_GETTER(TABLE_ENVELOPES_OFFSET, CONTENT_LENGTH);
 }
 
 void lsdj_table_set_transposition(lsdj_song_t* song, uint8_t table, uint8_t step, uint8_t value)
 {
-	TABLE_SETTER(TRANSPOSITION_OFFSET, CONTENT_LENGTH, value);
+	TABLE_SETTER(TABLE_TRANSPOSITION_OFFSET, CONTENT_LENGTH, value);
 }
 
 uint8_t lsdj_table_get_transposition(const lsdj_song_t* song, uint8_t table, uint8_t step)
 {
-	TABLE_GETTER(TRANSPOSITION_OFFSET, CONTENT_LENGTH);
+	TABLE_GETTER(TABLE_TRANSPOSITION_OFFSET, CONTENT_LENGTH);
 }
 
 bool lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t step, lsdj_command command)
@@ -101,12 +94,12 @@ bool lsdj_table_set_command1(lsdj_song_t* song, uint8_t table, uint8_t step, lsd
             
         const size_t index = table * LSDJ_TABLE_LENGTH + step;
         assert(index <= CONTENT_LENGTH);
-        song->bytes[COMMAND1_OFFSET + index] = byte;
+        song->bytes[TABLE_COMMAND1_OFFSET + index] = byte;
     } else {
         if (command == LSDJ_COMMAND_B)
             return false;
         
-        TABLE_SETTER(COMMAND1_OFFSET, CONTENT_LENGTH, (uint8_t)command)
+        TABLE_SETTER(TABLE_COMMAND1_OFFSET, CONTENT_LENGTH, (uint8_t)command)
     }
     
     return true;
@@ -117,9 +110,9 @@ lsdj_command lsdj_table_get_command1(const lsdj_song_t* song, uint8_t table, uin
 	if (lsdj_song_get_format_version(song) >= 8)
     {
         const size_t index = table * LSDJ_TABLE_LENGTH + step;
-        assert(index <= COMMAND1_OFFSET);
+        assert(index <= TABLE_COMMAND1_OFFSET);
         
-        const uint8_t byte = song->bytes[COMMAND2_OFFSET + index];
+        const uint8_t byte = song->bytes[TABLE_COMMAND2_OFFSET + index];
         
         if (byte > 1)
             return (lsdj_command)(byte - 1);
@@ -128,18 +121,18 @@ lsdj_command lsdj_table_get_command1(const lsdj_song_t* song, uint8_t table, uin
         else
             return (lsdj_command)byte;
     } else {
-        TABLE_GETTER(COMMAND1_OFFSET, COMMAND2_OFFSET)
+        TABLE_GETTER(TABLE_COMMAND1_OFFSET, CONTENT_LENGTH)
     }
 }
 
 void lsdj_table_set_command1_value(lsdj_song_t* song, uint8_t table, uint8_t step, uint8_t value)
 {
-	TABLE_SETTER(COMMAND1_VALUE_OFFSET, CONTENT_LENGTH, value);
+	TABLE_SETTER(TABLE_COMMAND1_VALUE_OFFSET, CONTENT_LENGTH, value);
 }
 
 uint8_t lsdj_table_get_command1_value(const lsdj_song_t* song, uint8_t table, uint8_t step)
 {
-	TABLE_GETTER(COMMAND1_VALUE_OFFSET, CONTENT_LENGTH);
+	TABLE_GETTER(TABLE_COMMAND1_VALUE_OFFSET, CONTENT_LENGTH);
 }
 
 bool lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t step, lsdj_command command)
@@ -156,12 +149,12 @@ bool lsdj_table_set_command2(lsdj_song_t* song, uint8_t table, uint8_t step, lsd
             
         const size_t index = table * LSDJ_TABLE_LENGTH + step;
         assert(index <= CONTENT_LENGTH);
-        song->bytes[COMMAND2_OFFSET + index] = byte;
+        song->bytes[TABLE_COMMAND2_OFFSET + index] = byte;
     } else {
         if (command == LSDJ_COMMAND_B)
             return false;
         
-        TABLE_SETTER(COMMAND2_OFFSET, CONTENT_LENGTH, (uint8_t)command)
+        TABLE_SETTER(TABLE_COMMAND2_OFFSET, CONTENT_LENGTH, (uint8_t)command)
     }
     
     return true;
@@ -172,9 +165,9 @@ lsdj_command lsdj_table_get_command2(const lsdj_song_t* song, uint8_t table, uin
     if (lsdj_song_get_format_version(song) >= 8)
     {
         const size_t index = table * LSDJ_TABLE_LENGTH + step;
-        assert(index <= COMMAND2_OFFSET);
+        assert(index <= TABLE_COMMAND2_OFFSET);
         
-        const uint8_t byte = song->bytes[COMMAND2_OFFSET + index];
+        const uint8_t byte = song->bytes[TABLE_COMMAND2_OFFSET + index];
         
         if (byte > 1)
             return (lsdj_command)(byte - 1);
@@ -183,16 +176,16 @@ lsdj_command lsdj_table_get_command2(const lsdj_song_t* song, uint8_t table, uin
         else
             return (lsdj_command)byte;
     } else {
-        TABLE_GETTER(COMMAND2_OFFSET, COMMAND2_OFFSET)
+        TABLE_GETTER(TABLE_COMMAND2_OFFSET, CONTENT_LENGTH)
     }
 }
 
 void lsdj_table_set_command2_value(lsdj_song_t* song, uint8_t table, uint8_t step, uint8_t value)
 {
-	TABLE_SETTER(COMMAND2_VALUE_OFFSET, CONTENT_LENGTH, value);
+	TABLE_SETTER(TABLE_COMMAND2_VALUE_OFFSET, CONTENT_LENGTH, value);
 }
 
 uint8_t lsdj_table_get_command2_value(const lsdj_song_t* song, uint8_t table, uint8_t step)
 {
-	TABLE_GETTER(COMMAND2_VALUE_OFFSET, CONTENT_LENGTH);
+	TABLE_GETTER(TABLE_COMMAND2_VALUE_OFFSET, CONTENT_LENGTH);
 }

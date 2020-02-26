@@ -37,11 +37,7 @@
 
 #include <assert.h>
 
-#define PHRASE_NOTES_OFFSET (0x0000)
-#define PHRASE_ALLOCATIONS_OFFSET (0x3E82)
-#define PHRASE_COMMANDS_OFFSET (0x4000)
-#define PHRASE_COMMAND_VALUES_OFFSET (0x4FF0)
-#define PHRASE_INSTRUMENTS_OFFSET (0x7000)
+#include "song_offsets.h"
 
 #define PHRASE_SETTER(OFFSET, LENGTH, VALUE) \
 const size_t index = phrase * LSDJ_PHRASE_LENGTH + step; \

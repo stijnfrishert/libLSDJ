@@ -37,7 +37,7 @@
 
 #include <assert.h>
 
-#define GROOVES_OFFSET (0x1090)
+#include "song_offsets.h"
 
 void lsdj_groove_set_step(lsdj_song_t* song, uint8_t groove, uint8_t step, uint8_t value)
 {

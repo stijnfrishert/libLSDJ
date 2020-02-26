@@ -37,9 +37,7 @@
 
 #include <assert.h>
 
-#define CHAIN_PHRASES_OFFSET (0x2080)
-#define CHAIN_TRANSPOSITIONS_OFFSET (0x2880)
-#define CHAIN_ALLOCATIONS_OFFSET (0x3EA2)
+#include "song_offsets.h"
 
 bool lsdj_chain_is_allocated(const lsdj_song_t* song, uint8_t chain)
 {
