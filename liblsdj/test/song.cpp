@@ -19,12 +19,12 @@ using namespace Catch;
 TEST_CASE( "Song", "[song]" )
 {
 	auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", nullptr, nullptr);
-//    auto sav = lsdj_sav_read_from_file("/Users/stijn/Google Drive/lsdj/lsdj/old/lsdj_571.sav", nullptr, nullptr);
-//    auto sav = lsdj_sav_read_from_file("/Users/stijn/Google Drive/lsdj/lsdj/lsdj_822.sav", nullptr, nullptr);
+//    auto sav = lsdj_sav_read_from_file("/Users/stijn/Google Drive/lsdj/lsdj/old/lsdj_571.sav", nullptr);
+//    auto sav = lsdj_sav_read_from_file("/Users/stijn/Google Drive/lsdj/lsdj/lsdj_822.sav", nullptr);
 	REQUIRE( sav != nullptr );
 
 	REQUIRE( LSDJ_SONG_BYTE_COUNT == 0x8000);
-    
+
 	SECTION( "Happy Birthday" )
 	{
 		auto song0 = lsdj_project_get_song_const(lsdj_sav_get_project_const(sav, 0));

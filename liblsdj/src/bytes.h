@@ -36,6 +36,8 @@
 #ifndef LSDJ_BYTES_H
 #define LSDJ_BYTES_H
 
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 //! Copy some bits over to another byte
@@ -57,5 +59,14 @@ void copy_bits_in_place(uint8_t* byte, uint8_t position, uint8_t count, uint8_t 
 	@param count The amount of bits to copy over (0-7)
 	@note position + count should not go above 8 */
 uint8_t get_bits(uint8_t byte, uint8_t position, uint8_t count);
+
+//! Is a given byte a valid name character for LSDj?
+/*! LSDj only supports 0-9, A-Z, x and space */
+bool is_valid_name_char(char c);
+
+//! Try to sanitize a full LSDj name
+/*! LSDj only supports 0-9, A-Z, x and space
+	@return false If the name couldn't be sanitized. Some characters might already have changed */
+bool sanitize_name(char* name, size_t size);
 
 #endif

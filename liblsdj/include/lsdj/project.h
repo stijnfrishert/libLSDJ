@@ -155,15 +155,18 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, const lsdj_
 lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const uint8_t* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
     
 //! Find out whether given data is likely a valid lsdsng
-/*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
+/*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics.
+    In fact, I wouldn't call this trustworthy at all, but there's little we can do due to the .lsdsng format */
 bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
 
 //! Find out whether a file is likely a valid lsdsng
-/*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
+/*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics.
+    In fact, I wouldn't call this trustworthy at all, but there's little we can do due to the .lsdsng format */
 bool lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error);
 
 //! Find out whether a memory address likely contains a valid lsdsng
-/*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
+/*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics.
+    In fact, I wouldn't call this trustworthy at all, but there's little we can do due to the .lsdsng format */
 bool lsdj_project_is_likely_valid_lsdsng_memory(const uint8_t* data, size_t size, lsdj_error_t** error);
     
 //! Write a project to an .lsdsng I/O stream

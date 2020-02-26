@@ -41,6 +41,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bytes.h"
 #include "compression.h"
 
 struct lsdj_project_t
@@ -121,8 +122,8 @@ void lsdj_project_free(lsdj_project_t* project)
 
 void lsdj_project_set_name(lsdj_project_t* project, const char* name)
 {
-    //! @todo: Should I sanitize this name into something LSDj accepts?
     strncpy(project->name, name, LSDJ_PROJECT_NAME_LENGTH);
+    sanitize_name(project->name, LSDJ_PROJECT_NAME_LENGTH);
 }
 
 const char* lsdj_project_get_name(const lsdj_project_t* project)
@@ -249,32 +250,24 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const uint8_t* data, size_t
 
 bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
 {
-    /*! @todo See if the name is alphanumeric */
+    // Really, the only thing we can do is check whether the name contains valid chars
+    // Can't do any checks on the format version, not any byte count checks (the virtual
+    // I/O might actually contain more bytes than just the .lsdsng)
     
-    // Find out about the file "size"
-    const long begin = lsdj_vio_tell(vio);
-    if (!lsdj_vio_seek(vio, 0, SEEK_END))
-    {
-        lsdj_error_optional_new(error, "Could not move to the end of the lsdsng");
+    // Read the name first
+    char name[LSDJ_PROJECT_NAME_LENGTH];
+    memset(name, '\0', sizeof(name));
+    if (!lsdj_vio_read(vio, name, sizeof(name), NULL))
         return false;
+    
+    // Check if any of the characters is invalid
+    for (uint8_t i = 0; i < strnlen(name, LSDJ_PROJECT_NAME_LENGTH); i += 1)
+    {
+        if (!is_valid_name_char(name[i]))
+            return false;
     }
     
-    const long size = lsdj_vio_tell(vio) - begin;
-    if (!lsdj_vio_seek(vio, 0, SEEK_SET))
-    {
-        lsdj_error_optional_new(error, "Could not move to the beginning of the lsdsng");
-        return false;
-    }
-
-    // Find out if the file size modulo's to the compression block size
-    /*! @todo What if someone gives up a buffer bigger than the project size?
-        Would still be correct, but not pass this heuristic */
-    if ((size - LSDJ_PROJECT_NAME_LENGTH - 1) % LSDJ_BLOCK_SIZE != 0)
-    {
-        lsdj_error_optional_new(error, "data length does not correspond to that of a valid lsdsng");
-        return false;
-    }
-    
+    // If not, return true
     return true;
 }
 

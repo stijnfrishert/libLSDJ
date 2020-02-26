@@ -54,7 +54,9 @@ void lsdj_instrument_set_name(lsdj_song_t* song, uint8_t instrument, const char*
     const size_t index = INSTRUMENT_NAMES_OFFSET + instrument * LSDJ_INSTRUMENT_NAME_LENGTH;
     assert(index < INSTRUMENT_NAMES_OFFSET + 320);
 
-    strncpy((char*)(&song->bytes[index]), name, LSDJ_INSTRUMENT_NAME_LENGTH);
+    char* dst = (char*)(&song->bytes[index]);
+    strncpy(dst, name, LSDJ_INSTRUMENT_NAME_LENGTH);
+    sanitize_name(dst, LSDJ_INSTRUMENT_NAME_LENGTH);
 }
 
 const char* lsdj_instrument_get_name(const lsdj_song_t* song, uint8_t instrument)
