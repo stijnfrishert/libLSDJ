@@ -464,8 +464,17 @@ lsdj_sav_t* lsdj_sav_read_from_memory(const uint8_t* data, size_t size, const ls
 
 bool lsdj_sav_is_likely_valid(lsdj_vio_t* vio, lsdj_error_t** error)
 {
+    lsdj_song_t song;
+    lsdj_vio_read(vio, song.bytes, LSDJ_SONG_BYTE_COUNT, NULL);
+    
+    // If the working memory song is invalid the song itself surely is as well
+    if (!lsdj_song_is_likely_valid(&song))
+    {
+        return false;
+    }
+    
     // Move to the initialization bytes
-    if (!lsdj_vio_seek(vio, LSDJ_SAV_HEADER_POSITION + 0x13E, SEEK_CUR))
+    if (!lsdj_vio_seek(vio, 0x13E, SEEK_CUR))
     {
         lsdj_error_optional_new(error, "could not seek to 'jk' flag");
         return false;

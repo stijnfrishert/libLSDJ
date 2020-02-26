@@ -39,6 +39,10 @@
 
 // --- Offsets --- //
 
+#define RB1_OFFSET (0x1E78)
+#define RB2_OFFSET (0x3E80)
+#define RB3_OFFSET (0x7FF0)
+
 #define BOOKMARKS_OFFSET (0x0FF0)
 #define CHAIN_ASSIGNMENTS_OFFSET (0x1290)
 
@@ -65,6 +69,22 @@
 
 #define BOOKMARK_PER_CHANNEL_COUNT (16)
 #define NO_BOOKMARK_VALUE (0xFF)
+
+
+// --- General --- //
+
+bool are_bytes_rb(const uint8_t* data)
+{
+    return data[0] == 'r' && data[1] == 'b';
+}
+
+bool lsdj_song_is_likely_valid(const lsdj_song_t* song)
+{
+    return are_bytes_rb(&song->bytes[RB1_OFFSET]) ||
+           are_bytes_rb(&song->bytes[RB2_OFFSET]) ||
+           are_bytes_rb(&song->bytes[RB3_OFFSET]);
+}
+
 
 // --- Song Settings --- //
 

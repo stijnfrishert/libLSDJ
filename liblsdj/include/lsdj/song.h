@@ -88,6 +88,15 @@ typedef enum
 } lsdj_sync_mode;
 
 
+// --- General --- //
+
+//! Go through a song and see if it's likely initialized properly
+/*! A song can always get corrupted, but this function checks whether some bytes that are changed
+    on song initialization are properly set.
+    @return true If the song was likely correctly initialized */
+bool lsdj_song_is_likely_valid(const lsdj_song_t* song);
+
+
 // --- Song Settings --- //
 
 //! Retrieve the format version of the song
