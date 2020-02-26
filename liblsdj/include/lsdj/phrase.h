@@ -95,13 +95,13 @@ uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint
 	@param phrase The command to set to this step
     @note Versions earlier than 7.1.0 (fmt v8 don't support the B command
     @return false if the command is not supported in your LSDj version */
-bool lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t step, lsdj_command command);
+bool lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t step, lsdj_command_t command);
 
 //! Retrieve the command at a step in a phrase
 /*! @param song The song that contains the phrase
 	@param phrase The index of the phrase (< LSDJ_PHRASE_COUNT)
 	@param step The step within the phrase (< LSDJ_PHRASE_LENGTH) */
-lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t step);
+lsdj_command_t lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t step);
 
 //! Change the command value at a step in a phrase
 /*! @param song The song that contains the phrase

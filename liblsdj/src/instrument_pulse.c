@@ -1,13 +1,13 @@
 #include "instrument.h"
 
-void lsdj_instrument_pulse_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width pulseWidth)
+void lsdj_instrument_pulse_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width_t pulseWidth)
 {
 	set_instrument_bits(song, instrument, 7, 6, 2, (uint8_t)pulseWidth);
 }
 
-lsdj_instrument_pulse_width lsdj_instrument_pulse_get_pulse_width(const lsdj_song_t* song, uint8_t instrument)
+lsdj_instrument_pulse_width_t lsdj_instrument_pulse_get_pulse_width(const lsdj_song_t* song, uint8_t instrument)
 {
-	return (lsdj_instrument_pulse_width)get_instrument_bits(song, instrument, 7, 6, 2);
+	return (lsdj_instrument_pulse_width_t)get_instrument_bits(song, instrument, 7, 6, 2);
 }
 
 void lsdj_instrument_pulse_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length)

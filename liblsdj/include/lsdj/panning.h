@@ -46,7 +46,7 @@ typedef enum
     LSDJ_PAN_LEFT = 1,
     LSDJ_PAN_RIGHT = 2,
     LSDJ_PAN_LEFT_RIGHT = 3,
-} lsdj_panning;
+} lsdj_panning_t;
     
 #ifdef __cplusplus
 }

@@ -72,44 +72,44 @@ const uint8_t get_synth_byte(const lsdj_song_t* song, uint8_t synth, uint8_t byt
 	return song->bytes[SYNTH_PARAMS_OFFSET + index];
 }
 
-void lsdj_synth_set_waveform(lsdj_song_t* song, uint8_t synth, lsdj_synth_waveform waveform)
+void lsdj_synth_set_waveform(lsdj_song_t* song, uint8_t synth, lsdj_synth_waveform_t waveform)
 {
 	set_synth_byte(song, synth, 0, (uint8_t)waveform);
 }
 
-lsdj_synth_waveform lsdj_synth_get_waveform(const lsdj_song_t* song, uint8_t synth)
+lsdj_synth_waveform_t lsdj_synth_get_waveform(const lsdj_song_t* song, uint8_t synth)
 {
-	return (lsdj_synth_waveform)get_synth_byte(song, synth, 0);
+	return (lsdj_synth_waveform_t)get_synth_byte(song, synth, 0);
 }
 
-void lsdj_synth_set_filter(lsdj_song_t* song, uint8_t synth, lsdj_synth_filter filter)
+void lsdj_synth_set_filter(lsdj_song_t* song, uint8_t synth, lsdj_synth_filter_t filter)
 {
 	set_synth_byte(song, synth, 1, (uint8_t)filter);
 }
 
-lsdj_synth_filter lsdj_synth_get_filter(const lsdj_song_t* song, uint8_t synth)
+lsdj_synth_filter_t lsdj_synth_get_filter(const lsdj_song_t* song, uint8_t synth)
 {
-	return (lsdj_synth_filter)get_synth_byte(song, synth, 1);
+	return (lsdj_synth_filter_t)get_synth_byte(song, synth, 1);
 }
 
-void lsdj_synth_set_distortion(lsdj_song_t* song, uint8_t synth, lsdj_synth_distortion distortion)
+void lsdj_synth_set_distortion(lsdj_song_t* song, uint8_t synth, lsdj_synth_distortion_t distortion)
 {
 	set_synth_byte(song, synth, 3, (uint8_t)distortion);
 }
 
-lsdj_synth_distortion lsdj_synth_get_distortion(const lsdj_song_t* song, uint8_t synth)
+lsdj_synth_distortion_t lsdj_synth_get_distortion(const lsdj_song_t* song, uint8_t synth)
 {
-	return (lsdj_synth_distortion)get_synth_byte(song, synth, 3);
+	return (lsdj_synth_distortion_t)get_synth_byte(song, synth, 3);
 }
 
-void lsdj_synth_set_phase_compression(lsdj_song_t* song, uint8_t synth, lsdj_synth_phase_compression compression)
+void lsdj_synth_set_phase_compression(lsdj_song_t* song, uint8_t synth, lsdj_synth_phase_compression_t compression)
 {
 	set_synth_byte(song, synth, 4, (uint8_t)compression);
 }
 
-lsdj_synth_phase_compression lsdj_synth_get_phase_compression(const lsdj_song_t* song, uint8_t synth)
+lsdj_synth_phase_compression_t lsdj_synth_get_phase_compression(const lsdj_song_t* song, uint8_t synth)
 {
-	return (lsdj_synth_phase_compression)get_synth_byte(song, synth, 4);
+	return (lsdj_synth_phase_compression_t)get_synth_byte(song, synth, 4);
 }
 
 void lsdj_synth_set_volume_start(lsdj_song_t* song, uint8_t synth, uint8_t volume)

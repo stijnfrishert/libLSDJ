@@ -66,7 +66,7 @@ typedef enum
 	LSDJ_COMMAND_ARDUINO_BOY_Q,
 	LSDJ_COMMAND_ARDUINO_BOY_Y,
     LSDJ_COMMAND_B // Added in 7.1.0
-} lsdj_command;
+} lsdj_command_t;
     
 #ifdef __cplusplus
 }

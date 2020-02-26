@@ -84,12 +84,12 @@ uint8_t get_instrument_bits(const lsdj_song_t* song, uint8_t instrument, uint8_t
 	return (uint8_t)(get_bits(song->bytes[INSTRUMENT_PARAMS_OFFSET + index], position, count) >> position);
 }
 
-void lsdj_instrument_set_type(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_type type)
+void lsdj_instrument_set_type(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_type_t type)
 {
 	set_instrument_bits(song, instrument, 0, 0, 8, (uint8_t)type);
 }
 
-lsdj_instrument_type lsdj_instrument_get_type(const lsdj_song_t* song, uint8_t instrument)
+lsdj_instrument_type_t lsdj_instrument_get_type(const lsdj_song_t* song, uint8_t instrument)
 {
 	return (uint8_t)get_instrument_bits(song, instrument, 0, 0, 8);
 }
@@ -104,14 +104,14 @@ uint8_t lsdj_instrument_get_envelope(const lsdj_song_t* song, uint8_t instrument
 	return get_instrument_bits(song, instrument, 1, 0, 8);
 }
 
-void lsdj_instrument_set_panning(lsdj_song_t* song, uint8_t instrument, lsdj_panning panning)
+void lsdj_instrument_set_panning(lsdj_song_t* song, uint8_t instrument, lsdj_panning_t panning)
 {
 	set_instrument_bits(song, instrument, 7, 0, 2, (uint8_t)panning);
 }
 
-lsdj_panning lsdj_instrument_get_panning(const lsdj_song_t* song, uint8_t instrument)
+lsdj_panning_t lsdj_instrument_get_panning(const lsdj_song_t* song, uint8_t instrument)
 {
-	return (lsdj_panning)get_instrument_bits(song, instrument, 7, 0, 2);
+	return (lsdj_panning_t)get_instrument_bits(song, instrument, 7, 0, 2);
 }
 
 void lsdj_instrument_set_transpose(lsdj_song_t* song, uint8_t instrument, bool transpose)
@@ -154,17 +154,17 @@ uint8_t lsdj_instrument_is_table_automated(const lsdj_song_t* song, uint8_t inst
 	return get_instrument_bits(song, instrument, 5, 3, 1) == 1;
 }
 
-void lsdj_instrument_set_vibrato_direction(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_direction direction)
+void lsdj_instrument_set_vibrato_direction(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_direction_t direction)
 {
 	set_instrument_bits(song, instrument, 5, 0, 1, (uint8_t)direction);
 }
 
-lsdj_vibrato_direction lsdj_instrument_get_vibrato_direction(const lsdj_song_t* song, uint8_t instrument)
+lsdj_vibrato_direction_t lsdj_instrument_get_vibrato_direction(const lsdj_song_t* song, uint8_t instrument)
 {
-	return (lsdj_vibrato_direction)get_instrument_bits(song, instrument, 5, 0, 1);
+	return (lsdj_vibrato_direction_t)get_instrument_bits(song, instrument, 5, 0, 1);
 }
 
-bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape shape, lsdj_plv_speed speed)
+bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape_t shape, lsdj_plv_speed_t speed)
 {
 	if (lsdj_song_get_format_version(song) >= 4)
 	{
@@ -203,7 +203,7 @@ bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t 
 	}
 }
 
-lsdj_vibrato_shape lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, uint8_t instrument)
+lsdj_vibrato_shape_t lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, uint8_t instrument)
 {
 	if (lsdj_song_get_format_version(song) >= 4)
 	{
@@ -226,7 +226,7 @@ lsdj_vibrato_shape lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, ui
 	}
 }
 
-lsdj_plv_speed lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t instrument)
+lsdj_plv_speed_t lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t instrument)
 {
 	if (lsdj_song_get_format_version(song) >= 4)
 	{

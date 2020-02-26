@@ -79,7 +79,7 @@ uint8_t lsdj_phrase_get_instrument(const lsdj_song_t* song, uint8_t phrase, uint
 	PHRASE_GETTER(PHRASE_INSTRUMENTS_OFFSET, 4080)
 }
 
-bool lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t step, lsdj_command command)
+bool lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t step, lsdj_command_t command)
 {
     if (lsdj_song_get_format_version(song) >= 8)
     {
@@ -104,7 +104,7 @@ bool lsdj_phrase_set_command(lsdj_song_t* song, uint8_t phrase, uint8_t step, ls
     return true;
 }
 
-lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t step)
+lsdj_command_t lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, uint8_t step)
 {
     if (lsdj_song_get_format_version(song) >= 8)
     {
@@ -114,11 +114,11 @@ lsdj_command lsdj_phrase_get_command(const lsdj_song_t* song, uint8_t phrase, ui
         const uint8_t byte = song->bytes[PHRASE_COMMANDS_OFFSET + index];
         
         if (byte > 1)
-            return (lsdj_command)(byte - 1);
+            return (lsdj_command_t)(byte - 1);
         else if (byte == 1)
             return LSDJ_COMMAND_B;
         else
-            return (lsdj_command)byte;
+            return (lsdj_command_t)byte;
     } else {
         PHRASE_GETTER(PHRASE_COMMANDS_OFFSET, 4080)
     }

@@ -27,12 +27,12 @@ uint8_t lsdj_instrument_noise_get_shape(const lsdj_song_t* song, uint8_t instrum
 	return get_instrument_bits(song, instrument, 4, 0, 8);
 }
 
-void lsdj_instrument_noise_set_stability(lsdj_song_t* song, uint8_t instrument, lsdj_noise_stability stability)
+void lsdj_instrument_noise_set_stability(lsdj_song_t* song, uint8_t instrument, lsdj_noise_stability_t stability)
 {
 	set_instrument_bits(song, instrument, 2, 0, 1, (uint8_t)stability);
 }
 
-lsdj_noise_stability lsdj_instrument_noise_get_stability(const lsdj_song_t* song, uint8_t instrument)
+lsdj_noise_stability_t lsdj_instrument_noise_get_stability(const lsdj_song_t* song, uint8_t instrument)
 {
-	return (lsdj_noise_stability)get_instrument_bits(song, instrument, 2, 0, 1);
+	return (lsdj_noise_stability_t)get_instrument_bits(song, instrument, 2, 0, 1);
 }

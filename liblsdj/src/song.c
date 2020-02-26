@@ -92,27 +92,27 @@ uint8_t lsdj_song_get_transposition(const lsdj_song_t* song)
 	return song->bytes[TRANSPOSITION_OFFSET];
 }
 
-void lsdj_song_set_sync_mode(lsdj_song_t* song, lsdj_sync_mode mode)
+void lsdj_song_set_sync_mode(lsdj_song_t* song, lsdj_sync_mode_t mode)
 {
 	song->bytes[SYNC_MODE_OFFSET] = (uint8_t)mode;
 }
 
-lsdj_sync_mode lsdj_song_get_sync_mode(const lsdj_song_t* song)
+lsdj_sync_mode_t lsdj_song_get_sync_mode(const lsdj_song_t* song)
 {
-	return (lsdj_sync_mode)song->bytes[SYNC_MODE_OFFSET];
+	return (lsdj_sync_mode_t)song->bytes[SYNC_MODE_OFFSET];
 }
 
 
 // --- Editor Settings --- //
 
-void lsdj_song_set_clone_mode(lsdj_song_t* song, lsdj_clone_mode clone)
+void lsdj_song_set_clone_mode(lsdj_song_t* song, lsdj_clone_mode_t clone)
 {
 	song->bytes[CLONE_MODE_OFFSET] = (uint8_t)clone;
 }
 
-lsdj_clone_mode lsdj_song_get_clone_mode(const lsdj_song_t* song)
+lsdj_clone_mode_t lsdj_song_get_clone_mode(const lsdj_song_t* song)
 {
-	return (lsdj_clone_mode)song->bytes[CLONE_MODE_OFFSET];
+	return (lsdj_clone_mode_t)song->bytes[CLONE_MODE_OFFSET];
 }
 
 void lsdj_song_set_font(lsdj_song_t* song, uint8_t font)
@@ -221,7 +221,7 @@ uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song)
 
 // --- Chains, Phrases //
 
-void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel channel, uint8_t chain)
+void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel_t channel, uint8_t chain)
 {
 	const size_t index = CHAIN_ASSIGNMENTS_OFFSET + row * LSDJ_CHANNEL_COUNT + channel;
 	assert(index < CHAIN_ASSIGNMENTS_OFFSET + 1024);
@@ -229,7 +229,7 @@ void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel channel, ui
     song->bytes[index] = chain;   
 }
 
-uint8_t lsdj_row_get_chain(const lsdj_song_t* song, uint8_t row, lsdj_channel channel)
+uint8_t lsdj_row_get_chain(const lsdj_song_t* song, uint8_t row, lsdj_channel_t channel)
 {
 	const size_t index = CHAIN_ASSIGNMENTS_OFFSET + row * LSDJ_CHANNEL_COUNT + channel;
 	assert(index < CHAIN_ASSIGNMENTS_OFFSET + 1024);
@@ -237,7 +237,7 @@ uint8_t lsdj_row_get_chain(const lsdj_song_t* song, uint8_t row, lsdj_channel ch
     return song->bytes[CHAIN_ASSIGNMENTS_OFFSET + row * LSDJ_CHANNEL_COUNT + channel];
 }
 
-bool lsdj_song_set_row_bookmarked(lsdj_song_t* song, uint8_t row, lsdj_channel channel, bool bookmarked)
+bool lsdj_song_set_row_bookmarked(lsdj_song_t* song, uint8_t row, lsdj_channel_t channel, bool bookmarked)
 {
 	if (lsdj_song_is_row_bookmarked(song, row, channel) == bookmarked)
 		return true;
@@ -262,7 +262,7 @@ bool lsdj_song_set_row_bookmarked(lsdj_song_t* song, uint8_t row, lsdj_channel c
 	return false;
 }
 
-bool lsdj_song_is_row_bookmarked(const lsdj_song_t* song, uint8_t row, lsdj_channel channel)
+bool lsdj_song_is_row_bookmarked(const lsdj_song_t* song, uint8_t row, lsdj_channel_t channel)
 {
 	for (size_t i = 0; i < BOOKMARK_PER_CHANNEL_COUNT; i++)
 	{

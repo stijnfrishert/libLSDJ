@@ -74,7 +74,7 @@ typedef enum
 {
    LSDJ_CLONE_DEEP = 0,
    LSDJ_CLONE_SLIM = 1
-} lsdj_clone_mode;
+} lsdj_clone_mode_t;
 
 //! The different sync modes that LSDj supports
 typedef enum
@@ -85,7 +85,7 @@ typedef enum
    LSDJ_SYNC_KEYBOARD = 3,
    LSDJ_SYNC_ANALOG_IN = 4,
    LSDJ_SYNC_ANALOG_OUT = 5,
-} lsdj_sync_mode;
+} lsdj_sync_mode_t;
 
 
 // --- General --- //
@@ -129,11 +129,11 @@ uint8_t lsdj_song_get_transposition(const lsdj_song_t* song);
 
 //! Change the synchronisation mode of a song (none, LSDJ, MIDI, etc.)
 /*! In some synchronisation modes the prelisten flag doesn't do anything */
-void lsdj_song_set_sync_mode(lsdj_song_t* song, lsdj_sync_mode mode);
+void lsdj_song_set_sync_mode(lsdj_song_t* song, lsdj_sync_mode_t mode);
 
 //! Retrieve the synchronisation mode of a song (none, LSDJ, MIDI, etc.)
 /*! In some synchronisation modes the prelisten flag doesn't do anything */
-lsdj_sync_mode lsdj_song_get_sync_mode(const lsdj_song_t* song);
+lsdj_sync_mode_t lsdj_song_get_sync_mode(const lsdj_song_t* song);
 
 //! @todo Drum max?
 
@@ -141,10 +141,10 @@ lsdj_sync_mode lsdj_song_get_sync_mode(const lsdj_song_t* song);
 // --- Editor Settings --- //
 
 //! Change whether cloning a chain also creates new phrases or not
-void lsdj_song_set_clone_mode(lsdj_song_t* song, lsdj_clone_mode clone);
+void lsdj_song_set_clone_mode(lsdj_song_t* song, lsdj_clone_mode_t clone);
 
 //! Ask whether cloning a chain also creates new phrases or not
-lsdj_clone_mode lsdj_song_get_clone_mode(const lsdj_song_t* song);
+lsdj_clone_mode_t lsdj_song_get_clone_mode(const lsdj_song_t* song);
 
 //! Change which font from the LSDj ROM is used for displaying
 void lsdj_song_set_font(lsdj_song_t* song, uint8_t font);
@@ -193,20 +193,20 @@ uint8_t lsdj_song_get_work_minutes(const lsdj_song_t* song);
 
 //! Change the chain assigned to a row + channel slot
 /*! @param chain The chain number to assign, or LSDJ_NO_CHAIN to set it to empty */
-void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel channel, uint8_t chain);
+void lsdj_row_set_chain(lsdj_song_t* song, uint8_t row, lsdj_channel_t channel, uint8_t chain);
 
 //! Retrieve the chain assigned to a row + channel slot
 /*! @return The chain number of LSDJ_NO_CHAIN if empty */
-uint8_t lsdj_row_get_chain(const lsdj_song_t* song, uint8_t row, lsdj_channel channel);
+uint8_t lsdj_row_get_chain(const lsdj_song_t* song, uint8_t row, lsdj_channel_t channel);
 
 //! Set whether a row + channel slot should be bookmarked
 /*! @note There are only 16 bookmarks per channel available, so this function can fail if no more space is available
     @return false If not bookmarks slots on this channel are available anymore */
-bool lsdj_song_set_row_bookmarked(lsdj_song_t* song, uint8_t row, lsdj_channel channel, bool bookmarked);
+bool lsdj_song_set_row_bookmarked(lsdj_song_t* song, uint8_t row, lsdj_channel_t channel, bool bookmarked);
 
 //! Ask whether a row + channel slot is bookmarked
 /*! @return True when the row has been bookmarked on this channel */
-bool lsdj_song_is_row_bookmarked(const lsdj_song_t* song, uint8_t row, lsdj_channel channel);
+bool lsdj_song_is_row_bookmarked(const lsdj_song_t* song, uint8_t row, lsdj_channel_t channel);
     
 #ifdef __cplusplus
 }

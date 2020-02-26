@@ -46,7 +46,7 @@ typedef enum
     LSDJ_CHANNEL_PULSE2 = 1,
     LSDJ_CHANNEL_WAVE = 2,
     LSDJ_CHANNEL_NOISE = 3,
-} lsdj_channel;
+} lsdj_channel_t;
 
 #define LSDJ_CHANNEL_COUNT (4)
 

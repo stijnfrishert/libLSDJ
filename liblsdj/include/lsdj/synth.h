@@ -56,7 +56,7 @@ typedef enum
 	LSDJ_SYNTH_WAVEFORM_SAW = 0,
 	LSDJ_SYNTH_WAVEFORM_SQUARE,
 	LSDJ_SYNTH_WAVEFORM_TRIANGLE
-} lsdj_synth_waveform;
+} lsdj_synth_waveform_t;
 
 //! The filter types the synth can use
 typedef enum
@@ -65,7 +65,7 @@ typedef enum
 	LSDJ_SYNTH_FILTER_HIGH_PASS,
 	LSDJ_SYNTH_FILTER_BAND_PASS,
 	LSDJ_SYNTH_FILTER_ALL_PASS,
-} lsdj_synth_filter;
+} lsdj_synth_filter_t;
 
 //! The distortion types the synth can use
 typedef enum
@@ -73,7 +73,7 @@ typedef enum
 	LSDJ_SYNTH_DISTORTION_CLIP = 0,
 	LSDJ_SYNTH_DISTORTION_WRAP,
 	LSDJ_SYNTH_DISTORTION_FOLD
-} lsdj_synth_distortion;
+} lsdj_synth_distortion_t;
 
 //! The phase compression modes the synth can use
 typedef enum
@@ -81,7 +81,7 @@ typedef enum
 	LSDJ_SYNTH_PHASE_NORMAL = 0,
 	LSDJ_SYNTH_PHASE_RESYNC,
 	LSDJ_SYNTH_PHASE_RESYNC2
-} lsdj_synth_phase_compression;
+} lsdj_synth_phase_compression_t;
 
 //! Set the flag that the wave for this synth has been overwritten
 /*! @param song The song containing the synth and wave
@@ -99,45 +99,45 @@ bool lsdj_synth_is_wave_overwritten(const lsdj_song_t* song, uint8_t synth);
 /*! @param song The song containing the synth
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
 	@param waveform The waveform to set */
-void lsdj_synth_set_waveform(lsdj_song_t* song, uint8_t synth, lsdj_synth_waveform waveform);
+void lsdj_synth_set_waveform(lsdj_song_t* song, uint8_t synth, lsdj_synth_waveform_t waveform);
 
 //! Retrieve the waveform type of a synth
 /*! @param song The song containing the synth
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
-lsdj_synth_waveform lsdj_synth_get_waveform(const lsdj_song_t* song, uint8_t synth);
+lsdj_synth_waveform_t lsdj_synth_get_waveform(const lsdj_song_t* song, uint8_t synth);
 
 //! Change the filter type of a synth
 /*! @param song The song containing the synth
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
 	@param filter The filter to set */
-void lsdj_synth_set_filter(lsdj_song_t* song, uint8_t synth, lsdj_synth_filter filter);
+void lsdj_synth_set_filter(lsdj_song_t* song, uint8_t synth, lsdj_synth_filter_t filter);
 
 //! Retrieve the filter type of a synth
 /*! @param song The song containing the synth
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
-lsdj_synth_filter lsdj_synth_get_filter(const lsdj_song_t* song, uint8_t synth);
+lsdj_synth_filter_t lsdj_synth_get_filter(const lsdj_song_t* song, uint8_t synth);
 
 //! Change the distortion type of a synth
 /*! @param song The song containing the synth
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
 	@param distortion The distortion to set */
-void lsdj_synth_set_distortion(lsdj_song_t* song, uint8_t synth, lsdj_synth_distortion distortion);
+void lsdj_synth_set_distortion(lsdj_song_t* song, uint8_t synth, lsdj_synth_distortion_t distortion);
 
 //! Retrieve the distortion type of a synth
 /*! @param song The song containing the synth
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
-lsdj_synth_distortion lsdj_synth_get_distortion(const lsdj_song_t* song, uint8_t synth);
+lsdj_synth_distortion_t lsdj_synth_get_distortion(const lsdj_song_t* song, uint8_t synth);
 
 //! Change the phase compression mode of a synth
 /*! @param song The song containing the synth
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT)
 	@param phase_compression The phase_compression to set */
-void lsdj_synth_set_phase_compression(lsdj_song_t* song, uint8_t synth, lsdj_synth_phase_compression compression);
+void lsdj_synth_set_phase_compression(lsdj_song_t* song, uint8_t synth, lsdj_synth_phase_compression_t compression);
 
 //! Retrieve the phase compression mode of a synth
 /*! @param song The song containing the synth
 	@param synth The index of the synth (< LSDJ_SYNTH_COUNT) */
-lsdj_synth_phase_compression lsdj_synth_get_phase_compression(const lsdj_song_t* song, uint8_t synth);
+lsdj_synth_phase_compression_t lsdj_synth_get_phase_compression(const lsdj_song_t* song, uint8_t synth);
 
 //! Change the volume start of a synth
 /*! @param song The song containing the synth

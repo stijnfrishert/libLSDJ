@@ -70,7 +70,7 @@ typedef enum
 	LSDJ_INSTRUMENT_TYPE_WAVE,
 	LSDJ_INSTRUMENT_TYPE_KIT,
 	LSDJ_INSTRUMENT_TYPE_NOISE,
-} lsdj_instrument_type;
+} lsdj_instrument_type_t;
 
 typedef enum
 {
@@ -78,7 +78,7 @@ typedef enum
 	LSDJ_INSTRUMENT_WAVE_VOLUME_1 = 0x60,
 	LSDJ_INSTRUMENT_WAVE_VOLUME_2 = 0x40,
 	LSDJ_INSTRUMENT_WAVE_VOLUME_3 = 0xA8
-} lsdj_instrument_wave_volume;
+} lsdj_instrument_wave_volume_t;
 
 typedef enum
 {
@@ -86,20 +86,20 @@ typedef enum
 	LSDJ_INSTRUMENT_PULSE_WIDTH_25,
 	LSDJ_INSTRUMENT_PULSE_WIDTH_50,
 	LSDJ_INSTRUMENT_PULSE_WIDTH_75
-} lsdj_instrument_pulse_width;
+} lsdj_instrument_pulse_width_t;
 
 typedef enum
 {
 	LSDJ_INSTRUMENT_VIBRATO_TRIANGLE = 0,
 	LSDJ_INSTRUMENT_VIBRATO_SAWTOOTH,
 	LSDJ_INSTRUMENT_VIBRATO_SQUARE
-} lsdj_vibrato_shape;
+} lsdj_vibrato_shape_t;
 
 typedef enum
 {
 	LSDJ_INSTRUMENT_VIBRATO_DOWN = 0,
 	LSDJ_INSTRUMENT_VIBRATO_UP
-} lsdj_vibrato_direction;
+} lsdj_vibrato_direction_t;
 
 typedef enum
 {
@@ -107,7 +107,7 @@ typedef enum
 	LSDJ_INSTRUMENT_PLV_TICK,
 	LSDJ_INSTRUMENT_PLV_STEP,
 	LSDJ_INSTRUMENT_PLV_DRUM,
-} lsdj_plv_speed;
+} lsdj_plv_speed_t;
 
 typedef enum
 {
@@ -115,14 +115,14 @@ typedef enum
 	LSDJ_INSTRUMENT_WAVE_PLAY_LOOP,
 	LSDJ_INSTRUMENT_WAVE_PLAY_PING_PONG,
 	LSDJ_INSTRUMENT_WAVE_PLAY_MANUAL,
-} lsdj_wave_play_mode;
+} lsdj_wave_play_mode_t;
 
 typedef enum
 {
 	LSDJ_INSTRUMENT_KIT_LOOP_OFF = 0,
 	LSDJ_INSTRUMENT_KIT_LOOP_ON,
 	LSDJ_INSTRUMENT_KIT_LOOP_ATTACK
-} lsdj_kit_loop_mode;
+} lsdj_kit_loop_mode_t;
 
 typedef enum
 {
@@ -130,13 +130,13 @@ typedef enum
 	LSDJ_INSTRUMENT_KIT_DISTORTION_SHAPE,
 	LSDJ_INSTRUMENT_KIT_DISTORTION_SHAPE2,
 	LSDJ_INSTRUMENT_KIT_DISTORTION_WRAP,
-} lsdj_kit_distortion_mode;
+} lsdj_kit_distortion_mode_t;
 
 typedef enum
 {
 	LSDJ_INSTRUMENT_NOISE_FREE = 0,
 	LSDJ_INSTRUMENT_NOISE_STABLE,
-} lsdj_noise_stability;
+} lsdj_noise_stability_t;
 
 //! Copy some bits over to a specific byte in an instrument
 /*! @note You won't have to use this function if you just use the other instrument functions */
@@ -168,39 +168,39 @@ const char* lsdj_instrument_get_name(const lsdj_song_t* song, uint8_t instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param type The type to set */
-void lsdj_instrument_set_type(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_type type);
+void lsdj_instrument_set_type(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_type_t type);
 
 //! Retrieve the type of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The type of the instrument */
-lsdj_instrument_type lsdj_instrument_get_type(const lsdj_song_t* song, uint8_t instrument);
+lsdj_instrument_type_t lsdj_instrument_get_type(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the envelope of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param envelope The envelope value to set
-	@note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume */
+	@note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume_t */
 void lsdj_instrument_set_envelope(lsdj_song_t* song, uint8_t instrument, uint8_t envelope);
 
 //! Retrieve the envelope of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The envelope of the instrument
-	@note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume */
+	@note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume_t */
 uint8_t lsdj_instrument_get_envelope(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the panning of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param panning The panning value to set */
-void lsdj_instrument_set_panning(lsdj_song_t* song, uint8_t instrument, lsdj_panning panning);
+void lsdj_instrument_set_panning(lsdj_song_t* song, uint8_t instrument, lsdj_panning_t panning);
 
 //! Retrieve the panning of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The panning of the instrument */
-lsdj_panning lsdj_instrument_get_panning(const lsdj_song_t* song, uint8_t instrument);
+lsdj_panning_t lsdj_instrument_get_panning(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the transpose of an instrument
 /*! @param song The song that contains the instrument
@@ -259,14 +259,14 @@ uint8_t lsdj_instrument_is_table_automated(const lsdj_song_t* song, uint8_t inst
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param direction The direction of the vibrato to write
 	@note This only makes sense for pulse, wave and noise instruments */
-void lsdj_instrument_set_vibrato_direction(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_direction direction);
+void lsdj_instrument_set_vibrato_direction(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_direction_t direction);
 
 //! Retrieve the vibrato direction of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The direction of the vibrato
 	@note This only makes sense for pulse, wave and noise instruments*/
-lsdj_vibrato_direction lsdj_instrument_get_vibrato_direction(const lsdj_song_t* song, uint8_t instrument);
+lsdj_vibrato_direction_t lsdj_instrument_get_vibrato_direction(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the vibrato shape and P/L/V speed of an instrument
 /*! @param song The song that contains the instrument
@@ -278,21 +278,21 @@ lsdj_vibrato_direction lsdj_instrument_get_vibrato_direction(const lsdj_song_t* 
 	bool.
 
 	@note This only makes sense for pulse, wave and noise instruments */
-bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape shape, lsdj_plv_speed speed);
+bool lsdj_instrument_set_vibrato_shape_and_plv_speed(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_shape_t shape, lsdj_plv_speed_t speed);
 
 //! Retrieve the vibrato shape of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The shape of the vibrato
 	@note This only makes sense for pulse, wave and noise instruments*/
-lsdj_vibrato_shape lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, uint8_t instrument);
+lsdj_vibrato_shape_t lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, uint8_t instrument);
 
 //! Retrieve the P/L/V speed setting of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The speed setting of P/L/V commands
 	@note This only makes sense for pulse, wave and noise instruments*/
-lsdj_plv_speed lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t instrument);
+lsdj_plv_speed_t lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t instrument);
 
 //! @todo Drum mode
 
@@ -304,14 +304,14 @@ lsdj_plv_speed lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t in
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param pulse width The pulse width to set
 	@note Calling this only makes sense if the instrument is a pulse instrument */
-void lsdj_instrument_pulse_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width pulseWidth);
+void lsdj_instrument_pulse_set_pulse_width(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_pulse_width_t pulseWidth);
 
 //! Retrieve the pulse width of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The pulse width of the instrument
 	@note Calling this only makes sense if the instrument is a pulse instrument */
-lsdj_instrument_pulse_width lsdj_instrument_pulse_get_pulse_width(const lsdj_song_t* song, uint8_t instrument);
+lsdj_instrument_pulse_width_t lsdj_instrument_pulse_get_pulse_width(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the length of a pulse instrument
 /*! @param song The song that contains the instrument
@@ -380,13 +380,13 @@ uint8_t lsdj_instrument_wave_get_synth(const lsdj_song_t* song, uint8_t instrume
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param play_mode The play mode */
-void lsdj_instrument_wave_set_play_mode(lsdj_song_t* song, uint8_t instrument, lsdj_wave_play_mode mode);
+void lsdj_instrument_wave_set_play_mode(lsdj_song_t* song, uint8_t instrument, lsdj_wave_play_mode_t mode);
 
 //! Retrieve the play mode that a wave instrument uses
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The play mode */
-lsdj_wave_play_mode lsdj_instrument_wave_get_play_mode(const lsdj_song_t* song, uint8_t instrument);
+lsdj_wave_play_mode_t lsdj_instrument_wave_get_play_mode(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the length value for a wave instrument
 /*! @param song The song that contains the instrument
@@ -457,13 +457,13 @@ bool lsdj_instrument_kit_get_half_speed(const lsdj_song_t* song, uint8_t instrum
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param distortion The distortion mode */
-void lsdj_instrument_kit_set_distortion_mode(lsdj_song_t* song, uint8_t instrument, lsdj_kit_distortion_mode distortion);
+void lsdj_instrument_kit_set_distortion_mode(lsdj_song_t* song, uint8_t instrument, lsdj_kit_distortion_mode_t distortion);
 
 //! Retrieve the distortion mode that a kit instrument uses
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The distortion mode */
-lsdj_kit_distortion_mode lsdj_instrument_kit_get_distortion_mode(const lsdj_song_t* song, uint8_t instrument);
+lsdj_kit_distortion_mode_t lsdj_instrument_kit_get_distortion_mode(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the first kit for a kit instrument
 /*! @param song The song that contains the instrument
@@ -541,25 +541,25 @@ uint8_t lsdj_instrument_kit_get_length2(const lsdj_song_t* song, uint8_t instrum
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param loop The loop of the first kit */
-void lsdj_instrument_kit_set_loop1(lsdj_song_t* song, uint8_t instrument, lsdj_kit_loop_mode loop);
+void lsdj_instrument_kit_set_loop1(lsdj_song_t* song, uint8_t instrument, lsdj_kit_loop_mode_t loop);
 
 //! Retrieve the loop of the first kit
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The loop of the first kit */
-lsdj_kit_loop_mode lsdj_instrument_kit_get_loop1(const lsdj_song_t* song, uint8_t instrument);
+lsdj_kit_loop_mode_t lsdj_instrument_kit_get_loop1(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the loop of the second kit
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param loop The loop of the set second kit */
-void lsdj_instrument_kit_set_loop2(lsdj_song_t* song, uint8_t instrument, lsdj_kit_loop_mode loop);
+void lsdj_instrument_kit_set_loop2(lsdj_song_t* song, uint8_t instrument, lsdj_kit_loop_mode_t loop);
 
 //! Retrieve the loop of the second kit
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The loop of the second kit */
-lsdj_kit_loop_mode lsdj_instrument_kit_get_loop2(const lsdj_song_t* song, uint8_t instrument);
+lsdj_kit_loop_mode_t lsdj_instrument_kit_get_loop2(const lsdj_song_t* song, uint8_t instrument);
 
 
 // --- Noise --- //
@@ -592,13 +592,13 @@ uint8_t lsdj_instrument_noise_get_shape(const lsdj_song_t* song, uint8_t instrum
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param stability The stability */
-void lsdj_instrument_noise_set_stability(lsdj_song_t* song, uint8_t instrument, lsdj_noise_stability stability);
+void lsdj_instrument_noise_set_stability(lsdj_song_t* song, uint8_t instrument, lsdj_noise_stability_t stability);
 
 //! Retrieve the stability that a noise instrument uses
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@return The stability */
-lsdj_noise_stability lsdj_instrument_noise_get_stability(const lsdj_song_t* song, uint8_t instrument);
+lsdj_noise_stability_t lsdj_instrument_noise_get_stability(const lsdj_song_t* song, uint8_t instrument);
     
 #ifdef __cplusplus
 }
