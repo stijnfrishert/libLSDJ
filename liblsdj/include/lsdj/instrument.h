@@ -74,6 +74,12 @@ typedef enum
 
 typedef enum
 {
+	LSDJ_INSTRUMENT_TABLE_PLAY,
+	LSDJ_INSTRUMENT_TABLE_STEP
+} lsdj_instrument_table_mode;
+
+typedef enum
+{
 	LSDJ_INSTRUMENT_WAVE_VOLUME_0 = 0x00,
 	LSDJ_INSTRUMENT_WAVE_VOLUME_1 = 0x60,
 	LSDJ_INSTRUMENT_WAVE_VOLUME_2 = 0x40,
@@ -242,17 +248,19 @@ void lsdj_instrument_set_table(lsdj_song_t* song, uint8_t instrument, uint8_t ta
 	@return The table of the instrument or LSDJ_INSTRUMENT_NO_TABLE */
 uint8_t lsdj_instrument_get_table(const lsdj_song_t* song, uint8_t instrument);
 
-//! Change the table automation of an instrument
+//! Change the table play mode of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@param automate Whether the table automates */
-void lsdj_instrument_automate_table(lsdj_song_t* song, uint8_t instrument, bool automate);
+	@param mode The play mode
+	@note in earlier versions this was called AUTOMATE (turned on = step mode) */
+void lsdj_instrument_set_table_mode(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_table_mode mode);
 
-//! Retrieve the table automation of an instrument
+//! Retrieve the table play mode of an instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@return Whether the table automates */
-uint8_t lsdj_instrument_is_table_automated(const lsdj_song_t* song, uint8_t instrument);
+	@return The play mode
+	@note in earlier versions this was called AUTOMATE (turned on = step mode) */
+lsdj_instrument_table_mode lsdj_instrument_get_table_mode(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the vibrato direction of an instrument
 /*! @param song The song that contains the instrument

@@ -144,14 +144,14 @@ uint8_t lsdj_instrument_get_table(const lsdj_song_t* song, uint8_t instrument)
 	return get_instrument_bits(song, instrument, 6, 0, 4);
 }
 
-void lsdj_instrument_automate_table(lsdj_song_t* song, uint8_t instrument, bool automate)
+void lsdj_instrument_set_table_mode(lsdj_song_t* song, uint8_t instrument, lsdj_instrument_table_mode mode)
 {
-	set_instrument_bits(song, instrument, 5, 3, 1, automate ? 1 : 0);
+	set_instrument_bits(song, instrument, 5, 3, 1, mode == LSDJ_INSTRUMENT_TABLE_STEP ? 1 : 0);
 }
 
-uint8_t lsdj_instrument_is_table_automated(const lsdj_song_t* song, uint8_t instrument)
+lsdj_instrument_table_mode lsdj_instrument_get_table_mode(const lsdj_song_t* song, uint8_t instrument)
 {
-	return get_instrument_bits(song, instrument, 5, 3, 1) == 1;
+	return get_instrument_bits(song, instrument, 5, 3, 1) == 1 ? LSDJ_INSTRUMENT_TABLE_STEP : LSDJ_INSTRUMENT_TABLE_PLAY;
 }
 
 void lsdj_instrument_set_vibrato_direction(lsdj_song_t* song, uint8_t instrument, lsdj_vibrato_direction_t direction)

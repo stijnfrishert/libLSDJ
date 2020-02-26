@@ -38,10 +38,6 @@
 
 #include "song.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 	//! The number of bytes the default wave array takes up
 #define LSDJ_DEFAULT_WAVE_LENGTH (16)
 
@@ -62,9 +58,5 @@ static const uint8_t LSDJ_SILENT_WAVE[LSDJ_DEFAULT_WAVE_LENGTH] = {
 static const uint8_t LSDJ_DEFAULT_INSTRUMENT[LSDJ_DEFAULT_INSTRUMENT_LENGTH] = {
     0xA8, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x03, 0x00, 0x00, 0xD0, 0x00, 0x00, 0x00, 0xF3, 0x00, 0x00
 };
-    
-#ifdef __cplusplus
-}
-#endif
 
 #endif

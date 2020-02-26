@@ -158,8 +158,8 @@ TEST_CASE( "Song", "[song]" )
 				REQUIRE( lsdj_instrument_is_table_enabled(song0, 0) == false );
 				REQUIRE( lsdj_instrument_is_table_enabled(song0, 3) == true );
 				REQUIRE( lsdj_instrument_get_table(song0, 3) == 0x00 );
-				REQUIRE( lsdj_instrument_is_table_automated(song0, 0) == false );
-				REQUIRE( lsdj_instrument_is_table_automated(song0, 3) == false );
+				REQUIRE( lsdj_instrument_get_table_mode(song0, 0) == LSDJ_INSTRUMENT_TABLE_PLAY );
+				REQUIRE( lsdj_instrument_get_table_mode(song0, 3) == LSDJ_INSTRUMENT_TABLE_PLAY );
 
 				REQUIRE( lsdj_instrument_get_vibrato_direction(song0, 0) == LSDJ_INSTRUMENT_VIBRATO_DOWN );
 				REQUIRE( lsdj_instrument_get_vibrato_shape(song0, 0) == LSDJ_INSTRUMENT_VIBRATO_TRIANGLE );
