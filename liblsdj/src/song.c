@@ -72,14 +72,27 @@ bool lsdj_song_has_changed(const lsdj_song_t* song)
 	return song->bytes[FILE_CHANGED_OFFSET] == 1;
 }
 
-void lsdj_song_set_tempo(lsdj_song_t* song, uint8_t bpm)
+bool lsdj_song_set_tempo(lsdj_song_t* song, unsigned short bpm)
 {
-	song->bytes[TEMPO_OFFSET] = bpm;
+    if (bpm < 40 || bpm > 295)
+        return false;
+    
+    if (bpm > 255)
+        song->bytes[TEMPO_OFFSET] = (uint8_t)(bpm - 256);
+    else
+        song->bytes[TEMPO_OFFSET] = (uint8_t)bpm;
+    
+    return true;
 }
 
-uint8_t lsdj_song_get_tempo(const lsdj_song_t* song)
+unsigned short lsdj_song_get_tempo(const lsdj_song_t* song)
 {
-	return song->bytes[TEMPO_OFFSET];
+	const uint8_t byte = song->bytes[TEMPO_OFFSET];
+    
+    if (byte < 40)
+        return byte + 256;
+    else
+        return byte;
 }
 
 void lsdj_song_set_transposition(lsdj_song_t* song, uint8_t semitones)

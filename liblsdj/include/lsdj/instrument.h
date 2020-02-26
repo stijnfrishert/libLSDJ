@@ -302,8 +302,6 @@ lsdj_vibrato_shape_t lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, 
 	@note This only makes sense for pulse, wave and noise instruments*/
 lsdj_plv_speed_t lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t instrument);
 
-//! @todo Drum mode
-
 
 // --- Pulse --- //
 

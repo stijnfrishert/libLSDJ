@@ -49,8 +49,6 @@ extern "C" {
 #define LSDJ_TABLE_COUNT (0x20)
 #define LSDJ_TABLE_LENGTH (0x10)
 
-//! @todo Allocating instruments
-
 //! Returns whether a table is in use
 /*! @param table The index of the table, at maximum LSDJ_TABLE_COUNT */
 bool lsdj_table_is_allocated(const lsdj_song_t* song, uint8_t table);

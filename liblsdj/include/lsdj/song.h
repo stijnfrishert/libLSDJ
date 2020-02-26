@@ -112,12 +112,13 @@ uint8_t lsdj_song_get_format_version(const lsdj_song_t* song);
 bool lsdj_song_has_changed(const lsdj_song_t* song);
 
 //! Change the tempo of a song, in beats-per-minute
-/*! @todo Should I convert this to the actual tempo (range 0 - 40 is mapped to higher bpm's)? */
-void lsdj_song_set_tempo(lsdj_song_t* song, uint8_t bpm);
+/*! @param bpm The tempo, ranging from 40 to 295
+    @return false If the tempo does not fit within the range */
+bool lsdj_song_set_tempo(lsdj_song_t* song, unsigned short bpm);
 
 //! Retrieve the tempo of a song, in beats-per-minute
-/*! @todo Should I convert this to the actual tempo (range 0 - 40 is mapped to higher bpm's)? */
-uint8_t lsdj_song_get_tempo(const lsdj_song_t* song);
+/*! @return The tempo, ranging from 40 to 295 */
+unsigned short lsdj_song_get_tempo(const lsdj_song_t* song);
 
 //! Change the global transposition of a song
 /*! The value given is in semitones. 0 or higher maps to a positive increase, 0xFF or lower to a negative one */
