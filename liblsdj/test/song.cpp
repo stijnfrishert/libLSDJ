@@ -40,6 +40,7 @@ TEST_CASE( "Song", "[song]" )
 			REQUIRE( lsdj_song_get_tempo(song0) == 88 );
 			REQUIRE( lsdj_song_get_transposition(song0) == 0 );
 			REQUIRE( lsdj_song_get_sync_mode(song0) == LSDJ_SYNC_NONE );
+			REQUIRE( lsdj_song_get_drum_max(song0) == 0x00 );
 		}
 
 		SECTION( "Editor settings" )

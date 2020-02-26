@@ -115,6 +115,16 @@ lsdj_sync_mode_t lsdj_song_get_sync_mode(const lsdj_song_t* song)
 	return (lsdj_sync_mode_t)song->bytes[SYNC_MODE_OFFSET];
 }
 
+void lsdj_song_set_drum_max(lsdj_song_t* song, uint8_t max)
+{
+	song->bytes[DRUM_MAX_OFFSET] = max;
+}
+
+uint8_t lsdj_song_get_drum_max(const lsdj_song_t* song)
+{
+	return song->bytes[DRUM_MAX_OFFSET];
+}
+
 
 // --- Editor Settings --- //
 

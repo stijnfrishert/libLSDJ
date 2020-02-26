@@ -88,6 +88,8 @@
 #define PRELISTEN_OFFSET					(0x3FC3)
 #define SYNTH_OVERWRITES_OFFSET				(0x3FC4)
 // Empty									(0x3FC6)
+#define DRUM_MAX_OFFSET						(0x3FD0)
+// Empty									(0x3FD1)
 
 
 // --- Bank 2 --- //

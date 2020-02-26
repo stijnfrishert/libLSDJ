@@ -136,6 +136,14 @@ void lsdj_song_set_sync_mode(lsdj_song_t* song, lsdj_sync_mode_t mode);
 /*! In some synchronisation modes the prelisten flag doesn't do anything */
 lsdj_sync_mode_t lsdj_song_get_sync_mode(const lsdj_song_t* song);
 
+//! Change the drum max value of a song
+/*! This doesn't do anything beyond 6.3.3, but neither setting nor getting it won't hurt your song */
+void lsdj_song_set_drum_max(lsdj_song_t* song, uint8_t max);
+
+//! Change the drum max value of a song
+/*! This doesn't do anything beyond 6.3.3, but neither setting nor getting it won't hurt your song */
+uint8_t lsdj_song_get_drum_max(const lsdj_song_t* song);
+
 //! @todo Drum max?
 
 
