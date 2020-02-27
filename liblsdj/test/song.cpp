@@ -165,6 +165,7 @@ TEST_CASE( "Song", "[song]" )
 				REQUIRE( lsdj_instrument_get_vibrato_direction(song0, 0) == LSDJ_INSTRUMENT_VIBRATO_DOWN );
 				REQUIRE( lsdj_instrument_get_vibrato_shape(song0, 0) == LSDJ_INSTRUMENT_VIBRATO_TRIANGLE );
 				REQUIRE( lsdj_instrument_get_plv_speed(song0, 0) == LSDJ_INSTRUMENT_PLV_FAST );
+				REQUIRE( lsdj_instrument_get_command_rate(song0, 0) == 0x00 );
 			}
 
 			SECTION( "Pulse" )

@@ -302,6 +302,20 @@ lsdj_vibrato_shape_t lsdj_instrument_get_vibrato_shape(const lsdj_song_t* song, 
 	@note This only makes sense for pulse, wave and noise instruments*/
 lsdj_plv_speed_t lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t instrument);
 
+//! Change the command rate of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@param rate The command rate
+	@note Kit instruments don't have a command rate */
+void lsdj_instrument_set_command_rate(lsdj_song_t* song, uint8_t instrument, uint8_t rate);
+
+//! Retrieve the command rate of an instrument
+/*! @param song The song that contains the instrument
+	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+	@return The command rate of the instrument
+	@note Kit instruments don't have a command rate */
+uint8_t lsdj_instrument_get_command_rate(const lsdj_song_t* song, uint8_t instrument);
+
 
 // --- Pulse --- //
 

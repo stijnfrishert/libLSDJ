@@ -253,3 +253,13 @@ lsdj_plv_speed_t lsdj_instrument_get_plv_speed(const lsdj_song_t* song, uint8_t 
         }
 	}
 }
+
+void lsdj_instrument_set_command_rate(lsdj_song_t* song, uint8_t instrument, uint8_t rate)
+{
+	set_instrument_bits(song, instrument, 8, 0, 8, rate);
+}
+
+uint8_t lsdj_instrument_get_command_rate(const lsdj_song_t* song, uint8_t instrument)
+{
+	return get_instrument_bits(song, instrument, 8, 0, 8);
+}
