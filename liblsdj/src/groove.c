@@ -36,6 +36,7 @@
 #include "groove.h"
 
 #include <assert.h>
+#include <stddef.h>
 
 #include "song_offsets.h"
 
