@@ -78,13 +78,22 @@ typedef struct lsdj_sav_t lsdj_sav_t;
 //! Create a new save
 /*! The working memory song buffer is zeroed out, and the sav contains no
 	songs in the project slots.
+ 
+    @param sav Pointer to the place where a sav will be created
+    @param allocator The allocator to use to create the sav (or NULL for default)
+    @return Whether the new was successful
+ 
 	@note Every call must be paired with an lsdj_sav_free() */
-lsdj_sav_t* lsdj_sav_new(const lsdj_allocator_t* allocator, lsdj_error_t** error);
+lsdj_error_t lsdj_sav_new(lsdj_sav_t** sav, const lsdj_allocator_t* allocator);
 
 //! Copy a save into a new save
 /*! Creates a new save and copies the data into it
-	@note Every call must be paired with an lsdj_sav_free() */
-lsdj_sav_t* lsdj_sav_copy(const lsdj_sav_t* sav, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+	
+    @param source The sav to copy from
+    @param destination The pointer to point to the new sav
+    @param allocator The allocator (or null) used for memory (de)allocation
+    @note Every call must be paired with an lsdj_sav_free() */
+lsdj_error_t lsdj_sav_copy(const lsdj_sav_t* source, lsdj_sav_t** destination, const lsdj_allocator_t* allocator);
 
 //! Frees a sav from memory
 /*! Call this when you no longer need a sav. */
@@ -100,7 +109,7 @@ void lsdj_sav_set_working_memory_song(lsdj_sav_t* sav, const lsdj_song_t* song);
 //! Copy the song buffer from a given project into the working memory
 /*! This effectively loads a project, and sets the current index to reflect that
 	@return false if the index is out of bounds, or the slot is empty */
-bool lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, uint8_t index, lsdj_error_t** error);
+lsdj_error_t lsdj_sav_set_working_memory_song_from_project(lsdj_sav_t* sav, uint8_t index);
     
 //! Retrieve the working memory song buffer from a sav
 /*! This funtion returns a mutable song. See lsdj_sav_get_working_memory_song_const() for immutable song retrieval */
@@ -125,7 +134,7 @@ uint8_t lsdj_sav_get_active_project_index(const lsdj_sav_t* sav);
     the slots, its name and version are also copied over
  
     @note Remember to call lsdj_project_free() after you're done with the result */
-lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+lsdj_error_t lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav, lsdj_project_t** project, const lsdj_allocator_t* allocator);
 
 //! Copy a project into one of the project slots
 /*! This copies data from the parameter project into the sav, without taking over ownership
@@ -133,7 +142,7 @@ lsdj_project_t* lsdj_project_new_from_working_memory_song(const lsdj_sav_t* sav,
  
 	@param project The project to move, or NULL is the slot should be freed up
     @return Whether the copy was successful */
-bool lsdj_sav_set_project_copy(lsdj_sav_t* sav, uint8_t index, const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+lsdj_error_t lsdj_sav_set_project_copy(lsdj_sav_t* sav, uint8_t index, const lsdj_project_t* project, const lsdj_allocator_t* allocator);
     
 //! Move a project into one of the project slots
 /*! This moves the parameter project into the sav, taking over ownership. You don't have
@@ -161,59 +170,62 @@ const lsdj_project_t* lsdj_sav_get_project_const(const lsdj_sav_t* sav, uint8_t 
 // --- I/O --- //
 
 //! Read an LSDj sav from virtual I/O
-/*! @param wvio The virtual stream to read from
-    @param error A description of the error that occured, if provided */
-lsdj_sav_t* lsdj_sav_read(lsdj_vio_t* vio, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+/*! @param rvio The virtual stream to read from
+    @param sav A pointer to the place where the sav will be created
+    @param allocator The allocator that will be used to create the sav (or NULL)
+    @return Error/success code */
+lsdj_error_t lsdj_sav_read(lsdj_vio_t* rvio, lsdj_sav_t** sav, const lsdj_allocator_t* allocator);
 
 //! Read an LSDj sav from file
 /*! @param path The path to te file to read from
-    @param error A description of the error that occured, if provided */
-lsdj_sav_t* lsdj_sav_read_from_file(const char* path, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+    @param sav A pointer to the place where the sav will be created
+    @param allocator The allocator that will be used to create the sav (or NULL)
+    @return Error/success code */
+lsdj_error_t lsdj_sav_read_from_file(const char* path, lsdj_sav_t** sav, const lsdj_allocator_t* allocator);
 
 //! Read an LSDj sav from memory
 /*! @param data Points to the memory to read from
 	@param size The size in bytes of the memory to read from
-    @param error A description of the error that occured, if provided */
-lsdj_sav_t* lsdj_sav_read_from_memory(const uint8_t* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+    @param sav A pointer to the place where the sav will be created
+    @param allocator The allocator that will be used to create the sav (or NULL)
+    @return Error/success code */
+lsdj_error_t lsdj_sav_read_from_memory(const uint8_t* data, size_t size, lsdj_sav_t** sav, const lsdj_allocator_t* allocator);
 
 //! Find out whether given data is likely a valid sav
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
-bool lsdj_sav_is_likely_valid(lsdj_vio_t* wvio, lsdj_error_t** error);
+bool lsdj_sav_is_likely_valid(lsdj_vio_t* wvio);
 
 //! Find out whether given data is likely a valid sav
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
-bool lsdj_sav_is_likely_valid_file(const char* path, lsdj_error_t** error);
+bool lsdj_sav_is_likely_valid_file(const char* path);
 
 //! Find out whether given data is likely a valid sav
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics. */
-bool lsdj_sav_is_likely_valid_memory(const uint8_t* data, size_t size, lsdj_error_t** error);
+bool lsdj_sav_is_likely_valid_memory(const uint8_t* data, size_t size);
     
 //! Write a sav to virtual I/O
 /*! @param sav The save to be written to stream
     @param rvio The virtual stream into which the sav is written
     @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
-    @param error A description of the error that occured, if provided
 
     @return Whether the write was successful */
-bool lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* rvio, size_t* writeCounter, lsdj_error_t** error);
+lsdj_error_t lsdj_sav_write(const lsdj_sav_t* sav, lsdj_vio_t* rvio, size_t* writeCounter);
 
 //! Write a sav to file
 /*! @param sav The save to be written to memory
     @param path The path to the file where the sav should be written on disk
     @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
-    @param error A description of the error that occured, if provided
 
     @return Whether the write was successful */
-bool lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, size_t* writeCounter, lsdj_error_t** error);
+lsdj_error_t lsdj_sav_write_to_file(const lsdj_sav_t* sav, const char* path, size_t* writeCounter);
 
 //! Write a sav to memory
 /*! @param sav The save to be written to memory
     @param data Pointer to the write buffer, should be at least LSDJ_SAV_SIZE in size
     @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
-    @param error A description of the error that occured, if provided
 
     @return Whether the write was successful */
-bool lsdj_sav_write_to_memory(const lsdj_sav_t* sav, uint8_t* data, size_t size, size_t* writeCounter, lsdj_error_t** error);
+lsdj_error_t lsdj_sav_write_to_memory(const lsdj_sav_t* sav, uint8_t* data, size_t size, size_t* writeCounter);
    
 
 #ifdef __cplusplus

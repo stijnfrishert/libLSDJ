@@ -64,51 +64,46 @@ struct lsdj_project_t
 
 // --- Allocation --- //
 
-lsdj_project_t* lsdj_project_alloc(const lsdj_allocator_t* allocator, lsdj_error_t** error)
+lsdj_error_t lsdj_project_alloc(lsdj_project_t** project, const lsdj_allocator_t* allocator)
 {
-    void* memory = lsdj_allocate_or_malloc(allocator, sizeof(lsdj_project_t));;
-    if (memory == NULL)
-    {
-        lsdj_error_optional_new(error, "could not allocate project");
-        return NULL;
-    }
+    *project = lsdj_allocate_or_malloc(allocator, sizeof(lsdj_project_t));;
+    if (*project == NULL)
+        return LSDJ_ALLOCATION_FAILED;
 
-    lsdj_project_t* project = (lsdj_project_t*)memory;
-    project->allocator = allocator;
+    (*project)->allocator = allocator;
     
-    return project;
+    return LSDJ_SUCCESS;
 }
 
-lsdj_project_t* lsdj_project_new(const lsdj_allocator_t* allocator, lsdj_error_t** error)
+lsdj_error_t lsdj_project_new(lsdj_project_t** pproject, const lsdj_allocator_t* allocator)
 {
-    lsdj_project_t* project = lsdj_project_alloc(allocator, error);
-    if (project == NULL)
-    {
-        lsdj_error_optional_new(error, "could not allocate memory for project");
-        return NULL;
-    }
+    const lsdj_error_t result = lsdj_project_alloc(pproject, allocator);
+    if (result != LSDJ_SUCCESS)
+        return result;
     
-    memset(project->name, '\0', sizeof(project->name));
+    lsdj_project_t* project = *pproject;
+    assert(project != NULL);
+        
+    memset(project->name, '\0', LSDJ_PROJECT_NAME_LENGTH);
     project->version = 0;
     memset(&project->song, 0, sizeof(lsdj_song_t));
     
-    return project;
+    return LSDJ_SUCCESS;
 }
 
-lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error)
+lsdj_error_t lsdj_project_copy(const lsdj_project_t* source, lsdj_project_t** destination, const lsdj_allocator_t* allocator)
 {
-    lsdj_project_t* copy = lsdj_project_alloc(allocator, error);
-    if (copy == NULL)
-    {
-        lsdj_error_optional_new(error, "could not allocate memory for project");
-        return NULL;
-    }
+    const lsdj_error_t result = lsdj_project_alloc(destination, allocator);
+    if (result != LSDJ_SUCCESS)
+        return result;
+    
+    lsdj_project_t* copy = *destination;
 
-    memcpy(copy->name, project->name, sizeof(project->name));
-    copy->version = project->version;
-    memcpy(&copy->song, &project->song, sizeof(project->song));
+    memcpy(copy->name, source->name, LSDJ_PROJECT_NAME_LENGTH);
+    copy->version = source->version;
+    memcpy(&copy->song, &source->song, LSDJ_SONG_BYTE_COUNT);
 
-    return copy;
+    return LSDJ_SUCCESS;
 }
 
 void lsdj_project_free(lsdj_project_t* project)
@@ -164,24 +159,24 @@ const lsdj_song_t* lsdj_project_get_song_const(const lsdj_project_t* project)
 
 // --- I/O --- //
 
-lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, const lsdj_allocator_t* allocator, lsdj_error_t** error)
+lsdj_error_t lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_project_t** pproject, const lsdj_allocator_t* allocator)
 {
-    lsdj_project_t* project = lsdj_project_alloc(allocator, error);
-    if (project == NULL)
-        return NULL;
+    lsdj_error_t result = lsdj_project_alloc(pproject, allocator);
+    if (result != LSDJ_SUCCESS)
+        return result;
+    
+    lsdj_project_t* project = *pproject;
     
     if (!lsdj_vio_read(rvio, project->name, LSDJ_PROJECT_NAME_LENGTH, NULL))
     {
-        lsdj_error_optional_new(error, "could not read project name");
         lsdj_project_free(project);
-        return NULL;
+        return LSDJ_READ_FAILED;
     }
     
     if (!lsdj_vio_read_byte(rvio, &project->version, NULL))
     {
-        lsdj_error_optional_new(error, "could not read project version");
         lsdj_project_free(project);
-        return NULL;
+        return LSDJ_READ_FAILED;
     }
 
     // Decompress the song data
@@ -194,50 +189,38 @@ lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, const lsdj_allocator_
     
     lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
     
-    if (!lsdj_decompress(rvio, NULL, &wvio, NULL, lsdj_vio_tell(rvio), false, error))
+    result = lsdj_decompress(rvio, NULL, &wvio, NULL, lsdj_vio_tell(rvio), false);
+    if (result != LSDJ_SUCCESS)
     {
         lsdj_project_free(project);
-        return NULL;
+        return result;
     }
     
     lsdj_project_set_song(project, &song);
     
-    return project;
+    return LSDJ_SUCCESS;
 }
 
-lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, const lsdj_allocator_t* allocator, lsdj_error_t** error)
+lsdj_error_t lsdj_project_read_lsdsng_from_file(const char* path, lsdj_project_t** project, const lsdj_allocator_t* allocator)
 {
-    if (path == NULL)
-    {
-        lsdj_error_optional_new(error, "path is NULL");
-        return NULL;
-    }
+    assert(path != NULL);
     
     FILE* file = fopen(path, "rb");
     if (file == NULL)
-    {
-        char message[512];
-        snprintf(message, 512, "could not open %s for reading", path);
-        lsdj_error_optional_new(error, message);
-        return NULL;
-    }
+        return LSDJ_FILE_OPEN_FAILED;
 
     lsdj_vio_t rvio = lsdj_create_file_vio(file);
     
-    lsdj_project_t* project = lsdj_project_read_lsdsng(&rvio, allocator, error);
+    const lsdj_error_t result = lsdj_project_read_lsdsng(&rvio, project, allocator);
     
     fclose(file);
     
-    return project;
+    return result;
 }
 
-lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const uint8_t* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error)
+lsdj_error_t lsdj_project_read_lsdsng_from_memory(const uint8_t* data, size_t size, lsdj_project_t** project, const lsdj_allocator_t* allocator)
 {
-    if (data == NULL)
-    {
-        lsdj_error_optional_new(error, "data is NULL");
-        return NULL;
-    }
+    assert(data != NULL);
     
     lsdj_memory_access_state_t state;
     state.begin = state.cur = (uint8_t*)data;
@@ -245,10 +228,10 @@ lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const uint8_t* data, size_t
 
     lsdj_vio_t rvio = lsdj_create_memory_vio(&state);
     
-    return lsdj_project_read_lsdsng(&rvio, allocator, error);
+    return lsdj_project_read_lsdsng(&rvio, project, allocator);
 }
 
-bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
+bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio)
 {
     // Really, the only thing we can do is check whether the name contains valid chars
     // Can't do any checks on the format version, not any byte count checks (the virtual
@@ -271,38 +254,25 @@ bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error)
     return true;
 }
 
-bool lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error)
+bool lsdj_project_is_likely_valid_lsdsng_file(const char* path)
 {
-    if (path == NULL)
-    {
-        lsdj_error_optional_new(error, "path is NULL");
-        return false;
-    }
+    assert(path != NULL);
     
     FILE* file = fopen(path, "rb");
     if (file == NULL)
-    {
-        char message[512];
-        snprintf(message, 512, "could not open %s for reading", path);
-        lsdj_error_optional_new(error, message);
         return false;
-    }
     
     lsdj_vio_t rvio = lsdj_create_file_vio(file);
     
-    bool result = lsdj_project_is_likely_valid_lsdsng(&rvio, error);
+    bool result = lsdj_project_is_likely_valid_lsdsng(&rvio);
     
     fclose(file);
     return result;
 }
 
-bool lsdj_project_is_likely_valid_lsdsng_memory(const uint8_t* data, size_t size, lsdj_error_t** error)
+bool lsdj_project_is_likely_valid_lsdsng_memory(const uint8_t* data, size_t size)
 {
-    if (data == NULL)
-    {
-        lsdj_error_optional_new(error, "data is NULL");
-        return 0;
-    }
+    assert(data != NULL);
     
     lsdj_memory_access_state_t state;
     state.begin = state.cur = (uint8_t*)data;
@@ -310,73 +280,44 @@ bool lsdj_project_is_likely_valid_lsdsng_memory(const uint8_t* data, size_t size
     
     lsdj_vio_t rvio = lsdj_create_memory_vio(&state);
     
-    return lsdj_project_is_likely_valid_lsdsng(&rvio, error);
+    return lsdj_project_is_likely_valid_lsdsng(&rvio);
 }
 
-bool lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio, size_t* writeCounter, lsdj_error_t** error)
+lsdj_error_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* wvio, size_t* writeCounter)
 {
     // Write the name
     if (!lsdj_vio_write(wvio, project->name, LSDJ_PROJECT_NAME_LENGTH, writeCounter))
-    {
-        lsdj_error_optional_new(error, "could not write project name for lsdsng");
-        return false;
-    }
+        return LSDJ_WRITE_FAILED;
     
     // Write the version
     if (!lsdj_vio_write_byte(wvio, project->version, writeCounter))
-    {
-        lsdj_error_optional_new(error, "could not write project version for lsdsng");
-        return false;
-    }
+        return LSDJ_WRITE_FAILED;
     
     // Compress and write the song buffer
     const lsdj_song_t* song = lsdj_project_get_song_const(project);
-    return lsdj_compress(song->bytes, wvio, 1, writeCounter, error);
+    return lsdj_compress(song->bytes, wvio, 1, writeCounter);
 }
 
-bool lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, size_t* writeCounter, lsdj_error_t** error)
+lsdj_error_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, size_t* writeCounter)
 {
-    if (path == NULL)
-    {
-        lsdj_error_optional_new(error, "path is NULL");
-        return false;
-    }
-    
-    if (project == NULL)
-    {
-        lsdj_error_optional_new(error, "project is NULL");
-        return false;
-    }
+    assert(project != NULL);
+    assert(path != NULL);
 
     FILE* file = fopen(path, "wb");
     if (file == NULL)
-    {
-        char message[512];
-        snprintf(message, 512, "could not open %s for writing\n%s", path, strerror(errno));
-        lsdj_error_optional_new(error, message);
-        return false;
-    }
+        return LSDJ_FILE_OPEN_FAILED;
 
     lsdj_vio_t wvio = lsdj_create_file_vio(file);
-    const bool result = lsdj_project_write_lsdsng(project, &wvio, writeCounter, error);
+    const lsdj_error_t result = lsdj_project_write_lsdsng(project, &wvio, writeCounter);
     fclose(file);
 
     return result;
 }
 
-bool lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, uint8_t* data, size_t* writeCounter, lsdj_error_t** error)
+lsdj_error_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, uint8_t* data, size_t* writeCounter)
 {
-    if (project == NULL)
-    {
-        lsdj_error_optional_new(error, "project is NULL");
-        return false;
-    }
-    
-    if (data == NULL)
-    {
-        lsdj_error_optional_new(error, "data is NULL");
-        return false;
-    }
+    assert(project != NULL);
+    assert(data != NULL);
     
     lsdj_memory_access_state_t state;
     state.begin = state.cur = data;
@@ -384,5 +325,5 @@ bool lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, uint8_t*
     
     lsdj_vio_t wvio = lsdj_create_memory_vio(&state);
     
-    return lsdj_project_write_lsdsng(project, &wvio, writeCounter, error);
+    return lsdj_project_write_lsdsng(project, &wvio, writeCounter);
 }

@@ -69,16 +69,21 @@ typedef struct lsdj_project_t lsdj_project_t;
 //! Create a new project
 /*! Creates a new project with an empty name, version #0 and zeroed out song
 
-    @param allocator The allocator (or null) used for memory (de)allocation
+    @param project Pointer to the place where a project will be created
+    @param allocator The allocator to use to create the sav (or NULL for default)
+    @return Whether the new was successful
+ 
     @note Every call must be paired with an lsdj_project_free() */
-lsdj_project_t* lsdj_project_new(const lsdj_allocator_t* allocator, lsdj_error_t** error);
+lsdj_error_t lsdj_project_new(lsdj_project_t** project, const lsdj_allocator_t* allocator);
 
 //! Copy a project into a new project
 /*! Creates a new project and copies the data into it.
 
+    @param source The project to copy from
+    @param destination The pointer to point to the new project
     @param allocator The allocator (or null) used for memory (de)allocation
 	@note Every call must be paired with an lsdj_project_free() */
-lsdj_project_t* lsdj_project_copy(const lsdj_project_t* project, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+lsdj_error_t lsdj_project_copy(const lsdj_project_t* source, lsdj_project_t** destination, const lsdj_allocator_t* allocator);
 
 //! Frees a project from memory
 /*! Call this when you no longer need a project. */
@@ -131,43 +136,43 @@ const lsdj_song_t* lsdj_project_get_song_const(const lsdj_project_t* project);
 	directly read from memory or file.
 
     @param rvio The virtual I/O stream to read from
-    @param allocator The allocator to create and free memory with for this project (optional)
-    @param In case of an error, more info is found in here (optional)
+    @param project The project will be put in the provided pointer
+ @param allocator The allocator to create and free memory with for this project (optional)
 
-	@return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
-lsdj_project_t* lsdj_project_read_lsdsng(lsdj_vio_t* rvio, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+	@return An error code (or success) */
+lsdj_error_t lsdj_project_read_lsdsng(lsdj_vio_t* rvio, lsdj_project_t** project, const lsdj_allocator_t* allocator);
 
 //! Read an LSDJ Project from an .lsdsng file
 /*! @param path The path to the lsdsng file to read
+    @param project The project will be put in the provided pointer
     @param allocator The allocator to create and free memory with for this project (optional)
-    @param In case of an error, more info is found in here (optional)
 
-    @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
-lsdj_project_t* lsdj_project_read_lsdsng_from_file(const char* path, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+    @return An error code (or success) */
+lsdj_error_t lsdj_project_read_lsdsng_from_file(const char* path, lsdj_project_t** project, const lsdj_allocator_t* allocator);
 
 //! Read an LSDJ Project from an .lsdsng in memory
 /*! @param data Points to the memory to read from
     @param size The amount of bytes of the memory to read from
+    @param project The project will be put in the provided pointer
     @param allocator The allocator to create and free memory with for this project (optional)
-    @param In case of an error, more info is found in here (optional)
 
-    @return The project (or NULL in case of an error) which you need to call lsdj_project_free() on */
-lsdj_project_t* lsdj_project_read_lsdsng_from_memory(const uint8_t* data, size_t size, const lsdj_allocator_t* allocator, lsdj_error_t** error);
+    @return An error code (or success) */
+lsdj_error_t lsdj_project_read_lsdsng_from_memory(const uint8_t* data, size_t size, lsdj_project_t** project, const lsdj_allocator_t* allocator);
     
 //! Find out whether given data is likely a valid lsdsng
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics.
     In fact, I wouldn't call this trustworthy at all, but there's little we can do due to the .lsdsng format */
-bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio, lsdj_error_t** error);
+bool lsdj_project_is_likely_valid_lsdsng(lsdj_vio_t* vio);
 
 //! Find out whether a file is likely a valid lsdsng
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics.
     In fact, I wouldn't call this trustworthy at all, but there's little we can do due to the .lsdsng format */
-bool lsdj_project_is_likely_valid_lsdsng_file(const char* path, lsdj_error_t** error);
+bool lsdj_project_is_likely_valid_lsdsng_file(const char* path);
 
 //! Find out whether a memory address likely contains a valid lsdsng
 /*! @note This is not a 100% guarantee that the data will load, we're just checking some heuristics.
     In fact, I wouldn't call this trustworthy at all, but there's little we can do due to the .lsdsng format */
-bool lsdj_project_is_likely_valid_lsdsng_memory(const uint8_t* data, size_t size, lsdj_error_t** error);
+bool lsdj_project_is_likely_valid_lsdsng_memory(const uint8_t* data, size_t size);
     
 //! Write a project to an .lsdsng I/O stream
 /*! This function uses liblsdj's virtual I/O system. There are other convenience functions to
@@ -176,28 +181,25 @@ bool lsdj_project_is_likely_valid_lsdsng_memory(const uint8_t* data, size_t size
     @param project The project to be written to stream
     @param vio The virtual stream into which the project is written
     @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
-    @param error A description of the error that occured, if provided
 
 	@return Whether the write was successful */
-bool lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, size_t* writeCounter, lsdj_error_t** error);
+lsdj_error_t lsdj_project_write_lsdsng(const lsdj_project_t* project, lsdj_vio_t* vio, size_t* writeCounter);
 
 //! Write a project to file
 /*! @param project The project to be written to file
     @param path The path to the file where the lsdsng should be written on disk
     @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
-    @param error A description of the error that occured, if provided
 
     @return Whether the write was successful */
-bool lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, size_t* writeCounter, lsdj_error_t** error);
+lsdj_error_t lsdj_project_write_lsdsng_to_file(const lsdj_project_t* project, const char* path, size_t* writeCounter);
 
 //! Write a project to a memory
 /*! @param project The project to be written to memory
     @param data Pointer to the write buffer, should be at least LSDSNG_MAX_SIZE in size
     @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
-    @param error A description of the error that occured, if provided
 
     @return Whether the write was successful */
-bool lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, uint8_t* data, size_t* writeCounter, lsdj_error_t** error);
+lsdj_error_t lsdj_project_write_lsdsng_to_memory(const lsdj_project_t* project, uint8_t* data, size_t* writeCounter);
     
 #ifdef __cplusplus
 }

@@ -16,8 +16,9 @@ SCENARIO( "Project creation and querying", "[project]" )
 
 	GIVEN( "A new project is created" )
 	{
-		auto project = lsdj_project_new(nullptr, nullptr);
-		REQUIRE(project != nullptr);
+        lsdj_project_t* project = NULL;
+		REQUIRE( lsdj_project_new(&project, nullptr) == LSDJ_SUCCESS );
+        REQUIRE( project != NULL );
 
 		WHEN( "Requesting the name")
 		{
@@ -104,7 +105,8 @@ SCENARIO( "Project creation and querying", "[project]" )
 			std::fill_n(buffer.bytes, LSDJ_SONG_BYTE_COUNT, 40);
 			lsdj_project_set_song(project, &buffer);
 
-			auto copy = lsdj_project_copy(project, nullptr, nullptr);
+            lsdj_project_t* copy = nullptr;
+            REQUIRE( lsdj_project_copy(project, &copy, nullptr) == LSDJ_SUCCESS );
 			REQUIRE(copy != nullptr);
 				
 			THEN( "The data should remain intact" )
@@ -136,7 +138,8 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 	SECTION( "Reading an .lsdsng from memory" )
 	{
         // Read the lsdsng from memory
-		auto project = lsdj_project_read_lsdsng_from_memory(lsdsng.data(), lsdsng.size(), nullptr, nullptr);
+        lsdj_project_t* project = nullptr;
+        REQUIRE( lsdj_project_read_lsdsng_from_memory(lsdsng.data(), lsdsng.size(), &project, nullptr) == LSDJ_SUCCESS );
 		REQUIRE( project != nullptr );
 
         // Name
@@ -158,7 +161,8 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 	SECTION( "Reading an .lsdsng from file" )
 	{
         // Read the lsdsng from file
-		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr, nullptr);
+        lsdj_project_t* project = nullptr;
+        REQUIRE( lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", &project, nullptr) == LSDJ_SUCCESS );
 		REQUIRE( project != nullptr );
 
         // Name
@@ -180,7 +184,8 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
 	SECTION( "Writing an .lsdsng to memory")
 	{
         // Create the project
-		auto project = lsdj_project_new(nullptr, nullptr);
+        lsdj_project_t* project = nullptr;
+		lsdj_project_new(&project, nullptr);
 		REQUIRE( project != nullptr );
 
         lsdj_project_set_name(project, "HAPPY BD");
@@ -194,14 +199,15 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         std::array<uint8_t, LSDSNG_MAX_SIZE> data;
         data.fill(0);
         size_t writeCount = 0;
-        REQUIRE( lsdj_project_write_lsdsng_to_memory(project, data.data(), &writeCount, nullptr) == true );
+        REQUIRE( lsdj_project_write_lsdsng_to_memory(project, data.data(), &writeCount) == LSDJ_SUCCESS );
         
         // Because liblsdj's compression algorithm is actually a more efficient fit than
         // the one in LSDJ itself, we can't compare with the .lsdsng sample file. So:
         // Decompress (the other test makes sure it's correct) back and compare against
         // the raw
         
-        auto lsdsng = lsdj_project_read_lsdsng_from_memory(data.data(), writeCount * LSDJ_BLOCK_SIZE, nullptr, nullptr);
+        lsdj_project_t* lsdsng = nullptr;
+        lsdj_project_read_lsdsng_from_memory(data.data(), writeCount * LSDJ_BLOCK_SIZE, &lsdsng, nullptr);
         assert(lsdsng != nullptr);
         
         std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
@@ -223,8 +229,8 @@ TEST_CASE( ".lsdsng save/load", "[project]" )
         const auto save = readFileContents(RESOURCES_FOLDER "sav/happy_birthday.sav");
         assert(save.size() == 131072);
         
-		REQUIRE( lsdj_project_is_likely_valid_lsdsng_memory(lsdsng.data(), lsdsng.size(), nullptr) == true );
+		REQUIRE( lsdj_project_is_likely_valid_lsdsng_memory(lsdsng.data(), lsdsng.size()) == true );
         
-        REQUIRE( lsdj_project_is_likely_valid_lsdsng_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr) == true );
+        REQUIRE( lsdj_project_is_likely_valid_lsdsng_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng") == true );
 	}
 }

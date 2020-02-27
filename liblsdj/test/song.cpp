@@ -18,7 +18,8 @@ using namespace Catch;
 
 TEST_CASE( "Song", "[song]" )
 {
-	auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", nullptr, nullptr);
+    lsdj_sav_t* sav = nullptr;
+	lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", &sav, nullptr);
 //    auto sav = lsdj_sav_read_from_file("/Users/stijn/Google Drive/lsdj/lsdj/old/lsdj_571.sav", nullptr);
 //    auto sav = lsdj_sav_read_from_file("/Users/stijn/Google Drive/lsdj/lsdj/lsdj_822.sav", nullptr);
 	REQUIRE( sav != nullptr );

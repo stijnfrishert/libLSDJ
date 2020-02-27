@@ -17,7 +17,9 @@ SCENARIO( "Saves", "[sav]" )
 	REQUIRE(LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX == 0xFF);
 
 	// Sample project used in some tests
-	auto project = lsdj_project_new(nullptr, nullptr);
+	lsdj_project_t* project = NULL;
+    REQUIRE( lsdj_project_new(&project, nullptr) == LSDJ_SUCCESS );
+    
 	lsdj_project_set_name(project, "MYSONG");
 	lsdj_project_set_version(project, 16);
 
@@ -27,8 +29,9 @@ SCENARIO( "Saves", "[sav]" )
 
 	GIVEN( "A new sav is created" )
 	{
-		auto sav = lsdj_sav_new(nullptr, nullptr);
-		REQUIRE( sav != nullptr );
+        lsdj_sav_t* sav = NULL;
+        REQUIRE( lsdj_sav_new(&sav, nullptr) == LSDJ_SUCCESS );
+        REQUIRE( sav != NULL );
 
 		WHEN( "The working memory song buffer is requested" )
 		{
@@ -54,10 +57,10 @@ SCENARIO( "Saves", "[sav]" )
 
 		WHEN( "Copying the working memory song from a project")
 		{
-			REQUIRE_FALSE( lsdj_sav_set_working_memory_song_from_project(sav, 2, nullptr) );
+            REQUIRE( lsdj_sav_set_working_memory_song_from_project(sav, 2) == LSDJ_NO_PROJECT_AT_INDEX );
 
 			lsdj_sav_set_project_move(sav, 2, project);
-			lsdj_sav_set_working_memory_song_from_project(sav, 2, nullptr);		
+            REQUIRE( lsdj_sav_set_working_memory_song_from_project(sav, 2) == LSDJ_SUCCESS );
 
 			THEN( "The working memory and index should change" )
 			{
@@ -89,7 +92,7 @@ SCENARIO( "Saves", "[sav]" )
 
 		WHEN( "Copying a project into a sav" )
 		{
-			lsdj_sav_set_project_copy(sav, 7, project, nullptr, nullptr);
+            REQUIRE( lsdj_sav_set_project_copy(sav, 7, project, nullptr) == LSDJ_SUCCESS );
 
 			THEN( "The data in the project should be identical " )
 			{
@@ -146,7 +149,8 @@ SCENARIO( "Saves", "[sav]" )
 
 			THEN( "The data should remain intact" )
 			{
-				auto copy = lsdj_sav_copy(sav, nullptr, nullptr);
+                lsdj_sav_t* copy = nullptr;
+                REQUIRE( lsdj_sav_copy(sav, &copy, nullptr) == LSDJ_SUCCESS );
 				REQUIRE( copy != nullptr );
 
 				auto copyBuffer = lsdj_sav_get_working_memory_song_const(sav);
@@ -159,7 +163,9 @@ SCENARIO( "Saves", "[sav]" )
         WHEN( "Creating a project from the working memory song with no active project" )
         {
             lsdj_sav_set_active_project_index(sav, LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX);
-            auto project = lsdj_project_new_from_working_memory_song(sav, nullptr, nullptr);
+            
+            lsdj_project_t* project = nullptr;
+            lsdj_project_new_from_working_memory_song(sav, &project, nullptr);
             auto wm = lsdj_sav_get_working_memory_song_const(sav);
             
             THEN( "It should contain the same data" )
@@ -183,13 +189,14 @@ SCENARIO( "Saves", "[sav]" )
             lsdj_sav_set_project_move(sav, 3, project);
             lsdj_sav_set_active_project_index(sav, 3);
             
-            auto project = lsdj_project_new_from_working_memory_song(sav, nullptr, nullptr);
+            lsdj_project_t* project = nullptr;
+            REQUIRE( lsdj_project_new_from_working_memory_song(sav, &project, nullptr) == LSDJ_SUCCESS);
+            REQUIRE( project != nullptr );
+            
             auto wm = lsdj_sav_get_working_memory_song_const(sav);
             
             THEN( "It should contain the same data" )
             {
-                REQUIRE( project != nullptr );
-                
                 std::array<char, LSDJ_PROJECT_NAME_LENGTH> name;
                 name.fill('\0');
                 strncpy(name.data(), lsdj_project_get_name(project), name.size());
@@ -214,7 +221,8 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 	SECTION( "Reading a .sav from file" )
 	{
-		auto sav = lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", nullptr, nullptr);
+        lsdj_sav_t* sav = nullptr;
+        REQUIRE( lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/all.sav", &sav, nullptr) == LSDJ_SUCCESS );
 		REQUIRE( sav != nullptr );
 
 		auto wm = lsdj_sav_get_working_memory_song_const(sav);
@@ -240,7 +248,8 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 	SECTION( "Reading a .sav from memory" )
 	{
-		auto sav = lsdj_sav_read_from_memory(save.data(), save.size(), nullptr, nullptr);
+        lsdj_sav_t* sav = nullptr;
+        REQUIRE( lsdj_sav_read_from_memory(save.data(), save.size(), &sav, nullptr) == LSDJ_SUCCESS );
 		REQUIRE( sav != nullptr );
 
 		// Working memory
@@ -268,7 +277,8 @@ TEST_CASE( ".sav save/load", "[sav]" )
 
 	SECTION( "Writing a .sav to memory" )
 	{
-		auto sav = lsdj_sav_new(nullptr, nullptr);
+        lsdj_sav_t* sav = nullptr;
+        REQUIRE( lsdj_sav_new(&sav, nullptr) == LSDJ_SUCCESS );
 		REQUIRE( sav != nullptr );
 
 		// Working memory
@@ -279,19 +289,21 @@ TEST_CASE( ".sav save/load", "[sav]" )
 		// Active project
 		lsdj_sav_set_active_project_index(sav, LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX);
 
-		auto project = lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr, nullptr);
+        lsdj_project_t* project = nullptr;
+		lsdj_project_read_lsdsng_from_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", &project, nullptr);
 		assert(project != nullptr);
 
 		lsdj_sav_set_project_move(sav, 0, project);
 
 		std::array<uint8_t, 131072> memory;
         size_t writeCount = 0;
-		REQUIRE( lsdj_sav_write_to_memory(sav, memory.data(), memory.size(), &writeCount, nullptr) == true );
+		REQUIRE( lsdj_sav_write_to_memory(sav, memory.data(), memory.size(), &writeCount) == LSDJ_SUCCESS );
 		REQUIRE( writeCount == LSDJ_SAV_SIZE );
 
 		lsdj_sav_free(sav);
 
-		auto compSav = lsdj_sav_read_from_memory(memory.data(), writeCount, nullptr, nullptr);
+        lsdj_sav_t* compSav = nullptr;
+        REQUIRE( lsdj_sav_read_from_memory(memory.data(), writeCount, &compSav, nullptr) == LSDJ_SUCCESS );
 		REQUIRE( compSav != nullptr );
         
         // --- Comparison --- //
@@ -324,12 +336,12 @@ TEST_CASE( ".sav save/load", "[sav]" )
         const auto lsdsng = readFileContents(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng");
         assert(lsdsng.size() == 3081);
         
-		REQUIRE( lsdj_sav_is_likely_valid_memory(save.data(), save.size(), nullptr) == true );
-        REQUIRE( lsdj_sav_is_likely_valid_memory(lsdsng.data(), lsdsng.size(), nullptr) == false );
-        REQUIRE( lsdj_sav_is_likely_valid_memory(raw.data(), raw.size(), nullptr) == false );
+		REQUIRE( lsdj_sav_is_likely_valid_memory(save.data(), save.size()) == true );
+        REQUIRE( lsdj_sav_is_likely_valid_memory(lsdsng.data(), lsdsng.size()) == false );
+        REQUIRE( lsdj_sav_is_likely_valid_memory(raw.data(), raw.size()) == false );
         
-        REQUIRE( lsdj_sav_is_likely_valid_file(RESOURCES_FOLDER "sav/happy_birthday.sav", nullptr) == true );
-        REQUIRE( lsdj_sav_is_likely_valid_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng", nullptr) == false );
-        REQUIRE( lsdj_sav_is_likely_valid_file(RESOURCES_FOLDER "raw/happy_birthday.raw", nullptr) == false );
+        REQUIRE( lsdj_sav_is_likely_valid_file(RESOURCES_FOLDER "sav/happy_birthday.sav") == true );
+        REQUIRE( lsdj_sav_is_likely_valid_file(RESOURCES_FOLDER "lsdsng/happy_birthday.lsdsng") == false );
+        REQUIRE( lsdj_sav_is_likely_valid_file(RESOURCES_FOLDER "raw/happy_birthday.raw") == false );
 	}
 }

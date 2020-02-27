@@ -73,14 +73,12 @@ extern "C" {
     @param writeCounter The amount of bytes written is _added_ to this value
     @param firstBlockPosition The position in rvio at which the very first block starts
     @param followBlockJumps If true, new block positions are read and jumped to relative to firstBlockPosition. Otherwise, the algo just moves to the next block
-    @param error In case of an error, this pointer is filled with more information
 
-    @return true on success, false on failure */
-bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
-                     lsdj_vio_t* wvio, size_t* writeCounter,
-                     long firstBlockPosition,
-                     bool followBlockJumps,
-                     lsdj_error_t** error);
+    @return An error code representing success or failure */
+lsdj_error_t lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
+                             lsdj_vio_t* wvio, size_t* writeCounter,
+                             long firstBlockPosition,
+                             bool followBlockJumps);
 
 //! Decompress a single block in the LSDj compression algorithm
 /*! Decompresses one block, and returns the id of the next block supposedly
@@ -93,14 +91,12 @@ bool lsdj_decompress(lsdj_vio_t* rvio, size_t* readCounter,
     @param readCounter The amount of bytes read is _added_ to this value
     @param wvio The stream to write decompressed bytes to
     @param writeCounter The amount of bytes written is _added_ to this value
-    @param nextBlockIndex The next block that is supposed to be read after this one (or 
-    @param error In case of an error, this pointer is filled with more information
+    @param nextBlockIndex The next block that is supposed to be read after this one (or
 
-    @return true on success, false on failure */
-bool lsdj_decompress_block(lsdj_vio_t* rvio, size_t* readCounter,
-                           lsdj_vio_t* wvio, size_t* writeCounter,
-                           unsigned short* nextBlockIndex,
-                           lsdj_error_t** error);
+    @return An error code representing success or failure */
+lsdj_error_t lsdj_decompress_block(lsdj_vio_t* rvio, size_t* readCounter,
+                                   lsdj_vio_t* wvio, size_t* writeCounter,
+                                   unsigned short* nextBlockIndex);
 
 //! Decompress a single step in the LSDj compression algorithm
 /*! Reads one byte and then performs a decompression based on the value
@@ -114,13 +110,11 @@ bool lsdj_decompress_block(lsdj_vio_t* rvio, size_t* readCounter,
     @param wvio The stream to write decompressed bytes to
     @param writeCounter The amount of bytes written is _added_ to this value
     @param nextBlockIndex if a block jump was encountered, this is the next block to jump to (or LSDJ_NO_NEXT_BLOCK_INDEX)
-    @param error In case of an error, this pointer is filled with more information
 
-    @return true on success, false on failure */
-bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
-                          lsdj_vio_t* wvio, size_t* writeCounter,
-                          unsigned short* nextBlockIndex,
-                          lsdj_error_t** error);
+    @return An error code representing success or failure */
+lsdj_error_t lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
+                                  lsdj_vio_t* wvio, size_t* writeCounter,
+                                  unsigned short* nextBlockIndex);
 
 
 // --- Compression --- //
@@ -136,10 +130,10 @@ bool lsdj_decompress_step(lsdj_vio_t* rvio, size_t* readCounter,
     @param blockOffset The offset to the block jump ids that will be written
     @param writeCounter The amount of bytes written is _added_ to this value, if provided (you should initialize this)
  
-    @return True on success, false if something failed
+    @return An error code representing success or failure
 
     @todo Should the first argument be an lsdj_vio_t* rvio? */
-bool lsdj_compress(const uint8_t* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCounter, lsdj_error_t** error);
+lsdj_error_t lsdj_compress(const uint8_t* data, lsdj_vio_t* wvio, unsigned int blockOffset, size_t* writeCounter);
     
 #ifdef __cplusplus
 }
