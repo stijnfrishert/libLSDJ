@@ -41,6 +41,16 @@ const char* lsdj_error_get_description(lsdj_error_t error)
 {
     switch (error)
     {
+        case LSDJ_SUCCESS: return "success";
+        case LSDJ_READ_FAILED: return "reading from virtual I/O failed";
+        case LSDJ_WRITE_FAILED: return "writing to virtual I/O failed";
+        case LSDJ_SEEK_FAILED: return "seeking position within virtual I/O failed";
+        case LSDJ_TELL_FAILED: return "telling position within virtual I/O failed";
+        case LSDJ_ALLOCATION_FAILED: return "allocating memory failed";
+        case LSDJ_NO_PROJECT_AT_INDEX: return "there is no project at the given slot index";
+        case LSDJ_DECOMPRESSION_INCORRECT_SIZE: return "the size of a song is not 0x8000 bytes after decompression";
+        case LSDJ_SRAM_INITIALIZATION_CHECK_FAILED: return "the SRAM initialization bytes aren't set to 'jk'";
+        case LSDJ_FILE_OPEN_FAILED: return "couldn't open a file";
         default: return NULL;
     }
 }
