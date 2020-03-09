@@ -56,8 +56,8 @@ namespace lsdj
         bool verbose = false;
         
     private:
-        void importSong(const std::string& path, lsdj_sav_t* sav, uint8_t index, uint8_t active, lsdj_error_t** error);
-        void importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<ghc::filesystem::path>& paths, lsdj_error_t** error);
+        lsdj_error_t importSong(const std::string& path, lsdj_sav_t* sav, uint8_t index, uint8_t active);
+        lsdj_error_t importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<ghc::filesystem::path>& paths);
         
     private:
         //! The path that refers to the working memory song

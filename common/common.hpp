@@ -43,7 +43,7 @@
 
 namespace lsdj
 {   
-    int handle_error(lsdj_error_t* error);
+    int handle_error(lsdj_error_t error);
     bool compareCaseInsensitive(std::string str1, std::string str2);
     std::string constructProjectName(const lsdj_project_t* project, bool underscore);
     bool isHiddenFile(const std::string& str);

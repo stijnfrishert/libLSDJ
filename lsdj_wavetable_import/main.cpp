@@ -91,15 +91,14 @@ int main(int argc, char* argv[])
             std::string source;
             std::string wavetable;
             
-            lsdj_error_t* error = nullptr;
-            if (lsdj_sav_is_likely_valid_file(inputs[0].c_str(), &error) ||
-                lsdj_project_is_likely_valid_lsdsng_file(inputs[0].c_str(), &error))
+            if (lsdj_sav_is_likely_valid_file(inputs[0].c_str()) ||
+                lsdj_project_is_likely_valid_lsdsng_file(inputs[0].c_str()))
             {
                 source = inputs[0];
                 wavetable = inputs[1];
             }
-            else if (lsdj_sav_is_likely_valid_file(inputs[1].c_str(), &error) ||
-                     lsdj_project_is_likely_valid_lsdsng_file(inputs[1].c_str(), &error))
+            else if (lsdj_sav_is_likely_valid_file(inputs[1].c_str()) ||
+                     lsdj_project_is_likely_valid_lsdsng_file(inputs[1].c_str()))
             {
                 source = inputs[1];
                 wavetable = inputs[0];

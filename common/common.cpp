@@ -41,10 +41,9 @@
 
 namespace lsdj
 {
-    int handle_error(lsdj_error_t* error)
+    int handle_error(lsdj_error_t error)
     {
         std::cerr << "ERROR: " << lsdj_error_get_description(error) << std::endl;
-        lsdj_error_free(error);
         return 1;
     }
     

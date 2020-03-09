@@ -56,7 +56,7 @@ namespace lsdj
         
     public:
         int exportProjects(const ghc::filesystem::path& path, const std::string& output);
-        void exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory, lsdj_error_t** error);
+        lsdj_error_t exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory);
         int print(const ghc::filesystem::path& path);
         
     public:

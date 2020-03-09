@@ -69,10 +69,11 @@ namespace lsdj
     bool WavetableImporter::importToSav(const ghc::filesystem::path& path, const std::string& wavetableName)
     {
         // Load the sav
-        lsdj_error_t* error = nullptr;
-        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), nullptr, &error);
-        if (error != nullptr)
+        lsdj_sav_t* sav = nullptr;
+        lsdj_error_t error = lsdj_sav_read_from_file(path.string().c_str(), &sav, nullptr);
+        if (error != LSDJ_SUCCESS)
         {
+            handle_error(error);
             lsdj_sav_free(sav);
             return false;
         }
@@ -94,8 +95,10 @@ namespace lsdj
         
         // Write the sav back to file
         const auto outputPath = ghc::filesystem::absolute(outputName);
-        if (!lsdj_sav_write_to_file(sav, outputPath.string().c_str(), nullptr, &error))
+        error = lsdj_sav_write_to_file(sav, outputPath.string().c_str(), nullptr);
+        if (error != LSDJ_SUCCESS)
         {
+            handle_error(error);
             lsdj_sav_free(sav);
             return false;
         }
@@ -108,10 +111,11 @@ namespace lsdj
     bool WavetableImporter::importToLsdsng(const ghc::filesystem::path& path, const std::string& wavetableName)
     {
         // Load the project
-        lsdj_error_t* error = nullptr;
-        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.string().c_str(), nullptr, &error);
-        if (error != nullptr)
+        lsdj_project_t* project = nullptr;
+        lsdj_error_t error = lsdj_project_read_lsdsng_from_file(path.string().c_str(), &project, nullptr);
+        if (error != LSDJ_SUCCESS)
         {
+            handle_error(error);
             lsdj_project_free(project);
             return false;
         }
@@ -133,7 +137,8 @@ namespace lsdj
         
         // Write the project back to file
         const auto outputPath = ghc::filesystem::absolute(outputName);
-        if (!lsdj_project_write_lsdsng_to_file(project, outputPath.string().c_str(), nullptr, &error))
+        error = lsdj_project_write_lsdsng_to_file(project, outputPath.string().c_str(), nullptr);
+        if (error != LSDJ_SUCCESS)
         {
             lsdj_project_free(project);
             return false;

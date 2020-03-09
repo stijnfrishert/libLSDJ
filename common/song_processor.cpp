@@ -53,10 +53,11 @@ namespace lsdj
         if (!shouldProcessSav(path))
             return true;
         
-        lsdj_error_t* error = nullptr;
-        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), nullptr, &error);
-        if (error != nullptr)
+        lsdj_sav_t* sav = nullptr;
+        lsdj_error_t error = lsdj_sav_read_from_file(path.string().c_str(), &sav, nullptr);
+        if (error != LSDJ_SUCCESS)
         {
+            handle_error(error);
             lsdj_sav_free(sav);
             return false;
         }
@@ -89,7 +90,8 @@ namespace lsdj
             }
         }
         
-        if (!lsdj_sav_write_to_file(sav, constructSavDestinationPath(path).string().c_str(), nullptr, &error))
+        lsdj_sav_write_to_file(sav, constructSavDestinationPath(path).string().c_str(), nullptr);
+        if (error != LSDJ_SUCCESS)
         {
             lsdj_sav_free(sav);
             return false;
@@ -105,10 +107,11 @@ namespace lsdj
         if (!shouldProcessLsdsng(path))
             return true;
         
-        lsdj_error_t* error = nullptr;
-        lsdj_project_t* project = lsdj_project_read_lsdsng_from_file(path.string().c_str(), nullptr, &error);
-        if (!project)
+        lsdj_project_t* project = nullptr;
+        lsdj_error_t error = lsdj_project_read_lsdsng_from_file(path.string().c_str(), &project, nullptr);
+        if (error != LSDJ_SUCCESS)
         {
+            handle_error(error);
             lsdj_project_free(project);
             return false;
         }
@@ -125,8 +128,10 @@ namespace lsdj
             return false;
         }
         
-        if (!lsdj_project_write_lsdsng_to_file(project, constructLsdsngDestinationPath(path).string().c_str(), nullptr, &error))
+        error = lsdj_project_write_lsdsng_to_file(project, constructLsdsngDestinationPath(path).string().c_str(), nullptr);
+        if (error != LSDJ_SUCCESS)
         {
+            handle_error(error);
             lsdj_project_free(project);
             return false;
         }

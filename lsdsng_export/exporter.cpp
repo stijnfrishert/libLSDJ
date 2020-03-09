@@ -49,10 +49,11 @@ namespace lsdj
     int Exporter::exportProjects(const ghc::filesystem::path& path, const std::string& output)
     {
         // Load in the save file
-        lsdj_error_t* error = nullptr;
-        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), nullptr, &error);
-        if (sav == nullptr)
+        lsdj_sav_t* sav = nullptr;
+        lsdj_error_t error = lsdj_sav_read_from_file(path.string().c_str(), &sav, nullptr);
+        if (error != LSDJ_SUCCESS)
             return handle_error(error);
+        assert(sav != nullptr);
         
         if (verbose)
             std::cout << "Read '" << path.string() << "'" << std::endl;
@@ -61,15 +62,16 @@ namespace lsdj
         
         if (shouldExportWorkingMemory())
         {
-            lsdj_project_t* project = lsdj_project_new_from_working_memory_song(sav, nullptr, &error);
-            if (error)
+            lsdj_project_t* project = nullptr;
+            error = lsdj_project_new_from_working_memory_song(sav, &project, nullptr);
+            if (error != LSDJ_SUCCESS)
             {
                 lsdj_sav_free(sav);
                 return handle_error(error);
             }
             
-            exportProject(project, outputFolder, true, &error);
-            if (error)
+            error = exportProject(project, outputFolder, true);
+            if (error != LSDJ_SUCCESS)
             {
                 lsdj_sav_free(sav);
                 return handle_error(error);
@@ -100,8 +102,8 @@ namespace lsdj
             }
             
             // Export the project
-            exportProject(project, outputFolder, false, &error);
-            if (error)
+            error = exportProject(project, outputFolder, false);
+            if (error != LSDJ_SUCCESS)
             {
                 lsdj_sav_free(sav);
                 return handle_error(error);
@@ -113,7 +115,7 @@ namespace lsdj
         return 0;
     }
     
-    void Exporter::exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory, lsdj_error_t** error)
+    lsdj_error_t Exporter::exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory)
     {
         auto name = constructName(project);
         if (name.empty())
@@ -135,17 +137,17 @@ namespace lsdj
         path /= stream.str();
         
         ghc::filesystem::create_directories(path.parent_path());
-        if (!lsdj_project_write_lsdsng_to_file(project, path.string().c_str(), nullptr, error))
-        {
-            std::cerr << "Failed writing " << name << " to file" << std::endl;
-            return;
-        }
+        lsdj_error_t error = lsdj_project_write_lsdsng_to_file(project, path.string().c_str(), nullptr);
+        if (error != LSDJ_SUCCESS)
+            return error;
         
         // Let the user know if verbose output has been toggled on
         if (verbose)
         {
             std::cout << "Exported " << ghc::filesystem::relative(path, folder).string() << std::endl;
         }
+        
+        return LSDJ_SUCCESS;
     }
     
     int Exporter::print(const ghc::filesystem::path& path)
@@ -175,10 +177,11 @@ namespace lsdj
     int Exporter::printSav(const ghc::filesystem::path& path)
     {
         // Try and read the sav
-        lsdj_error_t* error = nullptr;
-        lsdj_sav_t* sav = lsdj_sav_read_from_file(path.string().c_str(), nullptr, &error);
-        if (sav == nullptr)
+        lsdj_sav_t* sav = nullptr;
+        lsdj_error_t error = lsdj_sav_read_from_file(path.string().c_str(), &sav, nullptr);
+        if (error != LSDJ_SUCCESS)
             return lsdj::handle_error(error);
+        assert(sav != nullptr);
         
         // Header
         std::cout << "#   Name       ";
