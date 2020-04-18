@@ -157,6 +157,31 @@ TEST_CASE( "Format version changes", "[sav]" )
          
         REQUIRE( lsdj_song_get_format_version(song) == 8 );
         
-//        REQUIRE( lsdj_table_get_command1(song, 0x00, 0) == LSDJ_COMMAND_S );
+        REQUIRE( lsdj_table_get_command1(song, 0x00, 0) == LSDJ_COMMAND_S );
+        
+        REQUIRE( lsdj_instrument_wave_get_repeat(song, 0x0B) == 0x0 );
+        REQUIRE( lsdj_instrument_wave_get_repeat(song, 0x0F) == 0xF );
+        REQUIRE( lsdj_instrument_wave_get_loop_pos(song, 0x0B) == 0xF );
+        REQUIRE( lsdj_instrument_wave_get_loop_pos(song, 0x0F) == 0x0 );
+    }
+    
+    SECTION( "7.9.0" )
+    {
+        lsdj_sav_t* sav = nullptr;
+        REQUIRE( lsdj_sav_read_from_file(RESOURCES_FOLDER "sav/lsdj790.sav", &sav, nullptr) == LSDJ_SUCCESS);
+        REQUIRE( sav != nullptr );
+        
+        lsdj_project_t* project = lsdj_sav_get_project(sav, 0);
+        REQUIRE( project != nullptr );
+        
+        lsdj_song_t* song = lsdj_project_get_song(project);
+        assert(song != nullptr);
+         
+        REQUIRE( lsdj_song_get_format_version(song) == 9 );
+        
+        REQUIRE( lsdj_instrument_wave_get_repeat(song, 0x0B) == 0x0 );
+        REQUIRE( lsdj_instrument_wave_get_repeat(song, 0x0F) == 0xF );
+        REQUIRE( lsdj_instrument_wave_get_loop_pos(song, 0x0B) == 0xF );
+        REQUIRE( lsdj_instrument_wave_get_loop_pos(song, 0x0F) == 0x0 );
     }
 }

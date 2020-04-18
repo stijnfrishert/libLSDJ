@@ -187,6 +187,7 @@ TEST_CASE( "Song", "[song]" )
 				REQUIRE( lsdj_instrument_wave_get_play_mode(song0, 3) == LSDJ_INSTRUMENT_WAVE_PLAY_MANUAL );
 				REQUIRE( lsdj_instrument_wave_get_length(song0, 3) == 0xF );
 				REQUIRE( lsdj_instrument_wave_get_repeat(song0, 3) == 0x0 );
+                REQUIRE( lsdj_instrument_wave_get_loop_pos(song0, 3) == 0xF );
 				REQUIRE( lsdj_instrument_wave_get_speed(song0, 3) == 0x04 );
 			}
             
