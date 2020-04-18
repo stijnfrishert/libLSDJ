@@ -245,18 +245,24 @@ namespace lsdj
         
         // If the working memory song represent one of the projects, display that name
         const auto active = lsdj_sav_get_active_project_index(sav);
+        bool hasActiveProject = false;
         if (active != LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX)
         {
             const lsdj_project_t* project = lsdj_sav_get_project_const(sav, active);
-            
-            const auto name = constructName(project);
-            std::cout << name;
-            for (auto i = name.length(); i < 11; i += 1)
-                std::cout << ' ';
-        } else {
+            if (project)
+            {
+                const auto name = constructName(project);
+                std::cout << name;
+                for (auto i = name.length(); i < 11; i += 1)
+                    std::cout << ' ';
+                hasActiveProject = true;
+            }
+        }
+        
+        if (!hasActiveProject) {
             // The working memory doesn't represent one of the projects, so it
             // doesn't really have a name
-            std::cout << "          ";
+            std::cout << "           ";
         }
         
         const lsdj_song_t* song = lsdj_sav_get_working_memory_song_const(sav);
