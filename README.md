@@ -1,10 +1,14 @@
 # liblsdj
 
-[Little Sound DJ](http://littlesounddj.com) is wonderful tool that transforms your old gameboy into a music making machine. It has a thriving community of users that pushes their old hardware to its limits, in pursuit of new musical endeavours. It can however be cumbersome to manage songs and sounds outside of the gameboy.
+[Little Sound DJ](http://littlesounddj.com) is a wonderful tool that transforms your old gameboy into a music making machine. It has a thriving community of users that pushes their old hardware to its limits, in pursuit of new musical endeavours. It can however be cumbersome to manage songs and sounds outside of the gameboy.
 
-In this light *liblsdj* is being developed, a cross-platform and fast C utility library for interacting with the LSDJ save format (.sav), song files (.lsdsng) and more. The end goal is to deliver *liblsdj* with a suite of tools for working with everything LSDJ. Currently four such tools are included: *lsdsng-export*, *lsdsng-import*, *lsdj-mono* and *lsdj-wavetable-import*.
+In this light *LibLSDJ* was developed, a cross-platform and fast C utility library for interacting with the LSDJ save format (.sav), song files (.lsdsng) and more. The end goal is to deliver *LibLSDJ* with a suite of tools for working with everything LSDJ. Currently four such tools are included: *lsdsng-export*, *lsdsng-import*, *lsdj-mono* and *lsdj-wavetable-import*, and requests for other useful tools are very much welcomed.
 
-LibLSDJ is open source and freely available to anyone. If you'd like to show your appreciation, please consider buying one of my [albums](https://4ntler.bandcamp.com) or donate money through [PayPal](https://paypal.me/4ntler).
+The core library of *LibLSDJ* was rewritten in v2.0.0 to be future-proof against changes in *LSDJ*. This means that the export and import tools should never corrupt your songs, even when *LSDJ* itself adds new features after the latest *LibLSDJ* update (until the compression algorithm itself changes). Functions for tooling purposes do need to be added, but that is only a small task.
+
+*LibLSDJ* comes with a test suite to guarantee it works with real-life save files. Whenever a new bug is found, a test is added to this suite to ensure we never run into it again.
+
+The library and tools are open source and freely available to anyone. If you'd like to show your appreciation, please consider buying one of my [albums](https://4ntler.bandcamp.com) or donate money through [PayPal](https://paypal.me/4ntler).
 
 # Tools
 
@@ -80,7 +84,7 @@ LibLSDJ is open source and freely available to anyone. If you'd like to show you
 
 # System Requirements
 
-The nature of *liblsdj* as a C library makes it compilable on nearly all common operating systems. Both tools included have been tested on macOS Sierra and Windows 7/10 and seem to be working. DigiPack has also successfully built *liblsdj* on Arch Linux.
+The nature of *LibLSDJ* as a C library makes it compilable on nearly all common operating systems. Both tools included have been tested on macOS Sierra and Windows 7/10 and seem to be working. DigiPack has also successfully built *LibLSDJ* on Arch Linux.
 
 # Download
 
@@ -88,7 +92,7 @@ Precompiled binaries can be found under [releases](https://github.com/stijnfrish
 
 # Help out?
 
-If you'd like to help out, let me know. It'd be a great help if more people would test the tools coming with liblsdj. Though I've tagged the first release as 1.0.0, the software is very much still in alpha stage.
+If you'd like to help out, please let me know!
 
 Bug reports can be filed in [issues](https://github.com/stijnfrishert/liblsdj/issues). Feature requests can also be added there, appropriately labeled.
 
@@ -96,9 +100,9 @@ Developers that would like to help out are warmly invited to do so. This project
 
 # License
 
-*liblsdj* and its tools are released under the liberal MIT-license.
+*LibLSDJ* and its tools are released under the liberal MIT-license.
 
-*liblsdj* makes grateful use of the following dependencies:
+*LibLSDJ* makes grateful use of the following dependencies:
  - [Catch2](https://github.com/catchorg/Catch2) (Boost Software License 1.0)
  - [ghc::filesystem](https://github.com/gulrak/filesystem) (MIT)
  - [popl](https://github.com/badaix/popl) (MIT)
