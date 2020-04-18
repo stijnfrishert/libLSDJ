@@ -35,6 +35,7 @@
 
 #include "exporter.hpp"
 
+#include <cassert>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -290,7 +291,7 @@ namespace lsdj
         std::cout << std::endl;
     }
 
-    void Exporter::printProject(const lsdj_sav_t* sav, std::size_t index)
+    void Exporter::printProject(const lsdj_sav_t* sav, std::uint8_t index)
     {
         // Retrieve the project
         const lsdj_project_t* project = lsdj_sav_get_project_const(sav, index);
