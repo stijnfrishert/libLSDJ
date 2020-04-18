@@ -1,4 +1,4 @@
-# liblsdj
+# LibLSDJ
 
 [Little Sound DJ](http://littlesounddj.com) is a wonderful tool that transforms your old gameboy into a music making machine. It has a thriving community of users that pushes their old hardware to its limits, in pursuit of new musical endeavours. It can however be cumbersome to manage songs and sounds outside of the gameboy.
 
@@ -6,7 +6,7 @@ In this light *LibLSDJ* was developed, a cross-platform and fast C utility libra
 
 The core library of *LibLSDJ* was rewritten in v2.0.0 to be future-proof against changes in *LSDJ*. This means that the export and import tools should never corrupt your songs, even when *LSDJ* itself adds new features after the latest *LibLSDJ* update (until the compression algorithm itself changes). Functions for tooling purposes do need to be added, but that is only a small task.
 
-*LibLSDJ* comes with a test suite to guarantee it works with real-life save files. Whenever a new bug is found, a test is added to this suite to ensure we never run into it again.
+I'm also proud to say that TommityTom's [RetroPlug](https://github.com/tommitytom/RetroPlug) is built on *LibLSDJ* for its save file management. If you're using the tools or the library yourself, let me know, I'm curious to hear who depends on this. :)
 
 The library and tools are open source and freely available to anyone. If you'd like to show your appreciation, please consider buying one of my [albums](https://4ntler.bandcamp.com) or donate money through [PayPal](https://paypal.me/4ntler).
 
