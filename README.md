@@ -1,5 +1,7 @@
 # libLSDJ
 
+![libLSDJ logo](https://4ntler.com/liblsdj_banner.png)
+
 [Little Sound DJ](http://littlesounddj.com) is a wonderful tool that transforms your old gameboy into a music making machine. It has a thriving community of users that pushes their old hardware to its limits, in pursuit of new musical endeavours. It can however be cumbersome to manage songs and sounds outside of the gameboy.
 
 In this light *libLSDJ* was developed, a cross-platform and fast C utility library for interacting with the LSDJ save format (.sav), song files (.lsdsng) and more. The end goal is to deliver *libLSDJ* with a suite of tools for working with everything LSDJ. Currently four such tools are included: *lsdsng-export*, *lsdsng-import*, *lsdj-mono* and *lsdj-wavetable-import*, and requests for other useful tools are very much welcomed.
