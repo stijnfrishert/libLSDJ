@@ -4,6 +4,8 @@
 
 In this light *liblsdj* is being developed, a cross-platform and fast C utility library for interacting with the LSDJ save format (.sav), song files (.lsdsng) and more. The end goal is to deliver *liblsdj* with a suite of tools for working with everything LSDJ. Currently four such tools are included: *lsdsng-export*, *lsdsng-import*, *lsdj-mono* and *lsdj-wavetable-import*.
 
+LibLSDJ is open source and freely available to anyone. If you'd like to show your appreciation, please consider buying one of my [albums](https://4ntler.bandcamp.com) or donate money through [PayPal](https://paypal.me/4ntler).
+
 # Tools
 
 ## lsdsng-export
@@ -27,7 +29,8 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 	  -i [ --index ] arg       Single out a given project index to export, 0 or 
 	                           more
 	  -n [ --name ] arg        Single out a given project by name to export
-	  -w [ --working-memory ]  Single out the working-memory song to expor
+	  -w [ --working-memory ]  Single out the working-memory song to export
+	  --skip-working           Do not export the song in working memory when no other projects are given
 
 ## lsdsng-import
 
@@ -77,7 +80,7 @@ In this light *liblsdj* is being developed, a cross-platform and fast C utility 
 
 # System Requirements
 
-The nature of *liblsdj* as a C library makes it compilable on nearly all common OSes. Both tools included have been tested on macOS Sierra and Windows 7/10 and seem to be working. DigiPack has also successfully built *liblsdj* on Arch Linux.
+The nature of *liblsdj* as a C library makes it compilable on nearly all common operating systems. Both tools included have been tested on macOS Sierra and Windows 7/10 and seem to be working. DigiPack has also successfully built *liblsdj* on Arch Linux.
 
 # Download
 
@@ -95,10 +98,11 @@ Developers that would like to help out are warmly invited to do so. This project
 
 *liblsdj* and its tools are released under the liberal MIT-license.
 
+*liblsdj* makes grateful use of the following dependencies:
+ - [Catch2](https://github.com/catchorg/Catch2) (Boost Software License 1.0)
+ - [ghc::filesystem](https://github.com/gulrak/filesystem) (MIT)
+ - [popl](https://github.com/badaix/popl) (MIT)
+
 ---
 
-Special thanks for Defense Mechanism (urbster1) for thinking along and helping out where needed.
-
-# Appreciation
-
-LibLSDJ is open source and freely available to anyone. If you'd like to show your appreciation and help me further developer it, a [donation](https://bit.ly/2RZCAi0) goes a long way. Or hey, buy one of my [albums](https://4ntler.bandcamp.com)!
+Special thanks for Defense Mechanism (urbster1) and .exe (rbong) for thinking along and helping out where needed.
