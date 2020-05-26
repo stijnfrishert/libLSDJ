@@ -41,13 +41,24 @@ jobs:
 
     - name: Zip
       run: |
-        zip $ARCHIVE ./build/lsdsng_export/lsdsng-export
-        zip $ARCHIVE ./build/lsdsng_import/lsdsng-import
-        zip $ARCHIVE ./build/lsdj_mono/lsdj-mono
-        zip $ARCHIVE ./build/lsdj_wavetable_import/lsdj-wavetable-import
+        zip -j $ARCHIVE \
+        ./build/lsdsng_export/lsdsng-export \
+        ./build/lsdsng_import/lsdsng-import \
+        ./build/lsdj_mono/lsdj-mono \
+        ./build/lsdj_wavetable_import/lsdj-wavetable-import
         unzip -l $ARCHIVE
       env:
-          ARCHIVE: liblsdj_macos_${{ github.event.release.tag_name }}.zip 
+          ARCHIVE: liblsdj_macos_${{ github.event.release.tag_name }}.zip
+      
+    - name: Upload
+      uses: actions/upload-release-asset@v1.0.1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: .
+        asset_name: $ARCHIVE
+        asset_content_type: binary/octet-stream
  
 #   Ubuntu:
 #     runs-on: ubuntu-latest
