@@ -2,6 +2,8 @@
 
 #include <array>
 #include <catch2/catch.hpp>
+#include <cstring>
+
 #include <lsdj/chain.h>
 #include <lsdj/command.h>
 #include <lsdj/groove.h>
