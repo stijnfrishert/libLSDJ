@@ -28,7 +28,7 @@ jobs:
 #          build\lsdsng_import\Release\lsdsng-import.exe ^
 #          build\lsdj_mono\Release\lsdj-mono.exe ^
 #          build\lsdj_wavetable_import\Release\lsdj-wavetable-import.exe
-          7z.exe l $ARCHIVE
+#          7z.exe l $ARCHIVE
       env:
           ARCHIVE: liblsdj_windows_${{ github.event.release.tag_name }}.zip
  
