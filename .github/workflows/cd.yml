@@ -23,7 +23,7 @@ jobs:
 
     - name: Zip
       run: |
-          7zip.exe a $ARCHIVE ^
+          7z.exe a $ARCHIVE ^
           build\liblsdj\lsdj_mono\Release\lsdj-mono.exe
           7z.exe l $ARCHIVE
       env:
