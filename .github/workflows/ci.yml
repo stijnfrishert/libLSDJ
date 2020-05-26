@@ -3,7 +3,43 @@ name: Continuous Integration
 on: [push, pull_request]
 
 jobs:
-  build-ubuntu:
+  Build Windows:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: recursive
+    
+    - name: Configure
+      run: mkdir build && cd build && cmake ..
+      
+    - name: Build
+      run: cmake --build build
+
+    - name: Test
+      run: ./build/liblsdj/test/test
+ 
+  Build macOS:
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: recursive
+    
+    - name: Configure
+      run: mkdir build && cd build && cmake ..
+      
+    - name: Build
+      run: cmake --build build
+
+    - name: Test
+      run: ./build/liblsdj/test/test
+ 
+  Build Ubuntu:
     runs-on: ubuntu-latest
 
     steps:
@@ -12,11 +48,11 @@ jobs:
         lfs: true
         submodules: recursive
     
-    - name: configure
+    - name: Configure
       run: mkdir build && cd build && cmake ..
       
-    - name: build
+    - name: Build
       run: cmake --build build
 
-    - name: test
+    - name: Test
       run: ./build/liblsdj/test/test
