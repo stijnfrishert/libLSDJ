@@ -18,15 +18,15 @@ jobs:
     - name: Configure
       run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
       
-    - name: Build
-      run: cmake --build build --config Release
+    #- name: Build
+    #  run: cmake --build build --config Release
 
     - name: Zip
-      run: |
-          echo Archive: $ARCHIVE
-          7z a $ARCHIVE .\build\lsdsng_export\Release\lsdsng-export.exe -tzip
       env:
         ARCHIVE: liblsdj_windows.zip
+      run: |
+        echo Archive: $ARCHIVE
+        #7z a $ARCHIVE .\build\lsdsng_export\Release\lsdsng-export.exe -tzip
  
   macOS:
     runs-on: macos-latest
@@ -52,7 +52,7 @@ jobs:
         ./build/lsdj_wavetable_import/lsdj-wavetable-import
         unzip -l $ARCHIVE
       env:
-          ARCHIVE: liblsdj_macos_${{ github.event.release.tag_name }}.zip
+        ARCHIVE: liblsdj_macos_${{ github.event.release.tag_name }}.zip
       
     - name: Upload
       uses: actions/upload-release-asset@v1.0.1
