@@ -19,7 +19,7 @@ jobs:
       run: cmake --build build
 
     - name: Test
-      run: dir build\liblsdj\test && build\liblsdj\test\test.exe
+      run: dir build\liblsdj\test\Debug /S && build\liblsdj\test\Debug\test.exe
  
 #   build_macos:
 #     runs-on: macos-latest
