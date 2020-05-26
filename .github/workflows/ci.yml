@@ -3,7 +3,7 @@ name: Continuous Integration
 on: [push, pull_request]
 
 jobs:
-  Build Windows:
+  build_windows:
     runs-on: windows-latest
 
     steps:
@@ -21,7 +21,7 @@ jobs:
     - name: Test
       run: ./build/liblsdj/test/test
  
-  Build macOS:
+  build_macos:
     runs-on: macos-latest
 
     steps:
@@ -39,7 +39,7 @@ jobs:
     - name: Test
       run: ./build/liblsdj/test/test
  
-  Build Ubuntu:
+  build_ubuntu:
     runs-on: ubuntu-latest
 
     steps:
