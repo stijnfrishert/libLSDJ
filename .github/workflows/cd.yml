@@ -40,11 +40,12 @@ jobs:
       run: cmake --build build --config Release
 
     - name: Zip
-      run: zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdsng_export/lsdsng-export
-      run: zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdsng_import/lsdsng-import
-      run: zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdj_mono/lsdj-mono
-      run: zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdj_wavetable_import/lsdj-wavetable-import
-      run: ls -al .
+      run: |
+        zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdsng_export/lsdsng-export
+        zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdsng_import/lsdsng-import
+        zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdj_mono/lsdj-mono
+        zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdj_wavetable_import/lsdj-wavetable-import
+        ls -al .
  
 #   Ubuntu:
 #     runs-on: ubuntu-latest
