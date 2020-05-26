@@ -35,7 +35,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: .
+        asset_path: .\${{ env.ARCHIVE }}
         asset_name: ${{ env.ARCHIVE }}
         asset_content_type: binary/octet-stream
  
@@ -70,6 +70,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: .
+        asset_path: ./${{ env.ARCHIVE }}
         asset_name: ${{ env.ARCHIVE }}
         asset_content_type: binary/octet-stream
