@@ -18,15 +18,14 @@ jobs:
     - name: Configure
       run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
       
-    #- name: Build
-    #  run: cmake --build build --config Release
+    - name: Build
+      run: cmake --build build --config Release
 
     - name: Zip
       env:
         ARCHIVE: liblsdj_windows.zip
       run: |
-        echo Archive: ${{ env.ARCHIVE }}
-        #7z a $ARCHIVE .\build\lsdsng_export\Release\lsdsng-export.exe -tzip
+        7z a $ARCHIVE -tzip .\build\lsdsng_export\Release\lsdsng-export.exe
  
   macOS:
     runs-on: macos-latest
