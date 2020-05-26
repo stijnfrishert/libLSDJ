@@ -13,13 +13,13 @@ jobs:
         submodules: recursive
     
     - name: Configure
-      run: mkdir build && cd build && cmake ..
+      run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
       
     - name: Build
-      run: cmake --build build
+      run: cmake --build build --config Release
 
     - name: Test
-      run: dir build\liblsdj\test\Debug /S && build\liblsdj\test\Debug\test.exe
+      run: dir /S && build\liblsdj\test\Debug\test.exe
  
 #   build_macos:
 #     runs-on: macos-latest
@@ -31,10 +31,10 @@ jobs:
 #         submodules: recursive
     
 #     - name: Configure
-#       run: mkdir build && cd build && cmake ..
+#       run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
       
 #     - name: Build
-#       run: cmake --build build
+#       run: cmake --build build --config Release
 
 #     - name: Test
 #       run: ./build/liblsdj/test/test
@@ -49,10 +49,10 @@ jobs:
 #         submodules: recursive
     
 #     - name: Configure
-#       run: mkdir build && cd build && cmake ..
+#       run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
       
 #     - name: Build
-#       run: cmake --build build
+#       run: cmake --build build --config Release
 
 #     - name: Test
 #       run: ./build/liblsdj/test/test
