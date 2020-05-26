@@ -24,7 +24,10 @@ jobs:
     - name: Zip
       run: |
           7z.exe a $ARCHIVE ^
-          build\liblsdj\lsdj_mono\Release\lsdj-mono.exe
+          build\lsdsng_export\Release\lsdsng-export.exe
+          build\lsdsng_import\Release\lsdsng-import.exe
+          build\lsdj_mono\Release\lsdj-mono.exe
+          build\lsdj_wavetable_import\Release\lsdj-wavetable-import.exe
           7z.exe l $ARCHIVE
       env:
           ARCHIVE: liblsdj_windows_${{ github.event.release.tag_name }}.zip
@@ -64,21 +67,3 @@ jobs:
         asset_path: .
         asset_name: $ARCHIVE
         asset_content_type: binary/octet-stream
- 
-#   Ubuntu:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#     - uses: actions/checkout@v2
-#       with:
-#         lfs: true
-#         submodules: recursive
-    
-#     - name: Configure
-#       run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
-      
-#     - name: Build
-#       run: cmake --build build --config Release
-
-#     - name: Test
-#       run: ./build/liblsdj/test/test
