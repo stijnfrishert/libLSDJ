@@ -6,23 +6,28 @@ name: Continuous Deployment
 on: [push]
 
 jobs:
-#   Windows:
-#     runs-on: windows-latest
+  Windows:
+    runs-on: windows-latest
 
-#     steps:
-#     - uses: actions/checkout@v2
-#       with:
-#         lfs: true
-#         submodules: recursive
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: recursive
     
-#     - name: Configure
-#       run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
+    - name: Configure
+      run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
       
-#     - name: Build
-#       run: cmake --build build --config Release
+    - name: Build
+      run: cmake --build build --config Release
 
-#     - name: Test
-#       run: build\liblsdj\test\Release\test.exe
+    - name: Zip
+      run: |
+          7zip.exe a $ARCHIVE ^
+          build\liblsdj\lsdj_mono\Release\lsdj-mono.exe
+          7z.exe l $ARCHIVE
+      env:
+          ARCHIVE: liblsdj_windows_${{ github.event.release.tag_name }}.zip
  
   macOS:
     runs-on: macos-latest
