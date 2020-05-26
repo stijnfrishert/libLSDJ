@@ -41,11 +41,13 @@ jobs:
 
     - name: Zip
       run: |
-        zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdsng_export/lsdsng-export
-        zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdsng_import/lsdsng-import
-        zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdj_mono/lsdj-mono
-        zip liblsdj_macos_${{ github.event.release.tag_name }}.zip ./build/lsdj_wavetable_import/lsdj-wavetable-import
-        ls -al .
+        zip $ARCHIVE ./build/lsdsng_export/lsdsng-export
+        zip $ARCHIVE ./build/lsdsng_import/lsdsng-import
+        zip $ARCHIVE ./build/lsdj_mono/lsdj-mono
+        zip $ARCHIVE ./build/lsdj_wavetable_import/lsdj-wavetable-import
+        unzip -l $ARCHIVE
+      env:
+          ARCHIVE: liblsdj_macos_${{ github.event.release.tag_name }}.zip 
  
 #   Ubuntu:
 #     runs-on: ubuntu-latest
