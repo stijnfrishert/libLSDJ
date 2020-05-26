@@ -18,7 +18,7 @@ jobs:
         submodules: recursive
     
     - name: Configure
-      run: mkdir build && cd build && cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
+      run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
       
     - name: Build
       run: cmake --build build --config Release
