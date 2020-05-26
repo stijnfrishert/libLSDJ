@@ -2,7 +2,7 @@
 
 ![libLSDJ logo](https://4ntler.com/liblsdj_banner_github.png)
 
-![Continuous Integration](https://github.com/stijnfrishert/libLSDJ/workflows/Continuous%20Integration/badge.svg)
+![Passing Tests](https://github.com/stijnfrishert/libLSDJ/workflows/Build%20and%20Test/badge.svg)
 
 [Little Sound DJ](http://littlesounddj.com) is a wonderful tool that transforms your old gameboy into a music making machine. It has a thriving community of users that pushes their old hardware to its limits, in pursuit of new musical endeavours. It can however be cumbersome to manage songs and sounds outside of the gameboy.
 
