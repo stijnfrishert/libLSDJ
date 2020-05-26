@@ -25,7 +25,7 @@ jobs:
       env:
         ARCHIVE: liblsdj_windows.zip
       run: |
-        echo Archive: $ARCHIVE
+        echo Archive: ${{ env.ARCHIVE }}
         #7z a $ARCHIVE .\build\lsdsng_export\Release\lsdsng-export.exe -tzip
  
   macOS:
