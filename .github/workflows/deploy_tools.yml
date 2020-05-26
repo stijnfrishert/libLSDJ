@@ -1,4 +1,4 @@
-name: Deploy Tools to Release
+name: Deploy Tools
 
 on:
   release:
