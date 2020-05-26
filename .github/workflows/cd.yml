@@ -1,9 +1,8 @@
 name: Continuous Deployment
 
-# on:
-#   release:
-#     types: [created]
-on: [push]
+on:
+  release:
+    types: [created]
 
 jobs:
   Windows:
@@ -29,7 +28,6 @@ jobs:
         7z a ${{ env.ARCHIVE }} -tzip .\build\lsdsng_import\Release\lsdsng-import.exe
         7z a ${{ env.ARCHIVE }} -tzip .\build\lsdj_mono\Release\lsdj-mono.exe
         7z a ${{ env.ARCHIVE }} -tzip .\build\lsdj_wavetable_import\Release\lsdj-wavetable-import.exe
-        7z l ${{ env.ARCHIVE }}
         
     - name: Upload
       uses: actions/upload-release-asset@v1.0.1
