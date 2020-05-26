@@ -1,4 +1,4 @@
-name: Continuous Deployment
+name: Deploy Tools to Release
 
 on:
   release:
