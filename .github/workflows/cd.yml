@@ -23,7 +23,8 @@ jobs:
 
     - name: Zip
       run: |
-          7z a -tzip $ARCHIVE .\build\lsdsng_export\Release\lsdsng-export.exe
+          echo Archive: $ARCHIVE
+          7z a $ARCHIVE .\build\lsdsng_export\Release\lsdsng-export.exe -tzip
 #          build\lsdsng_export\Release\lsdsng-export.exe ^
 #          build\lsdsng_import\Release\lsdsng-import.exe ^
 #          build\lsdj_mono\Release\lsdj-mono.exe ^
