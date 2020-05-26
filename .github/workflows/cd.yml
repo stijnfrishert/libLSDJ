@@ -23,9 +23,13 @@ jobs:
 
     - name: Zip
       env:
-        ARCHIVE: liblsdj_windows.zip
+        ARCHIVE: liblsdj_windows_${{ github.event.release.tag_name }}.zip
       run: |
-        7z a $ARCHIVE -tzip .\build\lsdsng_export\Release\lsdsng-export.exe
+        7z a ${{ env.ARCHIVE }} -tzip ^
+        .\build\lsdsng_export\Release\lsdsng-export.exe ^
+        .\build\lsdsng_import\Release\lsdsng-import.exe ^
+        .\build\lsdj_mono\Release\lsdj-mono.exe ^
+        .\build\lsdj_wavetable_import\Release\lsdj-wavetable-import.exe
  
   macOS:
     runs-on: macos-latest
@@ -44,12 +48,11 @@ jobs:
 
     - name: Zip
       run: |
-        zip -j $ARCHIVE \
+        zip -j ${{ env.ARCHIVE }} \
         ./build/lsdsng_export/lsdsng-export \
         ./build/lsdsng_import/lsdsng-import \
         ./build/lsdj_mono/lsdj-mono \
         ./build/lsdj_wavetable_import/lsdj-wavetable-import
-        unzip -l $ARCHIVE
       env:
         ARCHIVE: liblsdj_macos_${{ github.event.release.tag_name }}.zip
       
