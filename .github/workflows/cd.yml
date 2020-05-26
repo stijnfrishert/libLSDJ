@@ -25,13 +25,8 @@ jobs:
       run: |
           echo Archive: $ARCHIVE
           7z a $ARCHIVE .\build\lsdsng_export\Release\lsdsng-export.exe -tzip
-#          build\lsdsng_export\Release\lsdsng-export.exe ^
-#          build\lsdsng_import\Release\lsdsng-import.exe ^
-#          build\lsdj_mono\Release\lsdj-mono.exe ^
-#          build\lsdj_wavetable_import\Release\lsdj-wavetable-import.exe
-#          7z.exe l $ARCHIVE
       env:
-          ARCHIVE: liblsdj_windows_${{ github.event.release.tag_name }}.zip
+        ARCHIVE: liblsdj_windows.zip
  
   macOS:
     runs-on: macos-latest
