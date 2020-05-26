@@ -3,7 +3,7 @@ name: Continuous Integration
 on: [push, pull_request]
 
 jobs:
-  build_windows:
+  Windows:
     runs-on: windows-latest
 
     steps:
@@ -21,38 +21,38 @@ jobs:
     - name: Test
       run: build\liblsdj\test\Release\test.exe
  
-#   build_macos:
-#     runs-on: macos-latest
+  macOS:
+    runs-on: macos-latest
 
-#     steps:
-#     - uses: actions/checkout@v2
-#       with:
-#         lfs: true
-#         submodules: recursive
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: recursive
     
-#     - name: Configure
-#       run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
+    - name: Configure
+      run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
       
-#     - name: Build
-#       run: cmake --build build --config Release
+    - name: Build
+      run: cmake --build build --config Release
 
-#     - name: Test
-#       run: ./build/liblsdj/test/test
+    - name: Test
+      run: ./build/liblsdj/test/test
  
-#   build_ubuntu:
-#     runs-on: ubuntu-latest
+  Ubuntu:
+    runs-on: ubuntu-latest
 
-#     steps:
-#     - uses: actions/checkout@v2
-#       with:
-#         lfs: true
-#         submodules: recursive
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+        submodules: recursive
     
-#     - name: Configure
-#       run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
+    - name: Configure
+      run: mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
       
-#     - name: Build
-#       run: cmake --build build --config Release
+    - name: Build
+      run: cmake --build build --config Release
 
-#     - name: Test
-#       run: ./build/liblsdj/test/test
+    - name: Test
+      run: ./build/liblsdj/test/test
