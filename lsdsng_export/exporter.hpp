@@ -55,7 +55,7 @@ namespace lsdj
         };
         
     public:
-        int export_(const ghc::filesystem::path& path, const std::string& output);
+        int export_(const ghc::filesystem::path& path);
         int print(const ghc::filesystem::path& path);
         
     public:
@@ -69,10 +69,11 @@ namespace lsdj
         
         std::vector<int> indices;
         std::vector<std::string> names;
+        std::string output;
         
     private:
-        int exportFolder(const ghc::filesystem::path& path, const std::string& output);
-        int exportSav(const ghc::filesystem::path& path, const std::string& output);
+        int exportFolder(const ghc::filesystem::path& path);
+        int exportSav(const ghc::filesystem::path& path);
         int printFolder(const ghc::filesystem::path& path);
         int printSav(const ghc::filesystem::path& path);
         bool shouldExportWorkingMemory();

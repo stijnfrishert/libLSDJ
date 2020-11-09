@@ -47,15 +47,15 @@
 
 namespace lsdj
 {
-    int Exporter::export_(const ghc::filesystem::path& path, const std::string& output)
+    int Exporter::export_(const ghc::filesystem::path& path)
     {
         if (ghc::filesystem::is_directory(path))
-            return exportFolder(path, output);
+            return exportFolder(path);
         else
-            return exportSav(path, output);
+            return exportSav(path);
     }
 
-    int Exporter::exportFolder(const ghc::filesystem::path& path, const std::string& output)
+    int Exporter::exportFolder(const ghc::filesystem::path& path)
     {
         for (auto it = ghc::filesystem::directory_iterator(path); it != ghc::filesystem::directory_iterator(); ++it)
         {
@@ -64,14 +64,14 @@ namespace lsdj
                 continue;
             
             std::cout << "Found " << path.filename().string() << std::endl;
-            if (exportSav(path, output) != 0)
+            if (exportSav(path) != 0)
                 return 1;
         }
         
         return 0;
     }
 
-    int Exporter::exportSav(const ghc::filesystem::path& path, const std::string& output)
+    int Exporter::exportSav(const ghc::filesystem::path& path)
     {
         // Load in the save file
         lsdj_sav_t* sav = nullptr;

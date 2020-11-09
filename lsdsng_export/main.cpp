@@ -127,10 +127,12 @@ int main(int argc, char* argv[])
                 exporter.indices.emplace_back(-1); // -1 represents working memory, kind-of a hack, but meh :/
 
             // Has the user requested a print, or an actual export?
-            if (print->is_set())
+            if (print->is_set()) {
                 return exporter.print(path);
-            else
-                return exporter.export_(path, output->value());
+            } else {
+                exporter.output = output->value();
+                return exporter.export_(path);
+            }
         } else {
             printHelp(options);
             return 0;
