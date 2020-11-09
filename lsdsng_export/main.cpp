@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
             if (print->is_set())
                 return exporter.print(path);
             else
-                return exporter.exportProjects(path, output->value());
+                return exporter.export_(path, output->value());
         } else {
             printHelp(options);
             return 0;

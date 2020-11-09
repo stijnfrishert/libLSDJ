@@ -42,7 +42,7 @@ extern "C" {
 
 #define LSDJ_VERSION_MAJOR 2
 #define LSDJ_VERSION_MINOR 0
-#define LSDJ_VERSION_PATCH 0
+#define LSDJ_VERSION_PATCH 1
 
 #define Q(x) #x
 #define QUOTE(x) Q(x)

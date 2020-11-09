@@ -47,7 +47,31 @@
 
 namespace lsdj
 {
-    int Exporter::exportProjects(const ghc::filesystem::path& path, const std::string& output)
+    int Exporter::export_(const ghc::filesystem::path& path, const std::string& output)
+    {
+        if (ghc::filesystem::is_directory(path))
+            return exportFolder(path, output);
+        else
+            return exportSav(path, output);
+    }
+
+    int Exporter::exportFolder(const ghc::filesystem::path& path, const std::string& output)
+    {
+        for (auto it = ghc::filesystem::directory_iterator(path); it != ghc::filesystem::directory_iterator(); ++it)
+        {
+            const auto path = it->path();
+            if (isHiddenFile(path.filename().string()) || path.extension() != ".sav")
+                continue;
+            
+            std::cout << "Found " << path.filename().string() << std::endl;
+            if (exportSav(path, output) != 0)
+                return 1;
+        }
+        
+        return 0;
+    }
+
+    int Exporter::exportSav(const ghc::filesystem::path& path, const std::string& output)
     {
         // Load in the save file
         lsdj_sav_t* sav = nullptr;
@@ -167,7 +191,7 @@ namespace lsdj
             if (isHiddenFile(path.filename().string()) || path.extension() != ".sav")
                 continue;
             
-            std::cout << path.filename().string() << std::endl;
+            std::cout << "Found " << path.filename().string() << std::endl;
             if (printSav(path) != 0)
                 return 1;
         }
