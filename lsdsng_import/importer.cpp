@@ -65,7 +65,7 @@ namespace lsdj
             for (auto it = ghc::filesystem::directory_iterator(path); it != ghc::filesystem::directory_iterator(); ++it)
             {
                 const auto path = it->path();
-                if (isHiddenFile(path.filename().string()) || !ghc::filesystem::is_regular_file(path) || path.extension() != ".lsdsng")
+                if (isHiddenFile(path.filename().string()) || !ghc::filesystem::is_regular_file(path) || path.extension() != ".lsdsng" || path.extension() != ".sav")
                     continue;
                 
                 const auto str = path.stem().string();
@@ -88,29 +88,22 @@ namespace lsdj
         }
     }
     
-    int Importer::importSongs(const char* savName)
+    int Importer::import()
     {
-        // Try to load the provided destination sav, or create a new one
+        // Create an empty sav to work with
         lsdj_sav_t* sav = nullptr;
-        lsdj_error_t error = LSDJ_SUCCESS;
-        if (savName)
-            error = lsdj_sav_read_from_file(ghc::filesystem::absolute(savName).string().c_str(), &sav, nullptr);
-        else
-            error = lsdj_sav_new(&sav, nullptr);
-        
+        lsdj_error_t error = lsdj_sav_new(&sav, nullptr);
         if (error != LSDJ_SUCCESS)
             return handle_error(error);
+        assert(sav != nullptr);
         
         // Find the first available project slot index
-        auto index = 0;
+        uint8_t index = 0;
         for( ; index < LSDJ_SAV_PROJECT_COUNT; ++index)
         {
             if (!lsdj_sav_get_project_const(sav, index))
                 break;
         }
-        
-        if (savName && verbose)
-            std::cout << "Read " << savName << ", containing " << std::to_string(index) << " saves" << std::endl;
         
         // Go through all input files and recursively find all .lsdsngs's (and the working memory file)
         std::vector<ghc::filesystem::path> paths;
@@ -129,16 +122,9 @@ namespace lsdj
             }
         }
         
-        // Construct an output file name if it's empty
-        if (outputFile.empty())
-        {
-            if (inputs.size() == 1)
-                outputFile = std::string(paths.front().filename().string()) + ".sav";
-            else
-                outputFile = "out.sav";
-        }
+        assert(!outputFile.empty());
         
-        // Import all lsdsng files
+        // Import all lsdsng/sav files
         const auto active = lsdj_sav_get_active_project_index(sav);
         for (auto i = 0; i < paths.size(); ++i)
         {
@@ -148,14 +134,12 @@ namespace lsdj
                 break;
             }
             
-            const lsdj_error_t error = importSong(paths[i].string(), sav, index, active);
+            const lsdj_error_t error = import(paths[i], sav, index, active);
             if (error != LSDJ_SUCCESS)
             {
                 lsdj_sav_free(sav);
                 return handle_error(error);
             }
-            
-            index += 1;
         }
         
         if (!workingMemoryPath.empty())
@@ -168,9 +152,6 @@ namespace lsdj
             }
         }
         
-        if (outputFile.empty())
-            outputFile = "out.sav";
-        
         // Write the sav to file
         error = lsdj_sav_write_to_file(sav, ghc::filesystem::absolute(outputFile).string().c_str(), nullptr);
         if (error != LSDJ_SUCCESS)
@@ -181,31 +162,77 @@ namespace lsdj
         
         return 0;
     }
+
+    lsdj_error_t Importer::import(const ghc::filesystem::path& path, lsdj_sav_t* sav, uint8_t& index, uint8_t active)
+    {
+        if (path.extension() == ".sav")
+            return importSav(path.string(), sav, index, active);
+        else if (path.extension() == ".lsdsng")
+            return importSong(path.string(), sav, index, active);
+    }
+
+    lsdj_error_t Importer::importSav(const std::string& path, lsdj_sav_t* destSav, uint8_t& index, uint8_t active)
+    {
+        lsdj_sav_t* sourceSav = nullptr;
+        lsdj_error_t result = lsdj_sav_read_from_file(path.data(), &sourceSav, nullptr);
+        if (result != LSDJ_SUCCESS)
+            return result;
+        
+        for (uint8_t i = 0; i < LSDJ_SAV_PROJECT_COUNT && index < LSDJ_SAV_PROJECT_COUNT; ++i)
+        {
+            const lsdj_project_t* project = lsdj_sav_get_project_const(sourceSav, i);
+            if (project)
+            {
+                result = importProject(project, destSav, index, active);
+                if (result != LSDJ_SUCCESS)
+                    break;
+            }
+        }
+        
+        lsdj_sav_free(sourceSav);
+        
+        return LSDJ_SUCCESS;
+    }
     
-    lsdj_error_t Importer::importSong(const std::string& path, lsdj_sav_t* sav, uint8_t index, uint8_t active)
+    lsdj_error_t Importer::importSong(const std::string& path, lsdj_sav_t* sav, uint8_t& index, uint8_t active)
     {
         lsdj_project_t* project = nullptr;
         lsdj_error_t error = lsdj_project_read_lsdsng_from_file(path.c_str(), &project, nullptr);
-        if (error != LSDJ_SUCCESS)
-            return error;
+        if (error == LSDJ_SUCCESS)
+        {
+            error = importProject(project, sav, index, active);
+            lsdj_project_free(project);
+            
+            if (error != LSDJ_SUCCESS)
+                return error;
+        }
+        
+        return LSDJ_SUCCESS;
+    }
+
+    lsdj_error_t Importer::importProject(const lsdj_project_t* project, lsdj_sav_t* sav, uint8_t& index, uint8_t active)
+    {
         assert(project != nullptr);
         
-        lsdj_sav_set_project_move(sav, index, project);
-        
-        const auto n = lsdj_project_get_name(project);
-        std::string name(n, strnlen(n, LSDJ_PROJECT_NAME_LENGTH));
+        lsdj_error_t error = lsdj_sav_set_project_copy(sav, index, project, nullptr);
+        if (error != LSDJ_SUCCESS)
+            return error;
         
         if (verbose)
-            std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
-        
-        if (index == 0 && active == LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX && workingMemoryPath.empty())
         {
-            error = lsdj_sav_set_working_memory_song_from_project(sav, index);
+            const auto n = lsdj_project_get_name(project);
+            std::string name(n, strnlen(n, LSDJ_PROJECT_NAME_LENGTH));
+            std::cout << "Imported " << name.data() << " at slot " << std::to_string(index) << std::endl;
+        }
+        
+        const auto oldIndex = index;
+        index += 1;
+        
+        if (oldIndex == 0 && active == LSDJ_SAV_NO_ACTIVE_PROJECT_INDEX && workingMemoryPath.empty())
+        {
+            lsdj_error_t error = lsdj_sav_set_working_memory_song_from_project(sav, oldIndex);
             if (error != LSDJ_SUCCESS)
-            {
-                lsdj_project_free(project);
                 return error;
-            }
         }
         
         return LSDJ_SUCCESS;
