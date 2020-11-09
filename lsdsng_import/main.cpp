@@ -57,10 +57,7 @@ std::string generateOutputFilename(const std::vector<std::string>& inputs)
     if (inputs.size() == 1)
     {
         const auto path = ghc::filesystem::absolute(inputs.front());
-        if (path.extension() == ".sav")
-            return path.stem().filename().string() + " out.sav";
-        else
-            return path.stem().filename().string() + ".sav";
+        return path.stem().filename().string() + ".sav";
     }
     
     return "out.sav";
