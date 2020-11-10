@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
     auto help = options.add<popl::Switch>("h", "help", "Show the help screen");
     auto verbose = options.add<popl::Switch>("v", "verbose", "Verbose output during import");
     auto output = options.add<popl::Value<std::string>>("o", "output", "The output file (.sav)");
+    auto wm = options.add<popl::Value<std::string>>("w", "working-memory", "The song to put in the working memory");
     
     try
     {
@@ -84,6 +85,9 @@ int main(int argc, char* argv[])
             lsdj::Importer importer;
             
             importer.inputs = imports;
+            if (wm->is_set())
+                importer.workingMemoryInput = wm->value();
+            
             importer.verbose = verbose->is_set();
             importer.outputFile = output->is_set() ?
                 output->value() :
