@@ -1,5 +1,15 @@
 #include "instrument.h"
 
+void lsdj_instrument_wave_set_volume(lsdj_song_t* song, uint8_t instrument, uint8_t volume)
+{
+    set_instrument_bits(song, instrument, 1, 0, 8, volume);
+}
+
+uint8_t lsdj_instrument_wave_get_volume(const lsdj_song_t* song, uint8_t instrument)
+{
+    return get_instrument_bits(song, instrument, 1, 0, 8);
+}
+
 void lsdj_instrument_wave_set_synth(lsdj_song_t* song, uint8_t instrument, uint8_t synth)
 {
 	set_instrument_bits(song, instrument, 2, 4, 4, synth);

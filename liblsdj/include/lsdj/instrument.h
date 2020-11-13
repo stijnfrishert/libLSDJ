@@ -182,19 +182,49 @@ void lsdj_instrument_set_type(lsdj_song_t* song, uint8_t instrument, lsdj_instru
 	@return The type of the instrument */
 lsdj_instrument_type_t lsdj_instrument_get_type(const lsdj_song_t* song, uint8_t instrument);
 
+
+
+
+
+
+
 //! Change the envelope of an instrument
 /*! @param song The song that contains the instrument
-	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@param envelope The envelope value to set
-	@note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume_t */
+    @param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+    @param envelope The envelope value to set
+    @note From 8.1.0+ (v11) envelope isn't used anymore, but adsr */
 void lsdj_instrument_set_envelope(lsdj_song_t* song, uint8_t instrument, uint8_t envelope);
 
 //! Retrieve the envelope of an instrument
 /*! @param song The song that contains the instrument
-	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@return The envelope of the instrument
-	@note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume_t */
+    @param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+    @return The envelope of the instrument
+    @note From 8.1.0+ (v11) envelope isn't used anymore, but adsr */
 uint8_t lsdj_instrument_get_envelope(const lsdj_song_t* song, uint8_t instrument);
+
+
+
+
+// void lsdj_instrument_adsr_set(
+//     const lsdj_song_t* song,
+//     uint8_t instrument,
+//     uint8_t initialLevel,
+//     uint8_t attackSpeed,
+//     uint8_t decaySpeed,
+//     uint8_t sustainLevel,
+//     uint8_t releaseSpeed);
+
+uint8_t lsdj_instrument_adsr_get_initial_level(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_adsr_get_attack_speed(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_adsr_get_attack_level(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_adsr_get_decay_speed(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_adsr_get_sustain_level(const lsdj_song_t* song, uint8_t instrument);
+uint8_t lsdj_instrument_adsr_get_release_speed(const lsdj_song_t* song, uint8_t instrument);
+
+
+
+
+
 
 //! Change the panning of an instrument
 /*! @param song The song that contains the instrument
@@ -384,6 +414,20 @@ uint8_t lsdj_instrument_pulse_get_finetune(const lsdj_song_t* song, uint8_t inst
 
 // --- Wave --- //
 
+//! Change the volume of a wave instrument
+/*! @param song The song that contains the instrument
+    @param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+    @param volume The envelope value to set
+    @note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume_t */
+void lsdj_instrument_wave_set_volume(lsdj_song_t* song, uint8_t instrument, uint8_t volume);
+
+//! Retrieve the volume of a wave instrument
+/*! @param song The song that contains the instrument
+    @param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+    @return The volume of the instrument
+    @note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume_t */
+uint8_t lsdj_instrument_wave_get_volume(const lsdj_song_t* song, uint8_t instrument);
+
 //! Change the synth index that a wave instrument uses
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
@@ -452,7 +496,7 @@ uint8_t lsdj_instrument_wave_get_repeat(const lsdj_song_t* song, uint8_t instrum
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
 	@param speed The speed value (1 - FF for fmt 6+, 1-F below fmt6)
-	Note: < fmt6 speed could only go up to F, in 6 and higher the max is FF
+	@note < fmt6 speed could only go up to F, in fmt6 and higher the max is FF
 	@return false If the format version does not support that speed value*/
 bool lsdj_instrument_wave_set_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed);
 
@@ -464,6 +508,20 @@ uint8_t lsdj_instrument_wave_get_speed(const lsdj_song_t* song, uint8_t instrume
 
 
 // --- Kit --- //
+
+//! Change the volume of a kit instrument
+/*! @param song The song that contains the instrument
+    @param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+    @param volume The envelope value to set
+    @note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume_t */
+void lsdj_instrument_kit_set_volume(lsdj_song_t* song, uint8_t instrument, uint8_t volume);
+
+//! Retrieve the volume of a kit instrument
+/*! @param song The song that contains the instrument
+    @param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+    @return The volume of the instrument
+    @note Wave and kit instruments only supports 3 volume levels, which are defined in lsdj_instrument_wave_volume_t */
+uint8_t lsdj_instrument_kit_get_volume(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the pitch for a kit instrument
 /*! @param song The song that contains the instrument
