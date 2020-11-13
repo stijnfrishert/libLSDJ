@@ -745,13 +745,15 @@ uint8_t lsdj_instrument_noise_get_length(const lsdj_song_t* song, uint8_t instru
 //! Change the shape for a noise instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@param shape The shape */
+	@param shape The shape
+    @note shape is available up to v8.6.0 (v12), otherwise undefined behaviour */
 void lsdj_instrument_noise_set_shape(lsdj_song_t* song, uint8_t instrument, uint8_t shape);
 
 //! Retrieve the shape that a noise instrument uses
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@return The shape */
+	@return The shape
+    @note shape is available up to v8.6.0 (v12), otherwise undefined behaviour */
 uint8_t lsdj_instrument_noise_get_shape(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the stability for a noise instrument
