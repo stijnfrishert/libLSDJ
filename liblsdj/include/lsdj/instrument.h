@@ -510,6 +510,20 @@ void lsdj_instrument_wave_set_synth(lsdj_song_t* song, uint8_t instrument, uint8
 	@return The synth the instrument uses (0 - F) */
 uint8_t lsdj_instrument_wave_get_synth(const lsdj_song_t* song, uint8_t instrument);
 
+//! Change the wave index that a wave instrument starts from
+/*! @param song The song that contains the instrument
+    @param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+    @param wave The start wavetable the instrument uses (0 - FF)
+    @note This setting only makes sense when the instrument is set to manual */
+void lsdj_instrument_wave_set_wave(lsdj_song_t* song, uint8_t instrument, uint8_t wave);
+
+//! Retrieve the wave index that a wave instrument starts from
+/*! @param song The song that contains the instrument
+    @param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
+    @return The wave the instrument uses (0 - FF)
+    @note This setting only makes sense when the instrument is set to manual */
+uint8_t lsdj_instrument_wave_get_wave(const lsdj_song_t* song, uint8_t instrument);
+
 //! Change the play mode for a wave instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
