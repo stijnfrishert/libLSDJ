@@ -98,11 +98,6 @@ lsdj_instrument_type_t lsdj_instrument_get_type(const lsdj_song_t* song, uint8_t
 	return (uint8_t)get_instrument_bits(song, instrument, 0, 0, 8);
 }
 
-
-
-
-
-
 void lsdj_instrument_set_envelope(lsdj_song_t* song, uint8_t instrument, uint8_t envelope)
 {
     set_instrument_bits(song, instrument, 1, 0, 8, envelope);
@@ -130,7 +125,10 @@ void lsdj_instrument_adsr_set_attack_speed(lsdj_song_t* song, uint8_t instrument
 
 uint8_t lsdj_instrument_adsr_get_attack_speed(const lsdj_song_t* song, uint8_t instrument)
 {
-    return get_instrument_bits(song, instrument, 1, 0, 3);
+    if (lsdj_song_get_format_version(song) >= 13)
+        return get_instrument_bits(song, instrument, 1, 0, 4);
+    else
+        return get_instrument_bits(song, instrument, 1, 0, 3);
 }
 
 void lsdj_instrument_adsr_set_attack_level(lsdj_song_t* song, uint8_t instrument, uint8_t level)
