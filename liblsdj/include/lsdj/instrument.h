@@ -731,13 +731,15 @@ lsdj_kit_loop_mode_t lsdj_instrument_kit_get_loop2(const lsdj_song_t* song, uint
 //! Change the length of a noise instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@param length The length value to set */
+	@param length The length value to set
+    @note Length is available up to v8.8.0 (v13), otherwise undefined behaviour */
 void lsdj_instrument_noise_set_length(lsdj_song_t* song, uint8_t instrument, uint8_t length);
 
 //! Retrieve the length of a noise instrument
 /*! @param song The song that contains the instrument
 	@param instrument The index of the instrument (< LSDJ_INSTRUMENT_COUNT)
-	@return The length of the instrument */
+	@return The length of the instrument
+    @note Length is available up to v8.8.0 (v13), otherwise undefined behaviour */
 uint8_t lsdj_instrument_noise_get_length(const lsdj_song_t* song, uint8_t instrument);
 
 //! Change the shape for a noise instrument
