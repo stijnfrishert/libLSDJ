@@ -105,10 +105,7 @@ lsdj_instrument_type_t lsdj_instrument_get_type(const lsdj_song_t* song, uint8_t
 
 void lsdj_instrument_set_envelope(lsdj_song_t* song, uint8_t instrument, uint8_t envelope)
 {
-    if (lsdj_song_get_format_version(song) >= 11)
-        set_instrument_bits(song, instrument, 1, 0, 8, envelope);
-    else
-        set_instrument_bits(song, instrument, 1, 0, 8, envelope);
+    set_instrument_bits(song, instrument, 1, 0, 8, envelope);
 }
 
 uint8_t lsdj_instrument_get_envelope(const lsdj_song_t* song, uint8_t instrument)
@@ -116,21 +113,19 @@ uint8_t lsdj_instrument_get_envelope(const lsdj_song_t* song, uint8_t instrument
     return get_instrument_bits(song, instrument, 1, 0, 8);
 }
 
-// void lsdj_instrument_adsr_set(
-//     const lsdj_song_t* song,
-//     uint8_t instrument,
-//     uint8_t initialLevel,
-//     uint8_t attackSpeed,
-//     uint8_t decaySpeed,
-//     uint8_t sustainLevel,
-//     uint8_t releaseSpeed)
-// {
-    
-// }
+void lsdj_instrument_adsr_set_initial_level(lsdj_song_t* song, uint8_t instrument, uint8_t level)
+{
+    set_instrument_bits(song, instrument, 1, 4, 4, level);
+}
 
 uint8_t lsdj_instrument_adsr_get_initial_level(const lsdj_song_t* song, uint8_t instrument)
 {
     return get_instrument_bits(song, instrument, 1, 4, 4);
+}
+
+void lsdj_instrument_adsr_set_attack_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed)
+{
+    set_instrument_bits(song, instrument, 1, 0, 3, speed);
 }
 
 uint8_t lsdj_instrument_adsr_get_attack_speed(const lsdj_song_t* song, uint8_t instrument)
@@ -138,9 +133,19 @@ uint8_t lsdj_instrument_adsr_get_attack_speed(const lsdj_song_t* song, uint8_t i
     return get_instrument_bits(song, instrument, 1, 0, 3);
 }
 
+void lsdj_instrument_adsr_set_attack_level(lsdj_song_t* song, uint8_t instrument, uint8_t level)
+{
+    set_instrument_bits(song, instrument, 9, 4, 4, level);
+}
+
 uint8_t lsdj_instrument_adsr_get_attack_level(const lsdj_song_t* song, uint8_t instrument)
 {
     return get_instrument_bits(song, instrument, 9, 4, 4);
+}
+
+void lsdj_instrument_adsr_set_decay_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed)
+{
+    set_instrument_bits(song, instrument, 9, 0, 3, speed);
 }
 
 uint8_t lsdj_instrument_adsr_get_decay_speed(const lsdj_song_t* song, uint8_t instrument)
@@ -148,9 +153,19 @@ uint8_t lsdj_instrument_adsr_get_decay_speed(const lsdj_song_t* song, uint8_t in
     return get_instrument_bits(song, instrument, 9, 0, 3);
 }
 
+void lsdj_instrument_adsr_set_sustain_level(lsdj_song_t* song, uint8_t instrument, uint8_t level)
+{
+    set_instrument_bits(song, instrument, 0xA, 4, 4, level);
+}
+
 uint8_t lsdj_instrument_adsr_get_sustain_level(const lsdj_song_t* song, uint8_t instrument)
 {
     return get_instrument_bits(song, instrument, 0xA, 4, 4);
+}
+
+void lsdj_instrument_adsr_set_release_speed(lsdj_song_t* song, uint8_t instrument, uint8_t speed)
+{
+    set_instrument_bits(song, instrument, 0xA, 0, 3, speed);
 }
 
 uint8_t lsdj_instrument_adsr_get_release_speed(const lsdj_song_t* song, uint8_t instrument)
