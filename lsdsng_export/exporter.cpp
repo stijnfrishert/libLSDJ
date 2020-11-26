@@ -153,7 +153,7 @@ namespace lsdj
         ghc::filesystem::create_directories(folder);
         
         std::stringstream stream;
-        stream << name << convertVersionToString(lsdj_project_get_version(project), true);
+        stream << name << convertVersionToString(lsdj_project_get_version(project), true, false);
         
         if (workingMemory)
             stream << ".WM";
@@ -241,7 +241,7 @@ namespace lsdj
         return 0;
     }
     
-    std::string Exporter::convertVersionToString(uint8_t version, bool prefixDot) const
+    std::string Exporter::convertVersionToString(uint8_t version, bool prefixDot, bool prefixWhitespace) const
     {
         std::ostringstream stream;
         
@@ -252,12 +252,18 @@ namespace lsdj
             case VersionStyle::HEX:
                 if (prefixDot)
                     stream << '.';
-                stream << std::uppercase << std::setfill(' ') << std::setw(2) << std::hex << static_cast<unsigned int>(version);
+                
+                if (prefixWhitespace)
+                    stream << std::setfill(' ') << std::setw(2);
+                stream << std::uppercase << std::hex << static_cast<unsigned int>(version);
                 break;
             case VersionStyle::DECIMAL:
                 if (prefixDot)
                     stream << '.';
-                stream << std::setfill('0') << std::setw(3) << static_cast<unsigned int>(version);
+                
+                if (prefixWhitespace)
+                    stream << std::setfill('0') << std::setw(3);
+                stream << static_cast<unsigned int>(version);
                 break;
         }
         
@@ -352,7 +358,7 @@ namespace lsdj
             std::cout << ' ';
         
         // Display the version number of the project
-        const auto songVersionString = convertVersionToString(lsdj_project_get_version(project), false);
+        const auto songVersionString = convertVersionToString(lsdj_project_get_version(project), false, true);
         std::cout << songVersionString;
         for (auto i = songVersionString.size(); i < 5; i += 1)
             std::cout << ' ';

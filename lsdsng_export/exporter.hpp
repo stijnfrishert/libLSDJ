@@ -82,7 +82,7 @@ namespace lsdj
         lsdj_error_t exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory);
         
         // Converts a project version to a string representation using the current VersionStyle
-        std::string convertVersionToString(uint8_t version, bool prefixDot) const;
+        std::string convertVersionToString(uint8_t version, bool prefixDot, bool prefixWhitespace) const;
         
         // Print the working memory song line
         void printWorkingMemorySong(const lsdj_sav_t* sav);
