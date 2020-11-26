@@ -47,7 +47,7 @@ void printHelp(const popl::OptionParser& options)
               << "Version: " << LSDJ_VERSION_STRING << "\n\n"
               << options << "\n";
 
-    std::cout << "LibLsdj is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";
+    std::cout << "LibLSDJ is open source and freely available to anyone.\nIf you'd like to show your appreciation, please consider\n  - buying one of my albums (https://4ntler.bandcamp.com)\n  - donating money through PayPal (https://paypal.me/4ntler).\n";
 }
 
 std::string generateOutputFilename(const std::vector<std::string>& inputs)
