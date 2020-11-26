@@ -203,9 +203,6 @@ namespace lsdj
     
     lsdj_error_t Importer::importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<ghc::filesystem::path>& paths)
     {
-        if (workingMemoryInput.empty())
-            return LSDJ_SUCCESS;
-        
         const auto path = ghc::filesystem::absolute(workingMemoryInput);
         
         lsdj_project_t* project = nullptr;
