@@ -1,0 +1,73 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Tests",
+      "type": "lldb",
+      "request": "launch",
+      "windows": {
+        "program": "${workspaceFolder}/build/liblsdj/test/test.exe"
+      },
+      "osx": {
+        "program": "${workspaceFolder}/build/liblsdj/test/test"
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug lsdj-mono",
+      "type": "lldb",
+      "request": "launch",
+      "windows": {
+        "program": "${workspaceFolder}/build/lsdj_mono/lsdj-mono.exe"
+      },
+      "osx": {
+        "program": "${workspaceFolder}/build/lsdj_mono/lsdj-mono"
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug lsdsng-export",
+      "type": "lldb",
+      "request": "launch",
+      "windows": {
+        "program": "${workspaceFolder}/build/lsdsng_export/lsdsng-export.exe"
+      },
+      "osx": {
+        "program": "${workspaceFolder}/build/lsdsng_export/lsdsng-export"
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug lsdsng-import",
+      "type": "lldb",
+      "request": "launch",
+      "windows": {
+        "program": "${workspaceFolder}/build/lsdsng_import/lsdsng-import.exe"
+      },
+      "osx": {
+        "program": "${workspaceFolder}/build/lsdsng_import/lsdsng-import"
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Debug lsdj-wavetable-import",
+      "type": "lldb",
+      "request": "launch",
+      "windows": {
+        "program": "${workspaceFolder}/build/lsdj_wavetable_import/lsdj-wavetable-import.exe"
+      },
+      "osx": {
+        "program": "${workspaceFolder}/build/lsdj_wavetable_import/lsdj-wavetable-import"
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
