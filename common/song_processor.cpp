@@ -17,22 +17,13 @@ namespace lsdj
             return true;
         
         if (std::filesystem::is_directory(path))
-        {
-            if (processDirectory(path) != 0)
-                return false;
-        }
+            return processDirectory(path);
         else if (path.extension() == ".sav")
-        {
-            if (processSav(path) != 0)
-                return false;
-        }
+            return processSav(path);
         else if (path.extension() == ".lsdsng")
-        {
-            if (processLsdsng(path) != 0)
-                return false;
-        }
+            return processLsdsng(path);
         
-        return true;
+        return false;
     }
 
     bool SongProcessor::processDirectory(const std::filesystem::path& path)
