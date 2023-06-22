@@ -140,6 +140,8 @@ namespace lsdj
             return importSav(path.string(), sav, index);
         else if (path.extension() == ".lsdsng")
             return importSong(path.string(), sav, index);
+        else
+            return LSDJ_UNKNOWN_EXTENSION;
     }
 
     lsdj_error_t Importer::importSav(const std::string& path, lsdj_sav_t* destSav, uint8_t& index)

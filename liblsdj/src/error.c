@@ -51,6 +51,7 @@ const char* lsdj_error_get_description(lsdj_error_t error)
         case LSDJ_DECOMPRESSION_INCORRECT_SIZE: return "the size of a song is not 0x8000 bytes after decompression";
         case LSDJ_SRAM_INITIALIZATION_CHECK_FAILED: return "the SRAM initialization bytes aren't set to 'jk'";
         case LSDJ_FILE_OPEN_FAILED: return "couldn't open a file";
+        case LSDJ_UNKNOWN_EXTENSION: return "unknown extension";
         default: return NULL;
     }
 }

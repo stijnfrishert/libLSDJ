@@ -51,7 +51,8 @@ typedef enum
     LSDJ_NO_PROJECT_AT_INDEX,
     LSDJ_DECOMPRESSION_INCORRECT_SIZE,
     LSDJ_SRAM_INITIALIZATION_CHECK_FAILED,
-    LSDJ_FILE_OPEN_FAILED
+    LSDJ_FILE_OPEN_FAILED,
+    LSDJ_UNKNOWN_EXTENSION
 } lsdj_error_t;
     
 //! Retrieve a string description of an error
