@@ -2,3 +2,4 @@
 **/xcode
 *.DS_Store
 .cache
+.vscode
