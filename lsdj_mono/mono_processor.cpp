@@ -56,12 +56,12 @@ namespace lsdj
 
     bool MonoProcessor::shouldProcessSav(const std::filesystem::path& path) const
     {
-        return alreadyEndsWithMono(path);
+        return !alreadyEndsWithMono(path);
     }
 
     bool MonoProcessor::shouldProcessLsdsng(const std::filesystem::path& path) const
     {
-        return alreadyEndsWithMono(path);
+        return !alreadyEndsWithMono(path);
     }
 
     std::filesystem::path MonoProcessor::constructSavDestinationPath(const std::filesystem::path& path)
