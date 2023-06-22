@@ -48,26 +48,26 @@ namespace lsdj
 {
     // Scan a path, see whether it's either an .lsdsng or a folder containing .lsdsng's
     // Returns the path to the .WM (working memory) file, or {} is there was none
-    void Importer::scanPath(const ghc::filesystem::path& path, std::vector<ghc::filesystem::path>& paths)
+    void Importer::scanPath(const std::filesystem::path& path, std::vector<std::filesystem::path>& paths)
     {
         if (isHiddenFile(path.filename().string()))
             return;
         
-        if (ghc::filesystem::is_regular_file(path))
+        if (std::filesystem::is_regular_file(path))
         {
             const auto stem = path.stem().string();
             const auto isWm = stem.size() >= 3 && stem.substr(stem.size() - 3) == ".WM";
             
-            if (!isWm || (!workingMemoryInput.empty() && path == ghc::filesystem::absolute(workingMemoryInput)))
+            if (!isWm || (!workingMemoryInput.empty() && path == std::filesystem::absolute(workingMemoryInput)))
                 paths.emplace_back(path);
             else {
                 std::cout << "Ignoring " << path.string() << ", because it ends on .WM" << std::endl;
                 std::cout << "If you want to include this as the working memory song, use the -w flag" << std::endl;
             }
         }
-        else if (ghc::filesystem::is_directory(path))
+        else if (std::filesystem::is_directory(path))
         {
-            for (auto it = ghc::filesystem::directory_iterator(path); it != ghc::filesystem::directory_iterator(); ++it)
+            for (auto it = std::filesystem::directory_iterator(path); it != std::filesystem::directory_iterator(); ++it)
                 scanPath(it->path(), paths);
         } else {
             throw std::runtime_error(path.string() + " is not a file or directory");
@@ -92,9 +92,9 @@ namespace lsdj
         }
         
         // Go through all input files and recursively find all .lsdsngs's (and the working memory file)
-        std::vector<ghc::filesystem::path> paths;
+        std::vector<std::filesystem::path> paths;
         for (auto& input : inputs)
-            scanPath(ghc::filesystem::absolute(input), paths);
+            scanPath(std::filesystem::absolute(input), paths);
         
         assert(!outputFile.empty());
         
@@ -124,7 +124,7 @@ namespace lsdj
         }
         
         // Write the sav to file
-        error = lsdj_sav_write_to_file(sav, ghc::filesystem::absolute(outputFile).string().c_str(), nullptr);
+        error = lsdj_sav_write_to_file(sav, std::filesystem::absolute(outputFile).string().c_str(), nullptr);
         if (error != LSDJ_SUCCESS)
         {
             lsdj_sav_free(sav);
@@ -134,7 +134,7 @@ namespace lsdj
         return 0;
     }
 
-    lsdj_error_t Importer::import(const ghc::filesystem::path& path, lsdj_sav_t* sav, uint8_t& index)
+    lsdj_error_t Importer::import(const std::filesystem::path& path, lsdj_sav_t* sav, uint8_t& index)
     {
         if (path.extension() == ".sav")
             return importSav(path.string(), sav, index);
@@ -203,12 +203,12 @@ namespace lsdj
         return LSDJ_SUCCESS;
     }
     
-    lsdj_error_t Importer::importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<ghc::filesystem::path>& paths)
+    lsdj_error_t Importer::importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<std::filesystem::path>& paths)
     {
         if (workingMemoryInput.empty())
             return LSDJ_SUCCESS;
         
-        const auto path = ghc::filesystem::absolute(workingMemoryInput);
+        const auto path = std::filesystem::absolute(workingMemoryInput);
         
         lsdj_project_t* project = nullptr;
         lsdj_error_t error = lsdj_project_read_lsdsng_from_file(path.string().c_str(), &project, nullptr);

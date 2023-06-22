@@ -13,7 +13,7 @@ set(SOURCES
 add_executable(lsdj-mono ${SOURCES})
 source_group(\\ FILES ${SOURCES})
 
-target_compile_features(lsdj-mono PUBLIC cxx_std_14)
+target_compile_features(lsdj-mono PUBLIC cxx_std_20)
 target_include_directories(lsdj-mono PUBLIC ${PROJECT_SOURCE_DIR}/dependency)
 target_link_libraries(lsdj-mono liblsdj)
 

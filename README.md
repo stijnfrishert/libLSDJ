@@ -99,7 +99,6 @@ Developers that would like to help out are warmly invited to do so. This project
 
 *libLSDJ* makes grateful use of the following dependencies:
  - [Catch2](https://github.com/catchorg/Catch2) (Boost Software License 1.0)
- - [ghc::filesystem](https://github.com/gulrak/filesystem) (MIT)
  - [popl](https://github.com/badaix/popl) (MIT)
 
 ---

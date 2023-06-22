@@ -35,7 +35,7 @@
 
 #include <iostream>
 
-#include <ghc/filesystem.hpp>
+#include <filesystem>
 #include <popl/popl.hpp>
 
 #include <lsdj/version.h>
@@ -84,7 +84,7 @@ int main(int argc, char* argv[])
             
             for (auto& input : inputs)
             {
-                if (!processor.process(ghc::filesystem::absolute(input)))
+                if (!processor.process(std::filesystem::absolute(input)))
                     return 1;
             }
             

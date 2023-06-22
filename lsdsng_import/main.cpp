@@ -56,7 +56,7 @@ std::string generateOutputFilename(const std::vector<std::string>& inputs)
     // we take that folder name as output. In case of multiple folders,
     if (inputs.size() == 1)
     {
-        const auto path = ghc::filesystem::absolute(inputs.front());
+        const auto path = std::filesystem::absolute(inputs.front());
         return path.stem().filename().string() + ".sav";
     }
     

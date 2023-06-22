@@ -47,17 +47,17 @@
 
 namespace lsdj
 {
-    int Exporter::export_(const ghc::filesystem::path& path)
+    int Exporter::export_(const std::filesystem::path& path)
     {
-        if (ghc::filesystem::is_directory(path))
+        if (std::filesystem::is_directory(path))
             return exportFolder(path);
         else
             return exportSav(path);
     }
 
-    int Exporter::exportFolder(const ghc::filesystem::path& path)
+    int Exporter::exportFolder(const std::filesystem::path& path)
     {
-        for (auto it = ghc::filesystem::directory_iterator(path); it != ghc::filesystem::directory_iterator(); ++it)
+        for (auto it = std::filesystem::directory_iterator(path); it != std::filesystem::directory_iterator(); ++it)
         {
             const auto path = it->path();
             if (isHiddenFile(path.filename().string()) || path.extension() != ".sav")
@@ -71,7 +71,7 @@ namespace lsdj
         return 0;
     }
 
-    int Exporter::exportSav(const ghc::filesystem::path& path)
+    int Exporter::exportSav(const std::filesystem::path& path)
     {
         // Load in the save file
         lsdj_sav_t* sav = nullptr;
@@ -83,7 +83,7 @@ namespace lsdj
         if (verbose)
             std::cout << "Read '" << path.string() << "'" << std::endl;
         
-        const auto outputFolder = ghc::filesystem::absolute(output);
+        const auto outputFolder = std::filesystem::absolute(output);
         
         if (shouldExportWorkingMemory())
         {
@@ -140,17 +140,17 @@ namespace lsdj
         return 0;
     }
     
-    lsdj_error_t Exporter::exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory)
+    lsdj_error_t Exporter::exportProject(const lsdj_project_t* project, std::filesystem::path folder, bool workingMemory)
     {
         auto name = constructName(project);
         if (name.empty())
             name = "(EMPTY)";
         
-        ghc::filesystem::path path = folder;
+        std::filesystem::path path = folder;
         
         if (putInFolder)
             path /= name;
-        ghc::filesystem::create_directories(folder);
+        std::filesystem::create_directories(folder);
         
         std::stringstream stream;
         stream << name << convertVersionToString(lsdj_project_get_version(project), true, false);
@@ -161,7 +161,7 @@ namespace lsdj
         stream << ".lsdsng";
         path /= stream.str();
         
-        ghc::filesystem::create_directories(path.parent_path());
+        std::filesystem::create_directories(path.parent_path());
         lsdj_error_t error = lsdj_project_write_lsdsng_to_file(project, path.string().c_str(), nullptr);
         if (error != LSDJ_SUCCESS)
             return error;
@@ -169,23 +169,23 @@ namespace lsdj
         // Let the user know if verbose output has been toggled on
         if (verbose)
         {
-            std::cout << "Exported " << ghc::filesystem::relative(path, folder).string() << std::endl;
+            std::cout << "Exported " << std::filesystem::relative(path, folder).string() << std::endl;
         }
         
         return LSDJ_SUCCESS;
     }
     
-    int Exporter::print(const ghc::filesystem::path& path)
+    int Exporter::print(const std::filesystem::path& path)
     {
-        if (ghc::filesystem::is_directory(path))
+        if (std::filesystem::is_directory(path))
             return printFolder(path);
         else
             return printSav(path);
     }
     
-    int Exporter::printFolder(const ghc::filesystem::path& path)
+    int Exporter::printFolder(const std::filesystem::path& path)
     {
-        for (auto it = ghc::filesystem::directory_iterator(path); it != ghc::filesystem::directory_iterator(); ++it)
+        for (auto it = std::filesystem::directory_iterator(path); it != std::filesystem::directory_iterator(); ++it)
         {
             const auto path = it->path();
             if (isHiddenFile(path.filename().string()) || path.extension() != ".sav")
@@ -199,7 +199,7 @@ namespace lsdj
         return 0;
     }
     
-    int Exporter::printSav(const ghc::filesystem::path& path)
+    int Exporter::printSav(const std::filesystem::path& path)
     {
         // Try and read the sav
         lsdj_sav_t* sav = nullptr;

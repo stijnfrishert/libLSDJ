@@ -35,8 +35,8 @@
 
 #include <iostream>
 
-#include <ghc/filesystem.hpp>
 #include <boost/program_options.hpp>
+#include <filesystem>
 
 #include "../common/common.hpp"
 #include "clean_processor.hpp"
@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
             
             for (auto& input : vm["file"].as<std::vector<std::string>>())
             {
-                if (!processor.process(ghc::filesystem::absolute(input)))
+                if (!processor.process(std::filesystem::absolute(input)))
                     return 1;
             }
             

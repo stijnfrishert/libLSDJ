@@ -33,8 +33,8 @@
  
  */
 
+#include <filesystem>
 #include <popl/popl.hpp>
-#include <ghc/filesystem.hpp>
 
 #include <iomanip>
 #include <iostream>
@@ -86,8 +86,8 @@ int main(int argc, char* argv[])
         // Do we have an input file?
         } else if (!inputs.empty()) {
             // What is the path of the input file, and does it exist on disk?
-            const auto path = ghc::filesystem::absolute(inputs.front());
-            if (!ghc::filesystem::exists(path))
+            const auto path = std::filesystem::absolute(inputs.front());
+            if (!std::filesystem::exists(path))
             {
                 std::cerr << "Path '" << path.string() << "' does not exist" << std::endl;
                 return 1;

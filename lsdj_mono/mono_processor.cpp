@@ -43,33 +43,33 @@ namespace lsdj
         }
     }
 
-    [[nodiscard]] bool alreadyEndsWithMono(const ghc::filesystem::path& path)
+    [[nodiscard]] bool alreadyEndsWithMono(const std::filesystem::path& path)
     {
         const auto stem = path.stem().string();
         return stem.size() >= 5 && stem.substr(stem.size() - 5) == ".MONO";
     }
 
-    [[nodiscard]] ghc::filesystem::path addMonoSuffix(const ghc::filesystem::path& path)
+    [[nodiscard]] std::filesystem::path addMonoSuffix(const std::filesystem::path& path)
     {
         return path.parent_path() / (path.stem().string() + ".MONO" + path.extension().string());
     }
 
-    bool MonoProcessor::shouldProcessSav(const ghc::filesystem::path& path) const
+    bool MonoProcessor::shouldProcessSav(const std::filesystem::path& path) const
     {
         return alreadyEndsWithMono(path);
     }
 
-    bool MonoProcessor::shouldProcessLsdsng(const ghc::filesystem::path& path) const
+    bool MonoProcessor::shouldProcessLsdsng(const std::filesystem::path& path) const
     {
         return alreadyEndsWithMono(path);
     }
 
-    ghc::filesystem::path MonoProcessor::constructSavDestinationPath(const ghc::filesystem::path& path)
+    std::filesystem::path MonoProcessor::constructSavDestinationPath(const std::filesystem::path& path)
     {
         return addMonoSuffix(path);
     }
 
-    ghc::filesystem::path MonoProcessor::constructLsdsngDestinationPath(const ghc::filesystem::path& path)
+    std::filesystem::path MonoProcessor::constructLsdsngDestinationPath(const std::filesystem::path& path)
     {
         return addMonoSuffix(path);
     }

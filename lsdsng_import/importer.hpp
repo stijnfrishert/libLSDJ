@@ -36,7 +36,7 @@
 #ifndef LSDJ_IMPORTER_HPP
 #define LSDJ_IMPORTER_HPP
 
-#include <ghc/filesystem.hpp>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -57,13 +57,13 @@ namespace lsdj
         bool verbose = false;
         
     private:
-        void scanPath(const ghc::filesystem::path& path, std::vector<ghc::filesystem::path>& paths);
+        void scanPath(const std::filesystem::path& path, std::vector<std::filesystem::path>& paths);
         
-        lsdj_error_t import(const ghc::filesystem::path& path, lsdj_sav_t* sav, uint8_t& index);
+        lsdj_error_t import(const std::filesystem::path& path, lsdj_sav_t* sav, uint8_t& index);
         lsdj_error_t importSav(const std::string& path, lsdj_sav_t* sav, uint8_t& index);
         lsdj_error_t importSong(const std::string& path, lsdj_sav_t* sav, uint8_t& index);
         lsdj_error_t importProject(const lsdj_project_t* project, lsdj_sav_t* sav, uint8_t& index);
-        lsdj_error_t importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<ghc::filesystem::path>& paths);
+        lsdj_error_t importWorkingMemorySong(lsdj_sav_t* sav, const std::vector<std::filesystem::path>& paths);
     };
 }
 

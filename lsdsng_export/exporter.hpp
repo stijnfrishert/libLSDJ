@@ -36,7 +36,7 @@
 #ifndef LSDJ_EXPORTER_HPP
 #define LSDJ_EXPORTER_HPP
 
-#include <ghc/filesystem.hpp>
+#include <filesystem>
 
 #include <lsdj/error.h>
 #include <lsdj/project.h>
@@ -55,8 +55,8 @@ namespace lsdj
         };
         
     public:
-        int export_(const ghc::filesystem::path& path);
-        int print(const ghc::filesystem::path& path);
+        int export_(const std::filesystem::path& path);
+        int print(const std::filesystem::path& path);
         
     public:
         // The version exporting style
@@ -72,14 +72,14 @@ namespace lsdj
         std::string output;
         
     private:
-        int exportFolder(const ghc::filesystem::path& path);
-        int exportSav(const ghc::filesystem::path& path);
-        int printFolder(const ghc::filesystem::path& path);
-        int printSav(const ghc::filesystem::path& path);
+        int exportFolder(const std::filesystem::path& path);
+        int exportSav(const std::filesystem::path& path);
+        int printFolder(const std::filesystem::path& path);
+        int printSav(const std::filesystem::path& path);
         bool shouldExportWorkingMemory();
         
         // Export an actual project
-        lsdj_error_t exportProject(const lsdj_project_t* project, ghc::filesystem::path folder, bool workingMemory);
+        lsdj_error_t exportProject(const lsdj_project_t* project, std::filesystem::path folder, bool workingMemory);
         
         // Converts a project version to a string representation using the current VersionStyle
         std::string convertVersionToString(uint8_t version, bool prefixDot, bool prefixWhitespace) const;

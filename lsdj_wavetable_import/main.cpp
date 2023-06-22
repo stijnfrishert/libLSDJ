@@ -33,7 +33,7 @@
  
  */
 
-#include <ghc/filesystem.hpp>
+#include <filesystem>
 #include <popl/popl.hpp>
 
 #include <lsdj/project.h>

@@ -13,11 +13,11 @@ namespace lsdj
         bool processPhrases = false;
         
     private:
-        [[nodiscard]] bool shouldProcessSav(const ghc::filesystem::path& path) const final;
-        [[nodiscard]] bool shouldProcessLsdsng(const ghc::filesystem::path& path) const final;
+        [[nodiscard]] bool shouldProcessSav(const std::filesystem::path& path) const final;
+        [[nodiscard]] bool shouldProcessLsdsng(const std::filesystem::path& path) const final;
         
-        [[nodiscard]] ghc::filesystem::path constructSavDestinationPath(const ghc::filesystem::path& path) final;
-        [[nodiscard]] ghc::filesystem::path constructLsdsngDestinationPath(const ghc::filesystem::path& path) final;
+        [[nodiscard]] std::filesystem::path constructSavDestinationPath(const std::filesystem::path& path) final;
+        [[nodiscard]] std::filesystem::path constructLsdsngDestinationPath(const std::filesystem::path& path) final;
         
         bool processSong(lsdj_song_t* song) final;
     };
