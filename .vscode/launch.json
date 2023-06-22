@@ -6,7 +6,7 @@
   "configurations": [
     {
       "name": "Debug Tests",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "windows": {
         "program": "${workspaceFolder}/build/liblsdj/test/test.exe"
@@ -19,7 +19,7 @@
     },
     {
       "name": "Debug lsdj-mono",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "windows": {
         "program": "${workspaceFolder}/build/lsdj_mono/lsdj-mono.exe"
@@ -32,7 +32,7 @@
     },
     {
       "name": "Debug lsdsng-export",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "windows": {
         "program": "${workspaceFolder}/build/lsdsng_export/lsdsng-export.exe"
@@ -45,7 +45,7 @@
     },
     {
       "name": "Debug lsdsng-import",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "windows": {
         "program": "${workspaceFolder}/build/lsdsng_import/lsdsng-import.exe"
@@ -58,7 +58,7 @@
     },
     {
       "name": "Debug lsdj-wavetable-import",
-      "type": "lldb",
+      "type": "cppvsdbg",
       "request": "launch",
       "windows": {
         "program": "${workspaceFolder}/build/lsdj_wavetable_import/lsdj-wavetable-import.exe"
