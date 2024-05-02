@@ -40,6 +40,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 #include <lsdj/sav.h>
 #include <lsdj/song.h>
